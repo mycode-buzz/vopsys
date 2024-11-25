@@ -1,0 +1,109 @@
+<?php
+///////////////////////////SERVER POST
+require_once INTERFACEROOT . "/object/serverPost.php";
+///////////////////////////SERVER POST
+
+///////////////////////////DATA MANAGER
+require_once INTERFACEROOT . "/object/userAlias.php";
+///////////////////////////DATA MANAGER
+///////////////////////////DATA MANAGER
+require_once INTERFACEROOT . "/object/metaMover.php";
+///////////////////////////DATA MANAGER
+
+///////////////////////////DATA MANAGER
+require_once INTERFACEROOT . "/object/metaRowz.php";
+///////////////////////////DATA MANAGER
+
+//Base Function End
+///////////////////////////SERVER MANAGER
+require_once INTERFACEROOT . "/interface_support.php";
+///////////////////////////SERVER MANAGER
+
+///////////////////////////DATA MANAGER
+require_once INTERFACEROOT . "/interface_datafunction.php";
+///////////////////////////DATA MANAGER
+
+///////////////////////////
+require_once INTERFACEROOT . "/interface-childrowz.php";
+///////////////////////////
+
+///////////////////////////DATA MANAGER
+require_once INTERFACEROOT . "/interface-pushRowz.php";
+///////////////////////////DATA MANAGER
+
+///////////////////////////DATA MANAGER
+require_once INTERFACEROOT . "/interface-pushColumn.php";
+///////////////////////////DATA MANAGER
+
+///////////////////////////DATA MANAGER
+require_once INTERFACEROOT . "/interface-pushView.php";
+///////////////////////////DATA MANAGER
+
+///////////////////////////SERVER MANAGER
+require_once INTERFACEROOT . "/interface_servermanager.php";
+///////////////////////////SERVER MANAGER
+
+///////////////////////////DATA MANAGER
+require_once INTERFACEROOT . "/interface_sessionmanager.php";
+///////////////////////////DATA MANAGER
+
+///////////////////////////DATA MANAGER
+require_once INTERFACEROOT . "/interface_datamanager.php";
+///////////////////////////DATA MANAGER
+
+
+///////////////////////////
+require_once INTERFACEROOT . "/interface-list.php";
+///////////////////////////
+
+///////////////////////////
+require_once INTERFACEROOT . "/interface-delete.php";
+///////////////////////////
+
+///////////////////////////
+require_once INTERFACEROOT . "/interface-patch.php";
+///////////////////////////
+
+///////////////////////////
+require_once INTERFACEROOT . "/interface-post.php";
+///////////////////////////
+
+///////////////////////////
+require_once INTERFACEROOT . "/interface-order.php";
+///////////////////////////
+
+///////////////////////////
+require_once INTERFACEROOT . "/interface-queryadvancedsearchinterface.php";
+///////////////////////////
+
+///////////////////////////
+require_once INTERFACEROOT . "/interface-queryadvancedsearch.php";
+///////////////////////////
+
+///////////////////////////
+require_once INTERFACEROOT . "/interface-querysearch.php";
+///////////////////////////
+
+///////////////////////////
+require_once INTERFACEROOT . "/interface-get.php";
+///////////////////////////
+
+///////////////////////////
+require_once INTERFACEROOT . "/interface-autojoin.php";
+///////////////////////////
+
+///////////////////////////
+require_once INTERFACEROOT . "/interface-push.php";
+///////////////////////////
+
+///////////////////////////DATA MANAGER
+require_once INTERFACEROOT   . "/interface-legacy.php";
+///////////////////////////DATA MANAGER
+
+///////////////////////////
+require_once INTERFACEROOT . "/interface.php";
+///////////////////////////
+
+//Top Function Start
+//*/
+?>

@@ -1,0 +1,7 @@
+ RewriteEngine On
+# Check if the requested URL does not correspond to an existing file
+ RewriteCond %{REQUEST_FILENAME} !-f
+# Check if the requested URL does not correspond to an existing directory
+ RewriteCond %{REQUEST_FILENAME} !-d
+# Rewrite the URL to a specific destination (replace '/desired-folder/' with your desired folder name)
+ RewriteRule ^(.*)$ index.php?ReWritePath=$1 [L,QSA]

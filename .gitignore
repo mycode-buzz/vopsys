@@ -1,0 +1,5 @@
+_build
+*.key
+vendor
+recyclebin
+upload

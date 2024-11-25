@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+</head>
+<body style="background-color:black">
+<script>
+
+  
+
+  function fn_getQuarterPeriod(int_fiscalYearEndMonth){
+    //fiscalYearEndMonth( January =0, February=1...)
+    const arr_monthNames = ["January", "February", "March","April","May","June","July","August","September","October","November","December"];
+    let today=new Date();
+    console.log("today: " + today);
+    let str_thisYear=today.getFullYear();
+    //console.log("str_thisYear: " + str_thisYear);
+    let str_yearEndMonthName=arr_monthNames[int_fiscalYearEndMonth];
+    //console.log("str_yearEndMonthName: " + str_yearEndMonthName);
+    console.log(str_yearEndMonthName + ", " +  str_thisYear);
+    
+    let obj_period={};                
+    let date_yearEndMonth;
+    let date_qmin;
+    
+    let date_q01;
+    let date_q02;
+    let date_q03;
+    let date_q04;
+    
+    let date_q1;
+    let date_q2;
+    let date_q3;
+    let date_q4;
+
+    let date_q5;
+    let date_q6;
+    let date_q7;
+    let date_q8;
+
+    date_yearEndMonth=new Date(str_thisYear, int_fiscalYearEndMonth, 1);
+    //console.log(date_yearEndMonth);    
+
+    date_q01=new Date(date_yearEndMonth.getFullYear(), 0, 1);            
+    date_q01.setMonth(date_yearEndMonth.getMonth()-2);        
+    //console.log(date_q01);
+
+    date_q02=new Date(date_q01.getFullYear(), 0, 1);            
+    date_q02.setMonth(date_q01.getMonth()-3);        
+    //console.log(date_q02);
+    
+    date_q03=new Date(date_q02.getFullYear(), 0, 1);            
+    date_q03.setMonth(date_q02.getMonth()-3);    
+    //console.log(date_q03);
+    
+    date_q04=new Date(date_q03.getFullYear(), 0, 1);            
+    date_q04.setMonth(date_q03.getMonth()-3);    
+    //console.log(date_q04);
+
+    //-----------------
+    
+    date_q1=new Date(date_yearEndMonth.getFullYear(), 0, 1);            
+    date_q1.setMonth(date_yearEndMonth.getMonth()+1);        
+    //console.log(date_q1);
+
+    date_q2=new Date(date_q1.getFullYear(), 0, 1);            
+    date_q2.setMonth(date_q1.getMonth()+3);        
+    //console.log(date_q2);
+    
+    date_q3=new Date(date_q2.getFullYear(), 0, 1);            
+    date_q3.setMonth(date_q2.getMonth()+3);    
+    //console.log(date_q3);
+    
+    date_q4=new Date(date_q3.getFullYear(), 0, 1);            
+    date_q4.setMonth(date_q3.getMonth()+3);    
+    //console.log(date_q4);
+
+    date_q5=new Date(date_q4.getFullYear(), 0, 1);            
+    date_q5.setMonth(date_q4.getMonth()+3);        
+    //console.log(date_q5);
+
+    date_q6=new Date(date_q5.getFullYear(), 0, 1);            
+    date_q6.setMonth(date_q5.getMonth()+3);        
+    //console.log(date_q6);
+    
+    date_q7=new Date(date_q6.getFullYear(), 0, 1);            
+    date_q7.setMonth(date_q6.getMonth()+3);    
+    //console.log(date_q7);
+    
+    date_q8=new Date(date_q7.getFullYear(), 0, 1);            
+    date_q8.setMonth(date_q7.getMonth()+3);    
+    //console.log(date_q8);
+
+    console.log(date_q04);
+    console.log(date_q03);
+    console.log(date_q02);
+    console.log(date_q01);
+    console.log("---");
+
+    console.log(date_q1);
+    console.log(date_q2);
+    console.log(date_q3);
+    console.log(date_q4);
+    console.log("---");
+
+    console.log(date_q5);
+    console.log(date_q6);
+    console.log(date_q7);
+    console.log(date_q8);
+    console.log("---");
+
+    if(today>=date_q04 && today<date_q03){
+      console.log("PAST current quarter is q1")
+      obj_period.int_todayQuarter=1;
+      obj_period.date_thisQuarter=date_q04;
+      obj_period.date_nextQuarter=date_q03;            
+    }
+
+    if(today>=date_q03 && today<date_q03){
+      console.log("PAST current quarter is q2")
+      obj_period.int_todayQuarter=2;
+      obj_period.date_thisQuarter=date_q03;
+      obj_period.date_nextQuarter=date_q02;            
+    }
+
+    if(today>=date_q02 && today<date_q01){
+      console.log("PAST current quarter is q3")
+      obj_period.int_todayQuarter=3;
+      obj_period.date_thisQuarter=date_q02;
+      obj_period.date_nextQuarter=date_q01;            
+    }
+    if(today>=date_q01 && today<date_q1){
+      console.log("PAST current quarter is q4")
+      obj_period.int_todayQuarter=4;
+      obj_period.date_thisQuarter=date_q01;
+      obj_period.date_nextQuarter=date_q1;            
+    }
+    //---
+
+    if(today>=date_q1 && today<date_q2){
+      console.log("PRESENT current quarter is q1")
+      obj_period.int_todayQuarter=1;
+      obj_period.date_thisQuarter=date_q1;
+      obj_period.date_nextQuarter=date_q2;            
+    }
+    if(today>=date_q2 && today<date_q3){
+      console.log("PRESENT current quarter is q2")
+      obj_period.int_todayQuarter=2;
+      obj_period.date_thisQuarter=date_q2;
+      obj_period.date_nextQuarter=date_q3;            
+    }
+    if(today>=date_q3 && today<date_q4){
+      console.log("PRESENT current quarter is q3")
+      obj_period.int_todayQuarter=3;
+      obj_period.date_thisQuarter=date_q3;
+      obj_period.date_nextQuarter=date_q4;            
+    }
+    if(today>=date_q4 && today<date_q5){
+      console.log("PRESENT current quarter is q4")
+      obj_period.int_todayQuarter=4;
+      obj_period.date_thisQuarter=date_q4;
+      obj_period.date_nextQuarter=date_q5;            
+    }
+    //---
+
+    if(today>=date_q5 && today<date_q6){
+      console.log("FUTURE current quarter is q1")
+      obj_period.int_todayQuarter=1;
+      obj_period.date_thisQuarter=date_q5;
+      obj_period.date_nextQuarter=date_q6;            
+    }
+    if(today>=date_q6 && today<date_q7){
+      console.log("WONT SEE: current quarter is q2")
+      obj_period.int_todayQuarter=2;
+      obj_period.date_thisQuarter=date_q6;
+      obj_period.date_nextQuarter=date_q7;            
+    }
+    if(today>=date_q7 && today<date_q8){
+      console.log("WONT SEE: current quarter is q3")
+      obj_period.int_todayQuarter=3;
+      obj_period.date_thisQuarter=date_q7;
+      obj_period.date_nextQuarter=date_q8;            
+    }
+    if(today>=date_q8){
+      console.log("WONT SEE: current quarter is q4")
+      obj_period.int_todayQuarter=4;
+      obj_period.date_thisQuarter=date_q8;      
+    }
+
+
+
+
+    if(today>=date_q02 && today<date_q03){
+      console.log("current quarter is q2")
+      obj_period.int_todayQuarter=2;
+      obj_period.date_thisQuarter=date_q1;
+      obj_period.date_nextQuarter=date_q2;            
+    }
+
+    if(today>=date_q1 && today<date_q2){
+      console.log("current quarter is q1")
+      obj_period.int_todayQuarter=1;
+      obj_period.date_thisQuarter=date_q1;
+      obj_period.date_nextQuarter=date_q2;
+      obj_period.date_next1Quarter=date_q3;
+      obj_period.date_next2Quarter=date_q4;
+      
+    }
+
+    if(today>=date_q2 && today<date_q3){
+      console.log("current quarter is q2")
+      obj_period.int_todayQuarter=2;
+      obj_period.date_thisQuarter=date_q2;
+      obj_period.date_nextQuarter=date_q3;
+      obj_period.date_next1Quarter=date_q4;
+      obj_period.date_next2Quarter=date_q1;
+    }    
+
+    if(today>=date_q3 && today<date_q4){
+      console.log("current quarter is q3")
+      obj_period.int_todayQuarter=3;
+      obj_period.date_thisQuarter=date_q3;
+      obj_period.date_nextQuarter=date_q4;
+      obj_period.date_next1Quarter=date_q1;
+      obj_period.date_next2Quarter=date_q2;
+    }
+
+    if(today>=date_q4){
+      console.log("current quarter is q4")
+      obj_period.int_todayQuarter=4;
+      obj_period.date_thisQuarter=date_q4;
+      obj_period.date_nextQuarter=date_q1;
+      obj_period.date_next1Quarter=date_q2;
+      obj_period.date_next2Quarter=date_q3;
+    }
+
+    
+    
+    
+    return obj_period;
+  }
+
+  
+
+function getNextQuarterStartDate(fiscalYearEndMonth){
+    
+    let obj_quarterPeriod=this.fn_getQuarterPeriod(fiscalYearEndMonth);    
+    let date_thisPeriod=obj_quarterPeriod.date_thisQuarter;
+    let date_nextPeriod=obj_quarterPeriod.date_nextQuarter;    
+    console.log("date_thisPeriod: " + date_thisPeriod);
+    console.log("date_nextPeriod: " + date_nextPeriod);    
+}
+
+
+for(var i=0;i<12;i++){
+
+  let fiscalYearEndMonth = i; // December (0-based index, so 11 means December)  
+  console.log("----------------------");    
+  getNextQuarterStartDate(fiscalYearEndMonth);
+  
+}
+
+
+
+</script>
+</body>
+</html>
