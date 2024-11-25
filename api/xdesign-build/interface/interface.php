@@ -73,6 +73,11 @@ class server_interface extends interface_legacy{
         //metaList
         //{"MetaViewId":"200007","SelectField":"Name","WhereField":"MetaGroup","WhereCriteria":"","AllowMultiple":false}        
         //{"ListMember":"Apple,Orange,Pear"}
+        //Type//{"ListMember": "Suspect,Prospect,Customer"}
+        //Status//{"ListMember": "Lead,Contacted,Qualified,Nurturing,Mid-Stage,Proposal,Meeting,Demo,Negotiating,Contract Sent,Contract Signed,Won,Lost,Disqualified,Inactive"}
+        //Sector//{"ListMember": "Technology,Finance,Healthcare,Real Estate,Retail,Manufacturing,Professional Services,Education,Non-profit"}
+        //Priority//{"ListMember": "Low,Normal,Important,Urgent"}
+        //Country//{"ListMember": "Australia,Brazil,Canada,China,France,Germany,India,Italy,Japan,Mexico,Russia,SouthKorea,Spain,UnitedKingdom,UnitedStates"}
         //{"ListMember":"Number,RecordId,Currency,Checkbox,Date,DateTime,Text,Note,JSON,Email,URL,Color,Phone"}
         
         /*
