@@ -55,7 +55,7 @@ class interface_sessionmanager extends interface_servermanager {
       
       $str_authorizeUserId=$this->fn_getCookie("AuthorizeUserId");      
       if(empty($str_authorizeUserId)){
-        $this->fn_setErrorLogin("Please login again");                        
+        //$this->fn_setErrorLogin("Please login again");                        
         exit;
       }
 

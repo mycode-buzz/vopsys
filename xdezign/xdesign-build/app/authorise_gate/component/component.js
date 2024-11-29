@@ -5,11 +5,7 @@
                   super(obj_ini);        
                 } 
                 fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                
-                  
-                  this.fn_extends("xapp_ajax");            
-              
-                  this.obj_holder.bln_debugServer=false;
+                  super.fn_initialize(obj_ini);                                                
                 }
                 fn_onLoad(){ //base object should be called
                   super.fn_onLoad();     
