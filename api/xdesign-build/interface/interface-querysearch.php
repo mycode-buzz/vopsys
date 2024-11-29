@@ -15,6 +15,8 @@ class interface_search extends interface_advancedsearch{
         $this->arr_whereQuery=[];
 
         
+        //$this->fn_varDump($this->obj_queryMetaWhere, "this->obj_queryMetaWhere", true);
+        
 
         $this->str_queryWhere="";               
         $MetaUserSystemId=$this->obj_userLogin->MetaUserSystemId;
@@ -26,8 +28,8 @@ class interface_search extends interface_advancedsearch{
             array_push($this->arr_whereQuery, $this->obj_queryScopeMetaData);
         }
        
-               
-
+        //$this->fn_varDump($this->arr_whereQuery, "this->arr_whereQuery", true);
+        
                       
         if($this->obj_post->SimpleSearch){
             $this->fn_interfaceFormatSimpleSearch();
@@ -41,8 +43,7 @@ class interface_search extends interface_advancedsearch{
             if(!$this->fn_isObjectEmpty($this->obj_queryAdvancedSearch)){            
                 array_push($this->arr_whereQuery, $this->obj_queryAdvancedSearch);
             }
-        }
-               
+        }               
             
         if(!$this->fn_isObjectEmpty($this->obj_queryMetaWhere)){
             array_push($this->arr_whereQuery, $this->obj_queryMetaWhere);
@@ -74,7 +75,8 @@ class interface_search extends interface_advancedsearch{
             
             array_push($this->arr_whereQuery, $this->obj_queryAutoJoin);       
         }
-                   
+              
+        
 
         //$this->fn_varDump($this->arr_whereQuery, "this->arr_whereQuery", true);
         
@@ -105,6 +107,7 @@ class interface_search extends interface_advancedsearch{
         if(empty($str_querySearch)){
             return;
         }
+        
         
         //$this->fn_var_dump($str_querySearch, "1 str_querySearch", true);
         

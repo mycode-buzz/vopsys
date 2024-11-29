@@ -40,7 +40,7 @@ class interface_get extends interface_search{
         
         
         $this->fn_formatQueryInterface();                                                                
-        $this->fn_interfaceFormatSelect();
+        $this->fn_interfaceFormatSelect();        
         
         if(!$this->bln_runQuery){
             if($this->bln_debugExecute){                
@@ -51,22 +51,25 @@ class interface_get extends interface_search{
 
         
 
+        $this->obj_paramAPI->get_archive=false;                
+        if($this->obj_metaRowz->obj_param->ArchivePin){
+            $this->obj_paramAPI->get_archive=true;                
+        }
+
+        
+
         if($bln_getCountOnly){
             $this->obj_paramAPI->get_count=true;                
         }
 
-        $this->obj_paramAPI->get_archive=false;                
         
-        if($this->obj_metaRowz->obj_param->ArchivePin){
-            $this->obj_paramAPI->get_archive=true;                
-        }
         
         $this->obj_rowzAPI->fn_buildEndPoint($this->obj_paramAPI);              
         
         
         if($this->bln_debugAction || $this->bln_debugExecute){
-            //$this->fn_varDump($this->obj_paramAPI, "this->obj_paramAPI", true);                                      
-            //exit;
+            $this->fn_varDump($this->obj_paramAPI, "this->obj_paramAPI", true);                                      
+            exit;
         }                 
         
         if($this->obj_post->ModeNewRecord){                                
@@ -156,6 +159,8 @@ class interface_get extends interface_search{
         
         $obj_paramView=$this->obj_metaView->obj_param;
         $MetaViewId=$obj_paramView->MetaViewId;
+
+        
         
         if(empty($MetaViewId)){
             if($this->bln_debugExecute){                
@@ -174,6 +179,8 @@ class interface_get extends interface_search{
             $this->bln_runQuery=false;
             return;
         }
+        $this->bln_runQuery=true;
+        
         
         $this->obj_paramAPI=$this->obj_rowzAPI->fn_getRequest();                                      
         $this->obj_paramAPI->view_id=$this->obj_metaView->obj_param->MetaViewId;                                                                                
@@ -184,7 +191,8 @@ class interface_get extends interface_search{
         $obj_requestBody=new StdClass;
         $this->obj_requestBodyAPI=$obj_requestBody;                
         
-        $this->fn_interfaceCollateMetaViewColumns();                                       
+        
+        $this->fn_interfaceCollateMetaViewColumns();                                               
         
         //DEBUG
         //$this->fn_varDump($this->arr_metaColumn, "this->arr_metaColumn", true);                   
@@ -202,10 +210,10 @@ class interface_get extends interface_search{
         }
         //$this->obj_paramAPI->select_column='["*"]';  
                 
-        $this->bln_runQuery=true;
+        
         //return;
         
-     
+        //$this->fn_varDump($this->obj_queryMetaWhere, "this->obj_queryMetaWhere", true);
                          
         $this->fn_interfaceFormatSQLQuery();           
         $this->fn_interfaceFormatSQLOrderBy();
@@ -240,8 +248,9 @@ class interface_get extends interface_search{
     function fn_interfaceGetMetaViewColumnSQL(){                        
 
         $obj_paramView=$this->obj_metaView->obj_param;
-        $obj_paramRowz=$this->obj_metaRowz->obj_param;
-        $obj_userLogin=$this->obj_userLogin;        
+        $obj_paramRowz=$this->obj_metaRowz->obj_param;        
+
+        $obj_user=$this->obj_userLogin;
         
         //Get the Fields shich should be selected from the view form and  column.
         //Meta constraint should ensure that the user is entiled to the view.
@@ -290,7 +299,7 @@ class interface_get extends interface_search{
 
         if(!empty($str_sqlWhere)){$str_sqlWhere.=" AND ";}        
         $str_sqlWhere.="(        
-            `meta_column`.`MetaColumnSystemId`=$obj_userLogin->MetaUserSystemId ";             
+            `meta_column`.`MetaColumnSystemId`=$obj_user->MetaUserSystemId ";             
         if(!empty($obj_paramView->MetaViewId)){          
             
             $str_sqlWhere.="/*METAVIEW*/
@@ -334,6 +343,7 @@ class interface_get extends interface_search{
             `meta_column`.`meta_column`.`HiddenPin`,
             `meta_column`.`meta_column`.`LockedPin`,                                    
             `meta_column`.`meta_column`.`RequiredPin`,                        
+            `meta_column`.`meta_column`.`MaxLength`,                        
             `meta_column`.`meta_column`.`PrimaryPin`,
             `meta_column`.`meta_column`.`MenuPin`,
             `meta_column`.`meta_column`.`MetaPermissionTag`,            
@@ -365,6 +375,11 @@ class interface_get extends interface_search{
         
         //$this->fn_varDump("fn_selectMinimalFieldCriteria ", "", true);
 
+        $str_sqlColumnScope="AND (`MenuPin` OR `InfoPin` OR `SearchPin`)";                        
+        if($obj_paramView->DistinctPin){                                            
+            $str_sqlColumnScope="AND (`MenuPin` OR `InfoPin`)";//duplicate scope for distinct
+        }        
+
         $str_bracket="";//should not have a bracket around id numbers 
         $str_sql="SELECT 
         group_concat(MetaColumnId) as List FROM `meta_column`.`meta_column`         
@@ -372,7 +387,7 @@ class interface_get extends interface_search{
         AND `MetaColumnSystemId`=:MetaColumnSystemId        
         AND `MetaSchemaName`=:MetaSchemaName
         AND `MetaTableName`=:MetaTableName        
-        AND (`MenuPin` OR `InfoPin` OR `SearchPin`)
+        $str_sqlColumnScope        
         ;";
 
         /*
@@ -414,6 +429,8 @@ class interface_get extends interface_search{
         $obj_paramView=$this->obj_metaView->obj_param;
 
         $this->obj_queryMetaWhere=new stdClass;
+
+        
 
         if($this->bln_debugRunSelect){
             $this->fn_addEcho("START fn_collateMetaViewColumns");                
@@ -492,8 +509,8 @@ class interface_get extends interface_search{
         $this->arr_rowsMetaView=$arr_rows;
         //$this->fn_varDump($arr_rows, "arr_rows");                    
         
-        $this->fn_interfaceCollateMetaColumn();        
-        $this->fn_interfaceCollateMetaViewWhere();          
+        $this->fn_interfaceCollateMetaColumn();                
+        $this->fn_interfaceCollateMetaViewWhere();             
         $this->fn_interfaceCollateMetaViewOrderBy();        
       }   
 
@@ -530,6 +547,7 @@ class interface_get extends interface_search{
             $obj_meta->HiddenPin=$arr_row["HiddenPin"];            
             $obj_meta->LockedPin=$arr_row["LockedPin"];                        
             $obj_meta->RequiredPin=$arr_row["RequiredPin"];                                    
+            $obj_meta->MaxLength=$arr_row["MaxLength"];                                    
             $obj_meta->PrimaryPin=$arr_row["PrimaryPin"];
             $obj_meta->MenuPin=$arr_row["MenuPin"];
             $obj_meta->MetaPermissionTag=$arr_row["MetaPermissionTag"];
@@ -609,14 +627,25 @@ class interface_get extends interface_search{
         $arr_where=[]; 
 
         
+        /*
+        if($obj_paramRowz->ArchivePin){
+            $this->fn_varDump($obj_paramRowz, "obj_paramRowz");
+            $this->fn_varDump($obj_paramRowz->ArchivePin, "obj_paramRowz->ArchivePin");
+            $this->fn_varDump($obj_paramView->MetaWhere, "obj_paramView->MetaWhere");            
+        }
+        //*/
+        
         if(is_null($obj_paramView->MetaWhere)){
             $obj_paramView->MetaWhere="";            
         }        
+        
         if(!empty($obj_paramView->MetaWhere)){
             $str_metaViewWhere=$this->fn_interfaceReplaceSessionCodes($obj_paramView->MetaWhere);
             $obj_where=json_decode($str_metaViewWhere);
             array_push($arr_where, $obj_where);     
         }
+
+        
 
         //this is a convienient way of adding to the where criteria        
         if(!empty($obj_paramView->FilterOnSubDomainPin)){            
@@ -631,7 +660,7 @@ class interface_get extends interface_search{
             $obj_where=json_decode($str_metaWhere);            
             array_push($arr_where, $obj_where);
                 
-        }    
+        }            
 
         //$this->fn_varDump($arr_where, "arr_where", true);
        
@@ -640,7 +669,11 @@ class interface_get extends interface_search{
             //$this->bln_debug=true;
         }
 
+        
+
         //$this->fn_varDump($this->obj_queryMetaWhere, "this->obj_queryMetaWhere", true);   
+
+        
     }
     function fn_interfaceCollateMetaViewOrderBy(){        
 

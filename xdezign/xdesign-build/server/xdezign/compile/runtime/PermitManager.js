@@ -231,7 +231,7 @@ class PermitManager {
 
     fn_applyPermit(obj_target, obj_permit, bln_newRecord=false){       
         
-        obj_target.HiddenPin=this.fn_getHidden(obj_permit);        
+        obj_target.HiddenPin=this.fn_getHiddenPin(obj_permit);        
         obj_target.LockedPin=this.fn_getLocked(obj_permit, bln_newRecord);        
 
         if(this.bln_debugPermit){
@@ -240,7 +240,7 @@ class PermitManager {
         }        
       }    
 
-    fn_getHidden(obj_permit){
+    fn_getHiddenPin(obj_permit){
         return obj_permit.bln_read ? false : true;
     }
     fn_getLocked(obj_permit, bln_newRecord=false){

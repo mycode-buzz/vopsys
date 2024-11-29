@@ -35,6 +35,7 @@ class metaRowz {
     $obj_param->DisabledPin=0;
     $obj_param->HiddenPin=0;       
     $obj_param->ArchivePin=0;   
+    $obj_param->AdminPin=0;   
     $obj_param->LockOpenPin=0;   
     $obj_param->AutoFetchPin=0;   
     $obj_param->AutoOpenPin=0;   
@@ -71,14 +72,39 @@ class metaRowz {
     $this->fn_display(true);
   }
 
+  function fn_hideArchive(){    
+    $this->fn_displayArchive(false);
+  }
+  function fn_showArchive(){    
+    $this->fn_displayArchive(true);
+  }
+
+  function fn_displayArchive($bln_value){
+
+    $bln_value=boolval($bln_value);
+    $int_valueFlip=intval(!$bln_value);    
+    $int_value=intval($bln_value);    
+
+    $obj_param=$this->obj_param;
+    $obj_parent=$this->obj_parent;
+    $MetaRowzId=$obj_param->MetaRowzId;
+    
+    $str_sql="UPDATE `meta_rowz`.`meta_rowz` SET `ArchivePin`=:ArchivePin WHERE TRUE
+    AND `MetaRowzId`=:MetaRowzId;";
+    $stmt=$obj_parent->fn_executeSQLStatement($str_sql, [
+      "MetaRowzId" => $MetaRowzId,
+      "ArchivePin" => $int_value,      
+    ]);      
+  }
+
   function fn_delete(){    
 
     $obj_param=$this->obj_param;
     $obj_parent=$this->obj_parent;
     $MetaRowzId=$obj_param->MetaRowzId;
 
-    $str_sql="DELETE FROM `meta_rowz`.`meta_rowz` WHERE `meta_rowz`.`MetaRowzId`=:MetaRowzId;";    
-    //*
+    $str_sql="DELETE FROM `meta_rowz`.`meta_rowz` WHERE TRUE 
+    AND `MetaRowzId`=:MetaRowzId;";        
     $obj_parent->fn_executeSQLStatement($str_sql, [
       "MetaRowzId" => $MetaRowzId
     ]);      
@@ -99,9 +125,7 @@ class metaRowz {
           $obj_metaRowz=new metaRowz($obj_parent);
           $obj_metaRowz->fn_initialize($MetaRowzId);
           $obj_metaRowz->fn_delete();                
-      }            
-      
-      //*/
+      }
     }
   }
 
@@ -242,6 +266,7 @@ class metaRowz {
       'DisabledPin'=>$obj_param->DisabledPin,             
       'HiddenPin'=>$obj_param->HiddenPin,      
       'ArchivePin'=>$obj_param->ArchivePin,       
+      'AdminPin'=>$obj_param->AdminPin,       
       'LockOpenPin'=>$obj_param->LockOpenPin,       
       'AutoFetchPin'=>$obj_param->AutoFetchPin,                           
       'AutoOpenPin'=>$obj_param->AutoOpenPin,                        
@@ -265,7 +290,7 @@ class metaRowz {
     $obj_paramMetaData->DataTableName="meta_rowz";
     $obj_paramMetaData->DataKeyName="MetaRowzId";        
     $obj_paramMetaData->DataKeyValue=$int_idRecord;                                                            
-    $obj_paramMetaData->MetaPermissionTag="";          
+    $obj_paramMetaData->MetaPermissionTag="#ALL";          
     $obj_metaData->fn_createRecord($obj_paramMetaData);     
 
     return $int_idRecord;
@@ -298,6 +323,7 @@ class metaRowz {
           `meta_rowz`.`DisabledPin`,        
           `meta_rowz`.`HiddenPin`,          
           `meta_rowz`.`ArchivePin`,          
+          `meta_rowz`.`AdminPin`,          
           `meta_rowz`.`LockOpenPin`,          
           `meta_rowz`.`AutoFetchPin`,        
           `meta_rowz`.`AutoOpenPin`,        
@@ -329,6 +355,7 @@ class metaRowz {
           :DisabledPin,        
           :HiddenPin,          
           :ArchivePin,
+          :AdminPin,
           :LockOpenPin,
           :AutoFetchPin,        
           :AutoOpenPin,        

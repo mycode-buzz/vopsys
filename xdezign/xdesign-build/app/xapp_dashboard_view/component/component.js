@@ -6,12 +6,13 @@
         fn_initialize(obj_ini){
           super.fn_initialize(obj_ini);                
         }
-        fn_loadDashboard(){                                                                                              
+        fn_loadDashboard(){
+          if(!super.fn_loadDashboard()){return;}                                                                                              
           
           this.obj_menuPanel=this.fn_getParentComponent();                  
           if(this.obj_menuPanel){
             //let obj_consoleContainer=this.obj_menuPanel.fn_addConsoleContainer("xapp_console_container_general", true);            
-            let obj_consoleContainer=this.obj_consoleContainerRecord=this.obj_menuPanel.fn_addConsoleContainer("console_container_record", true);                        
+            let obj_consoleContainer=this.obj_consoleContainerRecord=this.obj_menuPanel.fn_addConsoleContainer("console_container_record", true);                                    
             
             this.obj_button_file_select=obj_consoleContainer.fn_getConsoleComponent("xapp_button_file_select");                                                                                   
             this.obj_input_file_select=this.obj_button_file_select.fn_getComponent("xapp_input_file_select");                                                                                               
@@ -22,12 +23,40 @@
             let obj_standardMenu=obj_settingMenu.obj_parentMenu;
             let int_metaViewId=obj_standardMenu.fn_getMetaViewId();            
             let int_metaRowzId=obj_standardMenu.fn_getMetaRowzId();            
+            let int_idParentMetaRowz=obj_standardMenu.fn_getParentRowzId();            
             if(int_metaViewId){
               this.int_metaViewId=int_metaViewId;
               this.int_metaRowzId=int_metaRowzId;
               obj_consoleContainer.fn_showItem(this.obj_button_file_select);                        
               //obj_consoleContainer.fn_showItem(this.obj_button_file_import);                        
             }            
+            else if(!int_idParentMetaRowz){
+              let obj_consoleContainerMaintain=this.obj_consoleContainerRecord=this.obj_menuPanel.fn_addConsoleContainer("console_container_maintain", true);                        
+              console.log("int_idParentMetaRowz: " + int_idParentMetaRowz);              
+
+              //*
+              this.obj_button_provision_b2b=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_b2b");
+              this.obj_button_provision_b2c=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_b2c");
+              this.obj_button_provision_account_opportunity=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_linked_opportunity_hide");
+              this.obj_button_provision_linked_opportunity=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_linked_opportunity_show");
+              this.obj_button_provision_account_contact=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_linked_contact_hide");
+              this.obj_button_provision_linked_contact=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_linked_contact_show");
+              this.obj_button_provision_account_task=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_linked_task_hide");
+              this.obj_button_provision_linked_task=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_linked_task_show");              
+              
+              obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_b2b);                 
+              obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_b2c);                 
+              obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_account_opportunity);                 
+              obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_linked_opportunity);                 
+              obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_account_contact);                 
+              obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_linked_contact);                 
+              obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_account_task);                 
+              obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_linked_task);                 
+              
+              //*/
+
+            }
+            
           }                    
         } 
 

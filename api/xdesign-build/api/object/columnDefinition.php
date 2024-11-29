@@ -44,20 +44,20 @@ class columnDefinition{
         }
 
         
+        $str_sqlColumnScope="";                        
+        if($obj_paramView->DistinctPin){                                            
+            $str_sqlColumnScope="AND (`MenuPin` OR `InfoPin`) ";//duplicate scope for distinct
+        }        
+
         $str_sql="";                
-        
         $str_sql.="SELECT * FROM `meta_column`.`meta_column` WHERE TRUE                 
         AND `MetaColumnSystemId`=:MetaColumnSystemId        
         AND `MetaSchemaName`=:MetaSchemaName 
         AND `MetaTableName`=:MetaTableName
-        AND `LivePin` ";
-
-        if($obj_paramView->DistinctPin){
-            $str_sql.="AND (`MenuPin` OR `InfoPin` OR `SearchPin`) ";            
-        }
-
-        $str_sql.=";";      
-
+        AND `LivePin` 
+        $str_sqlColumnScope
+        ;";      
+        
         /*
         $this->fn_varDump($str_sql, "str_sql");
         $this->fn_varDump($MetaColumnSystemId, "MetaColumnSystemId");
@@ -75,9 +75,10 @@ class columnDefinition{
         $this->arr_rows=$stmt->fetchAll();         
 
         
+        
         if(empty($this->arr_rows)){                        
             
-            $str_message="Erorr on ColumnDefiniiton.
+            $str_message="Error on ColumnDefinition.
             obj_paramView->MetaViewName: $obj_paramView->MetaViewName  
             obj_paramView->MetaSchemaName: $obj_paramView->MetaSchemaName 
             obj_paramView->MetaTableName: $obj_paramView->MetaTableName
@@ -89,18 +90,15 @@ class columnDefinition{
 
             //$this->fn_varDump($str_message, "test");
 
-            $this->obj_parent->fn_setError($str_message);            
+            $this->fn_setError($str_message);            
         }            
+        
         
         $this->fn_create($this->arr_rows); 
         
         //$this->fn_varDump($this->arr_rows, "arr_rows");
     }
-    function fn_varDump($foo_val, $str_msg="xDUMP", $bln_console=true){
-
-        $this->obj_parent->fn_varDump($foo_val, $str_msg, true);
-
-    }
+    
     function fn_create($arr_rows){        
     
         $obj_column="";
@@ -137,6 +135,7 @@ class columnDefinition{
             if($obj_column->RequiredPin){
                 array_push($this->arr_requiredPin, $obj_column);
             }            
+            $obj_column->MaxLength=$arr_row["MaxLength"];                        
             $obj_column->PrimaryPin=$arr_row["PrimaryPin"];            
             $obj_column->DefaultValue=$arr_row["DefaultValue"];
             $obj_column->MetaClassType=$arr_row["MetaClassType"];            
@@ -145,8 +144,6 @@ class columnDefinition{
             $obj_column->Subdomain=$arr_row["Subdomain"];            
             $this->fn_addColumnToDefinition($obj_column);            
         }   
-        
-        //$this->fn_varDump($this->obj_definition, "this->obj_definition");
     }
 
     
@@ -182,12 +179,12 @@ class columnDefinition{
         //$obj_column=$this->obj_parent->fn_getObjectProperty($this->obj_definition, $str_shortName);          
         $obj_column=$this->obj_definition->{$str_shortName};
         if(empty($obj_column)){
-            $this->obj_parent->fn_setError("Error : Column Not Found: [".$obj_paramView->MetaSchemaName.".".$obj_paramView->MetaTableName.".".$str_shortName."]. Check Short Name.");
+            $this->fn_setError("Error : Column Not Found: [".$obj_paramView->MetaSchemaName.".".$obj_paramView->MetaTableName.".".$str_shortName."]. Check Short Name.");
             return false;
         }
         else{
             //for debug only
-            //$this->obj_parent->fn_setError("Error : Column IS Found: [".$obj_paramView->MetaSchemaName.".".$obj_paramView->MetaTableName.".".$str_shortName."].");            
+            //$this->fn_setError("Error : Column IS Found: [".$obj_paramView->MetaSchemaName.".".$obj_paramView->MetaTableName.".".$str_shortName."].");            
             //return;
         }
         
@@ -296,6 +293,7 @@ class columnDefinition{
         
         $MetaColumnAPIName=strtolower($obj_column->MetaColumnAPIName);                
         $MetaColumnType=strtolower($obj_column->MetaColumnType);                
+        $MaxLength=strtolower($obj_column->MaxLength);
         $foo_valueToLower=strtolower($foo_value);                        
         
         
@@ -305,8 +303,7 @@ class columnDefinition{
         foreach ($obj_metaOption as $property => $value) {                        
             
             $bln_writeOption=false;                        
-            switch(strtolower($property)){
-                case "maxlength":    
+            switch(strtolower($property)){                
                 case "formexpand":
                 case "formposition":                        
                 case "unsigned":                                                                        
@@ -344,32 +341,33 @@ class columnDefinition{
                 $obj_metaOption=$this->fn_jsonDecodeToObject($foo_value);                               
                 foreach ($obj_metaOption as $property => $value) {                        
                     switch(strtolower($property)){
-                        case "maxlength":            
-                            $int_min = 0;
-                            $int_max = 10000;               
-                            $int_maxLength= $value;                
-                            $bln_value=$this->fn_validateNumber($int_maxLength, $int_min, $int_max);                            
-                            if(!$bln_value){
-                                $this->obj_parent->fn_setMessage("Error: MaxLength not validate: [".$int_maxLength."]");
-                            exit        ;
-                            }                                
+                        case "notused":                                        
                         break;                    
                     }            
                 }
             break;        
+            case "maxlength":
+                $int_min = 0;
+                $int_max = 10000;               
+                $int_maxLength= $foo_value;                
+                $bln_value=$this->fn_validateNumber($int_maxLength, $int_min, $int_max);                            
+                if(!$bln_value){
+                    $this->obj_parent->fn_setMessage("Error: MaxLength not validate: [".$int_maxLength."]");
+                exit;
+                }                                
+            break;
             case "metacolumnapiname":                                
                 $foo_value = preg_replace('/\s+/', '', $foo_value);                                
             break;        
-        }
-        
+        }        
 
-        switch($MetaColumnType){    
+        switch($MetaColumnType){                
             case "note":                  
-                if(!isset($obj_column->MaxLength)){$this->obj_parent->fn_setError("Error: MaxLength is not set: [".$obj_column->MetaColumnAPIName."]");}                
+                if(!isset($obj_column->MaxLength)){$this->fn_setError("Error: MaxLength is not set: [".$obj_column->MetaColumnAPIName."]");}                
                 $foo_value=substr($foo_value, 0, 10000);
             break;
             case "text":                                                   
-                if(!isset($obj_column->MaxLength)){$this->obj_parent->fn_setError("Error: MaxLength is not set: [".$obj_column->MetaColumnAPIName."]");}                
+                if(!isset($obj_column->MaxLength)){$this->fn_setError("Error: MaxLength is not set: [".$obj_column->MetaColumnAPIName."]");}                
                 $foo_value=substr($foo_value, 0, 1000);
                 
             break;
@@ -386,7 +384,7 @@ class columnDefinition{
                 if($foo_value!=="NULL"){                                                                           
                     $bln_value=$this->fn_isValidJSON($foo_value);                
                     if(!$bln_value){
-                        $this->obj_parent->fn_setError("Invalid json format: [".$foo_value."]");                                
+                        $this->fn_setError("Invalid json format: [".$foo_value."]");                                
                     }
                 }
             break;            
@@ -398,6 +396,7 @@ class columnDefinition{
                     $foo_value=0;
                 }
             break;
+            case "percent":                 
             case "currency":                 
             case "number":     
                 
@@ -412,7 +411,7 @@ class columnDefinition{
                 $int_min = -9999999999.99999;
                 $bln_value=$this->fn_validateNumber($foo_value, $int_min, $int_max);
                 if(!$bln_value){
-                    $this->obj_parent->fn_setError("Invalid number format");                                
+                    $this->fn_setError("Invalid number format");                                
                 }                
                 
                 if(empty($obj_column->UnSigned)){
@@ -440,7 +439,7 @@ class columnDefinition{
                         $foo_value=$dateObject->format('Y-m-d'); // Output: 2024-08-31                        
                     }
                     else {                        
-                        $this->obj_parent->fn_setError("Invalid date format: [".$foo_value."]");            
+                        $this->fn_setError("Invalid date format: [".$foo_value."]");            
                     }
                     
                 }
@@ -459,7 +458,7 @@ class columnDefinition{
                         $foo_value=$dateObject->format('Y-m-d H:i:s'); // Output: 2024-08-31                        
                     }
                     else {                        
-                        $this->obj_parent->fn_setError("Invalid datetime format: [".$foo_value."]");            
+                        $this->fn_setError("Invalid datetime format: [".$foo_value."]");            
                     }                    
                 }
             break;
@@ -485,6 +484,7 @@ class columnDefinition{
     }
           
     function fn_filter($arr_listColumnAPIName=""){
+
         
         if(empty($arr_listColumnAPIName)){            
             return $this->arr_definition;
@@ -562,6 +562,16 @@ class columnDefinition{
         return $arr_filter;                       
     }
 
+    function fn_varDump($foo_val, $str_val){        
+        $this->obj_parent->fn_varDump($foo_val, $str_val);        
+        
+    }
+    function fn_setError($str_message){                
+        
+        $this->fn_varDump($str_message, "error message");                    
+        $this->obj_parent->fn_setError($str_message);                    
+    }
+    
     
          
   

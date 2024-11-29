@@ -186,7 +186,7 @@
                   let obj_metaColumnKey
                   obj_metaColumnKey=this.fn_getMetaColumnViaMetaName(obj_post.MetaKeySchemaName, obj_post.MetaKeyTableName, obj_post.MetaKeyColumnName);
                   if(!obj_metaColumnKey){
-                    alert("fn_onNewRecordUpdateMetaKey obj_metaColumnKey is false");
+                    alert("1 fn_onNewRecordUpdateMetaKey obj_metaColumnKey is false");
                     return;};
                   obj_metaColumnKey.str_value=obj_post.MetaKeyColumnValue;  
 
@@ -211,7 +211,7 @@
                   let obj_metaColumnKey;
                   obj_metaColumnKey=this.fn_getMetaColumnViaMetaName("meta_data", "meta_data", "MetaDataId");
                   if(!obj_metaColumnKey){
-                    alert("fn_onNewRecordUpdateDataKey obj_metaColumnKey is false");
+                    alert("2 fn_onNewRecordUpdateDataKey obj_metaColumnKey is false");
                     return;};
                   obj_metaColumnKey.str_value=obj_post.DataKeyColumnValue;                                      
 
@@ -256,24 +256,24 @@
                   return false;
                 }                
 
-                fn_recycleRecord(obj_column){   
+                fn_archiveRecord(obj_columnKey){   
 
-                  let int_columnKey=obj_column.fn_getColumnValue();
+                  let int_columnKey=obj_columnKey.fn_getColumnValue();
                   this.obj_holder.obj_query.str_metaKeyColumnValue=int_columnKey;
-                  this.fn_runRecycleRecord();
+                  this.fn_runArchiveRecord();
                 }
 
-                fn_runRecycleRecord(){                                       
+                fn_runArchiveRecord(){                                       
                   let obj_ini=this.obj_holder.obj_query;                        
-                  obj_ini.str_action="runRecycleRecord";                                                              
+                  obj_ini.str_action="runArchiveRecord";                                                              
                   this.fn_runServerAction(obj_ini);
                 }
                 runDeleteRow(){                                      
                   this.obj_paramRS.obj_menuButton.fn_onDeleteDynamicRow();//should be a dynamic menu                                    
                 } 
-                runRecycleRecord(){
-                  //console.log("runRecycleRecord");
-                  this.obj_paramRS.obj_menuButton.fn_onRecycleRecord();//should be a dynamic menu                                    
+                runArchiveRecord(){
+                  //console.log("runArchiveRecord");
+                  this.obj_paramRS.obj_menuButton.fn_onArchiveRecord();//should be a dynamic menu                                    
                 } 
                 
 
@@ -293,7 +293,7 @@
 
                 fn_formatColumnQuery(obj_column){
 
-                  let obj_row, obj_columnKey, obj_columnDataId, obj_metaColumn, obj_metaColumnKey;
+                  let obj_row, obj_columnKey, obj_metaColumn, obj_metaColumnKey;
 
                   let bln_formNewRecord=this.obj_holder.obj_query.bln_modeNewRecord;                                    
 
@@ -305,18 +305,13 @@
                     //alert("!obj_metaColumnKey && !bln_formNewRecord");
                     return false;//no update
                   }             
-                  
-                  
 
                   obj_row=obj_column.obj_row;
-                  obj_columnKey=obj_row.fn_getColumnKey();                        
-                  //obj_columnDataId=obj_row.fn_getColumnDataId();
-                  
+                  obj_columnKey=obj_row.fn_getColumnKey(obj_column);//either the record id or  metadata id                                                            
                   if(!obj_columnKey){
                     //alert("fn_formatColumnQuery: column key is false");
                     return false;
                   }
-                  
                   
                   //console.log("obj_columnKey.str_value: " + obj_columnKey.str_value);
                   //We have potentially just changed the view from the main menu view                                    
@@ -342,9 +337,6 @@
                   this.obj_holder.obj_query.str_metaKeyTableName=obj_metaColumnKey.MetaTableName;
                   this.obj_holder.obj_query.str_metaKeyColumnName=obj_metaColumnKey.MetaColumnName;
                   this.obj_holder.obj_query.str_metaKeyColumnValue=obj_columnKey.str_value;
-                  //this.obj_holder.obj_query.str_dataId=obj_columnDataId.str_value;
-                  
-                  
 
                   //USED TO CHANGE BETWEEN SYSTEMS IN OFFICE
                   let obj_metaColumnMetaSystemId=this.fn_getMetaColumnViaMetaName("meta_data", "meta_data", "MetaDataSystemId");                                    

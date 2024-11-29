@@ -22,7 +22,9 @@ class login_dashboard extends xapp_dashboard{
 }  
 
 
-  fn_loadDashboard(){         
+  fn_loadDashboard(){
+    if(!super.fn_loadDashboard()){return;}         
+
     if(obj_shared.fn_inStr("login.", location.hostname)){      
       this.fn_XDesigner_endAuthorize();//logout                    
       //console.log("login end auth");

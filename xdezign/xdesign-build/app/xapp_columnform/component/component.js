@@ -38,7 +38,7 @@
                   }                    
                   
                   if(obj_metaColumn.HiddenPin){                    
-                    this.fn_setHidden();                                        
+                    this.fn_setHiddenPin();                                        
                   }
   
                   this.fn_formattMetaColumnLabel();                       
@@ -52,8 +52,14 @@
                     str_currencySymbol="#";
                   }
                   switch(obj_metaColumn.MetaColumnType.toLowerCase()){
-                    case "currency":
-                      str_label+=" ("+str_currencySymbol+") ";
+                    case "currency":                      
+                      if(obj_metaColumn.MetaColumnName.toLowerCase()!=="regionalvalue"){
+                        str_label+=" ("+str_currencySymbol+") ";
+                      }
+                      
+                      break;                  
+                    case "percent":
+                      str_label+=" (%) ";
                       break;                  
                   }                  
                   this.obj_label.fn_setText(str_label);                  
@@ -610,10 +616,7 @@
                     obj_control.fn_setStyleProperty("width", "auto");
                     obj_control.fn_setStyleProperty("height", "50px");                                        
 
-                    const str_listId=obj_shared.fn_getUniquePrefix ("presetColor_")
-                    const newElement = document.createElement('div');                    
-                    newElement.innerHTML = `
-                    <datalist id="` + str_listId + `">                                           
+                    /*/
                     <option colorname="standard_white">#FFFFFF</option>                    
                     <option colorname="colorwheel_1_main_red">#FF0000</option>                   
                     <option colorname="colorwheel_4_main_brightgreen">#66FF00</option>                    
@@ -624,6 +627,18 @@
                     <option colorname="colorwheel_2_orange">#FF7F00</option>
                     <option colorname="standard_silver">#C0C0C0</option>  
                     <option colorname="colorwheel_3_yellow">#FFFF00</option>                                                            
+                    //*/
+
+                    const str_listId=obj_shared.fn_getUniquePrefix ("presetColor_")
+                    const newElement = document.createElement('div');                    
+
+                    newElement.innerHTML = `
+                    <datalist id="` + str_listId + `">                 
+                    <option colorname="standard_black">#000000</option>                          
+                    <option colorname="colorwheel_2_orange">#FF7F00</option>
+                    <option colorname="standard_silver">#C0C0C0</option>  
+                    <option colorname="colorwheel_3_yellow">#FFFF00</option>                                                            
+                    
                     </datalist>
                     `;  
                     this.obj_field.dom_obj.appendChild(newElement);                    
@@ -657,6 +672,7 @@
                     obj_control.fn_setDomProperty("type", "url");                      
                     break;
                   case "currency":
+                  case "percent":
                   case "number":                         
                     str_type="form_input";  
                     obj_control=this.obj_field.fn_addContextItem(str_type);                                        
@@ -686,41 +702,26 @@
                   case "json":
                     str_type="form_textarea";                      
                     obj_control=this.obj_field.fn_addContextItem(str_type);                                                            
+                    //console.log("obj_control form_textarea ");
                     break;                  
                   default:
                     str_type="form_input";
                     obj_control=this.obj_field.fn_addContextItem(str_type);                  
                     obj_control.fn_setDomProperty("type", "text");                                                                                      
                     break;
-                }                                    
-
-
+                }
+                
                   this.obj_input=obj_control;
                   
-                  //obj_control.fn_applyStyle();                                        
-                  
                   let str_placeholder=obj_metaColumn.PlaceHolder;
-                  if(this.obj_metaColumn.DebugPin){
-                    this.fn_debug();  
-                    this.fn_debugLabel("this.obj_metaColumn.PlaceHolder: " + this.obj_metaColumn.PlaceHolder);                                      
-                  }
                   if(str_placeholder){
-                    obj_control.fn_setPlaceholder(str_placeholder);                    
-                    if(this.obj_metaColumn.DebugPin){
-                      this.fn_debugLabel("fn_getPlaceholder: " + obj_control.fn_getPlaceholder());                    
-                    }
-                  }
-                  if(this.obj_metaColumn.DebugPin){
-                    obj_control.fn_debug();                    
+                    obj_control.fn_setPlaceholder(str_placeholder);                                        
                   }
 
-
-                  let int_maxlength=obj_metaColumn.MaxLength;     
-                  
+                  let int_maxlength=obj_metaColumn.MaxLength;                       
                   if(!int_maxlength){
                     int_maxlength=10000;
-                  }
-                  //this.fn_debugLabel("int_maxlength: " + int_maxlength);                               
+                  }                  
                   obj_control.fn_setDomProperty("maxlength", int_maxlength);                                        
                   
                   return obj_control;
@@ -752,6 +753,7 @@
                       }                      
                       break;
                     case "currency":
+                    case "percent":
                     case "number":                  
                         if(!str_value){
                           str_value=0;
@@ -764,7 +766,7 @@
                         str_value=obj_shared.fn_formatSystemDateString(new Date(), obj_metaColumn.DateTime, obj_metaColumn.DateTimeSecond);                                                                          
                           break;                                  
                       }
-                    break;
+                    break;                    
                   }                                    
 
                   return str_value;
@@ -830,6 +832,7 @@
                       }                      
                       break; 
                     case "currency":              
+                    case "percent":              
                     case "number":    
                       str_value=obj_shared.fn_formatNumber(str_value, obj_metaColumn.Decimal);                                            
                       bln_value=obj_shared.fn_validNumber(str_value, obj_metaColumn.UnSigned);                      
@@ -849,6 +852,12 @@
                     case "json":                  
                     break;
                     case "color":                  
+                    break;
+                    case "recordid":
+                      bln_value=obj_shared.fn_validNumber(str_value, false);                      
+                      if(!bln_value){
+                        return "ROWZ_INVALID";  
+                      }                      
                     break;
                     default:
                       this.fn_debugLabel("ERROR Type not found: " + obj_metaColumn.MetaColumnType.toLowerCase());                                             
@@ -871,6 +880,7 @@
                       else{str_value="off";}                                            
                       break;                              
                     case "currency":              
+                    case "percent":              
                     case "number":
                       str_value=obj_shared.fn_formatNumber(str_value, obj_metaColumn.Decimal);                      
                       break;

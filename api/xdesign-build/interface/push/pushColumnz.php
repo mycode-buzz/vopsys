@@ -27,4 +27,16 @@ function fn_pushColumnz($MetaUserSystemId){
   
     return "`".$str_listField."`";
   }
+
+  function fn_getColumnListNoPrimaryKeyExample(){
+    $obj_paramList=new stdClass;
+    $obj_paramList->TABLE_SCHEMA="meta_column";                        
+    $obj_paramList->TABLE_NAME="meta_column";                        
+    $obj_paramList->REMOVE_LIST="'MetaColumnId', 'ABC', 'DEF'";                        
+    $str_listField=$this->fn_getColumnListNoPrimaryKey($obj_paramList);                      
+    $str_listFieldName="`OtherColumnId`,".$str_listField;
+    $str_listFieldValue="OtherColumnIdValue,".$str_listField;                              
+    $str_sql="INSERT INTO `meta_schema`.`meta_table` ($str_listFieldName) SELECT $str_listFieldValue FROM `meta_schema`.`meta_table` WHERE TRUE;";                        
+    $stmt=$this->fn_executeSQLStatement($str_sql);        
+  }
 }//END OF CLASS

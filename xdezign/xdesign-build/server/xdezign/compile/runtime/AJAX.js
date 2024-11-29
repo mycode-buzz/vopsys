@@ -428,7 +428,7 @@ class AJAX extends component {
         obj_post.MetaViewId=obj_ini.int_idMetaView;                 
         obj_post.MetaRowzId=obj_ini.int_idMetaRowz;                
         obj_post.MetaRowzName=obj_ini.str_metaRowzName;                
-        
+        obj_post.MetaFormId=obj_ini.int_idMetaForm;
         obj_post.ModeNewRecord=obj_ini.bln_modeNewRecord;          
                 
         obj_post.QueryExpression=obj_ini.str_queryExpression;

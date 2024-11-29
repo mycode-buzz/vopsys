@@ -102,6 +102,8 @@ class pushView extends pushColumn{
       $obj_paramView=$obj_metaViewNew->obj_param;                         
 
       switch(strtolower($obj_paramView->MetaViewType)){
+        case "head":
+          return "head";          
         case "myviewtype":
           return "main";          
           default:          

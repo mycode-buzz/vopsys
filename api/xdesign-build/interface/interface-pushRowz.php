@@ -162,6 +162,13 @@ class pushRowz extends childrowz{
     
                
       }
+
+      function fn_hideArchive(){        
+        $this->obj_metaRowz->fn_hideArchive();                
+    }
+    function fn_showArchive(){        
+        $this->obj_metaRowz->fn_showArchive();                
+    }
     
 
           function fn_hideRowz(){        

@@ -14,6 +14,22 @@ class interface_support {
     function fn_initialize() {                           
   }
 
+  function fn_isObjectEmpty($obj_my){
+
+    if (!is_object($obj_my)) {
+        if(empty($obj_my)){
+            return true;
+        }
+        return false;
+    }
+
+    if (empty(get_object_vars($obj_my))) {
+        return true;
+    } else {
+        return false;
+    }
+  }
+
   function fn_addMetaData(){            
     return $this->obj_rowzAPI->fn_addMetaData();                                                
 }
@@ -474,9 +490,6 @@ function fn_getParameterFromUrl($url, $parameterName) {
     }        
     return true;
   }
-  
-
-
   
     //END SQL FUNCTION
 }//END CLASS  

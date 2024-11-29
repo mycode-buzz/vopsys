@@ -165,6 +165,7 @@ class rowzAPI extends rowzAPIWhere{
         $obj_call->get_count=false;
         $obj_call->get_autojoin=false; 
         $obj_call->get_archive=false; 
+        $obj_call->lock_toowner=false;         
         $obj_call->JoinView="";
         $obj_call->JoinKeyName="";            
         $obj_call->JoinKeyValue="";
@@ -777,6 +778,7 @@ class rowzAPI extends rowzAPIWhere{
         $obj_metaView=new metaView($this);                                                
         $obj_metaView->fn_initialize($int_idMetaView);                
         $bln_valid=$this->fn_validateView($obj_metaView, $int_idMetaView); 
+        
         if(!$bln_valid){
             $this->fn_setErrorView($int_idMetaView);            
             return;
@@ -1048,7 +1050,7 @@ class rowzAPI extends rowzAPIWhere{
         $str_sql=trim($str_sql, ", ");                        
         if(empty($str_sql)){                        
             $this->response->status_code=500;
-            $this->response->status_message.="select_column sql is blank. fn_setSelectColumn";               
+            $this->response->status_message.="fn_setSelectColumn select_column sql is blank.";               
             $this->response->status_message.=var_export($this->obj_call);                              
         }
 

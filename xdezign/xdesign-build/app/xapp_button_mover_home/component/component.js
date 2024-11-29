@@ -11,8 +11,6 @@
           if(!obj_menuButton){return;}                          
           
           obj_menuButton.fn_formHome();
-          
-          
           obj_project.fn_forgetEvent(e);
         }
       }//END CLS

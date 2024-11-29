@@ -477,7 +477,7 @@
                 if(!obj_permit){
                   return true;
                 }
-                let bln_hiddenPin=obj_permitManger.fn_getHidden(obj_permit);                                         
+                let bln_hiddenPin=obj_permitManger.fn_getHiddenPin(obj_permit);                                         
                 if(bln_hiddenPin){                    
                   return false;
                 }                  
@@ -638,7 +638,7 @@
                 
                 let int_totalColumn=this.obj_paramRS.int_totalColumn;
                 for (let i = 0; i < int_totalColumn; i++) {                        
-                  let obj_metaColumn=this.fn_getMetaColumn(i);                    
+                  let obj_metaColumn=this.fn_getMetaColumn(i);                                      
                   if(obj_metaColumn.MetaSchemaName!==MetaSchemaName){continue;}
                   if(obj_metaColumn.MetaTableName!==MetaTableName){continue;}
                   if(obj_metaColumn.MetaColumnName!==MetaColumnName){continue;}
@@ -659,16 +659,6 @@
                 return false;
               }    
               
-              fn_getMetaColumnViaFieldId(int_value){//should be deprecated in favour of fn_getMetaColumnViaMetaName, which includes schemaane                  
-                
-                let int_totalColumn=this.obj_paramRS.int_totalColumn;
-                for (let i = 0; i < int_totalColumn; i++) {                        
-                  let obj_metaColumn=this.fn_getMetaColumn(i);                                                            
-                  if(String(obj_metaColumn.MetaColumnId)===String(int_value)){                    
-                    return obj_metaColumn;
-                  }                    
-                }
-              }                
               
               fn_getMetaColumnViaFieldName(str_name){//should be deprecated in favour of fn_getMetaColumnViaMetaName, which includes schemaane                  
 

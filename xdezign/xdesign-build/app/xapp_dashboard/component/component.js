@@ -11,9 +11,26 @@
                   super.fn_onLoad();                  
                   if(this.fn_getDebugPin()){this.fn_highlightBorder("pink");}                  
                 }
-                fn_loadDashboard(){//should be overidden                  
-                  console.log("default load xapp_dashboard");                  
+                fn_loadDashboard(){//should be overidden
+                  //console.log("default load xapp_dashboard");                                           
+
+                  let obj_menuButton=this.fn_getMenuButton();                  
+                  let bln_adminPin=obj_menuButton.fn_getAdminPin();
+                  if(bln_adminPin){
+                    let bln_isAdminUser=obj_userHome.Admin;
+                    if(!bln_isAdminUser){                                            
+                      return false;
+                    }                    
+                  }
+                  return true;                  
+
+                  //console.log("bln_adminPin: " + bln_adminPin);
+                  //console.log("bln_isAdminUser: " + bln_isAdminUser);
+                  //console.log(obj_userHome);                  
                 }
+
+                
+
                 fn_refreshDashboard(){
                   //console.log("default refresh xapp_dashboard");                  
                 }

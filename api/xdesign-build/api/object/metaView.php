@@ -59,6 +59,7 @@ class metaView{
         $obj_param->MetaViewInterfacePin=""; 
         $obj_param->AutoView=0; 
         $obj_param->SystemPin=0; 
+        $obj_param->OwnerPin=0;         
         
         return $obj_param;
     }
@@ -79,11 +80,14 @@ class metaView{
 
         if(!empty($MetaViewId)){          
           if(empty($bln_getMetaData)){
-            $str_sql="SELECT *  FROM `meta_view`.`meta_view` WHERE TRUE AND 
-            `MetaViewId`=:MetaViewId
+            $str_sql="SELECT *  FROM `meta_view`.`meta_view` WHERE TRUE 
+            AND `MetaViewSystemId` IN(100, :MetaViewSystemId)
+            AND `MetaViewId`=:MetaViewId
+            
             ;";
             $stmt=$this->obj_parent->fn_executeSQLStatement($str_sql, [              
-            "MetaViewId" => $MetaViewId
+            "MetaViewSystemId" => $this->obj_parent->obj_userLogin->MetaUserSystemId,
+            "MetaViewId" => $MetaViewId,
             ]);                  
           }
           else{
@@ -436,13 +440,15 @@ class metaView{
 
         $obj_parent=$this->obj_parent;
         $obj_paramView=$this->obj_param;            
-        if(empty($this->obj_columnDefinition)){                          
-          $this->fn_setDefinition();                    
-        }            
+        
+        //SET DEFINITION
+        $this->fn_setDefinition();
+        //SET DEFINITION                  
+        
         $arr_listColumn=(array) json_decode($str_jsonColumn);    
         if(!$this->fn_validateJSONDecode($arr_listColumn))return false;                        
-        if(!is_array($arr_listColumn))return false;//must be an array, not an object                
-        $this->arr_selectColumn=$this->obj_columnDefinition->fn_filter($arr_listColumn);                                       
+        if(!is_array($arr_listColumn))return false;//must be an array, not an object                                
+        $this->arr_selectColumn=$this->obj_columnDefinition->fn_filter($arr_listColumn);                                                       
         return true;        
     }   
     
@@ -507,10 +513,10 @@ class metaView{
         return;
       }            
 
-                
-      if(empty($this->obj_columnDefinition)){                          
-        $this->fn_setDefinition();                    
-      }            
+      //SET DEFINITION
+      $this->fn_setDefinition();
+      //SET DEFINITION                  
+
       
       $arr_filterColumn=$this->obj_columnDefinition->fn_filter($arr_name);
 
@@ -577,9 +583,9 @@ class metaView{
 
       $obj_bodyHolder=new stdClass;
 
-      if(empty($this->obj_columnDefinition)){                          
-        $this->fn_setDefinition();                    
-      }            
+      //SET DEFINITION
+      $this->fn_setDefinition();
+      //SET DEFINITION                  
 
       //$obj_parent->fn_varDump($arr_nameShort, "arr_nameShort", true);                                  
       //return;
@@ -623,9 +629,9 @@ class metaView{
 
     function fn_getMetaListColumn($int_idMetaViewTarget){
 
-      if(empty($this->obj_columnDefinition)){                          
-        $this->fn_setDefinition();                    
-      }            
+      //SET DEFINITION
+      $this->fn_setDefinition();
+      //SET DEFINITION                  
 
       $obj_parent=$this->obj_parent;
       $obj_paramView=$this->obj_param;        
@@ -682,9 +688,9 @@ class metaView{
 
     function fn_getRequiredEmptyStatus($int_recordId){      
 
-      if(empty($this->obj_columnDefinition)){      
-        $this->fn_setDefinition();      
-      }        
+      //SET DEFINITION
+      $this->fn_setDefinition();
+      //SET DEFINITION                  
       
       
 
@@ -768,15 +774,7 @@ class metaView{
         //$obj_parent->fn_varDump($arr_data, "arr_data", true);                                  
         return array_column($arr_data, "MetaColumnAPIName");
   }
-
-  function fn_setDefinition(){
-
-      $obj_param=new stdClass;          
-      $obj_param->MetaColumnSystemId=$this->obj_parent->obj_userLogin->MetaUserSystemId;                          
-      $this->obj_columnDefinition=new columnDefinition($this, $this->obj_parent);      
-      $this->obj_columnDefinition->fn_initialize($obj_param);           
-  }  
-  
+    
   function fn_getAPIPostRequestBody(&$obj_param){      
     return $this->fn_getAPIRequestBody($obj_param);  
 }      
@@ -794,11 +792,9 @@ function fn_getAPIRequestBody(&$obj_param){
   $MetaViewId=$obj_paramView->MetaViewId;        
   $MetaColumnAPIName=$obj_param->MetaColumnAPIName;
   
-  
-  if(empty($this->obj_columnDefinition)){      
-    $this->fn_setDefinition();      
-  }            
-  
+  //SET DEFINITION
+  $this->fn_setDefinition();
+  //SET DEFINITION                  
 
   /*
         $this->fn_varDump($obj_param->MetaColumnAPIName, "obj_param->MetaColumnAPIName");
@@ -881,6 +877,21 @@ function fn_getObjectProperty($obj_my, $str_label){
 function fn_getArrayMember($arr_my, $str_label){
   return $this->obj_parent->fn_getArrayMember($arr_my, $str_label);  
 }
+
+function fn_setDefinition(){
+
+  if(!empty($this->obj_columnDefinition)){
+    if(!$this->obj_parent->fn_isObjectEmpty($this->obj_columnDefinition)){                      
+      return;
+    }        
+  }  
+
+  $obj_param=new stdClass;          
+  $obj_param->MetaColumnSystemId=$this->obj_parent->obj_userLogin->MetaUserSystemId;                          
+  $this->obj_columnDefinition=new columnDefinition($this, $this->obj_parent);      
+  $this->obj_columnDefinition->fn_initialize($obj_param);           
+  
+}  
 
 }//END OF CLASS  
 

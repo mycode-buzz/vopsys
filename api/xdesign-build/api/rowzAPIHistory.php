@@ -10,9 +10,10 @@ class rowzAPIHistory{
             //to do  record when a row was archived in sepaerate log.
         }
         
+        
         $str_sql="SELECT $obj_param->str_nameField FROM $obj_param->str_sqlSource WHERE $obj_param->str_whereCriteria;";        
-        //$this->fn_varDump($str_sql);
-        $arr_row=$this->fn_fetchRow($str_sql);    
+        //$this->fn_varDump($str_sql);        
+        $arr_row=$this->fn_fetchRow($str_sql, $this->obj_call->arr_metaWhere);//see params added eg fn_getAPIMetaPermissionTagSQL
         //*
         if(empty($arr_row)){
             return false;

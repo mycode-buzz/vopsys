@@ -6,7 +6,8 @@
         fn_initialize(obj_ini){
           super.fn_initialize(obj_ini);                
         }
-        fn_loadDashboard(){                                                                                              
+        fn_loadDashboard(){
+          if(!super.fn_loadDashboard()){return;}                                                                                              
           
           this.obj_menuPanel=this.fn_getParentComponent();                  
           if(this.obj_menuPanel){

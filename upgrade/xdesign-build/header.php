@@ -15,7 +15,7 @@ define("VOPSYSROOT",dirname(ROOT, 2));
 define("UPGRADEROOT",VOPSYSROOT."/upgrade/xdesign-build");
 define("APIROOT",VOPSYSROOT."/api/xdesign-build");
 define("INTERFACEROOT",APIROOT."/interface");
-define("MAINTAINROOT",INTERFACEROOT."/maintain");
+define("MAINTAINROOT",APIROOT."/maintain");
 ///////////////////////////SERVER PATH
 
 

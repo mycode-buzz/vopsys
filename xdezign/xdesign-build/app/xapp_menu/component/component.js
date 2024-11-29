@@ -939,39 +939,63 @@
               //let str_name=this.fn_getName();                
             }
 
-            if(this.bln_hasOfficeButton){
-              this.obj_consoleContainerGeneral.fn_showItem(this.obj_button_navigate_office);
-              this.obj_consoleContainerGeneral.fn_showItem(this.obj_button_navigate_lobby);
+            let obj_button, obj_container;
+            
+            ////ContainerGeneral
+            obj_container=this.obj_consoleContainerGeneral;
+            if(this.bln_hasOfficeButton){              
+              obj_button=obj_container.fn_getConsoleComponent("xapp_button_navigate_office");                                          
+              obj_container.fn_showItem(obj_button);
+              
+              obj_button=obj_container.fn_getConsoleComponent("xapp_button_navigate_lobby");                                        
+              obj_container.fn_showItem(obj_button);
             }
             if(this.bln_hasExitButton){
-              this.obj_consoleContainerGeneral.fn_showItem(this.obj_button_navigate_desktop);
+              obj_button=obj_container.fn_getConsoleComponent("xapp_button_navigate_desktop");                          
+              obj_container.fn_showItem(obj_button);
             }                        
+            //if(this.bln_hasSettingButton && obj_userHome.Admin){                                                          
             if(this.bln_hasSettingButton){                                                          
-              this.obj_consoleContainerGeneral.fn_showItem(this.obj_button_setting);   
+              obj_button=obj_container.fn_getConsoleComponent("xapp_button_navigate_settings");                                   
+              obj_container.fn_showItem(obj_button);   
             }
             if(this.bln_hasNewRowButton){                
-              this.obj_consoleContainerGeneral.fn_showItem(this.obj_button_newrow);                                
+              obj_button=obj_container.fn_getConsoleComponent("xapp_button_navigate_newrow");              
+              obj_container.fn_showItem(obj_button);                                
             }   
             if(this.bln_hasNewColumnButton){                              
-              this.obj_consoleContainerGeneral.fn_showItem(this.obj_button_newcolumn);                                
-            }               
-            if(this.bln_hasToggleArchiveButton){                
-              this.obj_consoleContainerGeneral.fn_showItem(this.obj_button_tooglearchive);                                
-            }   
-            
-            if(this.bln_hasShowRowButton){          
-              //this.obj_consoleContainerGeneral.fn_showItem(this.obj_button_hiderow);                                              
-              //this.obj_consoleContainerGeneral.fn_showItem(this.obj_button_showrow);              
-            }                      
-            
-            
+              obj_button=obj_container.fn_getConsoleComponent("xapp_button_navigate_newcolumn");                          
+              obj_container.fn_showItem(obj_button);                                
+            }                                       
+            ////ContainerGeneral
+
+            ////ContainerLeft            
+            obj_container=this.obj_consoleContainerGeneralLeft;
             if(this.bln_hasLoginButton){
-              this.obj_consoleContainerGeneralLeft.fn_showItem(this.obj_button_navigate_login);
+              obj_button=obj_container.fn_getConsoleComponent("xapp_button_navigate_login");
+              obj_container.fn_showItem(obj_button);
             }              
+            ////ContainerLeft
+
+            ////ContainerSearch
+            obj_container=this.obj_consoleContainerSearch;
             if(this.bln_hasSearchButton){
-              this.obj_consoleContainerSearch.fn_showItem(this.obj_console_search);
+              obj_button=this.obj_console_search;
+              obj_container.fn_showItem(this.obj_console_search);
             }                          
             
+          }
+
+          fn_formHome(){                       
+          
+            let obj_ini=new Object;            
+            obj_ini.int_actionCode=200;            
+            obj_ini.str_action="formHome";
+            obj_ini.str_nameFolderServer="xapp_dataform_system";            
+            this.fn_runServerAction(obj_ini);                                                                  
+          }        
+          formHome(){
+            obj_path.fn_navigateSubdomain("office");
           }
         
           fn_classifyLevel(){
@@ -1085,30 +1109,72 @@
             if(obj_item){
               obj_item.fn_setSettingOperationPinDisplay();                             
             }            
-          }              
+          }                        
 
-          fn_formNavigateToggleArchive(){                                          
-
-            let obj_settingmenu=this.obj_parentMenu;            
-            obj_settingmenu.fn_setSettingOperationPinDisplay();                             
-            let obj_standardMenu=obj_settingmenu.obj_parentMenu;
-
+          fn_loadformChangeDashboard(){                                                                                              
+          
+            this.obj_menuPanel=this.fn_getParentComponent();                  
+            this.obj_consoleContainerMaintain=this.obj_menuPanel.fn_addConsoleContainer("console_container_maintain", true);            
+            this.obj_button_form_movedown=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_form_movedown");                            
+            this.obj_button_form_moveup=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_form_moveup");                            
+            this.obj_button_form_gap=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_form_gap");                            
+            this.obj_consoleContainerMaintain.fn_showItem(this.obj_button_form_gap);
+            this.obj_consoleContainerMaintain.fn_showItem(this.obj_button_form_moveup);
+            this.obj_consoleContainerMaintain.fn_showItem(this.obj_button_form_movedown);
+          }                 
+          
+          fn_formAddGap(){
             let obj_ini=new Object;            
-            obj_ini.str_action="toggleArchive";                                     
-            obj_ini.str_nameFolderServer="xapp_dashboard_setting";                                         
-            obj_ini.int_idMetaRowz=obj_standardMenu.fn_getMetaRowzId();
-            if(obj_ini.int_idMetaRowz){            
-              this.fn_runServerAction(obj_ini);                                                                  
-            }          
-          }          
-
-          toggleArchive(){
-            let obj_settingmenu=this.obj_parentMenu;                        
-            let obj_standardMenu=obj_settingmenu.obj_parentMenu;            
-            //let str_subdomain=obj_standardMenu.fn_getSubdomain();            
-            obj_path.fn_navigateSubdomain("app", true);        
-
+            obj_ini.str_action="form_add_group";
+            obj_ini.str_nameFolderServer="xapp_dashboard_setting";
+            obj_ini.int_idMetaForm=this.fn_getMetaFormId(); 
+            this.fn_runServerAction(obj_ini);                                                                  
           }
+          form_add_group(){
+            obj_path.fn_navigateSubdomain("app", true);        
+          }
+
+          fn_formGap(){
+            let obj_ini=new Object;            
+            obj_ini.str_action="form_gap";
+            obj_ini.str_nameFolderServer="xapp_dashboard_setting";
+            obj_ini.int_idMetaForm=this.fn_getMetaFormId(); 
+            this.fn_runServerAction(obj_ini);                                                                  
+          }
+          form_gap(){
+            obj_path.fn_navigateSubdomain("app", true);        
+          }
+          
+          fn_formMoveUp(){
+            let obj_ini=new Object;            
+            obj_ini.str_action="form_moveup";                                     
+            obj_ini.str_nameFolderServer="xapp_dashboard_setting";                               
+            obj_ini.int_idMetaForm=this.fn_getMetaFormId(); 
+            this.fn_runServerAction(obj_ini);                                                                  
+          }
+          form_moveup(){            
+            //this.obj_parentMenu.obj_parentMenu.fn_refreshMenu();
+          }
+  
+          fn_getMetaFormId(){          
+            let obj_menuButton=this;          
+            let obj_recordset=obj_menuButton.obj_dataView;
+            //obj_recordset.fn_describeMetaColumns();
+            let obj_metaColumn=obj_recordset.fn_getMetaColumnViaName("`meta_column`.`meta_column`.`MetaColumnId`");          
+            return obj_metaColumn.str_value;
+          }
+
+          fn_formMoveDown(){
+            let obj_ini=new Object;            
+            obj_ini.str_action="form_movedown";                                     
+            obj_ini.str_nameFolderServer="xapp_dashboard_setting";                     
+            obj_ini.int_idMetaForm=this.fn_getMetaFormId(); 
+            this.fn_runServerAction(obj_ini);                                                                  
+          }
+          form_movedown(){
+            //this.obj_parentMenu.obj_parentMenu.fn_refreshMenu();
+          }
+          
           
           fn_formNavigateNewColumn(){                              
             
@@ -1126,7 +1192,7 @@
             }          
           }
           addNewColumn(){            
-            //obj_path.fn_navigateSubdomain("app", true);        
+            obj_path.fn_navigateSubdomain("app", true);        
           }
      
           fn_formNavigateNewRow(){                              
@@ -1145,41 +1211,79 @@
           }
           addNewRowz(){
             //console.log("addNewRowz return");
-            
-            let obj_settingmenu=this.obj_parentMenu;                        
-            let obj_standardMenu=obj_settingmenu.obj_parentMenu;
-            //obj_standardMenu.fn_refreshMenu();
-            //let str_subdomain=obj_standardMenu.fn_getSubdomain();
-            //console.log("str_subdomain:" + str_subdomain);
             obj_path.fn_navigateSubdomain("app", true);        
           }
-          fn_formNavigateDisplayRow(bln_value){                                          
-            
-            let int_idMetaRowz;            
 
-            let obj_menuButton=this.fn_getMenuButton();                  
-            //obj_menuButton.fn_debugText();
-            int_idMetaRowz=obj_menuButton.fn_getMenuRecordId();
+          ////////////////
+          //SHOW HIDE ARCHIVE
+          fn_formShowArchive(){                                          
+            this.fn_formDisplayArchive(true);
+          }
+          showArchive(){
+            this.fn_navigateApp(true);            
+          }
+          fn_formDisplayArchive(bln_value){                                          
+
+            let obj_ini=new Object;            
+            obj_ini.str_action="hideArchive";                                     
+            if(bln_value){
+              obj_ini.str_action="showArchive";                                     
+            }            
+            obj_ini.str_nameFolderServer="xapp_dashboard_setting";                       
+            this.fn_formRunRowAction(obj_ini);            
+          }          
+          fn_formHideArchive(){                                          
+            this.fn_formDisplayArchive(false);
+          }
+          hideArchive(){
+            this.fn_navigateApp(true);            
+          }
+          //SHOW HIDE ARCHIVE
+          ////////////////
+
+          ////////////////
+          //SHOW HIDE ROWZ
+          fn_formShowRowz(){                                          
+            this.fn_formDisplayRowz(true);
+          }
+          showRowz(){
+            this.fn_navigateApp(true);            
+          }
+          fn_formDisplayRowz(bln_value){                                          
 
             let obj_ini=new Object;            
             obj_ini.str_action="hideRowz";                                     
             if(bln_value){
               obj_ini.str_action="showRowz";                                     
             }            
-            obj_ini.str_nameFolderServer="xapp_dashboard_setting";                                         
-            obj_ini.int_idMetaRowz=int_idMetaRowz;
+            obj_ini.str_nameFolderServer="xapp_dashboard_setting";                       
+            this.fn_formRunRowAction(obj_ini);            
+          }          
+          fn_formHideRowz(){                                          
+            this.fn_formDisplayRowz(false);
+          }          
+          hideRowz(){
+            this.fn_navigateApp(true);            
+          }
+          //SHOW HIDE ROWZ
+          ////////////////
+
+          fn_navigateApp(bln_value){                               
+            if(bln_value){
+              obj_shared.fn_messageAlert("The application will now reload.");
+            }            
+            obj_path.fn_navigateSubdomain("app");                                                
+          }
+
+          fn_formRunRowAction(obj_ini){                                          
+
+            let obj_menuButton=this.fn_getMenuButton();                              
+            obj_ini.int_idMetaRowz=obj_menuButton.fn_getMenuRecordId();
             if(obj_ini.int_idMetaRowz){            
               this.fn_runServerAction(obj_ini);                                                                  
             }          
           }          
-          hideRowz(){
-            console.log("hideRowz return");
-            obj_path.fn_navigateSubdomain("app");            
-          }
-          showRowz(){
-            console.log("showRowz return");
-            obj_path.fn_navigateSubdomain("app");            
-          }
+          
           fn_setSettingOperationPinDisplay(){
             
             this.fn_setMarkedParentSchemaName();
@@ -1233,8 +1337,7 @@
           fn_setSettingPin(bln_value){
             this.obj_holder.bln_settingPin=bln_value;
           }
-          fn_setSettingMenu(obj_menu){         
-            //this.fn_debugText("fn_setSettingMenu");
+          fn_setSettingMenu(obj_menu){                     
             this.obj_holder.obj_menuSetting=obj_menu;            
           }               
           fn_getSettingMenu(){
@@ -1286,6 +1389,11 @@
             //console.log("xapp_menu fn_onDataEnd");
             
 
+            let obj_container, obj_button, obj_button_hide;
+            obj_container=this.obj_consoleContainerGeneral;
+
+            let obj_metaColumn, bln_value;
+
             if(this.obj_meta.bln_displayDashboard){
               this.fn_refreshDashboards();    
             }      
@@ -1295,9 +1403,60 @@
                 let obj_metaColumnParentRowzId=this.obj_dataView.fn_getMetaColumnViaName("`meta_rowz`.`meta_rowz`.`ParentRowzId`");
                 let int_value=obj_shared.fn_parseInt(obj_metaColumnParentRowzId.str_value);
                 if(int_value===0){return};
-                this.fn_showObjectButton(this.obj_button_showrow, this.obj_button_hiderow, "`meta_rowz`.`meta_rowz`.`HiddenPin`");              
+              
+                obj_metaColumn=this.obj_dataView.fn_getMetaColumnViaName("`meta_rowz`.`meta_rowz`.`HiddenPin`");                              
+                bln_value=obj_shared.fn_parseBool(obj_metaColumn.str_value);
+                obj_button=obj_container.fn_getConsoleComponent("xapp_button_general_row_show");                                      
+                obj_button_hide=obj_container.fn_getConsoleComponent("xapp_button_general_row_hide");                                          
+                this.obj_consoleContainerGeneral.fn_displayTogglePair(obj_button, obj_button_hide, bln_value);
               }
             }  
+            if(this.bln_hasShowArchiveButton){          
+              if(this.obj_dataView){
+                let obj_metaColumnParentRowzId=this.obj_dataView.fn_getMetaColumnViaName("`meta_rowz`.`meta_rowz`.`ParentRowzId`");
+                let int_value=obj_shared.fn_parseInt(obj_metaColumnParentRowzId.str_value);
+                if(int_value===0){return};
+              
+                obj_metaColumn=this.obj_dataView.fn_getMetaColumnViaName("`meta_rowz`.`meta_rowz`.`ArchivePin`");                              
+                bln_value=obj_shared.fn_parseBool(obj_metaColumn.str_value);
+                bln_value=obj_shared.fn_toggleBool(bln_value);
+                obj_button=obj_container.fn_getConsoleComponent("xapp_button_general_archive_show");                                      
+                obj_button_hide=obj_container.fn_getConsoleComponent("xapp_button_general_archive_hide");                                          
+                this.obj_consoleContainerGeneral.fn_displayTogglePair(obj_button, obj_button_hide, bln_value);
+              }
+            }  
+            if(this.bln_hasUseDateTimeButton){          
+              if(this.obj_dataView){
+
+                let obj_metaColumnParentRowzId=this.obj_dataView.fn_getMetaColumnViaName("`meta_rowz`.`meta_rowz`.`ParentRowzId`");
+                let int_value=obj_shared.fn_parseInt(obj_metaColumnParentRowzId.str_value);
+                if(int_value===0){return};
+              
+                obj_metaColumn=this.obj_dataView.fn_getMetaColumnViaName("`meta_rowz`.`meta_rowz`.`DateTimePin`");                              
+                bln_value=obj_shared.fn_parseBool(obj_metaColumn.str_value);
+                
+                
+
+                obj_button=obj_container.fn_getConsoleComponent("xapp_button_general_use_task_date");                                          
+                obj_button_hide=obj_container.fn_getConsoleComponent("xapp_button_general_use_task_datetime");                                          
+                this.obj_consoleContainerGeneral.fn_displayTogglePair(obj_button, obj_button_hide, bln_value);                                
+              }
+            }  
+            
+            if(this.bln_hasShowFormUpButton){          
+              if(this.obj_dataView){
+                obj_button=obj_container.fn_getConsoleComponent("xapp_button_general_form_up");                                                      
+                obj_container.fn_showItem(obj_button);
+              }
+            }  
+            if(this.bln_hasShowFormDownButton){          
+              if(this.obj_dataView){
+                
+                obj_button=obj_container.fn_getConsoleComponent("xapp_button_general_form_down");                                                      
+                obj_container.fn_showItem(obj_button);
+              }
+            }  
+            
           }   
           fn_receiveColumn(obj_data, obj_column, obj_post){
 
@@ -1309,25 +1468,7 @@
                 this.fn_updateButtonText(obj_data);                               
               }
             }     
-          }
-
-          fn_showObjectButton(obj_buttonshow, obj_buttonhide, str_name){
-            if(this.obj_dataView){              
-              //this.obj_dataView.fn_describeMetaColumns();                
-              let obj_metaColumn=this.obj_dataView.fn_getMetaColumnViaName(str_name);
-              //console.log(obj_metaColumn);
-              if(obj_metaColumn){
-                let bln_value=obj_shared.fn_parseBool(obj_metaColumn.str_value);
-                if(bln_value){
-                  this.obj_consoleContainerGeneral.fn_showItem(obj_buttonshow);                                  
-                }
-                else{
-                  this.obj_consoleContainerGeneral.fn_showItem(obj_buttonhide);                                                                  
-                }
-              }
-            }
-
-          }
+          }          
 
           fn_notifyChildControl(str_nameFunction, obj_arg){                                                                         
                 
@@ -1406,33 +1547,32 @@
             
             this.obj_menuPanel.obj_parentMenu=this; 
             
-            this.obj_consoleContainerSearch=this.obj_menuPanel.fn_addConsoleContainer("xapp_form_container_search", false);                            
-            //this.obj_consoleContainerSearch.fn_setBorder("10px solid green");
+            ////ContainerSearch
+            this.obj_consoleContainerSearch=this.obj_menuPanel.fn_addConsoleContainer("xapp_form_container_search", false);                                        
             this.obj_console_search=this.obj_consoleContainerSearch.fn_getConsoleComponent("xapp_console_search");
-            //this.obj_console_search.fn_setBorder("10px solid red");
+            //obj_console_search
+            ////ContainerSearch
+            
+            
+            
+            ////ContainerGeneral
+            this.obj_consoleContainerGeneral=this.obj_menuPanel.fn_addConsoleContainer("xapp_console_container_general", true);            
+            //obj_button_navigate_desktop
+            //obj_button_setting
+            //obj_button_newrow
+            //obj_button_newcolumn            
+            //obj_button_row_hide            
+            //obj_button_row_show            
+            //obj_button_archive_hide            
+            //obj_button_archive_show                        
+            //obj_button_navigate_office
+            //obj_button_navigate_lobby            
+            ////ContainerGeneral
 
-            
-            
-            
-            let obj_container=this.obj_consoleContainerGeneral=this.obj_menuPanel.fn_addConsoleContainer("xapp_console_container_general", true);                                      
-            this.obj_button_navigate_desktop=obj_container.fn_getConsoleComponent("xapp_button_navigate_desktop");              
-            this.obj_button_setting=obj_container.fn_getConsoleComponent("xapp_button_navigate_settings");                       
-            this.obj_button_newrow=obj_container.fn_getConsoleComponent("xapp_button_navigate_newrow");              
-            this.obj_button_newcolumn=obj_container.fn_getConsoleComponent("xapp_button_navigate_newcolumn");                          
-            this.obj_button_tooglearchive=obj_container.fn_getConsoleComponent("xapp_button_navigate_toggle_archive");                                      
-            this.obj_button_hiderow=obj_container.fn_getConsoleComponent("xapp_button_navigate_hiderow");                          
-            this.obj_button_showrow=obj_container.fn_getConsoleComponent("xapp_button_navigate_showrow");                                      
-            
-            this.obj_button_navigate_mall=obj_container.fn_getConsoleComponent("xapp_button_navigate_mall");              
-            this.obj_button_navigate_office=obj_container.fn_getConsoleComponent("xapp_button_navigate_office");                            
-            this.obj_button_navigate_lobby=obj_container.fn_getConsoleComponent("xapp_button_navigate_lobby");                            
-
-            let obj_containerLeft=this.obj_consoleContainerGeneralLeft=this.obj_menuPanel.fn_addConsoleContainer("xapp_console_container_general", false);
-            this.obj_button_navigate_login=obj_containerLeft.fn_getConsoleComponent("xapp_button_navigate_login");
-
-            
-            
-            
+            ////ContainerLeft
+            this.obj_consoleContainerGeneralLeft=this.obj_menuPanel.fn_addConsoleContainer("xapp_console_container_general", false);
+            //obj_button_navigate_login            
+            ////ContainerLeft
           }
           //CRUD CONSOLE
           fn_setConsole(){    
@@ -1794,7 +1934,7 @@
             obj_metaColumn=obj_recordset.fn_getMetaColumnViaName("ParentRowzId");
             if(obj_metaColumn){                      
               foo_value=obj_shared.fn_cleanId(obj_metaColumn.str_value);
-              this.obj_meta.int_idParentMetaRowz=foo_value;
+              this.fn_setParentRowzId(foo_value);
             }        
         
             obj_metaColumn=obj_recordset.fn_getMetaColumnViaName("MetaViewId");                            
@@ -1926,6 +2066,12 @@
               this.fn_setArchivePin(foo_value);
             }        
 
+            obj_metaColumn=obj_recordset.fn_getMetaColumnViaName("AdminPin");
+            if(obj_metaColumn){                    
+              foo_value=obj_shared.fn_parseBool(obj_metaColumn.str_value);                                               
+              this.fn_setAdminPin(foo_value);
+            }        
+
             
             obj_metaColumn=obj_recordset.fn_getMetaColumnViaName("LockOpenPin");
             if(obj_metaColumn){                    
@@ -2017,6 +2163,12 @@
           }
           fn_getMetaViewId(){           
             return this.obj_meta.int_idMetaView;            
+          }
+          fn_setParentRowzId(int_value){            
+            this.obj_meta.int_idParentMetaRowz=int_value;               
+          }
+          fn_getParentRowzId(){
+            return this.obj_meta.int_idParentMetaRowz;            
           }
           fn_setMetaRowzId(int_value){           
             this.obj_meta.int_idMetaRowz=int_value;            
@@ -2170,11 +2322,16 @@
           }
           //if(this.fn_getConsoleValue("Setting")){this.bln_hasSettingButton=true;}
           if(this.fn_getConsoleValue("NewRow")){this.bln_hasNewRowButton=true;}
-          if(this.fn_getConsoleValue("NewColumn")){this.bln_hasNewColumnButton=true;}
-          if(this.fn_getConsoleValue("ToggleArchive")){this.bln_hasToggleArchiveButton=true;}
-          
-          if(this.fn_getConsoleValue("Show Row")){this.bln_hasShowRowButton=true;}
+          if(this.fn_getConsoleValue("NewColumn")){this.bln_hasNewColumnButton=true;}                    
+          if(this.fn_getConsoleValue("UseDateTime")){this.bln_hasUseDateTimeButton=true;}                    
+
+          if(this.fn_getConsoleValue("ShowArchive")){this.bln_hasShowArchiveButton=true;}
+          if(this.fn_getConsoleValue("ShowRow")){this.bln_hasShowRowButton=true;}
           if(this.fn_getConsoleValue("Exit")){this.bln_hasExitButton=true;}  
+
+          if(this.fn_getConsoleValue("FormUp")){this.bln_hasShowFormUpButton=true;}
+          if(this.fn_getConsoleValue("FormDown")){this.bln_hasShowFormDownButton=true;}
+          if(this.fn_getConsoleValue("FormGap")){this.bln_hasShowFormGapButton=true;}
           
           this.bln_simpleSearch=false;
           this.bln_advancedSearch=false;
@@ -2885,34 +3042,27 @@
 
         fn_configureDynamicMenuFromRow(obj_rowMenu){    
             //this is run by the dynamic menu
-          //context dynamic menu button                
-
-          
+          //context dynamic menu button
 
           this.fn_setIsDynamicMenu(true);
 
-          this.bln_applyAnchor=true;
-          
-          if(!this.obj_rowMenu){return;}//can be false at top level    
+          this.bln_applyAnchor=true;//used to set wether there will be a  menu bar navigation anchor link
           
           //START Configure Dynamic Menu Key
           let obj_recordset=obj_rowMenu.obj_paramRS.obj_recordset;
           //grab column name for dynamic menu button 
           //references the data set of the parent menu   
           //gets the primary key of whichever is the  first column
-          let obj_metaColumn=obj_recordset.fn_getMetaColumnViaOrdinalPosition(0);                       
-          if(obj_metaColumn){                              
-            //set dynamic button text, and id values      
-            this.fn_updateButtonText(obj_recordset);                         
+          
+          //set dynamic button text, and id values      
+          this.fn_updateButtonText(obj_recordset);                         
 
-            this.obj_columnKey=obj_rowMenu.fn_getColumnKey();                        
-            if(this.obj_columnKey){//false on standard xapp_row
-              this.obj_columnDataId=obj_rowMenu.fn_getColumnDataId();//required for archive key            
-              this.obj_columnArchiveDate=obj_rowMenu.fn_getColumnArchiveDate();//required for archive key            
-              this.fn_setMenuRecordId(this.obj_columnKey.str_value);            
-            }
-            
-          } 
+          this.obj_columnKey=obj_rowMenu.fn_getColumnKey();                        
+          if(this.obj_columnKey){//false on standard xapp_row
+            this.obj_columnDataId=obj_rowMenu.fn_getColumnDataId();//required for menu archive button to function
+            this.obj_columnArchiveDate=obj_rowMenu.fn_getColumnArchiveDate();//required to toggle archive / restore button text in menupane            
+            this.fn_setMenuRecordId(this.obj_columnKey.str_value);            
+          }
           //END Configure Dynamic Menu Key
         }
 
@@ -3047,13 +3197,10 @@
         this.obj_rowMenu=obj_row;  
 
         this.obj_menuProject=this.obj_parentMenu.obj_menuProject;
-        this.obj_crudHead=this.obj_parentMenu.obj_crudHead;                                          
-                
+        this.obj_crudHead=this.obj_parentMenu.obj_crudHead;                                                          
                 
         this.obj_meta.arr_buttonConsole=obj_shared.fn_stringToArray(this.obj_meta.str_buttonConsole);                        
-        this.obj_meta.str_buttonConsole=this.obj_meta.arr_buttonConsole.toString();                                
-        
-        
+        this.obj_meta.str_buttonConsole=this.obj_meta.arr_buttonConsole.toString();                                        
         
         
         if(this.fn_getHiddenPin()){

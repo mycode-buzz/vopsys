@@ -1393,7 +1393,7 @@ class BaseObject extends LevelObject{
     }
     
     fn_getDomProperty(str_name){           
-        return this.obj_domProperty[str_name];
+        return this.obj_domProperty[str_name];        
     }
 
     fn_removeDomProperty(str_name){        
@@ -1499,7 +1499,7 @@ class BaseObject extends LevelObject{
         
         bln_value=obj_shared.fn_flipBool(bln_value);
         this.fn_setDomProperty("disabled", bln_value);                       
-    }      
+    }  
 
     fn_setDisabled(bln_value=true, bln_disableChildren=false){ 
         if(this.obj_holder.bln_debugNavigate){        
@@ -1585,6 +1585,14 @@ class BaseObject extends LevelObject{
         
         this.fn_setColor(this.fn_getBackground());
     }
+
+    fn_setHiddenPin(){
+        this.bln_hiddenPin=true;                  
+        this.fn_setDisplay(false);                                        
+      }
+    fn_getHiddenPin(){
+        return this.bln_hiddenPin;                                    
+    }                
 
     
     

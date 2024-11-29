@@ -62,7 +62,7 @@ class rowzAPIPatch extends rowzAPIHistory{
 
     function fn_patchData(){        
         
-        $obj_call=$this->obj_call;                
+        $obj_call=$this->obj_call;        
         $obj_metaView=$obj_call->obj_metaView;        
         $obj_paramView=$obj_metaView->obj_param;
 
@@ -130,6 +130,7 @@ class rowzAPIPatch extends rowzAPIHistory{
         $obj_paramHistory->str_sqlSource=$obj_call->str_sqlSource;
         $obj_paramHistory->str_whereCriteria=$str_whereCriteria;                                
         $obj_paramHistory=$this->fn_getFieldHistory($obj_paramHistory);        
+        //$obj_paramHistory=false;
         //GET HISTORY
 
         //CREATE HISTORY
@@ -167,8 +168,8 @@ class rowzAPIPatch extends rowzAPIHistory{
         
         if($obj_call->api_debug){
             //DEBUG
-            //$this->fn_varDump($str_sql, "str_sql");
-            //$this->fn_varDump($obj_call->arr_param, "obj_call->arr_param");        
+            $this->fn_varDump($str_sql, "str_sql");
+            $this->fn_varDump($obj_call->arr_param, "obj_call->arr_param");        
             //return;                            
             //DEBUG
         }

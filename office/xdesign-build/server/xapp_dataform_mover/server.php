@@ -233,9 +233,9 @@ function fn_createSystemFromUser($MetaMoverSystemId, $MetaMoverUserId, $MetaMove
 
   //Create System Button in Target User
   $str_sql="INSERT INTO `meta_user`.`meta_mover`
-  (MetaMoverSystemId, MetaMoverUserId, MetaMoverSystemName, MetaMoverType, MetaMoverStatus, MetaMoverTitle, MetaMoverFirst, MetaMoverLast, MetaMoverEmail)
+  (MetaMoverSystemId, MetaMoverUserId, MetaMoverSystemName, MetaMoverType, MetaPermissionTag, MetaMoverStatus, MetaMoverTitle, MetaMoverFirst, MetaMoverLast, MetaMoverEmail)
   SELECT 
-  MetaMoverSystemId, MetaMoverUserId, MetaMoverSystemName, 'Login', 'Enabled', MetaMoverTitle, MetaMoverFirst, MetaMoverLast, :MetaMoverEmail  
+  MetaMoverSystemId, MetaMoverUserId, MetaMoverSystemName, 'Login', '#ADMIN', 'Enabled', MetaMoverTitle, MetaMoverFirst, MetaMoverLast, :MetaMoverEmail  
   FROM `meta_user`.`meta_mover` WHERE TRUE
   AND MetaMoverSystemId=:MetaMoverSystemId 
   AND MetaMoverUserId=:MetaMoverUserId 

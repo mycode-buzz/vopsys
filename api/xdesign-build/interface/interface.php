@@ -20,6 +20,10 @@ class server_interface extends interface_legacy{
                 return $this->MetaOptionDefaultRecordId;                        
             case "number":
                 return $this->MetaOptionDefaultNumber;                        
+            case "currency":
+                return $this->MetaOptionDefaultCurrency;                        
+            case "percent":
+                return $this->MetaOptionDefaultPercent;                        
             case "checkbox":
                 return $this->MetaOptionDefaultCheckbox;                        
             case "date":
@@ -30,22 +34,14 @@ class server_interface extends interface_legacy{
                 return $this->MetaOptionDefaultJSON;                        
         }
 
-    }
+    }    
     
-    function fn_setMetaOptionDefaultText($int_characterMaximumLength){
-
-        if(!is_numeric($int_characterMaximumLength)){
-            $int_characterMaximumLength=0;
-        }
-
-        $this->MetaOptionDefaultText='{"MaxLength": "'.$int_characterMaximumLength.'"}';        
-
-    }
     function fn_initialize() {
         
         
         parent::fn_initialize();                                        
         //initalization code needs to remain here rather than in the consturctor, due to object hierachy functions                
+        
         
         $obj_post=$this->obj_post;                
         $obj_post->RowData="[{}]";                
@@ -59,11 +55,12 @@ class server_interface extends interface_legacy{
         $this->MetaOptionDefaultNumber='{"Decimal": "0"}';
         $this->MetaOptionDefaultRecordId=$this->MetaOptionDefaultNumber;
         $this->MetaOptionDefaultCurrency='{"UnSigned": "true", "Decimal": "2"}';
+        $this->MetaOptionDefaultPercent='{"UnSigned": "true", "Decimal": "2"}';        
         $this->MetaOptionDefaultCheckbox=NULL;
         $this->MetaOptionDefaultDate=NULL;
         $this->MetaOptionDefaultDateTime='{"DateTimeSecond": "false"}';
-        $this->MetaOptionDefaultText='{"MaxLength": "100"}';        
-        $this->MetaOptionDefaultNote='{"MaxLength": "10000"}';                        
+        $this->MetaOptionDefaultText=NULL;        
+        $this->MetaOptionDefaultNote=NULL;                        
         $this->MetaOptionDefaultJSON=$this->MetaOptionDefaultNote;        
         $this->MetaOptionDefaultEmail=NULL;                        
         $this->MetaOptionDefaultURL=$this->MetaOptionDefaultText;
@@ -74,10 +71,20 @@ class server_interface extends interface_legacy{
         //{"MetaViewId":"200007","SelectField":"Name","WhereField":"MetaGroup","WhereCriteria":"","AllowMultiple":false}        
         //{"ListMember":"Apple,Orange,Pear"}
         //Type//{"ListMember": "Suspect,Prospect,Customer"}
-        //Status//{"ListMember": "Lead,Contacted,Qualified,Nurturing,Mid-Stage,Proposal,Meeting,Demo,Negotiating,Contract Sent,Contract Signed,Won,Lost,Disqualified,Inactive"}
+        //Status//{"ListMember": "Lead,Contacted,Qualified,Nurturing,Mid-Stage,Proposal,Meeting,Demo,Negotiating,Contract Sent,Contract Signed,Won,Lost,Disqualified,Inactive","ArchiveStatus": "Won,Lost,Disqualified,Inactive"}
+        //Currency//{"ListMember": "USD,GBP,EUR"}
+        
+        //MaxLength//{"ListMember": "25,50,100,1000,5000,10000"}
+        
         //Sector//{"ListMember": "Technology,Finance,Healthcare,Real Estate,Retail,Manufacturing,Professional Services,Education,Non-profit"}
-        //Priority//{"ListMember": "Low,Normal,Important,Urgent"}
+        //Priority//{"ListMember": "Low,Normal,Important,Urgent"}        
         //Country//{"ListMember": "Australia,Brazil,Canada,China,France,Germany,India,Italy,Japan,Mexico,Russia,SouthKorea,Spain,UnitedKingdom,UnitedStates"}
+        //Product//{"ListMember": "Widget,Service"}
+        //State//{"ListMember": "State1,State2,State3"}
+        //Title//{"ListMember": "Sir,Madam,M.,Mr.,Mrs.,Ms."}
+        //Role//{"ListMember": "Decision Maker,Owner,Director,Manager,Supervisor,Assistant,Consultant,CEO,CFO,CTO,VP"}
+        //Task//{"ListMember": "Call,Email,Meeting,Send Contract"}
+        //Favourite//{"ListMember": "Golf,Football,Rugby,Cricket,Sailing,Baseball,Basketball,Boxing,Tennis,Cycling,Swimming,Surfing,Track and Field,Gymnastics,Other","AllowMultiple":"true"}
         //{"ListMember":"Number,RecordId,Currency,Checkbox,Date,DateTime,Text,Note,JSON,Email,URL,Color,Phone"}
         
         /*
@@ -202,8 +209,8 @@ class server_interface extends interface_legacy{
                 //$this->bln_debugAction=true;
                 $this->fn_runPushColumn();
             break; 
-            case "runRecycleRecord":
-                $this->fn_runRecycleRecord();
+            case "runArchiveRecord":
+                $this->fn_runArchiveRecord();
             break; 
             case "getChildRowz":                                                              
                 $this->fn_getChildRowz();                                 
@@ -381,22 +388,7 @@ class server_interface extends interface_legacy{
         $this->fn_setSession("UserLoginSession", serialize($this->obj_userLogin));
     }
   
-    function fn_isObjectEmpty($obj_my){
-
-        if (!is_object($obj_my)) {
-            if(empty($obj_my)){
-                return true;
-            }
-            return false;
-        }
-
-        if (empty(get_object_vars($obj_my))) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
+    
       
 }//END OF CLASS
 

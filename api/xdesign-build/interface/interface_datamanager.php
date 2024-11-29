@@ -33,7 +33,7 @@ class interface_datamanager extends interface_sessionmanager {
     
     
     parent::fn_initialize(); 
-
+    
     $this->bln_debugDataManager=false;
     
 
@@ -359,23 +359,19 @@ class interface_datamanager extends interface_sessionmanager {
     
     
     function fn_initializeConnection(){            
-      
-    
-      $this->obj_rowzAPI=new rowzAPI(); 
-      $this->obj_rowzAPI->fn_connect();              
-      $this->pdo_admin=$this->obj_rowzAPI->pdo_admin;            
-      
-      
-      global $LOGIN, $SYSTEM_ADMINISTRATOR_USERNAME, $SYSTEM_ADMINISTRATOR_PASSWORD, $SYSTEM_USER_EMAIL;
-      
+
+      global $LOGIN, $SYSTEM_ADMINISTRATOR_USERNAME, $SYSTEM_ADMINISTRATOR_PASSWORD, $SYSTEM_USER_EMAIL;      
       global $API_AUTHENTICATED;      
       $API_AUTHENTICATED=true;
+    
+      $this->obj_rowzAPI=new rowzAPI(); 
+      $this->obj_rowzAPI->fn_connect();                    
+      $this->pdo_admin=$this->obj_rowzAPI->pdo_admin;                        
+
+      //$this->fn_varDump($LOGIN, "LOGIN");      
       
       if($LOGIN){    
         
-        //$this->fn_varDump("data manager Login", "note", true);              
-        
-      
         $arr_row=[];
         $arr_row["MetaUserId"]=100;        
         $arr_row["MetaHomeSystemId"]=100;        
@@ -396,75 +392,33 @@ class interface_datamanager extends interface_sessionmanager {
         $this->obj_userGroup=$this->obj_userLogin;
         
       }                 
-      else{    
-
+      else{        
         
-        
-        
-        $this->obj_userLogin=$this->fn_loadSessionUser(); 
-        //$this->fn_debugSessionUserParam("UserLoginSession");                     
-        
-        //$this->fn_varDump($this->obj_userLogin, "this->obj_userLogin", true);                
-        
-        
-        $this->fn_loadMetaMoverData();                      
-
-
-        //$this->fn_addEcho("MetaPermissionTag: ".$this->obj_userLogin->MetaPermissionTag);                                
-        //$this->fn_varDump($this->obj_userLogin);                
-        //$this->fn_varDump($this->obj_post);                
-        
-        
-        //*        
-        $this->obj_userBase=$this->obj_userLogin->obj_userBase;        
+        $this->obj_userLogin=$this->fn_loadSessionUser();                 
+        //$this->fn_varDump($this->obj_userLogin, "$this->obj_userLogin");      
+        $this->obj_userBase=$this->obj_userLogin->obj_userBase;           
         $this->obj_userSystem=$this->obj_userLogin->obj_userSystem;
-        $this->obj_userGroup=$this->obj_userLogin->obj_userGroup;
-        //*/   
+        $this->obj_userGroup=$this->obj_userLogin->obj_userGroup;      
         
+        $this->fn_loadMetaMoverData();                                   
         $this->fn_pullSettingzColumnz();        
       }      
-
-      //$this->fn_setSystemOwner();
-
-      //$this->fn_varDump($this->obj_userLogin, "xxx");                     
-      //$this->fn_varDump($this->obj_post, "DATA MANAGER RECEIVE POST");                           
-      
-      /*                  
-      if($this->bln_debugExecute){
-        $this->fn_addConsole("this->obj_post->RunSearch", $this->obj_post->RunSearch);        
-        $this->fn_addConsole("this->obj_post->QueryList", $this->obj_post->QueryList);                     
-        $this->fn_addConsole("this->obj_post->QueryListParent", $this->obj_post->QueryListParent);                     
-        $this->fn_addConsole("this->obj_post->QueryListDisabled", $this->obj_post->QueryListDisabled);                     
-        $this->fn_addConsole("this->obj_post->QueryListParentDisabled", $this->obj_post->QueryListParentDisabled);                     
-      }
-      //*/
       
       
-      
-      
-      $this->bln_methodRowz=true;      
-      
+      //$this->fn_varDump($this->obj_userLogin);                
+      //$this->fn_varDump($this->obj_post);
       //$this->fn_debugSessionUserParam("UserLoginSession");                     
-      $this->obj_userLogin->MetaUserBaseId=100;                                  
-      
+      $this->obj_userLogin->MetaUserBaseId=$this->obj_userBase->MetaHomeSystemId;                                        
       $this->obj_userLogin->int_apiRowsPerPage=10;     
 
-      /////////////
-      //this is correct -use logged in user for the api view updates, already authenticated via session.            
+      ///////////// SET API USER LOGIN FOR INTERFACE      
       $this->obj_rowzAPI->obj_userLogin=$this->obj_userLogin;
-      /////////////
+      ///////////// SET API USER LOGIN FOR INTERFACE      
       
-      
-      $this->userAliasClient=new userAlias($this->obj_userLogin);
-      
-      //$this->fn_varDump($this->obj_userLogin->obj_metaSystem);
-      
+      $this->userAliasClient=new userAlias($this->obj_userLogin);      
       $this->obj_post->UserHome=json_encode($this->userAliasClient);            
       
-      $this->fn_validateSystem();      
-
-      //$this->fn_addEcho("AAA MetaPermissionTag: ".$this->obj_userLogin->MetaPermissionTag);                
-      
+      //$this->fn_validateSystem();            
     }    
 
     
@@ -567,6 +521,8 @@ class interface_datamanager extends interface_sessionmanager {
     
     function fn_getMetaMoverId($obj_user){
 
+      //$this->fn_varDump("fn_getMetaMoverId", "fn_getMetaMoverId");      
+
       //START Get MetaPermissionTag , Group Owner 
       $str_sql="SELECT * FROM `meta_user`.`meta_mover` JOIN `meta_data`.`meta_data` on `meta_mover`.`MetaMoverId`=`meta_data`.`DataKeyValue`
       WHERE TRUE AND
@@ -583,6 +539,12 @@ class interface_datamanager extends interface_sessionmanager {
         'MetaMoverUserId'=>$obj_user->MetaUserId
       ]);              
       $arr_row=$stmt->fetch();                              
+
+        /*
+        $this->fn_varDump($str_sql, "str_sql");      
+        $this->fn_varDump($obj_user->MetaUserSystemId, "obj_user->MetaUserSystemId");
+        $this->fn_varDump($obj_user->MetaUserId, "obj_user->MetaUserId");
+        //*/      
       
       if(empty($arr_row)){
         $this->fn_varDump("Mover Id Issue", "status", true);                      
@@ -634,24 +596,51 @@ class interface_datamanager extends interface_sessionmanager {
       MetaMoverId=:MetaMoverId AND
       MetaMoverType='User'    
       ;";                    
-      //$this->fn_varDump($str_sql, "str_sql");
-      
       
       $stmt = $this->fn_executeSQLStatement($str_sql, [          
         'MetaMoverSystemId'=>$this->obj_userLogin->MetaUserSystemId,
         'MetaMoverUserId'=>$this->obj_userLogin->MetaUserId,        
         'MetaMoverId'=>$this->obj_userLogin->MetaMoverId        
-      ]);        
+      ]);              
       $arr_row=$stmt->fetch();
 
+      if(empty($arr_row)){
+
+        /*
+        $this->fn_varDump($this->obj_userLogin->MetaUserSystemId, "this->obj_userLogin->MetaUserSystemId");
+        $this->fn_varDump($this->obj_userLogin->MetaUserId, "this->obj_userLogin->MetaUserId");
+        $this->fn_varDump($this->obj_userLogin->MetaMoverId, "this->obj_userLogin->MetaMoverId");      
+        //*/
+
+        /*
+      $this->fn_varDump($str_sql, "str_sql");            
+      $this->fn_varDump($this->obj_userLogin, "this->obj_userLogin");
+      //*/      
+      
+        $this->fn_setError("fn_loadMetaMoverData MetaMover Not Found");
+        exit;
+
+      }
+
+      //$this->fn_varDump($arr_row, "arr_row");
+      //exit;
+      
       $this->obj_userLogin->MetaPermissionTag=$arr_row["MetaPermissionTag"];
+      
       $this->obj_userLogin->MetaPermissionStamp=$arr_row["MetaPermissionStamp"];      
 
 
       $this->obj_userLogin->SessionPin=$arr_row["SessionPin"];
       
 
-      if(empty($this->obj_userLogin->SessionPin)){
+      /*
+      $this->fn_varDump($this->obj_userLogin->MetaUserSystemId, "this->obj_userLogin->MetaUserSystemId");
+      $this->fn_varDump($this->obj_userLogin->MetaUserId, "this->obj_userLogin->MetaUserId");
+      $this->fn_varDump($this->obj_userLogin->MetaMoverId, "this->obj_userLogin->MetaMoverId");           
+      $this->fn_varDump($this->obj_userLogin->SessionPin, "this->obj_userLogin->SessionPin");                      
+      //*/      
+
+      if(empty($this->obj_userLogin->SessionPin)){//reset session
         return;
       }
       
@@ -668,7 +657,11 @@ class interface_datamanager extends interface_sessionmanager {
 
     function fn_validateSystem($bln_retry=false){      
       
-      return;//turn on to ensure the logged in user is still valid.
+      //probably better to do a sesson pin reset when disabling a user ?
+      //turn on to ensure the logged in user is still valid.
+      return;
+      //turn on to ensure the logged in user is still valid.
+
       $str_sql="SELECT * FROM `meta_user`.`meta_mover` JOIN `meta_user`.`meta_user` ON
       `meta_user`.`meta_mover`.`MetaMoverUserId`=`meta_user`.`meta_user`.`MetaUserId`
       WHERE TRUE      
@@ -684,17 +677,8 @@ class interface_datamanager extends interface_sessionmanager {
         'MetaMoverUserId'=>$this->obj_userLogin->MetaUserId,        
         'MetaMoverSystemId'=>$this->obj_userLogin->MetaUserSystemId,        
       ];
-
-      /*      
-      $this->fn_addEcho("str_sql: ".$str_sql);
-      $this->fn_addEcho("MetaUserId: ".$this->obj_userLogin->MetaUserId);
-      $this->fn_addEcho("MetaMoverUserId: ".$this->obj_userLogin->MetaUserId);
-      $this->fn_addEcho("MetaUserSystemId: ".$this->obj_userLogin->MetaUserSystemId);      
-      //*/
       
       $RowCount=$this->fn_fetchCount($str_sql, $arr_param);                 
-      //$this->fn_addEcho("RowCount: ".$RowCount);
-
       if(empty($RowCount)){        
         if(empty($bln_retry)){
           $this->fn_runHome();          
@@ -708,7 +692,7 @@ class interface_datamanager extends interface_sessionmanager {
         exit;
       }      
       
-      //$this->fn_addEcho("User Validated");      
+      //user is now validated      
     }
 
     
@@ -740,8 +724,8 @@ class interface_datamanager extends interface_sessionmanager {
 
   function fn_debugSessionUserParam($str_sessionParam){           
     if(empty($_SESSION[$str_sessionParam])){$_SESSION[$str_sessionParam]="";}
-    $obj_userLogin=unserialize($_SESSION[$str_sessionParam]);                              
-    $this->fn_debugUserParam($obj_userLogin);
+    $obj_userSession=unserialize($_SESSION[$str_sessionParam]);                              
+    $this->fn_debugUserParam($obj_userSession);
   }
   
   function fn_databaseExist($str_nameDB){

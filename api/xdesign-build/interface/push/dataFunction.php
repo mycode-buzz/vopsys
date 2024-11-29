@@ -5,6 +5,13 @@ class dataFunction extends evalFunction{
   function fn_connect(){
 
     global $SYSTEM_DEFAULT_DATABASE, $SYSTEM_ADMINISTRATOR_USERNAME, $SYSTEM_ADMINISTRATOR_PASSWORD;
+
+    /*
+    $this->fn_varDump($SYSTEM_DEFAULT_DATABASE, "SYSTEM_DEFAULT_DATABASE");
+    $this->fn_varDump($SYSTEM_ADMINISTRATOR_USERNAME, "SYSTEM_ADMINISTRATOR_USERNAME");
+    $this->fn_varDump($SYSTEM_ADMINISTRATOR_PASSWORD, "SYSTEM_ADMINISTRATOR_PASSWORD");
+    exit;
+    //*/
     
     $obj_connect=new stdClass;                              
       $obj_connect->Schema=$SYSTEM_DEFAULT_DATABASE;                               

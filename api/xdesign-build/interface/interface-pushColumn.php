@@ -109,6 +109,7 @@ class pushColumn extends pushRowz{
             $DebugPin=0;                        
             $SectionTitle="";                        
             $MatchPin=0;
+            $MaxLength=100;
             
             switch(strtolower($DATA_TYPE)){
             case "decimal":
@@ -144,6 +145,9 @@ class pushColumn extends pushRowz{
             }   
 
 
+            if($COLUMN_NAME==="Percent"){
+                $MetaColumnType="Percent";
+            }        
             if($COLUMN_NAME==="Color"){
                 $MetaColumnType="Color";
             }        
@@ -176,12 +180,13 @@ class pushColumn extends pushRowz{
                 case "checkbox":                
                 break;
                 case "text":                    
-                    $SearchPin=1;                    
-                    $this->fn_setMetaOptionDefaultText($CHARACTER_MAXIMUM_LENGTH);
+                    $SearchPin=1;                                        
                     $MetaOption=$this->MetaOptionDefaultText;
+                    $MaxLength=$CHARACTER_MAXIMUM_LENGTH;
                 break;
                 case "note":                                        
                     $MetaOption=$this->MetaOptionDefaultNote;
+                    $MaxLength=10000;
                 break;                
                 case "date":                
                     $MetaLabel="Date";
@@ -275,6 +280,7 @@ class pushColumn extends pushRowz{
             $obj_paramColumn->HiddenPin=$HiddenPin;                                 
             $obj_paramColumn->LockedPin=$LockedPin;                             
             $obj_paramColumn->RequiredPin=$RequiredPin;
+            $obj_paramColumn->MaxLength=$MaxLength;     
             $obj_paramColumn->MetaList=NULL;     
             $obj_paramColumn->MetaOption=$MetaOption;            
             $obj_paramColumn->MetaSQL="";
@@ -290,6 +296,16 @@ class pushColumn extends pushRowz{
             if($this->bln_debugColumn){
                 $this->fn_varDump($int_idRecordColumn, "int_idRecordColumn");
             }
+            
+            if($this->fn_inString($TABLE_NAME, "mybox_")){
+                $str_sql="UPDATE meta_column.meta_column SET FormOrder=:FormOrder WHERE MetaColumnId=:MetaColumnId;";            
+                $stmt=$this->fn_executeSQLStatement($str_sql, [
+                'MetaColumnId'=>$int_idRecordColumn,
+                'FormOrder'=>$FormOrder,
+                ]);
+            }
+            
+            
     
         }//LOOP ROW                      
     
@@ -342,7 +358,7 @@ class pushColumn extends pushRowz{
         $obj_paramColumnPull=new stdClass;        
         $obj_paramColumnPull->MetaColumnSystemIdTemplate=$this->obj_userBase->MetaUserSystemId;//used in template
         $obj_paramColumnPull->MetaColumnSystemId=$this->obj_userLogin->MetaUserSystemId;//create column
-        $obj_paramColumnPull->MetaColumnOwnerId=$this->obj_userLogin->MetaUserSystemId;//create column        
+        $obj_paramColumnPull->MetaColumnOwnerId=$this->obj_userLogin->MetaUserId;//create column        
 
         //meta_column, meta_rowz, meta_view, meta_topup, meta_mall, meta_system, meta_mover
         
@@ -442,6 +458,7 @@ class pushColumn extends pushRowz{
             $obj_paramColumn->HiddenPin=$arr_row["HiddenPin"];            
             $obj_paramColumn->LockedPin=$arr_row["LockedPin"];
             $obj_paramColumn->RequiredPin=$arr_row["RequiredPin"];
+            $obj_paramColumn->MaxLength=$arr_row["MaxLength"];
             $obj_paramColumn->MetaList=$arr_row["MetaList"];            
             $obj_paramColumn->MetaOption=$arr_row["MetaOption"];            
             $obj_paramColumn->MetaSQL=$arr_row["MetaSQL"];

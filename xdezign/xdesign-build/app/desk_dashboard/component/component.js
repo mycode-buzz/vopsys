@@ -8,7 +8,8 @@
 
       this.obj_holder.bln_debugServer=false;      
     }
-    fn_loadDashboard(){                      
+    fn_loadDashboard(){      
+      if(!super.fn_loadDashboard()){return;}
       
       let obj_ini=new Object;            
       obj_ini.str_action="getSubscribedList";                           

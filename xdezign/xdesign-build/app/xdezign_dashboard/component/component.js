@@ -10,7 +10,8 @@
                   this.obj_holder.bln_debugServer=false;                  
                 }
 
-                fn_loadDashboard(){                                        
+                fn_loadDashboard(){
+                  if(!super.fn_loadDashboard()){return;}                                        
                   
                   let obj_iframe=this.fn_addContextItem("xdezign_iframe");                                    
                   obj_iframe.fn_resetIFrame();                             

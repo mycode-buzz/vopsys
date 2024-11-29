@@ -238,7 +238,7 @@ class PermitManager {
 
     fn_applyPermit(obj_target, obj_permit, bln_newRecord=false){       
         
-        obj_target.HiddenPin=this.fn_getHidden(obj_permit);        
+        obj_target.HiddenPin=this.fn_getHiddenPin(obj_permit);        
         obj_target.LockedPin=this.fn_getLocked(obj_permit, bln_newRecord);        
 
         if(this.bln_debugPermit){
@@ -247,7 +247,7 @@ class PermitManager {
         }        
       }    
 
-    fn_getHidden(obj_permit){
+    fn_getHiddenPin(obj_permit){
         return obj_permit.bln_read ? false : true;
     }
     fn_getLocked(obj_permit, bln_newRecord=false){
@@ -302,10 +302,22 @@ class User {
   } 
   fn_initialize(obj_user){//obj_post.UserHome
     this.obj_user=obj_user;  
-    obj_user.MetaPermissionTag=this.fn_cleanTag(obj_user.MetaPermissionTag);
+    let MetaPermissionTag=this.fn_cleanTag(obj_user.MetaPermissionTag);
+    let Admin=false;    
+    let Interface=false;
     if(this.MetaSystemOwner){
-      obj_user.MetaPermissionTag="#ADMIN";
+      MetaPermissionTag="#ADMIN";          
     }
+    if(MetaPermissionTag.toLowerCase()==="#admin"){
+      Admin=true;
+    }
+    if(this.MetaUserSystemId===100){
+      Interface=true;
+    }
+      
+    this.MetaPermissionTag=MetaPermissionTag;
+    this.Admin=Admin;
+    this.Interface=Interface;
     
     
   }
@@ -328,6 +340,18 @@ class User {
   get MetaUserSystemId(){      
     return this.obj_user.MetaUserSystemId;
   }    
+  get Admin(){      
+    return this.obj_user.Admin;
+  }
+  set Admin(bln_value){      
+    this.obj_user.Admin=bln_value;
+  }
+  get Interface(){      
+    return this.obj_user.Interface;
+  }
+  set Interface(bln_value){      
+    this.obj_user.Interface=bln_value;
+  }
   get MetaPermissionTag(){      
     return this.obj_user.MetaPermissionTag;
   }
@@ -628,14 +652,22 @@ class Shared{
 
   fn_messageWarn(str_message){
     alert(str_message);
+  }  
+  fn_messageAlert(str_message){
+    alert(str_message);
   }
+  
+  fn_messageConfirm(str_message){  
+    let bln_value=confirm(str_message);
+    return bln_value;
+  }  
 
   fn_formatDisplayValueFromColumn(obj_metaColumn, str_value){                                                                                                         
 
     str_value+="";                  
     if(!str_value){return str_value;}              
     
-    switch(obj_metaColumn.MetaColumnType.toLowerCase()){                    
+    switch(obj_metaColumn.MetaColumnType.toLowerCase()){                          
       case "checkbox":               
         if(!str_value){str_value=""};       
         str_value=obj_shared.fn_parseBool(str_value);                       
@@ -666,6 +698,7 @@ class Shared{
         }
         break;
       case "currency":              
+      case "percent": 
       case "number":                   
         str_value=this.fn_formatNumber(str_value, obj_metaColumn.Decimal);
         str_value = Number(str_value).toLocaleString('en-GB', { minimumFractionDigits: obj_metaColumn.Decimal, maximumFractionDigits: obj_metaColumn.Decimal });
@@ -678,6 +711,9 @@ class Shared{
         let obj_date=obj_shared.fn_getDateObjectFromSystemDate(str_value, obj_metaColumn.DateTime);                                                                                          
         str_value= obj_shared.fn_getCalendarDateStringFromDateObject(obj_date, obj_metaColumn.DateTime, obj_metaColumn.DateTimeSecond);                            
         break;
+      case "recordid":                                            
+        str_value=this.fn_formatNumber(str_value, 0);
+        
     }
     return str_value;
   }
@@ -1683,6 +1719,34 @@ fn_maintainList(obj_list){
   fn_alphanumericOnly(foo_value, str=""){
     return foo_value.replace(/[\W_]+/g, str);
   }
+
+  
+  fn_getHTMLTable(arr_name, arr_value){
+    let str_table, str_row, str_cell, str_name, str_value;
+    str_table=`<TABLE style="font-size: 0.8em;">`;    
+    for (let i = 0; i < arr_name.length; i++) {
+      str_name=arr_name[i];      
+      str_value=arr_value[i];      
+      str_value=this.fn_replace(str_value, "&nbsp;", "");
+      if(str_value==102){
+        //str_value="John Collins";
+      }
+      str_row="";
+      if(str_value){
+        str_row=`
+        <TR>
+        <TD style="text-align: right;">${str_name}:</TD>
+        <TD>${str_value}</TD>
+        </TR>`;
+      }
+      
+      if(str_row){str_table+=str_row;}
+    }
+    str_table+="</TABLE>";
+    return str_table;
+
+  }
+
 
   fn_replace(str_source, str_find, str_replace, str_brackets=""){  
     str_source=str_brackets+str_source+str_brackets;
@@ -3729,7 +3793,7 @@ class BaseObject extends LevelObject{
     }
     
     fn_getDomProperty(str_name){           
-        return this.obj_domProperty[str_name];
+        return this.obj_domProperty[str_name];        
     }
 
     fn_removeDomProperty(str_name){        
@@ -3835,7 +3899,7 @@ class BaseObject extends LevelObject{
         
         bln_value=obj_shared.fn_flipBool(bln_value);
         this.fn_setDomProperty("disabled", bln_value);                       
-    }      
+    }  
 
     fn_setDisabled(bln_value=true, bln_disableChildren=false){ 
         if(this.obj_holder.bln_debugNavigate){        
@@ -3921,6 +3985,14 @@ class BaseObject extends LevelObject{
         
         this.fn_setColor(this.fn_getBackground());
     }
+
+    fn_setHiddenPin(){
+        this.bln_hiddenPin=true;                  
+        this.fn_setDisplay(false);                                        
+      }
+    fn_getHiddenPin(){
+        return this.bln_hiddenPin;                                    
+    }                
 
     
     
@@ -5301,7 +5373,9 @@ class component extends BaseObject {
         }        
     }        
     
-    fn_onSelectStart(e){obj_project.fn_forgetEvent(e);}                
+    fn_onSelectStart(e){
+        console.log("hit generic");
+        obj_project.fn_forgetEvent(e);}                    
     fn_notifyChildControl(){}
     fn_onBlur(e){}
     fn_onClick(e){}
@@ -5753,7 +5827,7 @@ class AJAX extends component {
         obj_post.MetaViewId=obj_ini.int_idMetaView;                 
         obj_post.MetaRowzId=obj_ini.int_idMetaRowz;                
         obj_post.MetaRowzName=obj_ini.str_metaRowzName;                
-        
+        obj_post.MetaFormId=obj_ini.int_idMetaForm;
         obj_post.ModeNewRecord=obj_ini.bln_modeNewRecord;          
                 
         obj_post.QueryExpression=obj_ini.str_queryExpression;
@@ -5989,7 +6063,8 @@ document.addEventListener('DOMContentLoaded', (e) => {
   window.name = "vopsys"; 
   obj_project.fn_execute();   
 
-  document.body.addEventListener('selectstart', function(e) {e.preventDefault();});
+  
+  document.body.addEventListener('selectstart', function(e) {e.preventDefault();});  
   
 });
 

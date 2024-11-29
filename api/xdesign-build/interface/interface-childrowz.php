@@ -51,6 +51,13 @@ class childrowz extends interface_datafunction{
       
       $obj_paramView=$this->obj_metaView->obj_param;
       $obj_paramRowz=$this->obj_metaRowz->obj_param;      
+
+      if($obj_paramRowz->AdminPin){
+        //$this->fn_varDump($this->obj_userLogin);
+        if($this->obj_userLogin->MetaPermissionTag!=="#ADMIN"){
+          return;
+        }
+      }
       
 
       $bln_foundRowz=false;
@@ -574,9 +581,6 @@ class childrowz extends interface_datafunction{
         else{
           return "(/*SETTINGWHERE*/ `ParentRowzId`= $MetaRowzId)";
         }
-        
-          
-        
       }
 
       $str_sql="";
@@ -657,6 +661,7 @@ class childrowz extends interface_datafunction{
       `meta_rowz`.`DisabledPin`,        
       `meta_rowz`.`HiddenPin`,
       `meta_rowz`.`ArchivePin`,
+      `meta_rowz`.`AdminPin`,
       `meta_rowz`.`LockOpenPin`,
       `meta_rowz`.`AutoFetchPin`,        
       `meta_rowz`.`AutoOpenPin`,        

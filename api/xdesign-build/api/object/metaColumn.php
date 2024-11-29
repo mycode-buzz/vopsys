@@ -21,6 +21,7 @@ class metaColumn{
         $this->SearchPin="";                
         $this->UnSigned=0;                        
         $this->RequiredPin=0;                        
+        $this->MaxLength=100;                                
         $this->CreatedDate="";
         $this->ModifiedDate="";     
         $this->IsMetaData=false;    
@@ -29,7 +30,7 @@ class metaColumn{
         $this->obj_parent=$obj_parent;                
         $this->bln_debug=false;
 
-        $this->arr_metaColumnType=["Date","Date & Time","Number","Currency","Checkbox","Text","Note","JSON"];
+        $this->arr_metaColumnType=["Date","Date & Time","Percent","Number","Currency","Checkbox","Text","Note","JSON"];
     }
     function fn_initialize($MetaColumnId, $bln_getMetaData=false){
 
@@ -136,6 +137,7 @@ class metaColumn{
           'HiddenPin'=>$obj_param->HiddenPin,       
           'LockedPin'=>$obj_param->LockedPin,                    
           'RequiredPin'=>$obj_param->RequiredPin,                                        
+          'MaxLength'=>$obj_param->MaxLength,                                                  
           'MetaList'=>$obj_param->MetaList,
           'MetaOption'=>$obj_param->MetaOption,          
           'MetaSQL'=>$obj_param->MetaSQL,
@@ -182,6 +184,7 @@ class metaColumn{
           `meta_column`.`HiddenPin`,          
           `meta_column`.`LockedPin`,                              
           `meta_column`.`RequiredPin`, 
+          `meta_column`.`MaxLength`,           
           `meta_column`.`MetaList`,
           `meta_column`.`MetaOption`,            
           `meta_column`.`MetaSQL`,
@@ -214,6 +217,7 @@ class metaColumn{
           :HiddenPin,              
           :LockedPin,                             
           :RequiredPin,
+          :MaxLength,          
           :MetaList,
           :MetaOption,            
           :MetaSQL,        
@@ -292,6 +296,8 @@ class metaColumn{
             return $this->fn_validateDateType();
             break;
           case "checkbox":
+          case "currency":
+          case "percent":
           case "number":
             return $this->fn_validateNumberType();
             break;
@@ -317,9 +323,10 @@ class metaColumn{
             SET `$obj_paramColumn->MetaColumnName`=NULL;";              
             $obj_parent->fn_executeSQLStatement($str_sql);                                      
             break;
-          case "currency": 
-          case "checkbox":
-          case "number": 
+            case "checkbox":
+            case "currency":
+            case "percent":
+            case "number":
             $str_sql="UPDATE `$obj_paramColumn->MetaSchemaName`.`$obj_paramColumn->MetaTableName` 
             SET `$obj_paramColumn->MetaColumnName`=0;";              
             $obj_parent->fn_executeSQLStatement($str_sql);                                                             
@@ -403,7 +410,12 @@ class metaColumn{
             $MetaColumnDefinition="TINYINT DEFAULT 0";
             $this->fn_resetUICheckbox();                        
             break;
-        case "recordid":              
+        case "recordid"://not sure what this is doing , should not be possible to setup a recordid thru ui
+            $bln_valid=$this->fn_validateChangeType($MetaColumnNewType);                        
+            if(!$bln_valid){return false;}                        
+            $MetaColumnDefinition="INT UNSIGNED NOT NULL DEFAULT 0";
+            $this->fn_resetUINumber();                        
+            break;
         case "number":          
             $bln_valid=$this->fn_validateChangeType($MetaColumnNewType);                        
             if(!$bln_valid){return false;}                        
@@ -415,6 +427,12 @@ class metaColumn{
             if(!$bln_valid){return false;}                        
             $MetaColumnDefinition="DECIMAL(10,2) DEFAULT 0";
             $this->fn_resetUICurrency();                        
+            break;
+          case "percent":          
+            $bln_valid=$this->fn_validateChangeType($MetaColumnNewType);                        
+            if(!$bln_valid){return false;}                        
+            $MetaColumnDefinition="DECIMAL(10,2) DEFAULT 0";
+            $this->fn_resetUIPercent();                        
             break;
         default:                        
             $this->fn_changeType("Note");
@@ -461,8 +479,7 @@ class metaColumn{
         foreach ($obj_metaOption as $property => $value) {                        
             
           $bln_validOption=false;                   
-          switch(strtolower($property)){              
-            case "maxlength":
+          switch(strtolower($property)){                          
             case "formexpand":
             case "formposition":                        
             case "unsigned":                                                                        
@@ -513,6 +530,11 @@ class metaColumn{
         $this->fn_emptyMetaOption($this->obj_parent->MetaOptionDefaultCurrency);        
         $this->fn_emptyLabel('Currency');
       }
+      function fn_resetUIPercent(){
+        $this->fn_emptyMetaOption($this->obj_parent->MetaOptionDefaultPercent);        
+        $this->fn_emptyLabel('Percent');
+      }
+      
 
       function fn_resetUINumber(){
         $this->fn_emptyMetaOption($this->obj_parent->MetaOptionDefaultNumber);

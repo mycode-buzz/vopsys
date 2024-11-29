@@ -998,7 +998,9 @@ class component extends BaseObject {
         }        
     }        
     
-    fn_onSelectStart(e){obj_project.fn_forgetEvent(e);}                
+    fn_onSelectStart(e){
+        console.log("hit generic");
+        obj_project.fn_forgetEvent(e);}                    
     fn_notifyChildControl(){}
     fn_onBlur(e){}
     fn_onClick(e){}

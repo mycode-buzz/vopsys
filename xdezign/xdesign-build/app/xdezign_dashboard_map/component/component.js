@@ -10,7 +10,8 @@
                 fn_onStateChange(){      
                   if(!super.fn_onStateChange()){return;}      
                 }                
-                fn_loadDashboard(){//should be overidden                                    
+                fn_loadDashboard(){
+                  if(!super.fn_loadDashboard()){return;}//should be overidden                                    
                   
                   let obj_item;
                   //obj_item=this.fn_addContextItem("form_hardrule");                  

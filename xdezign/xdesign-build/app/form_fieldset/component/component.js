@@ -11,7 +11,7 @@ class form_fieldset extends component{
     super.fn_onLoad();
     if(this.fn_hasContextHolderParent()){return;}    
     this.obj_formLegend=this.fn_addContextItem("form_legend");
-    this.bln_toggleState=false;
+    this.bln_toggleState=true;
     
     this.obj_themeItemSection=this.fn_applyTheme("form_section", true);    
   }
@@ -33,10 +33,10 @@ class form_fieldset extends component{
     
     let bln_value=this.bln_toggleState;
     if(!bln_value){
-         this.fn_open();       
+      this.fn_open();             
     }
     else{
-      this.fn_close();        
+      this.fn_close();                    
     }
   }
 
@@ -74,7 +74,7 @@ class form_fieldset extends component{
     
     for(let i=1;i<arr_item.length;i++){                    
       obj_item=arr_item[i];      
-      if(bln_value && obj_item.fn_getHidden()){
+      if(bln_value && obj_item.fn_getHiddenPin()){
         continue;
       }
       obj_item.fn_setDisplayFlex(bln_value);      

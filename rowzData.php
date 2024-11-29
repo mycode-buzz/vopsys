@@ -13,8 +13,7 @@ class rowzData {
   
       if(!empty($this->pdo_admin)){
         return;        
-      }
-      
+      }     
       
         $obj_connect=new stdClass;                              
         $obj_connect->Schema=$SYSTEM_DEFAULT_DATABASE;                               

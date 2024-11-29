@@ -21,7 +21,20 @@
           //IMPORTANT: SAFE TO USE FOR PRODUCTION RELEASE, CHECKS FOR LOCAL HOST
         }  
 
-        fn_loadDashboard(){              
+        fn_loadDashboard(){
+          if(!super.fn_loadDashboard()){
+          
+            //let obj_control=this.fn_addContextItem("form_span");                                                          
+            //obj_control.fn_setText("ADMIN AREA");                                                                              
+            
+
+            let obj_menuButton=this.fn_getMenuButton();                  
+            this.obj_consoleContainer=obj_menuButton.obj_menuPanel.fn_addConsoleContainer("console_container_system", true);            
+            let obj_button=this.obj_consoleContainer.fn_getConsoleComponent("xapp_button_system_home", true);
+            this.obj_consoleContainer.fn_showItem(obj_button);            
+
+            return;
+          }              
           
 
           this.str_goPayLabel=obj_path.fn_getQueryStringValue("goPayLabel");            
@@ -246,7 +259,7 @@
           
         }
 
-        fn_debug(obj_param){
+        fn_debugDashboard(obj_param){
           
           console.log("obj_param.str_labelProduct: " + obj_param.str_labelProduct);
           console.log("obj_param.int_packageTokenz: " + obj_param.int_packageTokenz);
@@ -304,7 +317,7 @@
           }          
 
           if(this.bln_debug){
-            this.fn_debug(obj_param);            
+            this.fn_debugDashboard(obj_param);            
           }
           
           obj_param.int_customerTokenz=obj_param.int_customerTokenz+obj_param.int_purchaseTokenz;

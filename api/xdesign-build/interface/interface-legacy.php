@@ -13,8 +13,9 @@ class interface_legacy  extends interface_push{
     }
 
     function fn_initialize(){
-
+        
         parent::fn_initialize();   
+        
 
          //must remain at the top , to allow valid statements to run (blnPreventQuery is false)
          $this->obj_paramQuery=new stdClass;
@@ -25,10 +26,8 @@ class interface_legacy  extends interface_push{
     }
     function fn_legacyRunSQLStatement($bln_getCountOnly=false){
 
-
-
         if(empty($this->str_sqlStatement)){
-            $this->fn_setError("this->str_sqlStatement is empty, return");
+            //$this->fn_setError("this->str_sqlStatement is empty, return");
             return;
         }   
         

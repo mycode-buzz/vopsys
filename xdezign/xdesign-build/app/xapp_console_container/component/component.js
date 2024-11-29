@@ -12,6 +12,18 @@
                   this.bln_debugContainer=false;
                 }                
 
+                fn_displayTogglePair(obj_a, obj_b, bln_value){            
+    
+                  if(bln_value){
+                    this.fn_showItem(obj_a);                                  
+                    this.fn_hideItem(obj_b);                                                                  
+                  }
+                  else{
+                    this.fn_showItem(obj_b);                                                                  
+                    this.fn_hideItem(obj_a);                                                                  
+                  }                          
+              }
+
                 fn_onSubmit(e){                                                                                         
 
                   //this.fn_debugName("fn_onSubmit");

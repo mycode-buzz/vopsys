@@ -24,19 +24,19 @@ class page extends maintain{
     
     //$this->fn_addEcho("START SETTING  this->obj_post->Action", $this->obj_post->Action, true);                      
     //*
-    switch($this->obj_post->Action){                    
-        case "xmaintain_debug_status":                     
-          $this->fn_maintain_debug_status();
-        break;                                             
-        case "maintain_debug_off":                     
-          $this->fn_maintain_debug_off($int_idMetaRowz);
-        break;                                     
-        case "maintain_debug_on":                     
-          $this->fn_maintain_debug_on($int_idMetaRowz);
-        break;                                     
+    switch($this->obj_post->Action){                            
         case "maintain_debug_release":           
           $this->fn_maintain_debug_release();
-        break;                                     
+        break;                                                     
+        case "maintain":                 
+          $this->fn_maintain();
+        break;
+        case "provision":                 
+          $this->fn_provision();
+        break;
+        case "backup":                 
+          $this->fn_backup();
+        break;         
         case "form_add_group":       
           $this->fn_form_add_group($int_idMetaRowz);
         break;                        
@@ -49,20 +49,17 @@ class page extends maintain{
         case "form_gap":                                                  
           $this->fn_form_gap($int_idMetaForm);
         break;                                
-        case "maintain":                 
-          $this->fn_maintain();
-        break;
-        case "backup":                 
-          $this->fn_backup();
-        break;         
-        case "toggleArchive":                 
-          $this->fn_toggleArchive();
-        break;                                                
         case "addNewRowz":    
           $this->fn_addDefaultRowz();
         break;                                                
         case "addNewColumn":    
           $this->fn_addDefaultColumn();
+        break;                                                
+        case "hideArchive":                 
+          $this->fn_hideArchive();
+        break;                                                
+        case "showArchive":                 
+          $this->fn_showArchive();
         break;                                                
         case "hideRowz":                 
           $this->fn_hideRowz();

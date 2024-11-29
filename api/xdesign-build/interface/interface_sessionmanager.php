@@ -20,7 +20,7 @@ class interface_sessionmanager extends interface_servermanager {
     //this funciton is used by this page where no session exists before login.  
     //this function is used by login, once the user is authenticated.
     //The session is created from this object.  
-    //From then on the userParam is created from session in fn_loadSessionUser    
+    //From then on the userParam is created from session in fn_load SessionUser    
 
     $obj_user=new metaUser();    
     $obj_user->fn_initialize($arr_row);  
@@ -71,12 +71,12 @@ class interface_sessionmanager extends interface_servermanager {
         exit;
     }   
     
-    $obj_userLogin=unserialize($_SESSION[$str_sessionParam]);                                          
-    $this->fn_setUserDate($obj_userLogin);//Set Date
-    //$this->fn_debugUserParam($obj_userLogin);          
-    //$this->fn_varDump($obj_userLogin, "obj_userLogin", true);
+    $obj_userSession=unserialize($_SESSION[$str_sessionParam]);                                          
+    $this->fn_setUserDate($obj_userSession);//Set Date
+    //$this->fn_debugUserParam($obj_userSession);          
+    //$this->fn_varDump($obj_userSession, "obj_userSession", true);
     
-    return $obj_userLogin;        
+    return $obj_userSession;        
   } 
 
   function fn_openSystem($MetaMoverSystemIdTarget){    

@@ -110,14 +110,11 @@
                 fn_postComputeColumns(){
 
                   super.fn_postComputeColumns();
-
-                  if(this.obj_holder.obj_sectionMeta){
-                    this.obj_holder.obj_sectionMeta.fn_close();
-                  }                  
-
-                  //*                  
-                  else if(this.obj_holder.obj_section){
-                    this.obj_holder.obj_section.fn_open();
+                  
+                  if(this.obj_holder.obj_section){//refers only to the last section on the form
+                    if(!this.obj_holder.obj_section.obj_design.lockOpen){                    
+                      this.obj_holder.obj_section.fn_close();
+                    }
                   }
                 }
 
@@ -139,6 +136,8 @@
                     obj_section=this.obj_holder.obj_sectionPanel;
                   }
                   obj_column=obj_section.fn_addContextItem(str_type);
+
+                  
                   
                   
                   if(obj_column){
@@ -154,6 +153,7 @@
                 fn_configureSection(int_countColumn){                  
                   
                   let str_sectionTitle=this.obj_paramRow.obj_metaColumn.SectionTitle;
+                  
 
                   this.bln_shift=false;                    
                   if(!int_countColumn){                  
@@ -173,31 +173,35 @@
                   }
 
                   if(this.bln_shift){
-                    this.fn_addSection();                 
-                    if(str_sectionTitle){                                                                                
-                      this.obj_holder.obj_section.fn_setText(str_sectionTitle);                                                       
-                    }
-                  }       
-                  
-
-                  
-                  
+                    this.fn_addSection(this.obj_paramRow.obj_metaColumn);                                     
+                  }
                 }                    
                 fn_getColumnViaPosition(int_ordinalPosition){
                   return this.obj_paramRow.arr_column[int_ordinalPosition];
                   
                 }
-                fn_getColumnKey(){
-                  let obj_recordset=this.obj_paramRS.obj_recordset;
-                  let obj_metaColumn=obj_recordset.fn_getMetaColumnViaOrdinalPosition(0);                       
-                  let obj_metaColumnKey=obj_recordset.fn_getMetaColumnPrimaryKey(obj_metaColumn);                              
-                  let obj_columnKey=this.fn_getColumnViaPosition(obj_metaColumnKey.int_ordinalPosition);                                                                                    
+                fn_getColumnKey(obj_column=false){
+                  let obj_recordset, obj_metaColumn, obj_metaColumnKey, obj_columnKey
+                  if(obj_column){
+                    if(obj_column){
+                      obj_metaColumn=obj_column.obj_metaColumn;                      
+                      let MetaTableKeyField=obj_metaColumn.MetaTableKeyField;                      
+                      if(MetaTableKeyField.toLowerCase()==="metadataid"){                                                
+                        obj_columnKey=this.fn_getColumnDataId();
+                        return obj_columnKey;
+                      }
+                    }
+                  }
+                  obj_recordset=this.obj_paramRS.obj_recordset;
+                  obj_metaColumn=obj_recordset.fn_getMetaColumnViaOrdinalPosition(0);                       
+                  obj_metaColumnKey=obj_recordset.fn_getMetaColumnPrimaryKey(obj_metaColumn);                              
+                  obj_columnKey=this.fn_getColumnViaPosition(obj_metaColumnKey.int_ordinalPosition);                                                                                    
                   obj_columnKey.fn_setMetaColumnKey(obj_metaColumnKey);
                   return obj_columnKey;
                 }
                 fn_getColumnDataId(){
                   let obj_recordset=this.obj_paramRS.obj_recordset;
-                  let obj_metaColumnDataId=obj_recordset.fn_getMetaColumnViaFieldShortName("MetaDataId");                                                                          
+                  let obj_metaColumnDataId=obj_recordset.fn_getMetaColumnViaFieldShortName("metadataid");                                                                          
                   return this.fn_getColumnViaPosition(obj_metaColumnDataId.int_ordinalPosition);                                                                                
                 }
                 fn_getColumnArchiveDate(){
@@ -207,7 +211,7 @@
                 }
                 
 
-                fn_addSection(){                                                      
+                fn_addSection(obj_metaColumn){                                                      
 
                   let obj_section;
                   
@@ -217,16 +221,19 @@
                   obj_section=this.obj_holder.obj_section=this.obj_holder.obj_sectionPanel.fn_addContextItem("form_fieldset");                                                                                                            
                   obj_section.fn_setStyleProperty("overflow", "hidden");                  
                   obj_section.obj_design.lockOpen=true;
-                  if(this.obj_paramRow.obj_metaColumn.MetaColumnName==="MetaDataId"){
-                    obj_section.obj_design.lockOpen=false;
-                    this.obj_holder.obj_sectionMeta=obj_section;                    
-                    this.obj_holder.obj_sectionMeta.bln_isMetaData=true;
-                    this.obj_holder.obj_sectionMeta.fn_close();
 
+                  
+                  let str_sectionTitle=obj_metaColumn.SectionTitle;
+                  if(str_sectionTitle){                                                                                
+                    obj_section.fn_setText(str_sectionTitle);                                                       
                   }
-                  else{
-                    obj_section.fn_open();
+
+                  let bln_lockOpen=true;                                      
+                  let bln_sectionClose=obj_metaColumn.SectionClose;
+                  if(bln_sectionClose){                         
+                    bln_lockOpen=false;                                                                           
                   }
+                  obj_section.obj_design.lockOpen=bln_lockOpen;                    
                 }               
 
                 

@@ -43,10 +43,10 @@
                   
                   this.obj_button_complete_record=this.obj_consoleContainerRecord.fn_getComponent("xapp_button_complete_record");                    
 
-                  this.obj_button_recycle_record=this.obj_consoleContainerRecord.fn_getComponent("xapp_button_recycle_record");
+                  this.obj_button_archive_record=this.obj_consoleContainerRecord.fn_getComponent("xapp_button_archive_record");
                   if(this.obj_columnArchiveDate){                                        
                     if(this.obj_columnArchiveDate.str_value){
-                      this.obj_button_recycle_record.fn_setText("Restore Record");
+                      this.obj_button_archive_record.fn_setText("Restore Record");
 
                     }
                   }
@@ -128,13 +128,13 @@
               fn_exitConstraint(){   
                 this.fn_setConstraintKeyPin(false);        
               }
-              fn_formRecycleRecord(){        
-                this.fn_recycleRecord(true);        
+              fn_formArchiveRecord(){        
+                this.fn_archiveRecord(true);        
               }                 
               fn_formDeleteRecord(){                  
-                this.fn_recycleRecord(false);        
+                this.fn_archiveRecord(false);        
               }                 
-              fn_recycleRecord(bln_recycle){      
+              fn_archiveRecord(bln_recycle){      
         
                 if(!this.obj_dataView){return;}    
                 let obj_columnKey;
@@ -142,9 +142,9 @@
                 obj_columnKey=this.obj_columnDataId
                 if(!obj_columnKey.str_value){return;}//only 1 record with columnkey can be deleted. 
                 
-                this.obj_dataView.fn_recycleRecord(obj_columnKey, bln_recycle); 
+                this.obj_dataView.fn_archiveRecord(obj_columnKey, bln_recycle); 
               }
-              fn_onRecycleRecord(){                            
+              fn_onArchiveRecord(){                            
                 this.fn_formCompleteRecord(false);
               }
               fn_onDeleteDynamicRow(){                
@@ -196,17 +196,19 @@
                 super.fn_formViewRecord();                  
               }              
 
+              
+
               fn_setButtonViewRecord(){                
         
                 super.fn_setButtonViewRecord();                              
 
-
+                let bln_settingOperationPin=this.fn_getSettingOperationPin();
 
                 
-                this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_recycle_record);                                      
+                this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_archive_record);                                      
                 this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_complete_record);                                      
 
-                if(this.fn_getSettingOperationPin()){                      
+                if(bln_settingOperationPin){                      
                   return;            
                 }
                 if(this.obj_parentMenu && this.obj_parentMenu.fn_getSettingOperationPin()){                      
@@ -219,7 +221,7 @@
                 if(this.bln_dynamicMenu){
                   bln_showButtonComplete=false;
                 }
-                if(this.fn_getSettingOperationPin()){
+                if(bln_settingOperationPin){
                   bln_showButtonComplete=false;
                 }
                 if(bln_showButtonComplete){                  
@@ -255,7 +257,7 @@
                   }
                   
 
-                  this.obj_consoleContainerRecord.fn_showItem(this.obj_button_recycle_record);                                                      
+                  this.obj_consoleContainerRecord.fn_showItem(this.obj_button_archive_record);                  
                   
                   if(this.bln_multiRecordDisplay){  //All Record "Report View"                                              
                     if(this.bln_recordConsole){                                  
@@ -273,7 +275,7 @@
                   }     
                 } 
                 if(this.bln_isJoinedChildMenu){                  
-                  this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_recycle_record);                                      
+                  this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_archive_record);                                      
                   this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_complete_record);                                      
                 }
               }
@@ -444,7 +446,7 @@
                   this.obj_dataView.fn_resetDataView();//important to avoid page mis match                
                 }                
                 
-                this.fn_formViewRecord();
+                this.fn_formViewRecord();                               
               }
               
               
@@ -461,7 +463,7 @@
 
                 if(this.obj_meta.bln_displayData){
                   
-                  this.obj_consoleContainerRecord.fn_showItem(this.obj_button_recycle_record);                  
+                  this.obj_consoleContainerRecord.fn_showItem(this.obj_button_archive_record);                  
                   this.obj_consoleContainerRecord.fn_showItem(this.obj_button_complete_record);                  
                   this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_navigate_record);
                 }   
@@ -476,7 +478,7 @@
                }
                fn_setButtonNewRecord(){                  
 
-                this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_recycle_record);
+                this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_archive_record);
                 this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_navigate_record);                
                 //this.obj_consoleContainerRecord.fn_showItem(this.obj_button_complete_record);
                 //this.obj_button_complete_record.fn_setDisabled(true); //on in the wrong menu

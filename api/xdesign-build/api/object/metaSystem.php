@@ -84,7 +84,7 @@ class metaSystem {
         
         //$this->obj_parent->fn_addEcho("Existing MetaSystemId: ".$MetaSystemId);          
         
-        $obj_userLogin=$this->obj_parent->obj_userLogin;
+        //$this->obj_parent->obj_userLogin;
         
         if(empty($MetaSystemId)){
           if($this->obj_parent->DebugServer){
@@ -129,8 +129,8 @@ class metaSystem {
           $obj_paramMetaData->MetaPermissionTag="";                
           $obj_metaData->fn_createRecord($obj_paramMetaData);            
 
-          $obj_userLogin->MetaHomeSystemId=$MetaSystemId;//important to get this updated correctly , on new record
-          $obj_userLogin->MetaUserSystemId=$MetaSystemId;//important to get this updated correctly , on new record
+          $this->obj_parent->obj_userLogin->MetaHomeSystemId=$MetaSystemId;//important to get this updated correctly , on new record
+          $this->obj_parent->obj_userLogin->MetaUserSystemId=$MetaSystemId;//important to get this updated correctly , on new record
         
           return true;
         }
@@ -140,8 +140,8 @@ class metaSystem {
             $this->obj_parent->fn_addEcho("System fn_createRecord MetaSystemId is not empty: ".$MetaSystemId);  
           }
 
-          $obj_userLogin->MetaHomeSystemId=$MetaSystemId;//important to get this updated correctly , on new record
-          $obj_userLogin->MetaUserSystemId=$MetaSystemId;//important to get this updated correctly , on new record
+          $this->obj_parent->obj_userLogin->MetaHomeSystemId=$MetaSystemId;//important to get this updated correctly , on new record
+          $this->obj_parent->obj_userLogin->MetaUserSystemId=$MetaSystemId;//important to get this updated correctly , on new record
           
           return false;
             

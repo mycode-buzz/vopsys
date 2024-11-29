@@ -46,9 +46,8 @@
                   this.bln_locked=false;
                   let obj_metaColumn=this.obj_metaColumn=this.obj_paramRow.obj_metaColumn;                  
 
-                  this.str_valueInitial=obj_metaColumn.str_value;
-
-                  obj_metaColumn.MaxLength=20;
+                  this.str_valueInitial=obj_metaColumn.str_value;                  
+                  
                   //console.log(obj_metaColumn);
 
                   if(obj_metaColumn.MetaList){                
@@ -58,29 +57,66 @@
                   if(obj_metaColumn.MetaOption){                      
                     
                     //META OPTION
-                    for (const property in obj_metaOption) {//add metaoption if not existing as independent feature
+                    for (let str_property in obj_metaOption) {//add metaoption if not existing as independent feature
                       let bln_writeOption=false;
-                      switch(property.toLowerCase()){                                                
+                      
+                      let str_value=obj_metaOption[str_property];
+                      
+                      delete obj_metaOption[str_property];//remove any miscase.
+                      
+                      str_property=str_property.toLowerCase();
+
+                      obj_metaOption[str_property]=str_value;
+
+                      switch(str_property){                                                
                         case "placeholder":
                         case "formexpand":
                         case "formposition":                        
                         case "unsigned":
                         case "decimal": 
-                        case "datetimesecond":
-                        case "maxlength":
+                        case "datetimesecond":                        
                             bln_writeOption=true;
                         break;
                       }
+                      
                       if(bln_writeOption){
-                        obj_metaColumn[property]=obj_metaOption[property];
+                        obj_metaColumn[str_property]=obj_metaOption[str_property];
+                        
                         if(this.obj_metaColumn.DebugPin){
-                          this.fn_debugLabel(property + ": " + obj_metaColumn[property]);                    
+                          this.fn_debugLabel(str_property + ": " + obj_metaColumn[str_property]);                    
                         }
                       }
                     }
                     //META OPTION
-                  }
+                  }  
                   
+                  
+                  
+                  obj_metaColumn.DebugPin=obj_shared.fn_parseBool(obj_metaColumn.DebugPin);                                    
+                  obj_metaColumn.ValidationError=false;                  
+                  obj_metaColumn.LivePin=obj_shared.fn_parseBool(obj_metaColumn.LivePin);                                    
+                  obj_metaColumn.HiddenPin=obj_shared.fn_parseBool(obj_metaColumn.HiddenPin);                                                                        
+                  obj_metaColumn.MaxLength=obj_shared.fn_parseInt(obj_metaColumn.MaxLength);                                       
+                  obj_metaColumn.RequiredPin=obj_shared.fn_parseBool(obj_metaColumn.RequiredPin);                                    
+                  obj_metaColumn.PrimaryPin=obj_shared.fn_parseBool(obj_metaColumn.PrimaryPin);                                                      
+                  obj_metaColumn.LockedPin=obj_shared.fn_parseBool(obj_metaColumn.LockedPin);                                    
+                  obj_metaColumn.FormOrder=obj_shared.fn_parseInt(obj_metaColumn.FormOrder);
+                  
+                  obj_metaColumn.FormExpand=obj_shared.fn_parseBool(obj_metaColumn.formexpand);//MetaOption LCase
+                  obj_metaColumn.FormPosition=obj_shared.fn_parseString(obj_metaColumn.formposition);//MetaOption LCase                                                            
+                  obj_metaColumn.PlaceHolder=obj_shared.fn_parseString(obj_metaColumn.placeholder);//MetaOption LCase                                                            
+                  obj_metaColumn.UnSigned=obj_shared.fn_parseInt(obj_metaColumn.unsigned);//MetaOption LCase                                          
+                  obj_metaColumn.Decimal=obj_shared.fn_parseInt(obj_metaColumn.decimal);//MetaOption LCase                                                            
+                  obj_metaColumn.DateTimeSecond=obj_shared.fn_parseBool(obj_metaColumn.datetimesecond);//MetaOption LCase                                                            
+                                    
+
+                  delete obj_metaColumn["formexpand"];//remove lcase
+                  delete obj_metaColumn["formposition"];//remove lcase
+                  delete obj_metaColumn["placeholder"];//remove lcase
+                  delete obj_metaColumn["unsigned"];//remove lcase
+                  delete obj_metaColumn["decimal"];//remove lcase
+                  delete obj_metaColumn["datetimesecond"];//remove lcase                  
+
                   obj_metaColumn.DateTime=false;                  
                   switch(obj_metaColumn.MetaColumnType.toLowerCase()){
                     case "date":
@@ -91,31 +127,25 @@
                       obj_metaColumn.DateTimeSecond=obj_shared.fn_parseBool(obj_metaColumn.DateTimeSecond);                          
                       break;
                     case "currency":
+                    case "percent":
                     case "number":                      
                       obj_metaColumn.Decimal=obj_shared.fn_parseInt(obj_metaColumn.Decimal);                                                                        
                       obj_metaColumn.UnSigned=obj_shared.fn_parseBool(obj_metaColumn.UnSigned);                                                   
                       break;   
                     case "note":
                     case "text":
-                      obj_metaColumn.MaxLength=obj_shared.fn_parseInt(obj_metaColumn.MaxLength);                      
-                      if(obj_metaColumn.DebugPin){                          
-                          //this.fn_debugText("obj_metaColumn.MaxLength", obj_metaColumn.MaxLength)
-                          //console.log(obj_metaOption);
-                          //console.log(obj_metaColumn);                        
-                      }
-                  }                  
+                      obj_metaColumn.MaxLength=obj_shared.fn_parseInt(obj_metaColumn.MaxLength);                                            
+                  }   
+
+                  if(obj_metaColumn.DebugPin){                          
+                    //this.fn_debugText("obj_metaColumn.MaxLength", obj_metaColumn.MaxLength)
+                    console.log(obj_metaOption);
+                    console.log(obj_metaColumn);                        
+                }
                   
-                  obj_metaColumn.DebugPin=obj_shared.fn_parseBool(obj_metaColumn.DebugPin);                                    
-                  obj_metaColumn.ValidationError=false;                  
-                  obj_metaColumn.LivePin=obj_shared.fn_parseBool(obj_metaColumn.LivePin);                                    
-                  obj_metaColumn.HiddenPin=obj_shared.fn_parseBool(obj_metaColumn.HiddenPin);                                                                        
-                  obj_metaColumn.MaxLength=obj_shared.fn_parseInt(obj_metaColumn.MaxLength);                                       
-                  obj_metaColumn.RequiredPin=obj_shared.fn_parseBool(obj_metaColumn.RequiredPin);                                    
-                  obj_metaColumn.PrimaryPin=obj_shared.fn_parseBool(obj_metaColumn.PrimaryPin);                                                      
-                  obj_metaColumn.LockedPin=obj_shared.fn_parseBool(obj_metaColumn.LockedPin);                                    
-                  obj_metaColumn.FormOrder=obj_shared.fn_parseInt(obj_metaColumn.FormOrder);                                                      
-                  obj_metaColumn.FormExpand=obj_shared.fn_parseBool(obj_metaColumn.FormExpand);                                                      
-                  obj_metaColumn.FormPosition=obj_shared.fn_parseString(obj_metaColumn.FormPosition);                                                      
+                  
+                  
+                  
 
                   
                   //this.bln_debugColumn=this.obj_metaColumn.DebugPin;
@@ -160,7 +190,7 @@
                   }                           
 
                   if(obj_metaColumn.HiddenPin){
-                    this.fn_setHidden();                        
+                    this.fn_setHiddenPin();                        
                   }                   
 
                   const obj_metaDataRow=JSON.parse(JSON.stringify(this.obj_paramRow.obj_metaData));                  
@@ -168,7 +198,7 @@
                   let bln_debugPermit=false;
                   
                   if(this.bln_debugColumn){                    
-                    //console.log("DEBUG SET FOR [" + obj_metaColumn.str_name + "]");
+                    //console.log("DEBUG SET FOR [" + obj_metaColumn.str_property + "]");
                     //console.log(obj_metaColumn);                    
                     //bln_debugPermit=true;
                   }
@@ -204,7 +234,7 @@
                   }                                                                                                       
 
                   if(this.obj_metaColumn.HiddenPin){
-                    this.fn_setHidden();                        
+                    this.fn_setHiddenPin();                        
                   }                                    
 
                   if(bln_debugPermit){                    
@@ -469,15 +499,8 @@
 
                 fn_getMenuButton(){
                   return this.obj_paramRS.obj_recordset.obj_paramRS.obj_menuButton;
-                }                                
+                }                                                
                 
-                fn_setHidden(){
-                  this.bln_hidden=true;                  
-                  this.fn_setDisplay(false);                                        
-                }
-                fn_getHidden(){
-                  return this.bln_hidden;                                    
-                }                
                 fn_setMetaColumnKey(obj_metaColumnKey){                  
                   this.obj_metaColumnKey=obj_metaColumnKey;
                 }

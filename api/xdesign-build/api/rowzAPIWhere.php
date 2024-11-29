@@ -31,7 +31,29 @@ class rowzAPIWhere extends rowzAPIData{
         if(!empty($str_sql)){
             if(!empty($str_whereCriteria)){$str_whereCriteria.=" AND ";}                
             $str_whereCriteria.=$str_sql;        
-        }           
+        }                   
+        
+        //*
+        if($obj_paramView->OwnerPin){
+            $str_sql="(`meta_data`.`MetaDataOwnerId`=".$MetaUserId.")";        
+            if(!empty($str_sql)){
+                if(!empty($str_whereCriteria)){$str_whereCriteria.=" AND ";}                
+                $str_whereCriteria.=$str_sql;        
+            }           
+        }
+        //*/
+
+        /*
+        if($obj_call->lock_toowner){
+            $str_sql="(`meta_data`.`MetaDataOwnerId`=".$MetaUserId.")";        
+            if(!empty($str_sql)){
+                if(!empty($str_whereCriteria)){$str_whereCriteria.=" AND ";}                
+                $str_whereCriteria.=$str_sql;        
+            }           
+        }
+        //*/
+
+        
 
         if($obj_call->get_autojoin){
             $str_sql="(/*API RECYCLE*/`meta_link`.`DeleteDate` IS NULL)";

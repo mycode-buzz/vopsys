@@ -19,7 +19,8 @@ document.addEventListener('DOMContentLoaded', (e) => {
   window.name = "vopsys"; 
   obj_project.fn_execute();   
 
-  document.body.addEventListener('selectstart', function(e) {e.preventDefault();});
+  
+  document.body.addEventListener('selectstart', function(e) {e.preventDefault();});  
   
 });
 

@@ -6,14 +6,22 @@ class Shared{
 
   fn_messageWarn(str_message){
     alert(str_message);
+  }  
+  fn_messageAlert(str_message){
+    alert(str_message);
   }
+  
+  fn_messageConfirm(str_message){  
+    let bln_value=confirm(str_message);
+    return bln_value;
+  }  
 
   fn_formatDisplayValueFromColumn(obj_metaColumn, str_value){                                                                                                         
 
     str_value+="";                  
     if(!str_value){return str_value;}              
     
-    switch(obj_metaColumn.MetaColumnType.toLowerCase()){                    
+    switch(obj_metaColumn.MetaColumnType.toLowerCase()){                          
       case "checkbox":               
         if(!str_value){str_value=""};       
         str_value=obj_shared.fn_parseBool(str_value);                       
@@ -44,6 +52,7 @@ class Shared{
         }
         break;
       case "currency":              
+      case "percent": 
       case "number":                   
         str_value=this.fn_formatNumber(str_value, obj_metaColumn.Decimal);
         str_value = Number(str_value).toLocaleString('en-GB', { minimumFractionDigits: obj_metaColumn.Decimal, maximumFractionDigits: obj_metaColumn.Decimal });
@@ -56,6 +65,9 @@ class Shared{
         let obj_date=obj_shared.fn_getDateObjectFromSystemDate(str_value, obj_metaColumn.DateTime);                                                                                          
         str_value= obj_shared.fn_getCalendarDateStringFromDateObject(obj_date, obj_metaColumn.DateTime, obj_metaColumn.DateTimeSecond);                            
         break;
+      case "recordid":                                            
+        str_value=this.fn_formatNumber(str_value, 0);
+        
     }
     return str_value;
   }
@@ -1061,6 +1073,34 @@ fn_maintainList(obj_list){
   fn_alphanumericOnly(foo_value, str=""){
     return foo_value.replace(/[\W_]+/g, str);
   }
+
+  
+  fn_getHTMLTable(arr_name, arr_value){
+    let str_table, str_row, str_cell, str_name, str_value;
+    str_table=`<TABLE style="font-size: 0.8em;">`;    
+    for (let i = 0; i < arr_name.length; i++) {
+      str_name=arr_name[i];      
+      str_value=arr_value[i];      
+      str_value=this.fn_replace(str_value, "&nbsp;", "");
+      if(str_value==102){
+        //str_value="John Collins";
+      }
+      str_row="";
+      if(str_value){
+        str_row=`
+        <TR>
+        <TD style="text-align: right;">${str_name}:</TD>
+        <TD>${str_value}</TD>
+        </TR>`;
+      }
+      
+      if(str_row){str_table+=str_row;}
+    }
+    str_table+="</TABLE>";
+    return str_table;
+
+  }
+
 
   fn_replace(str_source, str_find, str_replace, str_brackets=""){  
     str_source=str_brackets+str_source+str_brackets;

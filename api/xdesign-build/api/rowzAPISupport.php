@@ -3,6 +3,22 @@
 class rowzAPISupport extends rowzAPIGet{        
 
     
+    function fn_isObjectEmpty($obj_my){
+
+        if (!is_object($obj_my)) {
+            if(empty($obj_my)){
+                return true;
+            }
+            return false;
+        }
+
+        if (empty(get_object_vars($obj_my))) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     
 
     
@@ -166,14 +182,11 @@ class rowzAPISupport extends rowzAPIGet{
     }    
     function fn_varDump($foo_val=false, $str_message="DUMP", $bln_console=false){        
         
-        $bln_proceed=true;
-        if(!empty($this->obj_page)){
-            if(!empty($this->obj_page->fn_varDump)){
-              $this->obj_page->fn_varDump($foo_val, $str_message, true);        
-              $bln_proceed=false;
-            }
+        if (method_exists($this->obj_page, 'fn_varDump')) {        
+            $this->obj_page->fn_varDump($foo_val, $str_message, true);        
+            return;
         }
-        if($bln_proceed){
+        else{
             $str_val=var_export($foo_val, true);
             $this->fn_addConsole($str_message, $str_val);        
         }
@@ -287,108 +300,117 @@ class rowzAPISupport extends rowzAPIGet{
             $arr_metaDataColumn=[];
 
             $obj_param=new stdClass;
-            $obj_param->MetaColumnAPIName="MetaDataId";            
+            $obj_param->MetaColumnAPIName="metadataownerid";
+            $obj_param->MetaColumnName="MetaDataOwnerId";            
+            $obj_param->MetaLabel="Mover";            
+            $obj_param->MatchPin=1;                   
+            $obj_param->HiddenPin=0;                                           
+            $obj_param->RecordSummaryPin=0;                                  
+            $obj_param->DefaultValue=$this->obj_userLogin->MetaUserId;                        
+            $obj_param->MetaColumnType="RecordId";                        
+            $obj_param->SectionTitle="Mover";        
+            $obj_param->SectionClose=false;        
+            $obj_metaColumn=$this->fn_getMetaDataColumn($obj_param);                        
+            array_push($arr_metaDataColumn, $obj_metaColumn);                                            
+
+            $obj_param=new stdClass;
+            $obj_param->MetaColumnAPIName="metapermissiontag";
+            $obj_param->MetaColumnName="MetaPermissionTag";            
+            $obj_param->MetaLabel="Permission";
+            $obj_param->LockedPin=0;          
+            $obj_param->HiddenPin=0;                                           
+            $obj_param->RecordSummaryPin=0;                        
+            $obj_param->DefaultValue=$this->fn_getMetaPermissionStamp();
+            $obj_param->MetaPermissionTag="#ALL WRITEONCE";            
+            $obj_metaColumn=$this->fn_getMetaDataColumn($obj_param);                        
+            array_push($arr_metaDataColumn, $obj_metaColumn);
+            
+
+            
+            $obj_param=new stdClass;
+            $obj_param->MetaColumnAPIName="metadataid";            
+            $obj_param->MetaColumnName="MetaDataId";            
+            $obj_param->MetaLabel="MetaData Id";            
             $obj_param->LockedPin=1;                        
+            $obj_param->HiddenPin=1;                                           
+            $obj_param->RecordSummaryPin=1;                      
             $obj_param->MetaPermissionTag="#INTERFACE";
-            $obj_param->MetaColumnType="RecordId";            
+            $obj_param->MetaColumnType="RecordId";                        
             $obj_param->PrimaryPin=true;            
-            $obj_param->SectionTitle="Meta";        
+            $obj_param->SectionTitle="Record Detail";        
+            $obj_param->SectionClose=true;        
             $obj_param->FormPosition="End";        
             
             $obj_metaColumn=$this->fn_getMetaDataColumn($obj_param);
             array_push($arr_metaDataColumn, $obj_metaColumn);        
 
             $obj_param=new stdClass;
-            $obj_param->MetaColumnAPIName="DataKeyValue";            
-            $obj_param->MetaLabel="Key";            
+            $obj_param->MetaColumnAPIName="datakeyvalue";            
+            $obj_param->MetaColumnName="DataKeyValue";            
+            $obj_param->MetaLabel="Record Id";            
             $obj_param->FormOrder=1;          
             $obj_param->LockedPin=1;                      
+            $obj_param->HiddenPin=1;                                           
+            $obj_param->RecordSummaryPin=1;                      
             $obj_param->MetaPermissionTag="#ADMIN";
             $obj_param->MetaColumnType="RecordId";            
             $obj_metaColumn=$this->fn_getMetaDataColumn($obj_param);                        
             array_push($arr_metaDataColumn, $obj_metaColumn);                    
 
             $obj_param=new stdClass;
-            $obj_param->MetaColumnAPIName="MetaDataSystemId";
-            $obj_param->LockedPin=1;
+            $obj_param->MetaColumnAPIName="metadatasystemid";
+            $obj_param->MetaColumnName="MetaDataSystemId";            
+            $obj_param->MetaLabel="MetaData SystemId";            
+            $obj_param->LockedPin=1;            
+            $obj_param->HiddenPin=1;                                           
+            $obj_param->RecordSummaryPin=1;                      
             $obj_param->DefaultValue=$this->obj_userLogin->MetaUserSystemId;            
             $obj_param->MetaPermissionTag="#INTERFACE";
             $obj_param->MetaColumnType="RecordId";            
-            $obj_metaColumn=$this->fn_getMetaDataColumn($obj_param);                        
-            array_push($arr_metaDataColumn, $obj_metaColumn);                                
-
-            $obj_param=new stdClass;
-            $obj_param->MetaColumnAPIName="MetaDataOwnerId";
-            $obj_param->MetaLabel="Owner";            
-            $obj_param->MatchPin=1;                   
-            $obj_param->DefaultValue=$this->obj_userLogin->MetaUserId;                        
-            $obj_param->MetaColumnType="RecordId";            
+            $obj_param->RecordSummaryPin=1;                      
             $obj_metaColumn=$this->fn_getMetaDataColumn($obj_param);                        
             array_push($arr_metaDataColumn, $obj_metaColumn);                                            
 
             $obj_param=new stdClass;
-            $obj_param->MetaColumnAPIName="ArchiveDate";                        
-            $obj_param->MetaColumnType="DateTime";            
-            $obj_metaColumn=$this->fn_getMetaDataColumn($obj_param);                        
-            array_push($arr_metaDataColumn, $obj_metaColumn);                                                       
-
-            $obj_param=new stdClass;
-            $obj_param->MetaColumnAPIName="MetaPermissionTag";
-            $obj_param->Label="Permission";
-            $obj_param->LockedPin=0;
-            $obj_param->DefaultValue=$this->fn_getMetaPermissionStamp();
-            $obj_param->MetaPermissionTag="#ALL WRITEONCE";            
-            $obj_metaColumn=$this->fn_getMetaDataColumn($obj_param);                        
-            array_push($arr_metaDataColumn, $obj_metaColumn);
-
-            $obj_param=new stdClass;
-            $obj_param->MetaColumnAPIName="DataSchemaName";
-            $obj_param->Label="Schema Name";
-            $obj_param->LockedPin=1;            
+            $obj_param->MetaColumnAPIName="dataschemaname";
+            $obj_param->MetaColumnName="DataSchemaName";            
+            $obj_param->MetaLabel="MetaData SchemaName";
+            $obj_param->LockedPin=1;                        
+            $obj_param->HiddenPin=1;                                           
+            $obj_param->RecordSummaryPin=1;                      
             $obj_param->MetaPermissionTag="#INTERFACE";            
             $obj_metaColumn=$this->fn_getMetaDataColumn($obj_param);                        
             array_push($arr_metaDataColumn, $obj_metaColumn);            
 
             $obj_param=new stdClass;
-            $obj_param->MetaColumnAPIName="DataTableName";
-            $obj_param->Label="Table Name";
+            $obj_param->MetaColumnAPIName="datatablename";
+            $obj_param->MetaColumnName="DataTableName";            
+            $obj_param->MetaLabel="MetaData TableName";
             $obj_param->LockedPin=1;            
+            $obj_param->HiddenPin=1;                                           
+            $obj_param->RecordSummaryPin=1;                      
             $obj_param->MetaPermissionTag="#INTERFACE";            
             $obj_metaColumn=$this->fn_getMetaDataColumn($obj_param);                        
             array_push($arr_metaDataColumn, $obj_metaColumn);            
 
             $obj_param=new stdClass;
-            $obj_param->MetaColumnAPIName="DataKeyName";
-            $obj_param->Label="Key Name";
-            $obj_param->LockedPin=1;            
+            $obj_param->MetaColumnAPIName="datakeyname";
+            $obj_param->MetaColumnName="DataKeyName";            
+            $obj_param->MetaLabel="MetaData KeyName";
+            $obj_param->LockedPin=1;                        
+            $obj_param->HiddenPin=1;                                           
+            $obj_param->RecordSummaryPin=1;                      
             $obj_param->MetaPermissionTag="#INTERFACE";            
             $obj_metaColumn=$this->fn_getMetaDataColumn($obj_param);                        
             array_push($arr_metaDataColumn, $obj_metaColumn);            
-
+            
             $obj_param=new stdClass;
-            $obj_param->MetaColumnAPIName="ModifiedDate";
-            $obj_param->Label="Modified Date";
+            $obj_param->MetaColumnAPIName="createddate";
+            $obj_param->MetaColumnName="CreatedDate";            
+            $obj_param->MetaLabel="Created On";
             $obj_param->LockedPin=1;            
-            $obj_param->DefaultValue=$this->obj_userLogin->ModifiedDate;            
-            $obj_param->MetaColumnType="DateTime";  
-            $obj_param->MetaOption='{"DateTimeSecond": "true"}';            
-            $obj_metaColumn=$this->fn_getMetaDataColumn($obj_param);                        
-            array_push($arr_metaDataColumn, $obj_metaColumn);                       
-
-            $obj_param=new stdClass;
-            $obj_param->MetaColumnAPIName="ModifiedBy";
-            $obj_param->MetaLabel="Modified By";                        
-            $obj_param->LockedPin=1;            
-            $obj_param->DefaultValue=$this->obj_userLogin->ModifiedBy;                        
-            $obj_param->MetaPermissionTag="#ADMIN";            
-            $obj_param->MetaColumnType="RecordId";                        
-            $obj_metaColumn=$this->fn_getMetaDataColumn($obj_param);                        
-            array_push($arr_metaDataColumn, $obj_metaColumn);                                            
-
-            $obj_param=new stdClass;
-            $obj_param->MetaColumnAPIName="CreatedDate";
-            $obj_param->Label="Created Date";
-            $obj_param->LockedPin=1;            
+            $obj_param->HiddenPin=1;                                           
+            $obj_param->RecordSummaryPin=1;                      
             $obj_param->DefaultValue=$this->obj_userLogin->CreatedDate;            
             $obj_param->MetaColumnType="DateTime";  
             $obj_param->MetaOption='{"DateTimeSecond": "true"}';            
@@ -396,20 +418,63 @@ class rowzAPISupport extends rowzAPIGet{
             array_push($arr_metaDataColumn, $obj_metaColumn);                                   
 
             $obj_param=new stdClass;
-            $obj_param->MetaColumnAPIName="CreatedBy";
+            $obj_param->MetaColumnAPIName="createdby";
+            $obj_param->MetaColumnName="CreatedBy";            
             $obj_param->MetaLabel="Created By";                        
             $obj_param->LockedPin=1;            
+            $obj_param->HiddenPin=1;                                           
+            $obj_param->RecordSummaryPin=1;                      
             $obj_param->DefaultValue=$this->obj_userLogin->CreatedBy;                        
             $obj_param->MetaPermissionTag="#ADMIN";            
             $obj_param->MetaColumnType="RecordId";                        
             $obj_metaColumn=$this->fn_getMetaDataColumn($obj_param);                        
             array_push($arr_metaDataColumn, $obj_metaColumn);
 
+            $obj_param=new stdClass;
+            $obj_param->MetaColumnAPIName="modifieddate";
+            $obj_param->MetaColumnName="ModifiedDate";            
+            $obj_param->MetaLabel="Modified On";
+            $obj_param->LockedPin=1;            
+            $obj_param->HiddenPin=1;                                           
+            $obj_param->RecordSummaryPin=1;                      
+            $obj_param->DefaultValue=$this->obj_userLogin->ModifiedDate;            
+            $obj_param->MetaColumnType="DateTime";  
+            $obj_param->MetaOption='{"DateTimeSecond": "true"}';            
+            $obj_metaColumn=$this->fn_getMetaDataColumn($obj_param);                        
+            array_push($arr_metaDataColumn, $obj_metaColumn);                       
+
+            $obj_param=new stdClass;
+            $obj_param->MetaColumnAPIName="modifiedby";
+            $obj_param->MetaColumnName="ModifiedBy";            
+            $obj_param->MetaLabel="Modified By";                        
+            $obj_param->LockedPin=1;            
+            $obj_param->HiddenPin=1;                                           
+            $obj_param->RecordSummaryPin=1;                      
+            $obj_param->DefaultValue=$this->obj_userLogin->ModifiedBy;                        
+            $obj_param->MetaPermissionTag="#ADMIN";            
+            $obj_param->MetaColumnType="RecordId";                        
+            $obj_metaColumn=$this->fn_getMetaDataColumn($obj_param);                        
+            array_push($arr_metaDataColumn, $obj_metaColumn);                                            
+
+            $obj_param=new stdClass;
+            $obj_param->MetaColumnAPIName="archivedate";        
+            $obj_param->MetaColumnName="ArchiveDate";                            
+            $obj_param->MetaLabel="Archive Date";            
+            $obj_param->MetaColumnType="DateTime";            
+            $obj_param->LockedPin=0;          
+            $obj_param->HiddenPin=1;                                           
+            $obj_param->RecordSummaryPin=1;                      
+            $obj_metaColumn=$this->fn_getMetaDataColumn($obj_param);                        
+            array_push($arr_metaDataColumn, $obj_metaColumn);                                                                   
+
+
+
             return $arr_metaDataColumn;
         }
         function fn_getMetaDataColumn($obj_param){            
 
             if(!isset($obj_param->MetaColumnAPIName)){$obj_param->MetaColumnAPIName="Error";}
+            if(!isset($obj_param->MetaColumnName)){$obj_param->MetaColumnName="Error";}
             if(!isset($obj_param->MetaLabel)){$obj_param->MetaLabel=$obj_param->MetaColumnAPIName;}            
             if(!isset($obj_param->DebugPin)){$obj_param->DebugPin=0;}                                    
             if(!isset($obj_param->FormOrder)){$obj_param->FormOrder=1000;}                        
@@ -417,10 +482,12 @@ class rowzAPISupport extends rowzAPIGet{
             if(!isset($obj_param->MatchPin)){$obj_param->MatchPin=0;}                        
             if(!isset($obj_param->HiddenPin)){$obj_param->HiddenPin=0;}                        
             if(!isset($obj_param->LockedPin)){$obj_param->LockedPin=0;}                        
+            if(!isset($obj_param->RecordSummaryPin)){$obj_param->RecordSummaryPin=0;}                        
             if(!isset($obj_param->DefaultValue)){$obj_param->DefaultValue="";}                        
             if(!isset($obj_param->MetaPermissionTag)){$obj_param->MetaPermissionTag="";}                                                
             if(!isset($obj_param->PrimaryPin)){$obj_param->PrimaryPin=false;}                                 
             if(!isset($obj_param->SectionTitle)){$obj_param->SectionTitle="";}                                
+            if(!isset($obj_param->SectionClose)){$obj_param->SectionClose=false;}                                            
             if(!isset($obj_param->MetaColumnType)){$obj_param->MetaColumnType="Text";}                                                  
             if(!isset($obj_param->MetaOption)){   
                 $obj_param->MetaOption=new stdClass;
@@ -439,7 +506,7 @@ class rowzAPISupport extends rowzAPIGet{
             $obj_metaColumn->MetaTableKeyField="MetaDataId";
             $obj_metaColumn->PrimaryPin=$obj_param->PrimaryPin;    
             $obj_metaColumn->MetaColumnAPIName=strtolower($obj_param->MetaColumnAPIName);                        
-            $obj_metaColumn->MetaColumnName=$obj_param->MetaColumnAPIName;                                    
+            $obj_metaColumn->MetaColumnName=$obj_param->MetaColumnName;                                    
             $obj_metaColumn->MetaLabel=$obj_param->MetaLabel;
             $obj_metaColumn->DebugPin=$obj_param->DebugPin;            
             $obj_metaColumn->FormOrder=$obj_param->FormOrder;            
@@ -449,12 +516,15 @@ class rowzAPISupport extends rowzAPIGet{
             $obj_metaColumn->MatchPin=$obj_param->MatchPin;            
             $obj_metaColumn->HiddenPin=$obj_param->HiddenPin;            
             $obj_metaColumn->LockedPin=$obj_param->LockedPin;                                    
-            $obj_metaColumn->RequiredPin=0;                            
+            $obj_metaColumn->RecordSummaryPin=$obj_param->RecordSummaryPin;                                    
+            $obj_metaColumn->RequiredPin=0;      
+            $obj_metaColumn->MaxLength=100;            
             $obj_metaColumn->MetaOption=$obj_param->MetaOption;                            
             $obj_metaColumn->DefaultValue=$obj_param->DefaultValue;
             $obj_metaColumn->MetaPermissionTag=$obj_param->MetaPermissionTag;//relates to permission to show these meta tags in the meta tag row
             $obj_metaColumn->IsMetaData=true;        
             $obj_metaColumn->SectionTitle=$obj_param->SectionTitle;  
+            $obj_metaColumn->SectionClose=$obj_param->SectionClose;              
             
             return $obj_metaColumn;            
         }
@@ -555,6 +625,7 @@ class rowzAPISupport extends rowzAPIGet{
             $obj_metaColumn->HiddenPin=$obj_param->HiddenPin;            
             $obj_metaColumn->LockedPin=$obj_param->LockedPin;                                    
             $obj_metaColumn->RequiredPin=0;                            
+            $obj_metaColumn->MaxLength=100;            
             $obj_metaColumn->MetaOption=$obj_param->MetaOption;                            
             $obj_metaColumn->DefaultValue=$obj_param->DefaultValue;
             $obj_metaColumn->MetaPermissionTag=$obj_param->MetaPermissionTag;//relates to permission to show these meta tags in the meta tag row
@@ -571,6 +642,7 @@ class rowzAPISupport extends rowzAPIGet{
                     return $this->MetaOptionDefaultText;            
                 case "recordid":
                     return $this->MetaOptionDefaultRecordId;                        
+                case "percent":
                 case "number":
                     return $this->MetaOptionDefaultNumber;                        
                 case "checkbox":

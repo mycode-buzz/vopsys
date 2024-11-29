@@ -42,8 +42,8 @@ class rowzAPIGet extends rowzAPIPost{
 
         $response=$this->response;
 
-        //SET REQUIRED AREAS
-        $this->fn_setSelectColumn();                              
+        //SET REQUIRED AREAS        
+        $this->fn_setSelectColumn();                                      
         $this->fn_setRowMatchSQL();              
         $this->fn_setSQLSource();                
         $this->fn_setOrderSQL();                      
@@ -77,19 +77,16 @@ class rowzAPIGet extends rowzAPIPost{
             return;
         }
         
-        $str_whereCriteria=$this->fn_getWhereCriteria();
+        $str_whereCriteria=$this->fn_getWhereCriteria();        
+        
 
         //only add Archive to Get, Dont add to General where statement        
         if($obj_paramView->MetaViewId==$this->MetaLinkViewId){
         }
-        else if(empty($obj_call->get_archive)){
-            //*
-            $str_sql="(`meta_data`.`ArchiveDate` IS NULL)";
-            if(!empty($str_sql)){
-                if(!empty($str_whereCriteria)){$str_whereCriteria.=" AND ";}                
-                $str_whereCriteria.=$str_sql;        
-            } 
-                //*/           
+        else if($obj_call->get_archive){}
+        else {
+            if(!empty($str_whereCriteria)){$str_whereCriteria.=" AND ";}                            
+            $str_whereCriteria.="(`meta_data`.`ArchiveDate` IS NULL)";                        
         }
             
         $str_whereCriteria=$this->fn_removeInOperator($str_whereCriteria);
@@ -104,6 +101,12 @@ class rowzAPIGet extends rowzAPIPost{
         );        
 
         
+        if($obj_call->api_debug){
+            //DEBUG            
+            $this->fn_varDump($obj_paramView, "obj_paramView");                                
+            //return;                            
+            //DEBUG
+        }
         
         //GET COUNT WITHOUT LIMIT
         $str_sql="SELECT ";
@@ -124,15 +127,13 @@ class rowzAPIGet extends rowzAPIPost{
         }
         $str_sql.=";";
                        
-    
+        
         if($obj_call->api_debug){
             //DEBUG
             $this->fn_varDump($str_sql, "str_sql");
             $this->fn_varDump($obj_call->arr_param, "obj_call->arr_param");                                
             //return;                            
             //DEBUG
-
-            
         }
 
         /*

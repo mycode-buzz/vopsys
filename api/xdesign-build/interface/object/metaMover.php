@@ -13,7 +13,7 @@ class metaMover{
     function fn_createMetaData($obj_param){   
       
       
-      $obj_userLogin=$this->obj_parent->obj_userLogin;
+      //$this->obj_parent->obj_userLogin;
       
       $obj_paramMetaData=new stdClass;                  
       $obj_paramMetaData->MetaDataSystemId=$obj_param->MetaDataSystemId;      
@@ -29,9 +29,14 @@ class metaMover{
       $obj_metaData->fn_createRecord($obj_paramMetaData);            
     }
     
-      function fn_createRecord($MetaMoverSystemId, $MetaMoverUserId, $MetaMoverEmail){                    
+      function fn_createRecord($obj_param){                    
 
-        $obj_userLogin=$this->obj_parent->obj_userLogin;
+        $MetaMoverSystemId=$obj_param->MetaMoverSystemId;
+        $MetaMoverUserId=$obj_param->MetaMoverUserId;
+        $MetaMoverEmail=$obj_param->MetaMoverEmail;
+        $MetaPermissionTag=$obj_param->MetaPermissionTag;        
+        
+        //$this->obj_parent->obj_userLogin;
   
         $MetaMoverType="User";
         $MetaMoverStatus="Enabled"; 
@@ -73,7 +78,8 @@ class metaMover{
             'MetaMoverSystemName'=>$MetaMoverSystemName, 
             'MetaMoverType'=>$MetaMoverType, 
             'MetaMoverStatus'=>$MetaMoverStatus, 
-            'MetaMoverEmail'=>$MetaMoverEmail,             
+            'MetaPermissionTag'=>$MetaPermissionTag,             
+            'MetaMoverEmail'=>$MetaMoverEmail,                         
           ];
           
           $this->fn_insertRecord($arr_param);                    
@@ -97,8 +103,8 @@ class metaMover{
       }  
 
       function fn_insertRecord($arr_param){                                
-
-        $obj_userLogin=$this->obj_parent->obj_userLogin;
+        
+        //$this->obj_parent->obj_userLogin;
   
         $str_sql="
         INSERT INTO `meta_user`.`meta_mover`
@@ -108,7 +114,8 @@ class metaMover{
           MetaMoverSystemName, 
           MetaMoverType, 
           MetaMoverStatus, 
-          MetaMoverEmail         
+          MetaPermissionTag,           
+          MetaMoverEmail      
         )
         VALUES
         (
@@ -116,7 +123,8 @@ class metaMover{
           :MetaMoverUserId, 
           :MetaMoverSystemName, 
           :MetaMoverType, 
-          :MetaMoverStatus, 
+          :MetaMoverStatus,
+          :MetaPermissionTag,          
           :MetaMoverEmail
         )
         ;";       
@@ -126,11 +134,10 @@ class metaMover{
       }          
       
       function fn_acceptInvite($MetaMoverSystemIdTarget, $bln_debug=false){      
-
-        $obj_userLogin=$this->obj_parent->obj_userLogin;
+        
     
-        $MetaMoverUserId=$obj_userLogin->MetaUserId;           
-        $MetaMoverEmail=$obj_userLogin->MetaUserEmail;       
+        $MetaMoverUserId=$this->obj_parent->obj_userLogin->MetaUserId;           
+        $MetaMoverEmail=$this->obj_parent->obj_userLogin->MetaUserEmail;       
         $MetaMoverType="User";
         $MetaMoverStatus="Enabled";
       

@@ -305,7 +305,12 @@
               //BASIC OPS 
               
               //MENU OPS 
-              
+              fn_getAdminPin(){
+                return this.obj_meta.bln_adminPin;
+              }   
+              fn_setAdminPin(bln_value){
+                this.obj_meta.bln_adminPin=bln_value;      
+              }   
               fn_getArchivePin(){
                 return this.obj_meta.bln_archivePin;
               }   

@@ -312,16 +312,20 @@ class interface_datafunction extends interface_support{
   }
   
     
-    function fn_resetAutoIncrement($str_source, $str_key){             
-      $str_sql="SELECT max($str_key) FROM $str_source";
-      $int_idMax=$this->fn_fetchColumn($str_sql);
+    function fn_resetAutoIncrement($str_source, $str_key){                   
 
-      if(is_null($int_idMax)){
-        $int_idMax=0;
-    }
-      
-      $str_sql="ALTER TABLE $str_source auto_increment=$int_idMax;";        
-      $this->fn_executeSQLStatement($str_sql);   
+      $str_sql="SELECT MAX($str_key) as `MaxId` FROM $str_source;";
+      $int_maxId=$this->fn_fetchColumn($str_sql);                
+      if(is_null($int_maxId)){
+        $int_maxId=0;
+      }
+      if(empty($int_maxId)){
+        $int_maxId=0;
+      }      
+      $int_maxId+=1;
+
+      $str_sql="ALTER TABLE $str_source AUTO_INCREMENT=$int_maxId;";
+      $stmt=$this->fn_executeSQLStatement($str_sql);                
     }
     function fn_protectSQLValue($str_value){             
      

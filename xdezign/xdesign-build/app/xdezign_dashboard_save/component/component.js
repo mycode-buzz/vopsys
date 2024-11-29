@@ -13,7 +13,10 @@
             //END INITIALIZE DESIGN      
             
         } 
-        fn_loadDashboard(){}                
+        fn_loadDashboard(){
+            if(!super.fn_loadDashboard()){return;}
+        }                
+        
 
         fn_saveAsProject(bln_protectChildren){//This relates to saving a component within the Project Isntance ie from the aciton button                                   
     

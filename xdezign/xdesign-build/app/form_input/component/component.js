@@ -24,8 +24,16 @@
 
                   this.obj_holder.bln_listenInput=true;
 
+                  this.obj_holder.bln_listenSelectStart=true;
+
                   //*/
-                }                
+                }    
+                fn_onSelectStart(e){
+                  //console.log("hit input");
+                  obj_project.eventCancelledByChild=false;
+                  e.stopPropagation();
+                  return true;
+                }                                    
                 fn_setControlType(str_value){
                   this.fn_setDomProperty("type", str_value);
 

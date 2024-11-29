@@ -24,10 +24,7 @@ class page extends package{
     switch($obj_post->Action){                             
       case "maintain":
         $this->fn_runPage();                  
-      break;              
-      case "maintain_debug_status":
-        $this->fn_maintain_debug_status();
-      break;              
+      break;                    
       default:          
         $this->fn_setError("APP ACTION Not Handled: [".$obj_post->Action."]");          
         exit;

@@ -9,7 +9,8 @@
                   
                   this.obj_holder.bln_debugServer=false;                                    
                 }
-                fn_loadDashboard(){                                                                            
+                fn_loadDashboard(){
+                  if(!super.fn_loadDashboard()){return;}                                                                            
                   
                   let obj_menuPanel=this.fn_getParentComponent();                  
                   let obj_container=this.obj_consoleContainerDashboard=obj_menuPanel.fn_addConsoleContainer("xapp_console_container_dashboard", true);

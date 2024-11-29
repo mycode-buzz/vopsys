@@ -11,7 +11,7 @@ class interface_delete extends interface_list{
     }
 
     
-    function fn_runRecycleRecord(){ 
+    function fn_runArchiveRecord(){ 
         
         $this->obj_metaView=new metaView($this);
         $this->obj_metaView->fn_initialize($this->MetaDataViewId);

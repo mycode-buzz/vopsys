@@ -10,8 +10,7 @@ class rowzAPIData extends rowzAPISupport{
 
     if(!empty($this->pdo_admin)){
       return;        
-    }
-    
+    }    
     
       $obj_connect=new stdClass;                              
       $obj_connect->Schema=$SYSTEM_DEFAULT_DATABASE;                               
@@ -19,6 +18,10 @@ class rowzAPIData extends rowzAPISupport{
       $obj_connect->Pass=$SYSTEM_ADMINISTRATOR_PASSWORD; 
       $obj_connect->Host='localhost';       
       $this->pdo_admin=$this->fn_dataConnect($obj_connect);             
+
+      if($obj_connect->HasError){        
+        $this->fn_varDump($obj_connect->str_message, "Connect Error");            
+      }
 
       if(empty($this->pdo_admin)){
         return false;
@@ -147,7 +150,7 @@ class rowzAPIData extends rowzAPISupport{
     //this funciton is used by this page where no session exists before login.  
     //this function is used by login, once the user is authenticated.
     //The session is created from this object.  
-    //From then on the userParam is created from session in fn_loadSessionUser
+    //From then on the userParam is created from session in fn_load SessionUser
     
     $obj_user=new metaUser();   
     $obj_user->fn_initialize($arr_row, $this->OPEN_USER_API);  
@@ -181,9 +184,14 @@ class rowzAPIData extends rowzAPISupport{
     $arr_row=$stmt->fetch();                        
     
     $obj_user->MetaMoverId=$arr_row["MetaMoverId"];
-    $obj_user->MetaPermissionTag=$arr_row["MetaPermissionTag"];//who created/owns your mover record ?
+    $obj_user->MetaPermissionTag=$arr_row["MetaPermissionTag"];//what permission do you have    
     $obj_user->MetaDataOwnerId=$arr_row["MetaDataOwnerId"];//who created/owns your mover record ?      
-
+    
+    $Admin=false;//see if this will "work"
+    if(strtolower($obj_user->MetaPermissionTag)==="#admin"){
+      $Admin=true;
+    }
+    $obj_user->Admin=$Admin;
   }
 
   function fn_setSystemOwner(){    

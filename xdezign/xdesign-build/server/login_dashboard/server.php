@@ -17,15 +17,18 @@ class page extends interface_datamanager{
     parent::fn_executePage();        
     
     
+    
     $this->bln_debugLogin=true;    
     
     
 
     $obj_post=$this->obj_post;       
     $Action=$obj_post->Action;
-    $this->AuthorizeUserStatus=false;     
 
-    
+    //End all access
+    $this->AuthorizeUserStatus=false;     
+    $this->fn_blankSession("UserLoginSession");           
+    //End all access
 
     
     //*
@@ -396,8 +399,14 @@ class page extends interface_datamanager{
     //create own system and mover record                
     $obj_metaSystem=new metaSystem($this);                             
     $bln_newSystem=$obj_metaSystem->fn_createRecord($arr_row["MetaUserId"], $arr_row["MetaUserEmail"]);            
-    $obj_metaMover=new metaMover($this);                                           
-    $obj_metaMover->fn_createRecord($this->obj_userLogin->MetaHomeSystemId, $arr_row["MetaUserId"], $arr_row["MetaUserEmail"]);            
+    
+    $obj_param=new stdClass;                  
+    $obj_param->MetaMoverSystemId=$this->obj_userLogin->MetaHomeSystemId;
+    $obj_param->MetaMoverUserId=$arr_row["MetaUserId"];
+    $obj_param->MetaMoverEmail=$arr_row["MetaUserEmail"];        
+    $obj_param->MetaPermissionTag="#ADMIN";        
+    $obj_metaMover=new metaMover($this);                                               
+    $obj_metaMover->fn_createRecord($obj_param);            
 
     //update user record 
     $str_sql="UPDATE `meta_user`.`meta_user` 

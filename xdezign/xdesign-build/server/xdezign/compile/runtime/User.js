@@ -3,10 +3,22 @@ class User {
   } 
   fn_initialize(obj_user){//obj_post.UserHome
     this.obj_user=obj_user;  
-    obj_user.MetaPermissionTag=this.fn_cleanTag(obj_user.MetaPermissionTag);
+    let MetaPermissionTag=this.fn_cleanTag(obj_user.MetaPermissionTag);
+    let Admin=false;    
+    let Interface=false;
     if(this.MetaSystemOwner){
-      obj_user.MetaPermissionTag="#ADMIN";
+      MetaPermissionTag="#ADMIN";          
     }
+    if(MetaPermissionTag.toLowerCase()==="#admin"){
+      Admin=true;
+    }
+    if(this.MetaUserSystemId===100){
+      Interface=true;
+    }
+      
+    this.MetaPermissionTag=MetaPermissionTag;
+    this.Admin=Admin;
+    this.Interface=Interface;
     
     
   }
@@ -29,6 +41,18 @@ class User {
   get MetaUserSystemId(){      
     return this.obj_user.MetaUserSystemId;
   }    
+  get Admin(){      
+    return this.obj_user.Admin;
+  }
+  set Admin(bln_value){      
+    this.obj_user.Admin=bln_value;
+  }
+  get Interface(){      
+    return this.obj_user.Interface;
+  }
+  set Interface(bln_value){      
+    this.obj_user.Interface=bln_value;
+  }
   get MetaPermissionTag(){      
     return this.obj_user.MetaPermissionTag;
   }

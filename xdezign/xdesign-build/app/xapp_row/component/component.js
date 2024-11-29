@@ -43,7 +43,7 @@
                   let obj_metaData=this.obj_paramRow.obj_metaData={};                                   
                   
                   for (let i = 0; i < int_totalColumn;i++) {                                                                
-                    let obj_metaColumn=obj_recordset.fn_getMetaColumn(i);                                                                                
+                    let obj_metaColumn=obj_recordset.fn_getMetaColumn(i);                                                                                                    
                     arr_item.push(obj_metaColumn);                    
                     if(obj_metaColumn.IsMetaData){                                            
                       obj_metaData.bln_hasData=true;                                                                                        
@@ -116,10 +116,13 @@
                 } 
                 
                 fn_postComputeColumns(){                  
-                  this.fn_callMarkColumn();
+                  this.fn_parseColumns();
                 }                
 
-                fn_callMarkColumn(){
+                fn_parseColumns(){
+
+                  const arr_nameSummary=[];
+                  const arr_valueSummary=[];
                   
                   let arr, i, obj_column;
                   arr=this.obj_paramRow.arr_column;                  
@@ -130,19 +133,52 @@
                       obj_column.fn_onMarkColumn();
                     }
                     //console.log(obj_column);
-                    if(obj_column.obj_metaColumn.SectionTitle==="Meta"){
+                    //if(obj_column.obj_metaColumn.SectionTitle==="Meta"){
+                    if(obj_column.obj_metaColumn.MetaColumnAPIName==="metadataid"){                      
                       obj_columnMarked=obj_column;
                     }
+                    
+                    let bln_addRecordSummary=obj_column.obj_metaColumn.RecordSummaryPin;
+                    if(obj_column.obj_metaColumn.MetaPermissionTag.toLowerCase()==="#interface"){
+                      if(!obj_userHome.Interface){
+                        bln_addRecordSummary=false;                        
+                      }
+                      
+                    }
+                    
+                    if(bln_addRecordSummary){
+                      //console.log(obj_column);
+                      //console.log(obj_column.obj_metaColumn);
+                      //obj_column.fn_setHiddenPin(true);
+                      let str_name=obj_column.obj_metaColumn.MetaLabel;
+                      let str_value=obj_shared.fn_replace(obj_column.str_valueDisplay, "&nbsp;", "");                      
+                      if(str_value){
+                        //console.log("[" + str_value + "]");                        
+                        arr_nameSummary.push(str_name);
+                        arr_valueSummary.push(str_value);
+                      }
+                    }
                   }
-                  if(obj_columnMarked){
+                  
+                  if(obj_columnMarked){//position Meta at End
                     let obj_parent=obj_columnMarked.fn_getParentComponent();                    
                     const childElement = obj_parent.dom_obj;
                     const parentElement = childElement.parentNode;                  
                     parentElement.removeChild(childElement);                        
                     parentElement.appendChild(childElement);
-                  }
+                    
+                    let str_html=obj_shared.fn_getHTMLTable(arr_nameSummary, arr_valueSummary );                    
+                    if(str_html){
+                      let obj_control=obj_parent.fn_addContextItem("form_span");   
+                      obj_control.fn_setText(str_html);
+                      obj_control.fn_setDisabled(true);
+                    }
+                  } 
                 }
 
+
+
+                
                 fn_describeRow(){
 
                   let arr_item=this.obj_paramRow.arr_metaColumn;                  
@@ -227,7 +263,7 @@
                   this.obj_paramRS.obj_recordset.fn_onComputeColumn(obj_column);
                 }
 
-                fn_getColumnKey(){                                  
+                fn_getColumnKey(obj_column=false){                                  
                 }
                 fn_getColumnDataId(){                  
                 }
