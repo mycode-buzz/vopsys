@@ -1182,7 +1182,7 @@ class BaseObject extends LevelObject{
     if(this.obj_design.str_themeType==="xxform_hardrule"){    
         bln_debug=true;        
     }       
-    if(this.obj_design.str_name==="xdesign1_AuthorizeUserEmail"){    
+    if(this.obj_design.str_name==="form_input_lxogin_emxail"){    
         bln_debug=true;        
     } 
     //*/

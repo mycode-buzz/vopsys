@@ -53,7 +53,7 @@
                     
                     let str_padding=this.fn_getStyleProperty("padding");
                     let int_padding=parseInt(str_padding);   
-                    let int_paddingExpand=(int_padding*3);
+                    let int_paddingExpand=(int_padding*3);                    
                     //console.log("int_paddingExpand: " + int_paddingExpand);
 
                     this.fn_setStyleProperty("padding", +int_paddingExpand+"px");        

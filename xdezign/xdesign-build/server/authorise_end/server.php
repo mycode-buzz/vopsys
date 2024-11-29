@@ -4,14 +4,41 @@
 $obj_post = json_decode(file_get_contents("php://input"));  
 $obj_post->MessageConsole="";   
 
-fn_addConsole("Authorise End");
-//End all access
-fn_blankSession("UserLoginSession");
-fn_loginCookie("AuthorizeSessionKey", "", true);
-fn_loginCookie("AuthorizeUserId", "", true);
-//End all access
+$bln_valid=fn_validSubDomain();
+if($bln_valid){
+  fn_addConsole("Authorise End");
+  //End all access
+  fn_blankSession("UserLoginSession");
+  fn_loginCookie("AuthorizeSessionKey", "", true);
+  fn_loginCookie("AuthorizeUserId", "", true);
+  //End all access
+}
+else{
+  fn_addConsole("Authorise Not End");
+}
 
 echo json_encode($obj_post);  
+
+function fn_validSubDomain(){
+  
+  $host = $_SERVER['HTTP_HOST'];
+  $parts = explode('.', $host);
+
+  // Assuming the first part is the subdomain
+  $subdomain = $parts[0];
+  // Check if it's a valid subdomain (not a TLD)
+  
+  if (count($parts) > 2) {
+    if($subdomain==="xdezign"){      
+      return false;
+    }      
+  } else{
+      //No subdomain detected
+  }
+  
+  return true;
+
+}
 
 function fn_blankSession($str_name){
     $_SESSION[$str_name]="";

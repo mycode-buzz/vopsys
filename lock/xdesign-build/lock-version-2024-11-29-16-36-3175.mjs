@@ -3587,7 +3587,7 @@ class BaseObject extends LevelObject{
     if(this.obj_design.str_themeType==="xxform_hardrule"){    
         bln_debug=true;        
     }       
-    if(this.obj_design.str_name==="xdesign1_AuthorizeUserEmail"){    
+    if(this.obj_design.str_name==="form_input_lxogin_emxail"){    
         bln_debug=true;        
     } 
     //*/
@@ -6344,7 +6344,7 @@ class form_fieldset extends component{
                     
                     let str_padding=this.fn_getStyleProperty("padding");
                     let int_padding=parseInt(str_padding);   
-                    let int_paddingExpand=(int_padding*3);
+                    let int_paddingExpand=(int_padding*3);                    
                     //console.log("int_paddingExpand: " + int_paddingExpand);
 
                     this.fn_setStyleProperty("padding", +int_paddingExpand+"px");        
@@ -13526,6 +13526,40 @@ class table extends component {
 
 
 /*START COMPONENT//*/
+/*type: form_input_login_email//*/
+      //XSTART component/form_input_login_email
+      class form_input_login_email extends component{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/form_input_login_email        
+/*type: form_input_login_email//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_input_login_pass//*/
+      //XSTART component/form_input_login_pass
+      class form_input_login_pass extends component{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/form_input_login_pass        
+/*type: form_input_login_pass//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
 /*type: form_label//*/
 
             //XSTART component/form_label
@@ -14305,13 +14339,12 @@ class login_dashboard extends xapp_dashboard{
 
   fn_resetForm(){          
     let obj_item;    
-    obj_item=obj_project.fn_getComponent("xdesign1_AuthorizeUserEmail");                                                
+    obj_item=obj_project.fn_getComponent("form_input_login_email");                                                
     if(obj_item){
       obj_item.fn_setDisplay(true);        
-      obj_item.fn_setText("");                    
-      //obj_item.fn_debug("fn_resetForm");
+      obj_item.fn_setText("");                          
     }                    
-    obj_item=obj_project.fn_getComponent("xdesign1_AuthorizeUserPass");
+    obj_item=obj_project.fn_getComponent("form_input_login_pass");
     if(obj_item){
       obj_item.fn_setDisplay(false);        
       obj_item.fn_setText("");                    
@@ -14340,7 +14373,7 @@ class login_dashboard extends xapp_dashboard{
     AuthorizeUserPass="";
     
     
-    obj_item=obj_project.fn_getComponent("xdesign1_AuthorizeUserEmail");
+    obj_item=obj_project.fn_getComponent("form_input_login_email");
     if(obj_item){
       MetaUserEmail=obj_item.fn_getValue();            
       obj_item.fn_setDisplay(true);        
@@ -14350,7 +14383,7 @@ class login_dashboard extends xapp_dashboard{
       //*/   
     }                            
     
-    obj_item=obj_project.fn_getComponent("xdesign1_AuthorizeUserPass");
+    obj_item=obj_project.fn_getComponent("form_input_login_pass");
     if(obj_item){
       AuthorizeUserPass=obj_item.fn_getValue();                                          
       /*
@@ -14431,20 +14464,18 @@ class login_dashboard extends xapp_dashboard{
     if(!bln_valid){
       bln_value=this.fn_requireAuthorizeUserEmail();        
       if(!bln_value){return false;}
-    }          
-    
+    }              
+
     //*
+    let obj_item=obj_project.fn_getComponent("form_button_login");                
+    obj_item.fn_setText("Open");    
+    //obj_item.fn_setDisabled();
+    //*/
+    
     if(!obj_auth.AuthorizeUserPass){
       bln_value=this.fn_requireAuthorizeUserPass();        
       if(!bln_value){return false;}             
     }
-    //*/
-
-    /*
-    let obj_item=obj_project.fn_getComponent("login_button_send");                
-    obj_item.fn_setText("Sent");    
-    obj_item.fn_setDisabled();
-    //*/
 
     //obj_auth.AuthorizeUserStatus=true;
     console.log("obj_auth.AuthorizeUserStatus: " + obj_auth.AuthorizeUserStatus);
@@ -14463,7 +14494,7 @@ class login_dashboard extends xapp_dashboard{
     
   }  
   fn_requireAuthorizeUserEmail(){                                      
-    let obj_item=obj_project.fn_getComponent("xdesign1_AuthorizeUserEmail");                    
+    let obj_item=obj_project.fn_getComponent("form_input_login_email");                    
     
     let MetaUserEmail;
     if(obj_item){
@@ -14483,7 +14514,7 @@ class login_dashboard extends xapp_dashboard{
   fn_requireAuthorizeUserPass(){
     
     let AuthorizeUserPass;                                
-    let obj_item=obj_project.fn_getComponent("xdesign1_AuthorizeUserPass");                                
+    let obj_item=obj_project.fn_getComponent("form_input_login_pass");                                
     if(obj_item){
       obj_item.fn_setDisplay(true);        
       AuthorizeUserPass=obj_item.fn_getValue();
@@ -14511,72 +14542,14 @@ class login_dashboard extends xapp_dashboard{
                   super(obj_ini);        
                 } 
                 fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                
-                  
-                  
-                  //this.fn_setType("loginpanelform");      
-                  this.fn_setTag("loginpanelform");            
-                  
-                   this.fn_extends("form_form");            
+                  super.fn_initialize(obj_ini);                                  
                 }
-                fn_onLoad(){
-                  super.fn_onLoad();
-
-                  let obj_item;
-
-                  //console.log("fn_onLoad");
-
-                  let int_maxPadding=30;
-                  let int_padding=int_maxPadding/2;
-                  
-                  obj_item=obj_project.fn_getComponent("xdesign1_AuthorizeUserEmail");                                                
-                  if(obj_item){                  
-                    obj_item.obj_design.bln_debugDesign=true;
-                    let int_maxPadding=30;
-                    let int_padding=int_maxPadding/2;                                                           
-                    
-                    //obj_item.fn_setStyleProperty("padding", int_maxPadding+"px");        
-                    //obj_item.fn_setStyleProperty("font-weight", "bold");        
-                  }
-
-                  obj_item=obj_project.fn_getComponent("xdesign1_AuthorizeUserPass");                                                
-                  if(obj_item){                  
-                    obj_item.obj_design.bln_debugDesign=true;
-                    //obj_item.fn_setStyleProperty("padding", int_maxPadding+"px");        
-                    //obj_item.fn_setStyleProperty("font-weight", "bold");        
-                  }
-
-                  obj_item=obj_project.fn_getComponent("login_button_send");                                                
-                  if(obj_item){                    
-                    obj_item.obj_design.bln_debugDesign=true;
-                    //obj_item.fn_setStyleProperty("padding", int_padding+"px");        
-                    //obj_item.fn_setStyleProperty("font-weight", "bold");        
-                  }
-
-
-                  
-                  /*
-                  let that=this;                  
-                  this.dom_obj.addEventListener('submit', function(e){                                                             
-                      e.preventDefault();                       
-                      let obj_notify=that.obj_holder.obj_projectLocal;                      
-                      if(obj_notify){
-                        obj_notify.fn_startAuthorize();      
-                      }                                            
-                  });
-                  //*/
-                }                  
-
-                
-                fn_onSubmit(e){   
-                  
-                  
+                fn_onSubmit(e){      
                   obj_project.fn_forgetEvent(e);                                    
                   let obj_dashboard=obj_project.fn_locateItem("login_dashboard");
                   if(obj_dashboard){                    
                     obj_dashboard.fn_startAuthorize();
-                  }                  
-                  
+                  }                                    
                 }
               }//END CLS
               //END TAG
@@ -18233,7 +18206,7 @@ class login_dashboard extends xapp_dashboard{
 //START COMPONENTMAP
 
 //START AUTO GENERATED COMPONENT MAP
-const obj_ComponentMap = new Map([['component', component],['xapp_ajax', xapp_ajax],['xapp_component', xapp_component],['form_fieldset', form_fieldset],['form_input', form_input],['tablecell', tablecell],['tableheader', tableheader],['tablerow', tablerow],['input', input],['table', table],['xapp_menu_operation', xapp_menu_operation],['xapp_menu', xapp_menu],['form_menu_panel', form_menu_panel],['xapp_base', xapp_base],['xapp_console_container', xapp_console_container],['xapp_data', xapp_data],['xapp_dataform', xapp_dataform],['form_inputandbutton', form_inputandbutton],['form_button', form_button],['form_button_rich', form_button_rich],['xapp_button', xapp_button],['xapp_console_button', xapp_console_button],['form_form', form_form],['xapp_dashboard', xapp_dashboard],['xapp', xapp],['form_tablecell', form_tablecell],['form_button_span', form_button_span],['form_button_icon', form_button_icon],['form_button_anchor', form_button_anchor],['form_inputandbutton_submit', form_inputandbutton_submit],['authorise_end', authorise_end],['block', block],['form_anchor', form_anchor],['form_button_search', form_button_search],['form_button_showhide', form_button_showhide],['form_button_submit', form_button_submit],['form_checkbox', form_checkbox],['form_field', form_field],['form_hardrule', form_hardrule],['form_icon', form_icon],['form_iframe', form_iframe],['form_label', form_label],['form_legend', form_legend],['form_menu_button_anchor', form_menu_button_anchor],['form_menu_button_icon', form_menu_button_icon],['form_menu_button_span', form_menu_button_span],['form_nonbreakingspace', form_nonbreakingspace],['form_panel', form_panel],['form_panellist', form_panellist],['form_radio', form_radio],['form_section', form_section],['form_section_panel', form_section_panel],['form_select', form_select],['form_span', form_span],['form_tab', form_tab],['form_table', form_table],['form_tableheader', form_tableheader],['form_tablerow', form_tablerow],['form_tablist', form_tablist],['form_tabset', form_tabset],['form_text', form_text],['form_textarea', form_textarea],['lock', lock],['login_dashboard', login_dashboard],['loginpanelform', loginpanelform],['menu_button', menu_button],['xapp_accordion', xapp_accordion],['xapp_button_general_archive_hide', xapp_button_general_archive_hide],['xapp_button_general_archive_show', xapp_button_general_archive_show],['xapp_button_general_form_down', xapp_button_general_form_down],['xapp_button_general_form_gap', xapp_button_general_form_gap],['xapp_button_general_form_group', xapp_button_general_form_group],['xapp_button_general_form_up', xapp_button_general_form_up],['xapp_button_general_row_hide', xapp_button_general_row_hide],['xapp_button_general_row_show', xapp_button_general_row_show],['xapp_button_general_use_task_date', xapp_button_general_use_task_date],['xapp_button_general_use_task_datetime', xapp_button_general_use_task_datetime],['xapp_button_navigate_desktop', xapp_button_navigate_desktop],['xapp_button_navigate_lobby', xapp_button_navigate_lobby],['xapp_button_navigate_login', xapp_button_navigate_login],['xapp_button_navigate_mall', xapp_button_navigate_mall],['xapp_button_navigate_newcolumn', xapp_button_navigate_newcolumn],['xapp_button_navigate_newrow', xapp_button_navigate_newrow],['xapp_button_navigate_office', xapp_button_navigate_office],['xapp_button_navigate_rowz', xapp_button_navigate_rowz],['xapp_button_navigate_settings', xapp_button_navigate_settings],['xapp_button_queryterm', xapp_button_queryterm],['xapp_column', xapp_column],['xapp_console', xapp_console],['xapp_console_search', xapp_console_search],['xapp_context_holder', xapp_context_holder],['xapp_data_childmenu', xapp_data_childmenu],['xapp_data_view', xapp_data_view],['xapp_dynamic_content', xapp_dynamic_content],['xapp_form_container_search', xapp_form_container_search],['xapp_menu_panel', xapp_menu_panel],['xapp_menuform', xapp_menuform],['xapp_propertysheet', xapp_propertysheet],['xapp_propertysheet_input', xapp_propertysheet_input],['xapp_queryterm_interface', xapp_queryterm_interface],['xapp_report_interface_fieldcriteria', xapp_report_interface_fieldcriteria],['xapp_report_interface_fieldlist', xapp_report_interface_fieldlist],['xapp_row', xapp_row],['xapp_theme', xapp_theme],['xapp_widgetboard', xapp_widgetboard]]);
+const obj_ComponentMap = new Map([['component', component],['xapp_ajax', xapp_ajax],['xapp_component', xapp_component],['form_fieldset', form_fieldset],['form_input', form_input],['tablecell', tablecell],['tableheader', tableheader],['tablerow', tablerow],['input', input],['table', table],['xapp_menu_operation', xapp_menu_operation],['xapp_menu', xapp_menu],['form_menu_panel', form_menu_panel],['xapp_base', xapp_base],['xapp_console_container', xapp_console_container],['xapp_data', xapp_data],['xapp_dataform', xapp_dataform],['form_inputandbutton', form_inputandbutton],['form_button', form_button],['form_button_rich', form_button_rich],['xapp_button', xapp_button],['xapp_console_button', xapp_console_button],['form_form', form_form],['xapp_dashboard', xapp_dashboard],['xapp', xapp],['form_tablecell', form_tablecell],['form_button_span', form_button_span],['form_button_icon', form_button_icon],['form_button_anchor', form_button_anchor],['form_inputandbutton_submit', form_inputandbutton_submit],['authorise_end', authorise_end],['block', block],['form_anchor', form_anchor],['form_button_search', form_button_search],['form_button_showhide', form_button_showhide],['form_button_submit', form_button_submit],['form_checkbox', form_checkbox],['form_field', form_field],['form_hardrule', form_hardrule],['form_icon', form_icon],['form_iframe', form_iframe],['form_input_login_email', form_input_login_email],['form_input_login_pass', form_input_login_pass],['form_label', form_label],['form_legend', form_legend],['form_menu_button_anchor', form_menu_button_anchor],['form_menu_button_icon', form_menu_button_icon],['form_menu_button_span', form_menu_button_span],['form_nonbreakingspace', form_nonbreakingspace],['form_panel', form_panel],['form_panellist', form_panellist],['form_radio', form_radio],['form_section', form_section],['form_section_panel', form_section_panel],['form_select', form_select],['form_span', form_span],['form_tab', form_tab],['form_table', form_table],['form_tableheader', form_tableheader],['form_tablerow', form_tablerow],['form_tablist', form_tablist],['form_tabset', form_tabset],['form_text', form_text],['form_textarea', form_textarea],['lock', lock],['login_dashboard', login_dashboard],['loginpanelform', loginpanelform],['menu_button', menu_button],['xapp_accordion', xapp_accordion],['xapp_button_general_archive_hide', xapp_button_general_archive_hide],['xapp_button_general_archive_show', xapp_button_general_archive_show],['xapp_button_general_form_down', xapp_button_general_form_down],['xapp_button_general_form_gap', xapp_button_general_form_gap],['xapp_button_general_form_group', xapp_button_general_form_group],['xapp_button_general_form_up', xapp_button_general_form_up],['xapp_button_general_row_hide', xapp_button_general_row_hide],['xapp_button_general_row_show', xapp_button_general_row_show],['xapp_button_general_use_task_date', xapp_button_general_use_task_date],['xapp_button_general_use_task_datetime', xapp_button_general_use_task_datetime],['xapp_button_navigate_desktop', xapp_button_navigate_desktop],['xapp_button_navigate_lobby', xapp_button_navigate_lobby],['xapp_button_navigate_login', xapp_button_navigate_login],['xapp_button_navigate_mall', xapp_button_navigate_mall],['xapp_button_navigate_newcolumn', xapp_button_navigate_newcolumn],['xapp_button_navigate_newrow', xapp_button_navigate_newrow],['xapp_button_navigate_office', xapp_button_navigate_office],['xapp_button_navigate_rowz', xapp_button_navigate_rowz],['xapp_button_navigate_settings', xapp_button_navigate_settings],['xapp_button_queryterm', xapp_button_queryterm],['xapp_column', xapp_column],['xapp_console', xapp_console],['xapp_console_search', xapp_console_search],['xapp_context_holder', xapp_context_holder],['xapp_data_childmenu', xapp_data_childmenu],['xapp_data_view', xapp_data_view],['xapp_dynamic_content', xapp_dynamic_content],['xapp_form_container_search', xapp_form_container_search],['xapp_menu_panel', xapp_menu_panel],['xapp_menuform', xapp_menuform],['xapp_propertysheet', xapp_propertysheet],['xapp_propertysheet_input', xapp_propertysheet_input],['xapp_queryterm_interface', xapp_queryterm_interface],['xapp_report_interface_fieldcriteria', xapp_report_interface_fieldcriteria],['xapp_report_interface_fieldlist', xapp_report_interface_fieldlist],['xapp_row', xapp_row],['xapp_theme', xapp_theme],['xapp_widgetboard', xapp_widgetboard]]);
 //END AUTO GENERATED MAP
 
 
@@ -18418,8 +18391,8 @@ var obj_InstanceJSONMap = new Map([
 [76171, {"obj_design":{"int_idRecord":76171,"str_idXDesign":"myId_25555422","str_name":"xapp_widgetboard","str_nameShort":"xapp_widgetboard","str_type":"xapp_widgetboard","str_tag":"xapp_widgetboard","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_section","bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_classExtend":"xapp_component"},"obj_domStyle":{"flex-direction":"column","padding":"10px","flex-wrap":"wrap","flex-flow":"row wrap","border":"1px solid white","gap":"10px","display":"none"}}],
 [76255, {"obj_design":{"int_idRecord":76255,"str_idXDesign":"myId_81785083","str_name":"xapp_dashboard","str_nameShort":"xapp_dashboard","str_type":"xapp_dashboard","str_tag":"xapp_dashboard","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_classExtend":"xapp_component","bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_themeType":"form_section"},"obj_domStyle":{"flex-direction":"column","flex-wrap":"wrap","flex-flow":"row wrap","border":"1px solid white","gap":"10px","display":"none","padding":"0px"}}],
 [76344, {"obj_design":{"int_idRecord":76344,"str_idXDesign":"myId_06166711","str_name":"login_panel","str_nameShort":"login_panel","str_type":"component","str_tag":"login_panel","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"arr_item":[{"obj_design":{"int_idRecord":77377,"str_type":"loginpanelform"}}],"str_idProject":"myId_60426365","bln_classController":"false","str_categoryName":"Lock","bln_registerAtContainer":true,"bln_lockComponent":true,"str_themeType":"component","str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_06166711"},"obj_domStyle":{"display":"flex","align-items":"center","justify-content":"center","background-color":"rgb(64, 169, 236)","border":"1px outset rgb(64, 169, 236)","border-radius":"4px","padding-left":"40px","padding-right":"40px","padding":"40px"},"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_06166711"}}],
-[76358, {"obj_design":{"str_type":"form_input","str_name":"xdesign1_AuthorizeUserEmail","int_idRecord":76358,"str_idXDesign":"myId_33161371","str_idProject":"myId_87716375","str_tag":"input","bln_registerAtProject":true,"str_nameShort":"xdesign1_authorizeuseremail","str_createdDate":"2021-11-29 8:50:28","str_modifiedDate":"2021-11-29 8:50:28","bln_createRelease":"false","bln_editPin":true,"bln_isLocalHome":true,"str_themeType":"form_input","bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":"false","bln_lockComponent":true,"str_categoryName":"Other","bln_expand":true,"bln_registerAtContainer":true},"obj_domProperty":{"minlinegth":"5","maxlength":"100","required":true,"type":"email","placeholder":"Your email address","autocomplete":"username"},"obj_domStyle":{"background-color":"rgb(65, 65, 65)","border":"medium none rgb(65, 65, 65)","color":"white","border-radius":"4px","display":"block","width":"100%","font-weight":"bold","padding":"10px"},"user_agent":"Firefox","dom_objContentContainer":{"minlinegth":"5","maxlength":"100"}}],
-[76361, {"obj_design":{"str_type":"form_input","str_name":"xdesign1_AuthorizeUserPass","int_idRecord":76361,"str_idProject":"myId_87716375","str_tag":"input","bln_registerAtProject":true,"str_nameShort":"xdesign1_authorizeuserpass","str_createdDate":"2021-11-29 8:50:28","str_modifiedDate":"2021-11-29 8:50:28","bln_createRelease":"false","str_idXDesign":"myId_27726192","bln_editPin":true,"str_themeType":"form_input","bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":"false","bln_lockComponent":true,"str_categoryName":"Other","bln_expand":true},"obj_domProperty":{"minlinegth":"5","maxlength":"100","size":"20","placeholder":"One Time Pass","inputmode":"numeric","pattern":"[0-9]*","autocomplete":"one-time-code","type":"text"},"obj_domStyle":{"background-color":"rgb(65, 65, 65)","border":"medium none rgb(65, 65, 65)","color":"white","border-radius":"4px","display":"none","padding":"30px","font-weight":"bold"},"user_agent":"Firefox","dom_objContentContainer":{"minlinegth":"5","maxlength":"100","inputmode":"numeric"}}],
+[76358, {"obj_design":{"str_type":"form_input_login_email","str_name":"form_input_login_email","int_idRecord":76358,"str_idXDesign":"myId_33161371","str_idProject":"myId_87716375","str_tag":"input","bln_registerAtProject":true,"str_nameShort":"form_input_login_email","str_createdDate":"2021-11-29 8:50:28","str_modifiedDate":"2021-11-29 8:50:28","bln_createRelease":"false","bln_editPin":true,"bln_isLocalHome":true,"str_themeType":"form_input","bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Other","bln_expand":true,"bln_registerAtContainer":true,"str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"minlinegth":"5","maxlength":"100","required":true,"type":"email","placeholder":"Your email address","autocomplete":"username"},"obj_domStyle":{"background-color":"rgb(65, 65, 65)","border":"medium none rgb(65, 65, 65)","color":"white","border-radius":"4px","display":"block","width":"100%","font-weight":"bold","padding":"10px"},"user_agent":"Firefox","dom_objContentContainer":{"minlinegth":"5","maxlength":"100"}}],
+[76361, {"obj_design":{"str_type":"form_input_login_pass","str_name":"form_input_login_pass","int_idRecord":76361,"str_idProject":"myId_87716375","str_tag":"input","bln_registerAtProject":true,"str_nameShort":"form_input_login_pass","str_createdDate":"2021-11-29 8:50:28","str_modifiedDate":"2021-11-29 8:50:28","bln_createRelease":"false","str_idXDesign":"myId_27726192","bln_editPin":true,"str_themeType":"form_input","bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","bln_expand":true,"str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"minlinegth":"5","maxlength":"100","size":"20","placeholder":"One Time Pass","inputmode":"numeric","pattern":"[0-9]*","autocomplete":"one-time-code","type":"text"},"obj_domStyle":{"background-color":"rgb(65, 65, 65)","border":"medium none rgb(65, 65, 65)","color":"white","border-radius":"4px","display":"none","padding":"90px","font-weight":"bold"},"user_agent":"Firefox","dom_objContentContainer":{"minlinegth":"5","maxlength":"100","inputmode":"numeric"}}],
 [76394, {"obj_design":{"int_idRecord":76394,"str_idXDesign":"myId_91985606","str_name":"xapp_menu_context_holder","str_nameShort":"xapp_menu_context_holder","str_type":"xapp_context_holder","str_tag":"xapp_menu_context_holder","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"bln_isLocalHome":true,"bln_isContextHolder":true,"bln_palettePinRelease":true,"bln_palettePin":true,"arr_item":[{"obj_design":{"int_idRecord":7775,"str_type":"xapp_context_holder"}},{"obj_design":{"int_idRecord":75368,"str_type":"xapp_context_holder"}},{"obj_design":{"int_idRecord":76686,"str_type":"xapp_context_holder"}}],"bln_classController":"false","bln_lockComponent":true,"str_categoryName":"Xapp","str_themeType":"xapp_context_holder"},"obj_domProperty":{"Id":"myId_91985606"},"obj_domStyle":{"flex flow":"row wrap","flex-flow":"row wrap","gap":"10px","display":"none"},"dom_objContentContainer":{"Id":"myId_91985606"}}],
 [76596, {"obj_design":{"int_idRecord":76596,"str_idXDesign":"myId_58935386","str_name":"menu_console","str_nameShort":"menu_console","str_type":"xapp_context_holder","str_tag":"menu_console","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"str_themeType":"xapp_context_holder","bln_isLocalHome":true,"bln_isContextHolder":true,"bln_palettePinRelease":true,"bln_palettePin":true,"arr_item":[{"obj_design":{"int_idRecord":76746,"str_type":"xapp_console_container"}},{"obj_design":{"int_idRecord":77152,"str_type":"xapp_button"}},{"obj_design":{"int_idRecord":75418,"str_type":"xapp_console_button"}},{"obj_design":{"int_idRecord":76655,"str_type":"xapp_console_container"}},{"obj_design":{"int_idRecord":76626,"str_type":"xapp_form_container_search"}},{"obj_design":{"int_idRecord":76605,"str_type":"xapp_console_container"}},{"obj_design":{"int_idRecord":77171,"str_type":"xapp_button_queryterm"}},{"obj_design":{"int_idRecord":77173,"str_type":"xapp_queryterm_interface"}},{"obj_design":{"int_idRecord":77200,"str_type":"xapp_report_interface_fieldlist"}},{"obj_design":{"int_idRecord":77201,"str_type":"xapp_report_interface_fieldcriteria"}}],"bln_classController":"false","str_categoryName":"Other","bln_lockComponent":true,"str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_58935386"},"obj_domStyle":{"gap":"10px","flex-flow":"row wrap","display":"flex"},"dom_objContentContainer":{"Id":"myId_58935386"}}],
 [76605, {"obj_design":{"int_idRecord":76605,"str_idXDesign":"myId_36985869","str_name":"xapp_console_container_general","str_nameShort":"xapp_console_container_general","str_type":"xapp_console_container","str_tag":"xapp_console_container_general","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":"false","arr_item":[{"obj_design":{"int_idRecord":77396,"str_type":"xapp_button_navigate_settings"}},{"obj_design":{"int_idRecord":77037,"str_type":"xapp_button_navigate_mall"}},{"obj_design":{"int_idRecord":77397,"str_type":"xapp_button_navigate_desktop"}},{"obj_design":{"int_idRecord":77485,"str_type":"xapp_button_navigate_lobby"}},{"obj_design":{"int_idRecord":77486,"str_type":"xapp_button_navigate_rowz"}},{"obj_design":{"int_idRecord":77038,"str_type":"xapp_button_navigate_office"}},{"obj_design":{"int_idRecord":77430,"str_type":"xapp_button_navigate_login"}},{"obj_design":{"int_idRecord":77496,"str_type":"xapp_button_navigate_newrow"}},{"obj_design":{"int_idRecord":77497,"str_type":"xapp_button_navigate_newcolumn"}},{"obj_design":{"int_idRecord":77520,"str_type":"xapp_button_general_archive_hide"}},{"obj_design":{"int_idRecord":77519,"str_type":"xapp_button_general_archive_show"}},{"obj_design":{"int_idRecord":77530,"str_type":"xapp_button_general_use_task_date"}},{"obj_design":{"int_idRecord":77531,"str_type":"xapp_button_general_use_task_datetime"}},{"obj_design":{"int_idRecord":77517,"str_type":"xapp_button_general_row_hide"}},{"obj_design":{"int_idRecord":77518,"str_type":"xapp_button_general_row_show"}},{"obj_design":{"int_idRecord":77523,"str_type":"xapp_button_general_form_up"}},{"obj_design":{"int_idRecord":77522,"str_type":"xapp_button_general_form_down"}},{"obj_design":{"int_idRecord":77524,"str_type":"xapp_button_general_form_gap"}},{"obj_design":{"int_idRecord":77525,"str_type":"xapp_button_general_form_group"}}],"bln_lockComponent":true,"str_categoryName":"Xapp","str_themeType":"form_section","str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_36985869"},"obj_domStyle":{"str_name":"crud_console_record_control","display":"flex","gap":"10px","backkground":"red","flex-flow":"row wrap","border":"0px solid purple"},"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_36985869"}}],
@@ -18506,7 +18479,7 @@ var obj_InstanceJSONMap = new Map([
 [77372, {"obj_design":{"str_tag":"form_block2","str_type":"form_span","str_idXDesign":"myId_85887786","str_name":"form_block2","str_nameShort":"form_block2","str_themeType":"form_block2","int_idRecord":77372,"str_createdDate":"2022-11-18 16:02:10","str_modifiedDate":"2022-11-18 16:02:10","blnIsTag":true,"bln_editPin":true,"bln_typeable":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_idProject":"myId_09982219","str_categoryName":"Anchor","bln_classController":"false","bln_lockComponent":true},"obj_domProperty":{"Id":"myId_85887786","innerHTML":"&nbsp;"},"obj_domStyle":{"padding":"10px","maxheight":"175","color":"black","border-radius":"4px","border":"0px solid black","font-family":"Tahoma","background":"#5233ff"},"dom_objContentContainer":{"Id":"myId_85887786"}}],
 [77373, {"obj_design":{"str_tag":"form_block3","str_type":"form_span","str_idXDesign":"myId_96189882","str_name":"form_block3","str_nameShort":"form_block3","str_themeType":"form_block3","int_idRecord":77373,"str_createdDate":"2022-11-18 16:02:10","str_modifiedDate":"2022-11-18 16:02:10","blnIsTag":true,"bln_editPin":true,"bln_typeable":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_idProject":"myId_09982219","str_categoryName":"Anchor","bln_classController":"false","bln_lockComponent":true},"obj_domProperty":{"Id":"myId_96189882","innerHTML":"&nbsp;"},"obj_domStyle":{"padding":"10px","maxheight":"175","color":"black","border-radius":"4px","border":"0px solid black","font-family":"Tahoma","background":"#b833ff"},"dom_objContentContainer":{"Id":"myId_96189882"}}],
 [77374, {"obj_design":{"str_tag":"form_block4","str_type":"form_span","str_idXDesign":"myId_89139499","str_name":"form_block4","str_nameShort":"form_block4","str_themeType":"form_block4","int_idRecord":77374,"str_createdDate":"2022-11-18 16:02:10","str_modifiedDate":"2022-11-18 16:02:10","blnIsTag":true,"bln_editPin":true,"bln_typeable":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_idProject":"myId_09982219","str_categoryName":"Anchor","bln_classController":"false","bln_lockComponent":true},"obj_domProperty":{"innerHTML":"&nbsp;","Id":"myId_89139499"},"obj_domStyle":{"padding":"10px","maxheight":"175","color":"black","border-radius":"4px","border":"0px solid black","font-family":"Tahoma","background":"#ff33e0"},"dom_objContentContainer":{"Id":"myId_89139499"}}],
-[77377, {"obj_design":{"int_idRecord":77377,"str_idXDesign":"myId_29131132","str_name":"loginpanelform","str_nameShort":"loginpanelform","str_type":"loginpanelform","str_tag":"form","str_classExtend":"form_form","str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"str_themeType":"form_form","bln_isLocalHome":true,"bln_palettePinRelease":true,"bln_palettePin":true,"arr_item":[{"obj_design":{"int_idRecord":76358,"str_type":"form_input"}},{"obj_design":{"int_idRecord":76361,"str_type":"form_input"}},{"obj_design":{"int_idRecord":77378,"str_type":"form_button"}}],"str_idProject":"myId_06166711","bln_classController":true,"str_categoryName":"Other","bln_lockComponent":true,"bln_registerAtProject":true},"obj_domProperty":{"Id":"myId_29131132"},"obj_domStyle":{"flex-wrap":"wrap","display":"flex"," background-color":"coral","flex-direction":"column","gap":"10px"},"user_agent":"Firefox","dom_objContentContainer":{"0":{"minlinegth":"5","maxlength":"100"},"1":{"minlinegth":"5","maxlength":"100","inputmode":"numeric"},"2":{"Id":"myId_70207800"},"Id":"myId_29131132"}}],
+[77377, {"obj_design":{"int_idRecord":77377,"str_idXDesign":"myId_29131132","str_name":"loginpanelform","str_nameShort":"loginpanelform","str_type":"loginpanelform","str_tag":"form","str_classExtend":"form_form","str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"str_themeType":"form_form","bln_isLocalHome":true,"bln_palettePinRelease":true,"bln_palettePin":true,"arr_item":[{"obj_design":{"int_idRecord":76358,"str_type":"form_input"}},{"obj_design":{"int_idRecord":76361,"str_type":"form_input"}},{"obj_design":{"int_idRecord":77378,"str_type":"form_button"}}],"str_idProject":"myId_06166711","bln_classController":true,"str_categoryName":"lock","bln_lockComponent":true,"bln_registerAtProject":true,"str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_29131132"},"obj_domStyle":{"flex-wrap":"wrap","display":"flex"," background-color":"coral","flex-direction":"column","gap":"10px"},"user_agent":"Firefox","dom_objContentContainer":{"0":{"minlinegth":"5","maxlength":"100"},"1":{"minlinegth":"5","maxlength":"100","inputmode":"numeric"},"2":{"Id":"myId_70207800"},"Id":"myId_29131132"}}],
 [77378, {"obj_design":{"int_idRecord":77378,"str_idXDesign":"myId_70207800","str_name":"form_button_login","str_nameShort":"form_button_login","str_type":"form_button","str_themeType":"form_button","str_tag":"button","bln_registerAtContainer":true,"str_createdDate":"2022-11-20 23:26:20","str_modifiedDate":"2022-11-20 23:26:20","bln_editPin":true,"str_text":"Send","bln_palettePinRelease":true,"bln_palettePin":true,"str_idProject":"myId_29131132","bln_registerAtProject":true,"bln_classController":"false","str_categoryName":"Other","bln_expand":true},"obj_domProperty":{"innerText":"My Button","Id":"myId_70207800","type":"submit","innerHTML":"Send"},"obj_domStyle":{"cursor":"pointer","border":"0px none","height":"40px","padding":"10px","border-radius":"2px"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_70207800"},"bln_debugLoad":true}],
 [77379, {"obj_design":{"int_idRecord":77379,"str_idXDesign":"myId_48693643","str_name":"form_button_search","str_nameShort":"form_button_search","str_type":"form_button_search","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"str_text":"Search","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"form_inputandbutton_submit","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_isThemeItem":true,"bln_classController":true,"str_categoryName":"Xtra","bln_lockComponent":true,"str_nameRegistrator":"notset","str_idProject":"notset","str_classList":"notset","str_releaseLabel":"notset","str_lastVersionDate":"notset","str_value":"Search"},"obj_domProperty":{"type":"submit","innerText":"Submit","Id":"myId_48693643","innerHTML":"Search"},"obj_domStyle":{"padding":"10px","cursor":"pointer","border-radius":"2px","border":"0px none white","background-color":"white","flex flow":"column wrap","pointer":"black","rgb(18, 47, 66)":"rgb(18, 47, 66)"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"data":"","Id":"myId_48693643"}}],
 [77381, {"obj_design":{"int_idRecord":77381,"str_idXDesign":"myId_92278787","str_name":"form_icon","str_nameShort":"form_icon","str_type":"form_icon","str_tag":"i","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_icon","bln_editPin":true,"bln_registerAtContainer":true,"bln_classController":true,"str_categoryName":"Xtra","str_idProject":"notset","str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_92278787"},"obj_domStyle":{"margin":"10px"},"dom_objContentContainer":{"Id":"myId_92278787"}}],

@@ -37,13 +37,12 @@ class login_dashboard extends xapp_dashboard{
 
   fn_resetForm(){          
     let obj_item;    
-    obj_item=obj_project.fn_getComponent("xdesign1_AuthorizeUserEmail");                                                
+    obj_item=obj_project.fn_getComponent("form_input_login_email");                                                
     if(obj_item){
       obj_item.fn_setDisplay(true);        
-      obj_item.fn_setText("");                    
-      //obj_item.fn_debug("fn_resetForm");
+      obj_item.fn_setText("");                          
     }                    
-    obj_item=obj_project.fn_getComponent("xdesign1_AuthorizeUserPass");
+    obj_item=obj_project.fn_getComponent("form_input_login_pass");
     if(obj_item){
       obj_item.fn_setDisplay(false);        
       obj_item.fn_setText("");                    
@@ -72,7 +71,7 @@ class login_dashboard extends xapp_dashboard{
     AuthorizeUserPass="";
     
     
-    obj_item=obj_project.fn_getComponent("xdesign1_AuthorizeUserEmail");
+    obj_item=obj_project.fn_getComponent("form_input_login_email");
     if(obj_item){
       MetaUserEmail=obj_item.fn_getValue();            
       obj_item.fn_setDisplay(true);        
@@ -82,7 +81,7 @@ class login_dashboard extends xapp_dashboard{
       //*/   
     }                            
     
-    obj_item=obj_project.fn_getComponent("xdesign1_AuthorizeUserPass");
+    obj_item=obj_project.fn_getComponent("form_input_login_pass");
     if(obj_item){
       AuthorizeUserPass=obj_item.fn_getValue();                                          
       /*
@@ -163,20 +162,18 @@ class login_dashboard extends xapp_dashboard{
     if(!bln_valid){
       bln_value=this.fn_requireAuthorizeUserEmail();        
       if(!bln_value){return false;}
-    }          
-    
+    }              
+
     //*
+    let obj_item=obj_project.fn_getComponent("form_button_login");                
+    obj_item.fn_setText("Open");    
+    //obj_item.fn_setDisabled();
+    //*/
+    
     if(!obj_auth.AuthorizeUserPass){
       bln_value=this.fn_requireAuthorizeUserPass();        
       if(!bln_value){return false;}             
     }
-    //*/
-
-    /*
-    let obj_item=obj_project.fn_getComponent("login_button_send");                
-    obj_item.fn_setText("Sent");    
-    obj_item.fn_setDisabled();
-    //*/
 
     //obj_auth.AuthorizeUserStatus=true;
     console.log("obj_auth.AuthorizeUserStatus: " + obj_auth.AuthorizeUserStatus);
@@ -195,7 +192,7 @@ class login_dashboard extends xapp_dashboard{
     
   }  
   fn_requireAuthorizeUserEmail(){                                      
-    let obj_item=obj_project.fn_getComponent("xdesign1_AuthorizeUserEmail");                    
+    let obj_item=obj_project.fn_getComponent("form_input_login_email");                    
     
     let MetaUserEmail;
     if(obj_item){
@@ -215,7 +212,7 @@ class login_dashboard extends xapp_dashboard{
   fn_requireAuthorizeUserPass(){
     
     let AuthorizeUserPass;                                
-    let obj_item=obj_project.fn_getComponent("xdesign1_AuthorizeUserPass");                                
+    let obj_item=obj_project.fn_getComponent("form_input_login_pass");                                
     if(obj_item){
       obj_item.fn_setDisplay(true);        
       AuthorizeUserPass=obj_item.fn_getValue();
