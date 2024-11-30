@@ -524,7 +524,7 @@ class BaseObject extends LevelObject{
     fn_expandMutliple(int_number){
         if(this.obj_design.bln_expand){                                
             let str_fontSize;            
-            str_fontSize="1rem";                   
+            str_fontSize="1.2rem";                   
             let int_padding=10;
             let int_paddingExpand=(int_padding*int_number);                                          
             this.fn_setStyleProperty("padding", +int_paddingExpand+"px");        
@@ -537,7 +537,7 @@ class BaseObject extends LevelObject{
     fn_expandFraction(int_number){
         if(this.obj_design.bln_expand){                     
           let str_fontSize;
-          str_fontSize="1rem";                   
+          str_fontSize="1.1rem";                   
           let int_padding=10;   
           let int_paddingExpand=int_padding + (int_padding/int_number);
           this.fn_setStyleProperty("padding", +int_paddingExpand+"px");        
