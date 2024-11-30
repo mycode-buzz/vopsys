@@ -134,6 +134,7 @@ $str_header2=<<<heredoc
   }                
   html{        
     background-color: rgb(43, 44, 52);    
+    font-family: tahoma;    
     
   }    
    a {

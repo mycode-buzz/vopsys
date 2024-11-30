@@ -10,7 +10,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>var ServerQueryString = "<?php echo $_SERVER['QUERY_STRING']; ?>";</script>
-<script type="module" src="/app-version-2024-11-30-03-30-1154.mjs"></script>
+<script type="module" src="/app-version-2024-11-30-22-45-1527.mjs"></script>
 
 
 <script src="https://kit.fontawesome.com/6daaa4e123.js" crossorigin="anonymous"  data-auto-replace-svg="nest"></script>
@@ -24,6 +24,7 @@
   }                
   html{        
     background-color: rgb(43, 44, 52);    
+    font-family: tahoma;    
     
   }    
    a {

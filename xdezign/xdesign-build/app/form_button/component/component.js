@@ -36,7 +36,7 @@
                   }
                 }  
 
-                fn_setStyleProperty(str_name, str_value, str_priority){
+                xfn_setStyleProperty(str_name, str_value, str_priority){//n ot sure why this is necessary
                   
                   if(this.dom_obj){this.dom_obj.style.setProperty(str_name, str_value, str_priority);}
               }        

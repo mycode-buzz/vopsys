@@ -99,7 +99,13 @@
             
             obj_instance.obj_holder.bln_markSave=false;
 
-            //SAVE                
+            if(obj_projectTarget===obj_instance){//saving object project
+                if(obj_projectTarget.obj_design.str_type=="xapp_theme"){
+                    obj_instance.obj_design.bln_lockComponent=true;//lock theme
+                }
+            }
+
+            //SAVE                              
             if(parseInt(obj_instance.obj_design.int_modeExecute)===obj_holder.int_modeEdit){        
                 if(bln_debug){obj_instance.fn_debug("ALL CHILD SAVED, I AM EDITABLE");}            
                 obj_ini=new Object;

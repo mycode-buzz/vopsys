@@ -2923,22 +2923,28 @@ class BaseObject extends LevelObject{
 
     fn_expandMutliple(int_number){
         if(this.obj_design.bln_expand){                                
+            let str_fontSize;            
+            str_fontSize="1rem";                   
             let int_padding=10;
             let int_paddingExpand=(int_padding*int_number);                                          
             this.fn_setStyleProperty("padding", +int_paddingExpand+"px");        
             this.fn_setStyleProperty("font-weight", "bold");        
+            this.fn_setStyleProperty("font-size", str_fontSize);        
+            
           }
       }
     
-    fn_expandFraction(int_fraction){
-        if(this.obj_design.bln_expand){                              
+    fn_expandFraction(int_number){
+        if(this.obj_design.bln_expand){                     
+          let str_fontSize;
+          str_fontSize="1rem";                   
           let int_padding=10;   
-          let int_paddingExpand=int_padding + (int_padding/int_fraction);
+          let int_paddingExpand=int_padding + (int_padding/int_number);
           this.fn_setStyleProperty("padding", +int_paddingExpand+"px");        
           this.fn_setStyleProperty("font-weight", "bold");                                                                    
+          this.fn_setStyleProperty("font-size", str_fontSize);        
           }
       }
-
       fn_expand(){        
       }
     
@@ -3589,93 +3595,106 @@ class BaseObject extends LevelObject{
     
     fn_applyTheme(str_themeType=false, bln_returnThemeItem=false){   
 
-    
-    
-    //N.B Theme MUST be set to register with Project to run here
-    
-    if(!obj_project.obj_theme){return};
-    if(obj_project.obj_design.str_type.toLowerCase()==="xapp_theme"){return;}//dont theme a theme project
-    if(this.obj_design.bln_isThemeItem){return;}//dont theme a theme item    
-
-    let str_type,  str_name, obj_theme, obj_themeItem;    
-    
-    let bln_debug=false;
-    bln_debug=this.bln_debugButtonSettings;
+        let str_type,  str_name, obj_theme, obj_themeItem;    
+        let bln_debug=false;
+        bln_debug=this.bln_debugButtonSettings;
   
-    //*//turn on to debug    
-    /*
-    if(this.obj_design.str_themeType==="xxform_hardrule"){    
-        bln_debug=true;        
-    }       
-    if(this.obj_design.str_name==="form_input_lxogin_emxail"){    
-        bln_debug=true;        
-    } 
-    //*/
+    
+        //N.B Theme MUST be set to register with Project to run here
+        
+
+        obj_theme=obj_project.obj_theme;                
+        if(!obj_theme){
+            if (bln_debug){console.log("PROJECT THEME IS FALSE" + this.obj_design.str_name);}
+            return;
+        }
+        
+        if(obj_project.obj_design.str_type.toLowerCase()==="xapp_theme"){return;}//dont theme a theme project
+        
+        if(this.obj_design.bln_isThemeItem){return;}//dont theme a theme item    
+        
+        str_type=this.obj_design.str_type.toLowerCase();                
+        if(str_type==="xapp_theme"){return;}//dont theme a theme           
+    
+        
+        //*//turn on to debug    
+        /*
+        if(this.obj_design.str_themeType==="menu_button"){    
+            bln_debug=true;        
+        }       
+        if(this.obj_design.str_name==="form_input_lxogin_emxail"){    
+            bln_debug=true;        
+        } 
+        //*/
+
+        /*
+        if(this===obj_project){    
+            bln_debug=true;        
+        } 
+        //*/
+
+        /*
+        if(this.obj_design.str_themeType==="menu_button"){    
+            bln_debug=true;        
+        }       
+        //*/
     
 
-    if(this.obj_design.bln_debugDesign){    
-        bln_debug=true;        
-        console.log("fn_applyTheme");
-    }    
-    //*/
+        if(this.obj_design.bln_debugDesign){    
+            bln_debug=true;        
+            console.log("fn_applyTheme");
+        }    
+        //*/
 
-    /*//turn on to debug
-    if(this.obj_design.str_name="xdebug"){
-        bln_debug=true;
-    }
-    //*/
+        /*//turn on to debug
+        if(this.obj_design.str_name="xdebug"){
+            bln_debug=true;
+        }
+        //*/
     
-    str_type=this.obj_design.str_type.toLowerCase();                
-    if(str_type==="xapp_theme"){return;}//dont theme a theme        
+        
     
-    obj_theme=obj_project.obj_theme;                
-    if(!obj_theme){
-        if (bln_debug){console.log("PROJECT THEME IS FALSE" + this.obj_design.str_name);}
-        return;
-    }                    
     
-    str_name=this.obj_design.str_name;    
-    if(!str_themeType){
-        str_themeType=this.obj_design.str_themeType;        
-        if(!str_themeType){str_themeType="notset"};  
-    }
+    
+        str_name=this.obj_design.str_name;    
+        if(!str_themeType){
+            str_themeType=this.obj_design.str_themeType;        
+            if(!str_themeType){str_themeType="notset"};  
+        }
   
-    if (bln_debug){console.log("START APPLY THEME: [" + str_name + "][" + str_themeType + "]");}    
+        if (bln_debug){console.log("START APPLY THEME: [" + str_name + "][" + str_themeType + "]");}    
     
     
-    //Match App Item str_themeType to Theme Object str_type                                 
-    if(!obj_themeItem && str_themeType!=="notset"){ 
-        obj_themeItem=obj_theme.fn_getThemeViaThemeType(str_themeType, bln_debug);                              
-        if(obj_themeItem){                
-            if (bln_debug){console.log("FOUND THEME ITEM VIA THEMETYPE: [" + str_name + "][" + str_themeType + "]");}
+        //Match App Item str_themeType to Theme Object str_type                                 
+        if(!obj_themeItem && str_themeType!=="notset"){ 
+            obj_themeItem=obj_theme.fn_getThemeViaThemeType(str_themeType, bln_debug);                              
+            if(obj_themeItem){                
+                if (bln_debug){console.log("FOUND THEME ITEM VIA THEMETYPE: [" + str_name + "][" + str_themeType + "]");}
 
-            if(bln_returnThemeItem){                
-                return obj_themeItem;                
+                if(bln_returnThemeItem){                
+                    return obj_themeItem;                
+                }
+            }
+        }        
+
+        if(bln_returnThemeItem){
+            return false;
+        }
+    
+        //If there is now a Theme Object Item, then clone style to App Item
+        let str_success="NO THEME APPLIED";
+        if(obj_themeItem){                        
+            let str_display=this.obj_domStyle.display;
+            this.obj_domStyle=this.fn_shallowCopyObject(obj_themeItem.obj_domStyle);        
+            this.obj_domStyle.display=str_display;    
+            //note: this display needs to be block flex etc for background to be applied                
+            str_success="THEME APPLIED";        
+            if(bln_debug){
+                obj_themeItem.fn_debug("theme item");
+                this.fn_debug("apply theme item");
             }
         }
-    }        
-
-    if(bln_returnThemeItem){
-        return false;
-    }
-    
-    
-    
-    
-    //If there is now a Theme Object Item, then clone style to App Item
-    let str_success="NO THEME APPLIED";
-    if(obj_themeItem){                        
-        let str_display=this.obj_domStyle.display;
-        this.obj_domStyle=this.fn_shallowCopyObject(obj_themeItem.obj_domStyle);        
-        this.obj_domStyle.display=str_display;    
-        //note: this display needs to be block flex etc for background to be applied                
-        str_success="THEME APPLIED";        
-        if(bln_debug){
-            obj_themeItem.fn_debug("theme item");
-            this.fn_debug("apply theme item");
-        }
-    }
-    if (bln_debug){console.log("END APPLY THEME: [" + str_name + "][" + str_success + "]");}
+        if (bln_debug){console.log("END APPLY THEME: [" + str_name + "][" + str_success + "]");}
   }
   
   fn_getThemeViaThemeType(str_themeType, bln_debug){          
