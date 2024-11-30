@@ -30,7 +30,7 @@
           this.obj_icon.fn_setDomProperty("class", str_value);            
           //this.obj_icon.fn_setStyleProperty("color", "rgb(64, 169, 236)");          
           this.obj_icon.fn_setDisplay(true);
-          //this.obj_icon.fn_debug();
+          this.obj_icon.fn_debug();
           //this.fn_debug();
         }
         fn_hideIcon(){

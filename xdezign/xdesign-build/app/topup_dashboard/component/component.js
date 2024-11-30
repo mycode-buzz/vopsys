@@ -57,14 +57,14 @@
           this.str_expireSubscription=obj_userHome.MetaSystem.CreditExpiryDate;                              
           this.date_expireSubscription=obj_shared.fn_getDateObjectFromSystemDate(this.str_expireSubscription);                    
 
-          this.obj_themeBackground=this.fn_applyTheme("form_blockbackground", true);
-          this.obj_themeMidground=this.fn_applyTheme("form_blockmidground", true);
-          this.obj_themeForground=this.fn_applyTheme("form_blockforground", true);
-          this.obj_themeHighlight=this.fn_applyTheme("form_blockhighlight", true);
-          this.obj_themeBlock1=this.fn_applyTheme("form_block1", true);
-          this.obj_themeBlock2=this.fn_applyTheme("form_block2", true);
-          this.obj_themeBlock3=this.fn_applyTheme("form_block3", true);
-          this.obj_themeBlock4=this.fn_applyTheme("form_block4", true);
+          this.obj_themeBackground=this.fn_getThemeObject("form_blockbackground");
+          this.obj_themeMidground=this.fn_getThemeObject("form_blockmidground");
+          this.obj_themeForground=this.fn_getThemeObject("form_blockforground");
+          this.obj_themeHighlight=this.fn_getThemeObject("form_blockhighlight");
+          this.obj_themeBlock1=this.fn_getThemeObject("form_block1");
+          this.obj_themeBlock2=this.fn_getThemeObject("form_block2");
+          this.obj_themeBlock3=this.fn_getThemeObject("form_block3");
+          this.obj_themeBlock4=this.fn_getThemeObject("form_block4");
           
           this.str_nameProduct=obj_shared.fn_removeSpace(obj_userHome.MetaSystem.CreditName);
 

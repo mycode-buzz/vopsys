@@ -12,16 +12,10 @@
 
                   
                   
-                  this.obj_themeItemHighlight=this.fn_applyTheme("form_blockHighlight", true);                  
+                  this.obj_themeItemHighlight=this.fn_getThemeObject("form_blockHighlight");                  
                   this.str_colorHighlight="orange";
                   if(this.obj_themeItemHighlight){
                     this.str_colorHighlight=this.obj_themeItemHighlight.fn_getStyleProperty("background");                  
-                  }
-                  
-
-                  this.obj_themeItemLegend=this.fn_applyTheme("form_legend", true);                  
-                  if(this.obj_themeItemLegend){
-                  this.str_borderLegend=this.obj_themeItemLegend.fn_getStyleProperty("border");                  
                   }
                 }
                 

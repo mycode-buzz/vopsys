@@ -8,6 +8,7 @@
                   super.fn_initialize(obj_ini);                                  
                 }
                 fn_onSubmit(e){      
+                  
                   obj_project.fn_forgetEvent(e);                                    
                   let obj_dashboard=obj_project.fn_locateItem("login_dashboard");
                   if(obj_dashboard){                    

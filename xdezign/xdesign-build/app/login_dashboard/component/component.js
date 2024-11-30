@@ -7,6 +7,29 @@ class login_dashboard extends xapp_dashboard{
     super.fn_initialize(obj_ini);                
 
     this.obj_holder.bln_debugServer=true;      
+
+    this.obj_holder.bln_listenSubmit=true;
+  }
+
+  fn_onLoad(){
+    super.fn_onLoad();
+    
+    let obj_item;
+    obj_item=obj_project.fn_getComponent("form_button_login_email");                
+    obj_item.fn_setDisplay(true);                 
+
+    obj_item=obj_project.fn_getComponent("form_button_login_pass");                
+    obj_item.fn_setDisplay(false);             
+  }
+
+  fn_onSubmit(e){      
+   alert(e);
+    return;
+    obj_project.fn_forgetEvent(e);                                    
+    let obj_dashboard=obj_project.fn_locateItem("login_dashboard");
+    if(obj_dashboard){                    
+      obj_dashboard.fn_startAuthorize();
+    }                                    
   }
 
   fn_formatPost(obj_ini){  
@@ -32,24 +55,11 @@ class login_dashboard extends xapp_dashboard{
     else{
       //console.log("no login subdomain so no end auth");
     } 
-    this.fn_addContextItem("login_panel");                                    
+    //this.fn_addContextItem("login_panel");                                    
   }   
 
-  fn_resetForm(){          
-    let obj_item;    
-    obj_item=obj_project.fn_getComponent("form_input_login_email");                                                
-    if(obj_item){
-      obj_item.fn_setDisplay(true);        
-      obj_item.fn_setText("");                          
-    }                    
-    obj_item=obj_project.fn_getComponent("form_input_login_pass");
-    if(obj_item){
-      obj_item.fn_setDisplay(false);        
-      obj_item.fn_setText("");                    
-    }    
-  }
-  fn_XDesigner_endAuthorize(){
-    this.fn_resetForm();
+  
+  fn_XDesigner_endAuthorize(){    
     let obj_ini=new Object;         
     obj_ini.str_action="XDesigner_endAuthorize";                
     this.fn_runServerAction(obj_ini);          
@@ -73,8 +83,7 @@ class login_dashboard extends xapp_dashboard{
     
     obj_item=obj_project.fn_getComponent("form_input_login_email");
     if(obj_item){
-      MetaUserEmail=obj_item.fn_getValue();            
-      obj_item.fn_setDisplay(true);        
+      MetaUserEmail=obj_item.fn_getValue();                  
       /*
       obj_item.fn_setDomProperty("autocomplete", "email");        
       obj_item.fn_setDomProperty("type", "email");    
@@ -95,8 +104,18 @@ class login_dashboard extends xapp_dashboard{
 
     bln_valid=obj_shared.fn_validEmail(MetaUserEmail);    
     if(!bln_valid){      
-      return;
+      return false;
     }
+
+    let bln_validAuthorizeUserEmail=this.fn_getAuthorizeUserEmail()
+    if(bln_validAuthorizeUserEmail){
+      if(!AuthorizeUserPass){
+        return false;
+      }
+      if(AuthorizeUserPass.length<6){
+        return false;
+      }
+    }  
 
     let obj_auth={        
       MetaUserEmail:MetaUserEmail,
@@ -105,7 +124,7 @@ class login_dashboard extends xapp_dashboard{
 
     this.fn_setAuthorizeObject(obj_auth);    
     this.fn_getAuthorizeObject(obj_auth);
-    this.fn_XDesigner_startAuthorize(obj_auth);
+    return this.fn_XDesigner_startAuthorize(obj_auth);
 
   }
   fn_setAuthorizeObject(obj_post){
@@ -128,9 +147,12 @@ class login_dashboard extends xapp_dashboard{
     this.fn_setAuthorizeUserStatus(bln_value);        
 }    
   /////////////////////            
+  fn_getAuthorizeUserEmail(){
+    return this.obj_holder.MetaUserEmail;    
+  }                
   fn_setAuthorizeUserEmail(MetaUserEmail){
     this.obj_holder.MetaUserEmail=MetaUserEmail;    
-  }                
+  }                  
   fn_setAuthorizeUserPass(AuthorizeUserPass){                          
     this.obj_holder.AuthorizeUserPass=AuthorizeUserPass;
   }              
@@ -148,12 +170,14 @@ class login_dashboard extends xapp_dashboard{
   }   
   
   fn_XDesigner_startAuthorize(obj_auth){       
-    obj_auth.str_action="XDesigner_startAuthorize";            
+
+    obj_auth.str_action="XDesigner_startAuthorize";                
     this.fn_runServerAction(obj_auth);          
   }
   XDesigner_startAuthorize(obj_post){    
 
     let bln_value;          
+    let obj_item;
     
     this.fn_setAuthorizeObject(obj_post);//set values from server on client
     let obj_auth=this.fn_getAuthorizeObject();//get client values      
@@ -164,11 +188,19 @@ class login_dashboard extends xapp_dashboard{
       if(!bln_value){return false;}
     }              
 
-    //*
-    let obj_item=obj_project.fn_getComponent("form_button_login");                
-    obj_item.fn_setText("Open");    
-    //obj_item.fn_setDisabled();
-    //*/
+    obj_item=obj_project.fn_getComponent("form_input_login_email");                    
+    obj_item.fn_setDisplay(false);            
+
+    obj_item=obj_project.fn_getComponent("form_input_login_pass");                                
+    obj_item.fn_setDisplay(true);             
+
+    
+    obj_item=obj_project.fn_getComponent("form_button_login_email");                
+    obj_item.fn_setDisplay(false);                 
+
+    obj_item=obj_project.fn_getComponent("form_button_login_pass");                
+    obj_item.fn_setDisplay(true);             
+    
     
     if(!obj_auth.AuthorizeUserPass){
       bln_value=this.fn_requireAuthorizeUserPass();        
@@ -195,8 +227,7 @@ class login_dashboard extends xapp_dashboard{
     let obj_item=obj_project.fn_getComponent("form_input_login_email");                    
     
     let MetaUserEmail;
-    if(obj_item){
-      obj_item.fn_setDisplay(true);        
+    if(obj_item){      
       MetaUserEmail=obj_item.fn_getValue();        
     }
     
@@ -213,8 +244,7 @@ class login_dashboard extends xapp_dashboard{
     
     let AuthorizeUserPass;                                
     let obj_item=obj_project.fn_getComponent("form_input_login_pass");                                
-    if(obj_item){
-      obj_item.fn_setDisplay(true);        
+    if(obj_item){      
       AuthorizeUserPass=obj_item.fn_getValue();
     }
     if(!AuthorizeUserPass){              

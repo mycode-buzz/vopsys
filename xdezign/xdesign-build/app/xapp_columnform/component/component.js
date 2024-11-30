@@ -102,19 +102,22 @@
                 
                   if(bln_value){             
                     this.fn_transferEditToView();                
+                    //this.fn_hideLabelBorder();                                        
                   }
                   else{                      
                       this.fn_transferViewToEdit();                      
+                      //this.fn_showLabelBorder();                                        
                   }    
 
                   //LABEL ACTION
-                  this.fn_hideLabelBorder();                                        
+                  //this.fn_hideLabelBorder();                                        
                   //LABEL ACTION
                 }  
 
                 fn_transferEditToView(){                  
                   
                   
+
                   if(this.fn_getUpdatePermission()){
                     this.fn_setUpdatePermission(false);                    
                     this.fn_updateFieldValue();                                         
@@ -122,7 +125,7 @@
                   
                   this.fn_setModeExecuteView();                     
                 }
-                fn_transferViewToEdit(){                  
+                fn_transferViewToEdit(){                                    
                   this.fn_setModeExecuteEdit();                     
                 }
 
@@ -135,6 +138,8 @@
                   super.fn_setModeExecuteView();                  
 
                   this.fn_removeThemeEdit();
+                  this.fn_hideLabelBorder();                                        
+
                   
                   let obj_control=this.obj_text;
                   this.fn_setControl(obj_control);                                    
@@ -161,8 +166,9 @@
 
                   this.obj_control.fn_setFocus(true);
 
+                  this.fn_showLabelBorder();
                   this.fn_applyThemeEdit();
-
+                  
                   
 
                   if(this.bln_debugColumn){                    
@@ -277,10 +283,11 @@
                       return;
                     }
                     //*/
-                    this.obj_label.fn_setStyleProperty("border", this.str_borderLegend);                
+                    //this.obj_label.fn_setStyleProperty("borderColor", this.str_borderHighlight);                                    
+                    this.obj_label.fn_setStyleProperty("borderColor", "white");                                    
                 }
-                fn_hideLabelBorder(){                  
-                    this.obj_label.fn_setStyleProperty("border", "1px solid transparent");                
+                fn_hideLabelBorder(){                                      
+                    this.obj_label.fn_setStyleProperty("borderColor", "transparent");                
                 }
 
                 fn_onChildMouseUp(e){                         
@@ -305,7 +312,9 @@
                 } 
                 fn_onChildMouseLeave(e){                
                   if(obj_project.obj_itemEvent===this.obj_label){
-                    this.fn_hideLabelBorder();                  
+                    if(this!==this.obj_row.obj_selectedColumn){
+                      this.fn_hideLabelBorder();                  
+                    }
                   }
                 } 
                 fn_onChildClick(e){                                                                                                            
@@ -376,7 +385,9 @@
                 fn_applyThemeEdit(){
 
                   
-                  this.obj_control.fn_applyThemeEdit(this.str_colorHighlight);
+                  this.obj_control.fn_applyThemeEdit(this.str_colorHighlight);                  
+                  //this.obj_control.fn_setStyleProperty("color", "#333333");                  
+                  //this.obj_control.fn_setStyleProperty("color", "#444444");                  
                 }
 
                 fn_removeThemeEdit(){
@@ -549,7 +560,7 @@
                   obj_target.fn_setStyleProperty(str_property, str_value);
                   
                   str_property="color";
-                  str_value = cssObj.getPropertyValue(str_property);                      
+                  str_value = cssObj.getPropertyValue(str_property);                                        
                   obj_target.fn_setStyleProperty(str_property, str_value);
 
                   obj_target.fn_setStyleProperty("outline", "none");                      

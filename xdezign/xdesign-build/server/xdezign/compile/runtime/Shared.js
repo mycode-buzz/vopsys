@@ -1077,7 +1077,7 @@ fn_maintainList(obj_list){
   
   fn_getHTMLTable(arr_name, arr_value){
     let str_table, str_row, str_cell, str_name, str_value;
-    str_table=`<TABLE style="font-size: 0.8em;">`;    
+    str_table=`<TABLE>`;    
     for (let i = 0; i < arr_name.length; i++) {
       str_name=arr_name[i];      
       str_value=arr_value[i];      

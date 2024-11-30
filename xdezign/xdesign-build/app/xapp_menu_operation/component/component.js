@@ -151,8 +151,6 @@
                 if(this.fn_getAutoPin()){this.obj_design.bln_isPinned=true;}                
                 this.fn_referenceObject();
                 this.fn_startReflow();
-                
-
 
                 //*
                 let bln_autoFetch=this.fn_getAutoFetch();              
@@ -162,6 +160,9 @@
                 }              
                 //*/
 
+                //this.fn_setStyleProperty("borderTopWidth", "1px");
+                
+                
 
                 this.fn_onOpen();
                 this.fn_openContent();
@@ -213,13 +214,41 @@
                     }                    
                   }               
                   
+                  /*
+                  let str_borderWidth="0px";
+                  if(this.obj_parentMenu){                    
+                    let bln_value=this.obj_parentMenu.fn_isChildTop(this);
+                    if(bln_value){
+                      str_borderWidth="1px";
+                    }
+                  }
+                    this.fn_setStyleProperty("borderTopWidth", str_borderWidth);                  
+                  //*/
+                  //this.fn_setStyleProperty("borderTopWidth", "0px");                  
                   
+
                   this.fn_onClose();
                   this.fn_closeContent();                          
 
                   let bln_togglePeers=this.fn_getTogglePeersPin();                                
                   if(bln_togglePeers){this.fn_displayOnPeers();}                  
               } 
+
+              fn_isChildTop(obj_childMenu){
+                let arrChildMenu;
+                if(obj_childMenu.fn_getIsDynamicMenu()){
+                  arrChildMenu=this.obj_holder.arr_dynamicMenu;                      
+                }
+                else{
+                  arrChildMenu=this.obj_holder.arr_standardMenu;
+                }
+                let obj_candidate=arrChildMenu[0];
+                if(obj_candidate===obj_childMenu){
+                  return true;
+                }
+                return false;
+
+              }
               xfn_closeChildren(){
 
                 //this.fn_debugText("fn_closeChildren");

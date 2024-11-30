@@ -171,7 +171,7 @@
                     if(str_html){
                       let obj_control=obj_parent.fn_addContextItem("form_span");   
                       obj_control.fn_setText(str_html);
-                      obj_control.fn_setDisabled(true);
+                      //obj_control.fn_setDisabled(true);
                     }
                   } 
                 }

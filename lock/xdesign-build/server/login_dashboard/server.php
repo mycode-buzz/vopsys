@@ -18,7 +18,7 @@ class page extends interface_datamanager{
     
     
     
-    $this->bln_debugLogin=true;    
+    $this->bln_debugLogin=false;    
     
     
 
@@ -135,6 +135,7 @@ class page extends interface_datamanager{
     }                  
     
 
+    /*
     if($this->bln_debugLogin){      
       $this->fn_addEcho("***START CHECK CAN SEND OTP");                           
       //$this->fn_varDump($obj_post, "obj_post");      
@@ -142,6 +143,7 @@ class page extends interface_datamanager{
       $this->fn_addEcho("AuthorizeUserPass: ".$this->AuthorizeUserPass);            
       $this->fn_addEcho("***END CHECK CAN SEND OTP");                     
     }
+    //*/
     
 
     
@@ -557,6 +559,7 @@ function fn_createInstanceUserIfNotExist($MetaUserName, $MetaUserPassword){
     ;";              
     //$this->fn_addEcho("str_sql: ".$str_sql);                                    
     
+    
     $stmt=$this->fn_executeSQLStatementLogin($str_sql, [
       'MetaUserEmail' => $this->obj_userLogin->MetaUserEmail         
     ]);             
@@ -602,7 +605,8 @@ function fn_createInstanceUserIfNotExist($MetaUserName, $MetaUserPassword){
     }
     
     
-    
+    $this->fn_addEcho("*******************OTP Email Sent *******************");                                    
+    //return;
     
     //*
     $this->str_methodMailer="SENDGRID";

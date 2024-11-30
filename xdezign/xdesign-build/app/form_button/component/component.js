@@ -17,18 +17,11 @@
 
                   if(this.fn_hasContextHolderParent()){return;}                      
 
-                  if(this.obj_design.bln_expand){                    
-                    
-                    let str_padding=this.fn_getStyleProperty("padding");
-                    let int_padding=parseInt(str_padding);   
-                    let int_paddingExpand=int_padding + (int_padding/2);                    
+                }   
 
-                    this.fn_setStyleProperty("padding", +int_paddingExpand+"px");        
-                    str_padding=this.fn_getStyleProperty("padding");
-                    
-                    this.fn_setStyleProperty("font-weight", "bold");                                                                    
-                  }
-                }        
+                fn_expand(){//called by base onload
+                  this.fn_expandFraction(2);
+                }
               
                 fn_onSelectStart(e){
                   console.log("fn_onSelectStart");

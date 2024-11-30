@@ -13,7 +13,7 @@ class form_fieldset extends component{
     this.obj_formLegend=this.fn_addContextItem("form_legend");
     this.bln_toggleState=true;
     
-    this.obj_themeItemSection=this.fn_applyTheme("form_section", true);    
+    this.obj_themeItemSection=this.fn_getThemeObject("form_section");    
   }
   
   fn_setText(str_value){         
@@ -47,6 +47,7 @@ class form_fieldset extends component{
       this.fn_setStyleProperty("border", obj_themeItem.fn_getStyleProperty("border"));    
       this.fn_setStyleProperty("boxShadow", obj_themeItem.fn_getStyleProperty("boxShadow"));    
       this.fn_setStyleProperty("padding", obj_themeItem.fn_getStyleProperty("padding"));
+      this.fn_setStyleProperty("backgroundColor", obj_themeItem.fn_getStyleProperty("backgroundColor"));
     }        
     
     
@@ -61,6 +62,7 @@ class form_fieldset extends component{
     this.fn_setStyleProperty("boxShadow", "none");    
     this.fn_setStyleProperty("paddingTop", "0px");            
     this.fn_setStyleProperty("paddingBottom", "0px");               
+    this.fn_setStyleProperty("backgroundColor", "transparent");
 
     this.bln_toggleState=false;            
     this.fn_setDisplayChildren(false);    

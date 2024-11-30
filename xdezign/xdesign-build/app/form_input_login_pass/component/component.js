@@ -1,5 +1,5 @@
       //XSTART component/form_input_login_pass
-      class form_input_login_pass extends component{
+      class form_input_login_pass extends form_input{
         constructor(obj_ini) {      
           super(obj_ini);        
         } 

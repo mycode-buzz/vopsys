@@ -48,18 +48,13 @@
                 }
                 fn_onLoad(){    
                   super.fn_onLoad();                                          
-
-                  if(this.obj_design.bln_expand){
-                    
-                    let str_padding=this.fn_getStyleProperty("padding");
-                    let int_padding=parseInt(str_padding);   
-                    let int_paddingExpand=(int_padding*3);                    
-                    //console.log("int_paddingExpand: " + int_paddingExpand);
-
-                    this.fn_setStyleProperty("padding", +int_paddingExpand+"px");        
-                    this.fn_setStyleProperty("font-weight", "bold");        
-                  }
+                  
+                  
                 }
+                fn_expand(){//called by base onload
+                  this.fn_expandMutliple(3);
+                }
+                
                 fn_setText(str_value){    
                   //no need to set text as innerHTML is not supported on input
                   this.fn_setValue(str_value);

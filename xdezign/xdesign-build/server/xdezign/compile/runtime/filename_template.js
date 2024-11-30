@@ -33,6 +33,7 @@ class Project extends {str_nameTargetClass}{
         if(!e){return;}
         e.preventDefault();
         e.stopImmediatePropagation();
+        e.stopPropagation();                                                           
     }
     fn_debugEvent(){
 

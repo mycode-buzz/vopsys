@@ -10,7 +10,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>var ServerQueryString = "<?php echo $_SERVER['QUERY_STRING']; ?>";</script>
-<script type="module" src="/xapp-version-2024-11-29-10-35-5729.mjs"></script>
+<script type="module" src="/xapp-version-2024-11-30-03-30-4114.mjs"></script>
 
 
 <script src="https://kit.fontawesome.com/6daaa4e123.js" crossorigin="anonymous"  data-auto-replace-svg="nest"></script>

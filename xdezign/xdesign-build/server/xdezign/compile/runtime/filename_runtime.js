@@ -1723,7 +1723,7 @@ fn_maintainList(obj_list){
   
   fn_getHTMLTable(arr_name, arr_value){
     let str_table, str_row, str_cell, str_name, str_value;
-    str_table=`<TABLE style="font-size: 0.8em;">`;    
+    str_table=`<TABLE>`;    
     for (let i = 0; i < arr_name.length; i++) {
       str_name=arr_name[i];      
       str_value=arr_value[i];      
@@ -2919,12 +2919,33 @@ class BaseObject extends LevelObject{
             this.obj_holder.obj_lastItem=this.obj_design.arr_item[0];
         }
         //*/
-    }     
+    } 
+
+    fn_expandMutliple(int_number){
+        if(this.obj_design.bln_expand){                                
+            let int_padding=10;
+            let int_paddingExpand=(int_padding*int_number);                                          
+            this.fn_setStyleProperty("padding", +int_paddingExpand+"px");        
+            this.fn_setStyleProperty("font-weight", "bold");        
+          }
+      }
+    
+    fn_expandFraction(int_fraction){
+        if(this.obj_design.bln_expand){                              
+          let int_padding=10;   
+          let int_paddingExpand=int_padding + (int_padding/int_fraction);
+          this.fn_setStyleProperty("padding", +int_paddingExpand+"px");        
+          this.fn_setStyleProperty("font-weight", "bold");                                                                    
+          }
+      }
+
+      fn_expand(){        
+      }
     
     fn_onLoad(){//can be overriden , but should be called                      
 
         
-        this.fn_applyFeatures();//apply style, them, domproperties etc // this appears to not ref to children
+        this.fn_applyFeatures();//apply style, them, domproperties etc // this appears to not ref to children        
         this.fn_initializePlugins();//attach design helpers etc                
         this.fn_actionRegister();//attach design helpers etc                                
         
@@ -3517,7 +3538,7 @@ class BaseObject extends LevelObject{
         this.fn_applyDomProperty();                                                                         
         //this.fn_applyDomAttribute();
         this.fn_applyStyle();               
-
+        this.fn_expand();
         this.fn_onApplyFeatures();
     }
 
@@ -3560,7 +3581,11 @@ class BaseObject extends LevelObject{
 
     fn_getThemeObject(str_themeType){   
 
+        return this.fn_applyTheme(str_themeType, true);
+
     }
+
+    
     
     fn_applyTheme(str_themeType=false, bln_returnThemeItem=false){   
 
