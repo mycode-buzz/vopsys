@@ -25,9 +25,7 @@ class page extends interface_datamanager{
     }   
 }
    
-function fn_upgradeXDesign(){                  
-
-  global $SYSTEM_ADMINISTRATOR_USERNAME, $SYSTEM_ADMINISTRATOR_PASSWORD;                
+function fn_upgradeXDesign(){                    
 
   $str_pathFolderXDesignBuild=VOPSYSROOT."/xdezign/xdesign-build";        
   

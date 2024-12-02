@@ -15,9 +15,9 @@
           }          
           this.bln_emphasis=true;
           this.int_emphasis=4;
-          this.int_boldText=500;          
+          this.int_boldWeight=500;          
           this.str_textPay="Payment";
-          this.str_iconPay="fa-solid fa-star";
+          //this.str_iconPay="fa-solid fa-star";
           //IMPORTANT: SAFE TO USE FOR PRODUCTION RELEASE, CHECKS FOR LOCAL HOST
         }  
 
@@ -96,6 +96,8 @@
             str_nameProduct:"Subscription",                        
             obj_themeItem:this.obj_themeMidground,
             str_textSubmit:"&nbsp;",
+            str_color:this.obj_themeMidground.fn_getStyleProperty("backgroundColor"),            
+            bln_boldText:true,            
           };
           this.fn_setDefaultPackageOption(obj_param);
           obj_param.bln_expiredSubscription=false;          
@@ -117,8 +119,8 @@
           str_text=`More Information`;          
           
           let obj_showHide=obj_container.fn_addContextItem("form_button_showhide");                    
-          obj_showHide.fn_setText(str_text);            
-          obj_showHide.fn_showIcon("fa-solid fa-circle-info");
+          obj_showHide.fn_setText(str_text);                      
+          obj_showHide.fn_showIcon("info");
 
           let str_paymentLink;
           //let str_paymentLink =window.location.href;
@@ -167,8 +169,13 @@
           
           obj_control=obj_container.fn_addContextItem("form_span");          
           if(this.bln_emphasis){
-            obj_control.fn_setStyleProperty("fontWeight", this.int_boldText);
+            if(obj_param.bln_boldText){              
+              obj_control.fn_setStyleProperty("fontWeight", "bold");                    
+            }                                 
           }
+          if(obj_param.str_color){
+            obj_control.fn_setStyleProperty("color", obj_param.str_color);                                
+          }         
           
           obj_control.fn_setText(str_text);
           obj_control.fn_setDisplay(false);
@@ -180,7 +187,14 @@
 
           this.obj_priceList={};
 
-          let obj_param, obj_themeItem;          
+          let obj_param;
+          let obj_themeItem, str_textPay, str_iconPay, str_color, bln_boldText; 
+          
+          obj_themeItem=this.obj_themeMidground;
+          str_textPay=this.str_textPay;
+          str_iconPay=this.str_icon;
+          str_color=this.obj_themeMidground.fn_getStyleProperty("backgroundColor");
+          bln_boldText=true;
           
           //---------------------
           obj_param={            
@@ -188,9 +202,11 @@
             int_priceTokenz:2.50,
             int_packageTokenz:500,            
             str_nameProduct:"CALENDARDAY",                                    
-            obj_themeItem:this.obj_themeBlock1,
-            str_textSubmit:this.str_textPay,
-            str_icon:this.str_iconPay,
+            obj_themeItem:obj_themeItem,
+            str_textSubmit:str_textPay,
+            str_icon:str_iconPay,
+            str_color:str_color,            
+            bln_boldText:bln_boldText,            
           };
           this.obj_priceList[obj_param.str_nameProduct]=obj_param;                    
 
@@ -200,9 +216,11 @@
             int_priceTokenz:15,
             int_packageTokenz:5000,            
             str_nameProduct:"CALENDARMONTH",      
-            obj_themeItem:this.obj_themeBlock2,
-            str_textSubmit:this.str_textPay,
-            str_icon:this.str_iconPay,            
+            obj_themeItem:obj_themeItem,
+            str_textSubmit:str_textPay,
+            str_icon:str_iconPay,
+            str_color:str_color,            
+            bln_boldText:bln_boldText,            
           };
           this.obj_priceList[obj_param.str_nameProduct]=obj_param;                    
           
@@ -212,9 +230,11 @@
             int_priceTokenz:100,
             int_packageTokenz:60000,            
             str_nameProduct:"FISCALQUARTER",                  
-            obj_themeItem:this.obj_themeBlock3,
-            str_textSubmit:this.str_textPay,
-            str_icon:this.str_iconPay,            
+            obj_themeItem:obj_themeItem,
+            str_textSubmit:str_textPay,
+            str_icon:str_iconPay,
+            str_color:str_color,            
+            bln_boldText:bln_boldText,            
           };
           this.obj_priceList[obj_param.str_nameProduct]=obj_param;                              
           
@@ -225,9 +245,11 @@
               int_priceTokenz:1000,
               int_packageTokenz:1000000,            
               str_nameProduct:"FISCALYEAR",
-              obj_themeItem:this.obj_themeBlock4,
-              str_textSubmit:this.str_textPay,
-              str_icon:this.str_iconPay,            
+              obj_themeItem:obj_themeItem,
+              str_textSubmit:str_textPay,
+              str_icon:str_iconPay,
+              str_color:str_color,            
+              bln_boldText:bln_boldText,            
             };
             this.obj_priceList[obj_param.str_nameProduct]=obj_param;          
           }
@@ -612,8 +634,13 @@
             obj_control=obj_form.fn_addContextItem("form_span");                              
             obj_control.fn_setText(str_item);            
             if(this.bln_emphasis){
-              obj_control.fn_setStyleProperty("fontWeight", this.int_boldText);                    
-            }            
+              if(obj_param.bln_boldText){              
+                obj_control.fn_setStyleProperty("fontWeight", "bold");                    
+              }                     
+            }   
+            if(obj_param.str_color){
+              obj_control.fn_setStyleProperty("color", obj_param.str_color);                                
+            }         
           }
 
           obj_control=this.fn_addTopUpSubmit(obj_form, obj_param);                    
@@ -665,8 +692,8 @@
             str_text="Let's Go!";            
           }           
          
-          this.obj_submitSummary.fn_setText(str_text);          
-          this.obj_submitSummary.fn_showIcon("fa-solid fa-coins");
+          this.obj_submitSummary.fn_setText(str_text);                                        
+          this.obj_submitSummary.fn_showIcon("replace-summary");
         }        
 
         fn_checkForUpgradeOptions(bln_action=false){
@@ -861,7 +888,7 @@
           obj_label.fn_setText(str_label);            
           let obj_span=obj_field.fn_getComponent("form_span");
           obj_span.fn_setText(str_span);            
-          //obj_span.fn_setStyleProperty("fontWeight", "bold");                    
+          obj_span.fn_setStyleProperty("fontWeight", "bold");                    
           return obj_field;
         }
       }

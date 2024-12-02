@@ -733,6 +733,10 @@ class Shared{
     return true;
   }
    
+  fn_extractNumbers(str) {
+    const numbers = str.match(/\d+/g);
+    return numbers ? numbers.map(Number) : [];
+  }
 
   fn_getMode(){
     return this.fn_getURLParam("mode");        
@@ -1854,6 +1858,10 @@ fn_maintainList(obj_list){
         parent.removeChild(parent.firstChild);
     }
   }
+  
+  fn_hyphenToCamelCase(str) {
+      return str.replace(/-(\w)/g, (match, char) => char.toUpperCase());
+    }
 
   fn_camelCaseToHyphen(str) { 
 
@@ -3767,6 +3775,16 @@ class BaseObject extends LevelObject{
     fn_setClassName(str_className){                   
     this.dom_obj.className=str_className;
     }
+
+    fn_setControlStyleProperty(obj_control, str_name, str_value){
+        if(obj_control){obj_control.fn_setStyleProperty(str_name, str_value);}            
+      }
+      fn_getControlStyleProperty(obj_control, str_name, str_value){
+        if(obj_control){ return obj_control.fn_getStyleProperty(str_name, str_value);}            
+      }
+      fn_getControlComputedStyleProperty(obj_control, str_name, str_value){
+        if(obj_control){ return obj_control.fn_getComputedStyleProperty(str_name, str_value);}            
+      }
       
 
     fn_getComputedStyleProperty(str_name){                
@@ -3982,8 +4000,7 @@ class BaseObject extends LevelObject{
         obj_enabled.pointerEvents = computedStyle.getPropertyValue("pointer-events");
         if(obj_enabled.pointerEvents==="none"){obj_enabled.pointerEvents="auto";}
         obj_enabled.cursor = computedStyle.getPropertyValue("cursor");                                          
-        obj_enabled.color = this.fn_getComputedStyleProperty("color");
-        obj_enabled.colorIcon = this.fn_getComputedStyleProperty("colorIcon");          
+        obj_enabled.color = this.fn_getComputedStyleProperty("color");        
       }
 
     fn_afterDomPropertyDisabled(bln_value){
@@ -3995,14 +4012,12 @@ class BaseObject extends LevelObject{
           case true:              
               this.fn_setStyleProperty("pointer-events", "none");                  
               this.fn_setStyleProperty("cursor", "default");                                                    
-              this.fn_setStyleProperty("color", "gray");                                                 
-              this.fn_setStyleProperty("colorIcon", "gray");                                            
+              this.fn_setStyleProperty("color", "gray");                                                               
               break;
           case false:              
               this.fn_setStyleProperty("pointer-events", this.obj_holder.obj_enabled.pointerEvents);          
               this.fn_setStyleProperty("cursor", this.obj_holder.obj_enabled.cursor);                                      
-              this.fn_setStyleProperty("color", this.obj_holder.obj_enabled.color);                            
-              this.fn_setStyleProperty("colorIcon", this.obj_holder.obj_enabled.colorIcon);              
+              this.fn_setStyleProperty("color", this.obj_holder.obj_enabled.color);                                    
               break;            
           }              
     }       
@@ -6089,6 +6104,7 @@ class myJSON  {
 var  obj_project, obj_myJson, obj_shared, obj_boot, obj_holder, obj_const, obj_clipboard, obj_path, obj_permitManger, obj_userHome;
 var obj_projectTarget;
 var obj_projectParent;
+
 
 obj_shared=new Shared;
 obj_myJson=new myJSON(new Object);

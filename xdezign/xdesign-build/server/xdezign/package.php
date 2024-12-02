@@ -88,17 +88,7 @@ class package extends xdezign{
     $this->obj_post->URLProjectVersion=$this->path2url($obj_pathRecord->obj_pathBuild->str_folderPathVersion); //note down verison URL                 
     $this->obj_post->URLSubdomain=$this->fn_getSubDomain();
     
-    //$this->fn_importComponentFile($this->obj_record->Type);
-    //Temprairly disabling this here.
-    //1. Its not sure why the database cannot be assume to be upto date
-    //Surely its upto the Devleoper to decide when to hit the import button .      
-    
-    
-    //1 START Create Project Index File          
-
-    //background-color: rgb(43, 44, 52);        
-    //background-color: rgb(43 55 61);    
-    
+    //1 START Create Project Index File              
 $str_header1=<<<heredoc
 <!DOCTYPE html>
 <html lang="en">
@@ -122,11 +112,8 @@ $str_header2=<<<heredoc
 <script>var ServerQueryString = "<?php echo \$_SERVER['QUERY_STRING']; ?>";</script>
 <script type="module" src="$this->str_virtualFileDelimiter$this->str_name_file_project"></script>
 
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
-<script src="https://kit.fontawesome.com/6daaa4e123.js" crossorigin="anonymous"  data-auto-replace-svg="nest"></script>
-
-<!--
--->
 <style>
   * {/*NOTE. Box Sizing must be set//*/
     -webkit-box-sizing: border-box;
@@ -146,7 +133,6 @@ $str_header2=<<<heredoc
 </style>
 <body>
 heredoc;
-
 /*
 overflow: -moz-scrollbars-vertical; 
     overflow-y: scroll;

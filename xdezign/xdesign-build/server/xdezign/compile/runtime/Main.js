@@ -2,6 +2,7 @@ var  obj_project, obj_myJson, obj_shared, obj_boot, obj_holder, obj_const, obj_c
 var obj_projectTarget;
 var obj_projectParent;
 
+
 obj_shared=new Shared;
 obj_myJson=new myJSON(new Object);
 obj_boot=new Holder;

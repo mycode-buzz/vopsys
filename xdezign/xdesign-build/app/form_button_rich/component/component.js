@@ -48,6 +48,7 @@
         fn_showIcon(str_value){
 
           let obj_anchor=this.fn_getComponent("form_button_anchor");          
+          
           if(obj_anchor){                
             obj_anchor.bln_debugButtonDisable=this.bln_debugButtonDisable;
             obj_anchor.fn_showIcon(str_value);                          
@@ -79,45 +80,33 @@
         
         fn_setStyleProperty(str_name, str_value){                          
 
-          let obj_anchor=this.fn_getComponent("form_button_anchor");                   
+          let obj_anchor=this.fn_getComponent("form_button_anchor");                             
+
+          str_name=obj_shared.fn_hyphenToCamelCase(str_name);
 
           switch(str_name){
-            case "color":
-              if(obj_anchor){          
-                obj_anchor.fn_setStyleProperty(str_name, str_value);                                        
-              }
-              break;
-            case "colorIcon":
-              if(obj_anchor){                    
-                obj_anchor.fn_setStyleProperty(str_name, str_value);                                        
-              }
-              break;
-            case "fontSizeIcon":
-              if(obj_anchor){                          
-                obj_anchor.fn_setStyleProperty(str_name, str_value);                                        
-              }              
-              break;
-            default:
-              super.fn_setStyleProperty(str_name, str_value);                  
+            case "fontWeight":                                          
+            case "color":                                        
+            case "fontSize":                           
+              this.fn_setControlStyleProperty(obj_anchor, str_name, str_value);
+              break;                      
           }
+          
+          super.fn_setStyleProperty(str_name, str_value);                  
 
         }
         
         fn_getComputedStyleProperty(str_name){
           
           let obj_anchor=this.fn_getComponent("form_button_anchor");          
+
+          str_name=obj_shared.fn_hyphenToCamelCase(str_name);
           
           switch(str_name){
-            case "color":                          
-              if(obj_anchor){          
-                return obj_anchor.fn_getComputedStyleProperty(str_name);                          
-              }   
-              break;                     
-            case "colorIcon":          
-              if(obj_anchor){          
-                return obj_anchor.fn_getComputedStyleProperty(str_name);                          
-              }                        
-              break;                     
+            case "fontWeight":                                          
+            case "color":                            
+            case "fontSize":                           
+              return this.fn_getControlComputedStyleProperty(obj_anchor, str_name);                            
             default:
               return super.fn_getComputedStyleProperty(str_name);                  
           }

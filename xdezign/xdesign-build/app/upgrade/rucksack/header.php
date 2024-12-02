@@ -13,20 +13,16 @@ define("SERVERROOT",ROOT."/server");
 define("DB_STORE_ROOT",ROOT."/dbstore");
 define("VOPSYSROOT",dirname(ROOT, 2));
 define("UPGRADEROOT",VOPSYSROOT."/upgrade/xdesign-build");
-define("OSROOT",UPGRADEROOT."/vopsys");
-define("PROCESSROOT",OSROOT."/process");
-define("INTERFACEROOT",OSROOT."/interface");
-define("DATAROOT",OSROOT."/data");
-define("ROWZROOT",OSROOT."/rowz");
-define("APIROOT",VOPSYSROOT."/api/xdesign-build/");
-define("MAINTAINROOT",OSROOT."/maintain");
+define("APIROOT",VOPSYSROOT."/api/xdesign-build");
+define("INTERFACEROOT",APIROOT."/interface");
+define("MAINTAINROOT",APIROOT."/maintain");
 ///////////////////////////SERVER PATH
 
 
 
 
 ///////////////////////////
-require_once OSROOT . "/include.php";
+require_once INTERFACEROOT . "/include.php";
 ///////////////////////////
  
 ///////////////////////////

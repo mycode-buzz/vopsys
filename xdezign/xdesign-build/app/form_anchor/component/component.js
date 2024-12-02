@@ -24,15 +24,23 @@
           this.obj_span=this.fn_getComponent("form_button_span");          
         }
 
-        fn_showIcon(str_value){   
-          this.obj_holder.str_iconClass=str_value;
-          str_value+=" fa-lg";       
-          this.obj_icon.fn_setDomProperty("class", str_value);            
-          //this.obj_icon.fn_setStyleProperty("color", "rgb(64, 169, 236)");          
-          this.obj_icon.fn_setDisplay(true);
-          this.obj_icon.fn_debug();
-          //this.fn_debug();
-        }
+        fn_showIcon(str_value){
+          
+          if(str_value){                                                    
+            this.obj_icon.fn_setText(str_value);                                  
+            this.obj_icon.fn_setStyleProperty("fontWeight", "bold");                                  
+            this.obj_icon.fn_setDisplay(true);          
+            this.obj_icon.fn_setClassName("material-icons");                                              
+          }         
+          else{
+            this.obj_icon.fn_setDisplay(false);            
+            /*
+            this.fn_showIcon("check_box");                        
+            this.obj_icon.fn_setStyleProperty("color", "white");                                              
+            //*/
+          }
+
+        }  
         fn_hideIcon(){
           this.obj_icon.fn_setDisplay(false);
         }

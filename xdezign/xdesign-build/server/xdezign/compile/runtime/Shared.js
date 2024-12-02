@@ -87,6 +87,10 @@ class Shared{
     return true;
   }
    
+  fn_extractNumbers(str) {
+    const numbers = str.match(/\d+/g);
+    return numbers ? numbers.map(Number) : [];
+  }
 
   fn_getMode(){
     return this.fn_getURLParam("mode");        
@@ -1208,6 +1212,10 @@ fn_maintainList(obj_list){
         parent.removeChild(parent.firstChild);
     }
   }
+  
+  fn_hyphenToCamelCase(str) {
+      return str.replace(/-(\w)/g, (match, char) => char.toUpperCase());
+    }
 
   fn_camelCaseToHyphen(str) { 
 

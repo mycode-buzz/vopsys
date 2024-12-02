@@ -951,8 +951,8 @@
               obj_container.fn_showItem(obj_button);
             }
             if(this.bln_hasExitButton){
-              obj_button=obj_container.fn_getConsoleComponent("xapp_button_navigate_desktop");                          
-              obj_container.fn_showItem(obj_button);
+              obj_button=obj_container.fn_getConsoleComponent("xapp_button_navigate_desktop");
+              obj_container.fn_showItem(obj_button);                                          
             }                        
             //if(this.bln_hasSettingButton && obj_userHome.Admin){                                                          
             if(this.bln_hasSettingButton){                                                          
@@ -2924,9 +2924,8 @@
             let obj_item=this.fn_addDynamicMenuToAccordion(obj_row);                          
             if(obj_item){
               //obj_item.fn_debug();              
-              obj_item.fn_setStyleProperty("fontWeightAnchor", "normal");                            
-              //obj_item.fn_setStyleProperty("font-weight", "normal");                            
-              //obj_item.fn_showIcon("fa-solid fa-star");                            
+              obj_item.fn_setStyleProperty("fontWeight", "normal");                                          
+              //obj_item.fn_showIcon("replace-row-view");                            
             }
             /*
             const obj_compareURL=obj_path.fn_compareURLNavigateArchive(obj_item.obj_meta.str_metaRowzName);                                    
@@ -3027,8 +3026,9 @@
           //obj_item.obj_meta=obj_meta;                
           obj_item.fn_configureSelfShared(obj_row);            
           
-          obj_item.fn_configureDynamicMenuFromRow(obj_row);                         
-
+          obj_item.fn_configureDynamicMenuFromRow(obj_row);                                                      
+          
+          
           
           return obj_item;
         } 
@@ -3457,7 +3457,7 @@
             return;
           }
 
-          let obj_anchor=this.fn_getComponent("form_menu_button_anchor");          
+          let obj_anchor=this.fn_getComponent("form_button_anchor");          
           if(obj_anchor){          
             obj_anchor.fn_setNavigationURL(str_value);          
           } 
@@ -3470,51 +3470,18 @@
 
         fn_getMenuRecordId(){
           return this.obj_meta.str_metaRecordId;
-        }
-        
-        /*
-        fn_showIcon(str_value){
-
-          let obj_anchor=this.fn_getComponent("form_menu_button_anchor");          
-          //console.log("obj_anchor: " + obj_anchor);
-          if(obj_anchor){                        
-            obj_anchor.fn_showIcon(str_value);                          
-          }  
-          //this.fn_debug();
-        } 
-        
-        //Dynamic Dynamic Menu                   
-        fn_setText(str_value){      
-          
-          //console.log("fn_setText str_value: " + str_value);
-
-          super.fn_setText(str_value);          
-
-          let obj_anchor=this.fn_getComponent("form_menu_button_anchor");          
-          //console.log("fn_setText obj_anchor: " + obj_anchor);
-          if(obj_anchor){          
-            obj_anchor.fn_setText(str_value);          
-          }          
-          //this.fn_debug();
-        }          
-        //*/
+        }        
 
         
         ///////////////////////
         ///////////////////////
         ///////////////////////
-        fn_showIcon(str_value){
-
-          let obj_anchor=this.fn_getComponent("form_menu_button_anchor");                    
-          if(obj_anchor){                        
-            obj_anchor.fn_showIcon(str_value);                          
-          }          
-        }
+        
         fn_setText(str_value){      
 
           super.fn_setText(str_value);          
 
-          let obj_anchor=this.fn_getComponent("form_menu_button_anchor");                              
+          let obj_anchor=this.fn_getComponent("form_button_anchor");                              
           
           if(obj_anchor){          
             obj_anchor.fn_setText(str_value);          
@@ -3526,60 +3493,12 @@
 
           str_text=super.fn_getText();                  
 
-          let obj_anchor=this.fn_getComponent("form_menu_button_anchor");          
+          let obj_anchor=this.fn_getComponent("form_button_anchor");          
           if(obj_anchor){          
             str_text=obj_anchor.fn_getText();          
           }                   
           return str_text; 
-        }
-        fn_setStyleProperty(str_name, str_value){                          
-
-          let obj_anchor=this.fn_getComponent("form_menu_button_anchor");                   
-
-          switch(str_name){
-            case "fontWeightAnchor"://special case for child data menus
-              if(obj_anchor){          
-                obj_anchor.fn_setStyleProperty(str_name, str_value);                                        
-              }
-              break;                   
-            case "color":
-              if(obj_anchor){          
-                obj_anchor.fn_setStyleProperty(str_name, str_value);                                        
-              }
-              break;
-            case "colorIcon":
-              if(obj_anchor){                    
-                obj_anchor.fn_setStyleProperty(str_name, str_value);                                        
-              }
-              break;
-            case "fontSizeIcon":
-              if(obj_anchor){                          
-                obj_anchor.fn_setStyleProperty(str_name, str_value);                                        
-              }              
-              break;
-            default:
-              super.fn_setStyleProperty(str_name, str_value);                  
-          }
         }        
-        fn_getComputedStyleProperty(str_name){
-          
-          let obj_anchor=this.fn_getComponent("form_menu_button_anchor");          
-          
-          switch(str_name){
-            case "color":                          
-              if(obj_anchor){          
-                return obj_anchor.fn_getComputedStyleProperty(str_name);                          
-              }   
-              break;                     
-            case "colorIcon":          
-              if(obj_anchor){          
-                return obj_anchor.fn_getComputedStyleProperty(str_name);                          
-              }                        
-              break;                     
-            default:
-              return super.fn_getComputedStyleProperty(str_name);                  
-          }
-        }         
         ///////////////////////
         ///////////////////////
         ///////////////////////

@@ -16,7 +16,7 @@
           const svgElement =this.dom_obj.querySelector('svg');
           //font awesome will nest a new svg tag into the icon i element
           //this is only seen in the HTML after program execution breaks , for eaxmampel after the first trip to the server.
-          if(svgElement){
+          if(svgElement){            
             svgElement.style.setProperty(str_name, str_value);
           }
           else{
