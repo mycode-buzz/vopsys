@@ -521,7 +521,7 @@ class BaseObject extends LevelObject{
         //*/
     } 
 
-    fn_expandMutliple(int_number){
+    fn_expandMultiple(int_number){
         if(this.obj_design.bln_expand){                                
             let str_fontSize;            
             str_fontSize="1.2rem";                   

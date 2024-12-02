@@ -2934,7 +2934,7 @@ class BaseObject extends LevelObject{
         //*/
     } 
 
-    fn_expandMutliple(int_number){
+    fn_expandMultiple(int_number){
         if(this.obj_design.bln_expand){                                
             let str_fontSize;            
             str_fontSize="1.2rem";                   
@@ -6405,7 +6405,7 @@ class form_fieldset extends component{
                   
                 }
                 fn_expand(){//called by base onload
-                  this.fn_expandMutliple(3);
+                  this.fn_expandMultiple(2);
                 }
                 
                 fn_setText(str_value){    
@@ -6670,7 +6670,8 @@ class table extends component {
                 }   
 
                 fn_expand(){//called by base onload
-                  this.fn_expandFraction(2);
+                  //this.fn_expandFraction(1);
+                  this.fn_expandMultiple(1.5);
                 }
               
                 fn_onSelectStart(e){
@@ -13915,7 +13916,7 @@ class table extends component {
                   if(this.fn_getDebugPin()){this.fn_highlightBorder("red");}                  
                 }
                 fn_expand(){//called by base onload
-                  //this.fn_expandMutliple(3);
+                  //this.fn_expandMultiple(3);
                 }
               }//END CLS
               //END TAG

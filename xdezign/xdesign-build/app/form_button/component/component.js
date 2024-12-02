@@ -20,7 +20,8 @@
                 }   
 
                 fn_expand(){//called by base onload
-                  this.fn_expandFraction(2);
+                  //this.fn_expandFraction(2);
+                  this.fn_expandMultiple(3);
                 }
               
                 fn_onSelectStart(e){

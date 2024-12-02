@@ -52,7 +52,7 @@
                   
                 }
                 fn_expand(){//called by base onload
-                  this.fn_expandMutliple(3);
+                  this.fn_expandMultiple(3);
                 }
                 
                 fn_setText(str_value){    
