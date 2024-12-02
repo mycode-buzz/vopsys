@@ -12625,30 +12625,71 @@ class table extends component {
 
 
 /*START COMPONENT//*/
-/*type: form_form//*/
+/*type: form_tablecell//*/
 
-            //XSTART component/form_form
-              class form_form extends component{
+            //XSTART component/form_tablecell
+              class form_tablecell extends component{
                 constructor(obj_ini) {      
                   super(obj_ini);        
-                }                
-
+                } 
                 fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                      
-                  
-                  this.obj_holder.bln_listenSubmit=true;
-              }    
-
-              fn_onSubmit(e){                              
-
-                //alert("form fn_onSubmit: " + e.type);
-                obj_project.fn_forgetEvent(e);                
-                this.fn_parentEventBubble("Submit", e);//this causes things to happen                  
-              }
+                  super.fn_initialize(obj_ini);            
+                }         
+              fn_locateItem(str_idXDesign, str_type){
+                let arr, obj_item;
+                arr=this.obj_design.arr_item;
+                for(let i=0;i<arr.length;i++){
+                    obj_item=arr[i];     
+                    
+                    if(obj_item.fn_getType()===str_type){
+                      if(obj_item.obj_design.str_idXDesign==str_idXDesign){
+                        return obj_item;
+                      }
+                      if(obj_item.obj_design.str_linkId==str_idXDesign){
+                        return obj_item;
+                      }
+                    }
+                }
+                return false;
+              } 
               }//END CLS
               //END TAG
-              //END component/form_form
-/*type: form_form//*/
+              //END component/form_tablecell
+/*type: form_tablecell//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_inputandbutton_submit//*/
+
+            //XSTART component/form_inputandbutton_submit
+            class form_inputandbutton_submit extends form_button_rich{
+              constructor(obj_ini) {      
+                super(obj_ini);        
+              } 
+              fn_initialize(obj_ini){
+                super.fn_initialize(obj_ini);           
+
+                this.obj_holder.bln_listenClick=true;
+                this.obj_holder.bln_listenDblClick=true;
+
+                
+                this.bln_enabled=true;
+              }                              
+              fn_onClick(e){                                                      
+                
+                this.fn_notifyParent("fn_onLinkButtonClick", e);                                    
+                obj_project.fn_unsetEvent();    
+              }
+              fn_onDblClick(e){                                                                    
+                //console.log("form_inputandbutton_submit fn_onDblClick");
+                
+                obj_project.fn_unsetEvent();    
+              }
+            }//END CLS
+            //END TAG
+            //END component/form_inputandbutton_submit
+/*type: form_inputandbutton_submit//*/
 /*END COMPONENT//*/
 
 
@@ -12863,102 +12904,70 @@ class table extends component {
 
 
 /*START COMPONENT//*/
-/*type: form_tablecell//*/
+/*type: authorise_gate//*/
 
-            //XSTART component/form_tablecell
-              class form_tablecell extends component{
+            //XSTART component/authorise_gate
+              class authorise_gate extends xapp_ajax{
                 constructor(obj_ini) {      
                   super(obj_ini);        
                 } 
                 fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);            
-                }         
-              fn_locateItem(str_idXDesign, str_type){
-                let arr, obj_item;
-                arr=this.obj_design.arr_item;
-                for(let i=0;i<arr.length;i++){
-                    obj_item=arr[i];     
-                    
-                    if(obj_item.fn_getType()===str_type){
-                      if(obj_item.obj_design.str_idXDesign==str_idXDesign){
-                        return obj_item;
-                      }
-                      if(obj_item.obj_design.str_linkId==str_idXDesign){
-                        return obj_item;
-                      }
-                    }
+                  super.fn_initialize(obj_ini);                                                
                 }
-                return false;
+                fn_onLoad(){ //base object should be called
+                  super.fn_onLoad();     
+                  
+                  if(obj_project.fn_hasContextHolderParent()){return;}                          
+              
+                  this.fn_checkAuthorize();        
+                }  
+                fn_checkAuthorize(){  
+              
+                  let obj_ini=new Object;            
+                  obj_ini.str_action="checkAuthorize";                    
+                  this.fn_runServerAction(obj_ini);                                
+                  this.fn_createCurtain();
               } 
+              
+              fn_removeCurtain(){//overidden    
+                const o=this.obj_holder.dom_objCurtain;
+                  if(o && o.parentNode){
+                    o.parentNode.removeChild(o);      
+                  }
+              }
+              
+              fn_createCurtain(){//overidden  
+                
+                this.fn_removeCurtain();
+                
+                const o= document.createElement("curtain");
+                const os=o.style;
+                this.obj_holder.dom_objCurtain=o;    
+                os.display="block";
+                os.width="100%";
+                os.height="100vh";
+                os.position="absolute";
+                os.left="0px";
+                os.top="0px";
+                os.backgroundColor="rgb(43, 44, 52)";  
+                os.zindex=1000;
+                document.body.appendChild(o);    
+              }
+              
+                fn_onAuthorizeUserStatus(obj_post){//overidden       
+                  this.fn_removeCurtain();
+                  super.fn_onAuthorizeUserStatus(obj_post);                
+                  
+                  this.fn_notify(obj_project, "fn_onAuthorizeUserStatus");    
+                }
+              
+                fn_onUnAuthorizeUserStatus(obj_post){                                                          
+                  obj_path.fn_navigateSubdomain("lock", true);        
+                }
               }//END CLS
               //END TAG
-              //END component/form_tablecell
-/*type: form_tablecell//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_inputandbutton_submit//*/
-
-            //XSTART component/form_inputandbutton_submit
-            class form_inputandbutton_submit extends form_button_rich{
-              constructor(obj_ini) {      
-                super(obj_ini);        
-              } 
-              fn_initialize(obj_ini){
-                super.fn_initialize(obj_ini);           
-
-                this.obj_holder.bln_listenClick=true;
-                this.obj_holder.bln_listenDblClick=true;
-
-                
-                this.bln_enabled=true;
-              }                              
-              fn_onClick(e){                                                      
-                
-                this.fn_notifyParent("fn_onLinkButtonClick", e);                                    
-                obj_project.fn_unsetEvent();    
-              }
-              fn_onDblClick(e){                                                                    
-                //console.log("form_inputandbutton_submit fn_onDblClick");
-                
-                obj_project.fn_unsetEvent();    
-              }
-            }//END CLS
-            //END TAG
-            //END component/form_inputandbutton_submit
-/*type: form_inputandbutton_submit//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: authorise_end//*/
-      //XSTART component/authorise_end
-      class authorise_end extends xapp_ajax{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                      
-          this.obj_holder.bln_debugServer=false;
-        }
-        fn_onLoad(){ //base object should be called
-          super.fn_onLoad();     
-          
-          if(obj_project.fn_hasContextHolderParent()){return;}                          
-      
-          this.fn_endAuthorize();        
-        }  
-        fn_endAuthorize(){  
-      
-          let obj_ini=new Object;            
-          obj_ini.str_action="endAuthorize";                    
-          this.fn_runServerAction(obj_ini);                                          
-      }       
-      }//END CLS
-      //END TAG
-      //END component/authorise_end        
-/*type: authorise_end//*/
+              //END component/authorise_gate
+/*type: authorise_gate//*/
 /*END COMPONENT//*/
 
 
@@ -12979,6 +12988,107 @@ class table extends component {
         //END component/block
         
 /*type: block//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: desk//*/
+
+            //XSTART component/desk
+              class desk extends xapp{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                
+
+                  this.obj_holder.bln_debugServer=false;                  
+                }
+              }//END CLS
+              //END TAG
+              //END component/desk
+/*type: desk//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: desk_dashboard//*/
+//XSTART component/desk_dashboard
+  class desk_dashboard extends xapp_dashboard{
+    constructor(obj_ini) {      
+      super(obj_ini);        
+    } 
+    fn_initialize(obj_ini){
+      super.fn_initialize(obj_ini);                
+
+      this.obj_holder.bln_debugServer=false;      
+    }
+    fn_loadDashboard(){      
+      if(!super.fn_loadDashboard()){return;}
+      
+      let obj_ini=new Object;            
+      obj_ini.str_action="getSubscribedList";                           
+      this.fn_runServerAction(obj_ini);                                      
+
+      
+    }
+    getSubscribedList(obj_post){
+      
+      this.fn_removeChildren();                         
+
+      let arr_row=obj_post.RowData;    
+  
+      let obj_row, obj_item;            
+      if(arr_row.length){
+
+        for(var i=0;i<arr_row.length;i++){                      
+          obj_row=arr_row[i];
+          if(obj_shared.fn_isObjectEmpty(obj_row)){continue;}//RowData Can contain a single empty object              
+          obj_item=this.fn_addContextItem("desk_form_button");                    
+          if(!obj_item){continue;}
+          obj_item.fn_setSubDomain(obj_row.Subdomain);
+          obj_item.fn_setText(obj_row.MetaMallTitle);
+          obj_item.fn_showIcon(obj_row.MetaMallIcon);                    
+          obj_item.obj_design.int_idRecord=obj_row.MetaMallId;      
+        }
+
+      }
+      else{        
+        obj_item=this.fn_addContextItem("form_section");                      
+        obj_item.fn_setText("No Apps Enabled");                  
+
+      }
+
+      
+
+    }
+  }//END CLS
+  //END TAG
+  //END component/desk_dashboard
+/*type: desk_dashboard//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: desk_form_button//*/
+
+            //XSTART component/desk_form_button
+              class desk_form_button extends xapp_console_button{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                
+                }
+                fn_onClick(e){                                                        
+                  obj_path.fn_navigateSubdomain(this.obj_design.str_subdomain);
+                  
+                  obj_project.fn_forgetEvent(e);    
+                }  
+              }//END CLS
+              //END TAG
+              //END component/desk_form_button
+/*type: desk_form_button//*/
 /*END COMPONENT//*/
 
 
@@ -13566,6 +13676,34 @@ class table extends component {
 
 
 /*START COMPONENT//*/
+/*type: form_form//*/
+
+            //XSTART component/form_form
+              class form_form extends component{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                }                
+
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                      
+                  
+                  this.obj_holder.bln_listenSubmit=true;
+              }    
+
+              fn_onSubmit(e){                              
+
+                //alert("form fn_onSubmit: " + e.type);
+                obj_project.fn_forgetEvent(e);                
+                this.fn_parentEventBubble("Submit", e);//this causes things to happen                  
+              }
+              }//END CLS
+              //END TAG
+              //END component/form_form
+/*type: form_form//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
 /*type: form_hardrule//*/
       //XSTART component/form_hardrule
       class form_hardrule extends component{
@@ -13628,40 +13766,6 @@ class table extends component {
               //END TAG
               //END component/form_iframe
 /*type: form_iframe//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_input_login_email//*/
-      //XSTART component/form_input_login_email
-      class form_input_login_email extends form_input{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-      }//END CLS
-      //END TAG
-      //END component/form_input_login_email        
-/*type: form_input_login_email//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_input_login_pass//*/
-      //XSTART component/form_input_login_pass
-      class form_input_login_pass extends form_input{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-      }//END CLS
-      //END TAG
-      //END component/form_input_login_pass        
-/*type: form_input_login_pass//*/
 /*END COMPONENT//*/
 
 
@@ -14320,318 +14424,6 @@ class table extends component {
       //END TAG
       //END component/form_textarea        
 /*type: form_textarea//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: lock//*/
-      //XSTART component/lock
-      class lock extends xapp{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        fn_onLoad(){
-          super.fn_onLoad();
-          this.fn_onAuthorizeUserStatus();
-        }
-      }//END CLS
-      //END TAG
-      //END component/lock        
-/*type: lock//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: login_dashboard//*/
-//XSTART component/login_dashboard
-class login_dashboard extends xapp_dashboard{
-  constructor(obj_ini) {      
-    super(obj_ini);        
-  } 
-  fn_initialize(obj_ini){
-    super.fn_initialize(obj_ini);                
-
-    this.obj_holder.bln_debugServer=true;      
-
-    this.obj_holder.bln_listenSubmit=true;
-  }
-
-  fn_onLoad(){
-    super.fn_onLoad();
-    
-    let obj_item;
-    obj_item=obj_project.fn_getComponent("form_button_login_email");                
-    obj_item.fn_setDisplay(true);                 
-
-    obj_item=obj_project.fn_getComponent("form_button_login_pass");                
-    obj_item.fn_setDisplay(false);             
-  }
-
-  fn_onSubmit(e){      
-   alert(e);
-    return;
-    obj_project.fn_forgetEvent(e);                                    
-    let obj_dashboard=obj_project.fn_locateItem("login_dashboard");
-    if(obj_dashboard){                    
-      obj_dashboard.fn_startAuthorize();
-    }                                    
-  }
-
-  fn_formatPost(obj_ini){  
-
-    let obj_post;
-    
-    obj_post=super.fn_formatPost(obj_ini);   
-    
-    obj_post.MetaUserEmail=obj_ini.MetaUserEmail;        
-    obj_post.AuthorizeUserPass=obj_ini.AuthorizeUserPass;       
-        
-    return obj_post;
-}  
-
-
-  fn_loadDashboard(){
-    if(!super.fn_loadDashboard()){return;}         
-
-    if(obj_shared.fn_inStr("login.", location.hostname)){      
-      this.fn_XDesigner_endAuthorize();//logout                    
-      //console.log("login end auth");
-    }
-    else{
-      //console.log("no login subdomain so no end auth");
-    } 
-    //this.fn_addContextItem("login_panel");                                    
-  }   
-
-  
-  fn_XDesigner_endAuthorize(){    
-    let obj_ini=new Object;         
-    obj_ini.str_action="XDesigner_endAuthorize";                
-    this.fn_runServerAction(obj_ini);          
-  }
-  
-  XDesigner_endAuthorize(){    
-    //console.log("Session Authorisation Cookie Removed");  
-  }
-  fn_onUnAuthorizeUserStatus(obj_post){    
-    obj_project.fn_setVisible(true);
-  }
-  fn_onAuthorizeUserStatus(){    
-  }
-  fn_startAuthorize(){        
-
-    let obj_item, bln_valid;
-    let MetaUserEmail, AuthorizeUserPass;
-    MetaUserEmail="";
-    AuthorizeUserPass="";
-    
-    
-    obj_item=obj_project.fn_getComponent("form_input_login_email");
-    if(obj_item){
-      MetaUserEmail=obj_item.fn_getValue();                  
-      /*
-      obj_item.fn_setDomProperty("autocomplete", "email");        
-      obj_item.fn_setDomProperty("type", "email");    
-      //*/   
-    }                            
-    
-    obj_item=obj_project.fn_getComponent("form_input_login_pass");
-    if(obj_item){
-      AuthorizeUserPass=obj_item.fn_getValue();                                          
-      /*
-      obj_item.fn_setDomProperty("placeholder", "One Time Pass");        
-      obj_item.fn_setDomProperty("inputmode", "numeric");        
-      obj_item.fn_setDomProperty("pattern", "[0-9]*");        
-      obj_item.fn_setDomProperty("autocomplete", "one-time-code");        
-      obj_item.fn_setDomProperty("type", "text");     
-      //*/   
-    }                
-
-    bln_valid=obj_shared.fn_validEmail(MetaUserEmail);    
-    if(!bln_valid){      
-      return false;
-    }
-
-    let bln_validAuthorizeUserEmail=this.fn_getAuthorizeUserEmail()
-    if(bln_validAuthorizeUserEmail){
-      if(!AuthorizeUserPass){
-        return false;
-      }
-      if(AuthorizeUserPass.length<6){
-        return false;
-      }
-    }  
-
-    let obj_auth={        
-      MetaUserEmail:MetaUserEmail,
-      AuthorizeUserPass:AuthorizeUserPass
-    };
-
-    this.fn_setAuthorizeObject(obj_auth);    
-    this.fn_getAuthorizeObject(obj_auth);
-    return this.fn_XDesigner_startAuthorize(obj_auth);
-
-  }
-  fn_setAuthorizeObject(obj_post){
-      
-    let bln_valid;
-    bln_valid=obj_shared.fn_validEmail(obj_post.MetaUserEmail);
-    if(!bln_valid){obj_post.MetaUserEmail="";}
-    this.fn_setAuthorizeUserEmail(obj_post.MetaUserEmail);
-    
-    bln_valid=false;    
-    if(obj_post.AuthorizeUserPass){
-      bln_valid=true;
-    }
-    
-    
-    if(!bln_valid){obj_post.AuthorizeUserPass="";}
-    this.fn_setAuthorizeUserPass(obj_post.AuthorizeUserPass);    
-    
-    let bln_value=obj_shared.fn_parseBool(obj_post.AuthorizeUserStatus)
-    this.fn_setAuthorizeUserStatus(bln_value);        
-}    
-  /////////////////////            
-  fn_getAuthorizeUserEmail(){
-    return this.obj_holder.MetaUserEmail;    
-  }                
-  fn_setAuthorizeUserEmail(MetaUserEmail){
-    this.obj_holder.MetaUserEmail=MetaUserEmail;    
-  }                  
-  fn_setAuthorizeUserPass(AuthorizeUserPass){                          
-    this.obj_holder.AuthorizeUserPass=AuthorizeUserPass;
-  }              
-  fn_setAuthorizeUserStatus(AuthorizeUserStatus){                          
-    this.obj_holder.AuthorizeUserStatus=AuthorizeUserStatus;
-  }              
-  /////////////////////        
-  fn_getAuthorizeObject(){
-    return {        
-      AuthorizeSessionKey:obj_shared.fn_getCookie("AuthorizeSessionKey"),
-      MetaUserEmail:this.obj_holder.MetaUserEmail,
-      AuthorizeUserPass:this.obj_holder.AuthorizeUserPass,
-      AuthorizeUserStatus:this.obj_holder.AuthorizeUserStatus
-    };
-  }   
-  
-  fn_XDesigner_startAuthorize(obj_auth){       
-
-    obj_auth.str_action="XDesigner_startAuthorize";                
-    this.fn_runServerAction(obj_auth);          
-  }
-  XDesigner_startAuthorize(obj_post){    
-
-    let bln_value;          
-    let obj_item;
-    
-    this.fn_setAuthorizeObject(obj_post);//set values from server on client
-    let obj_auth=this.fn_getAuthorizeObject();//get client values      
-    
-    let bln_valid=obj_shared.fn_validEmail(obj_auth.MetaUserEmail);
-    if(!bln_valid){
-      bln_value=this.fn_requireAuthorizeUserEmail();        
-      if(!bln_value){return false;}
-    }              
-
-    obj_item=obj_project.fn_getComponent("form_input_login_email");                    
-    obj_item.fn_setDisplay(false);            
-
-    obj_item=obj_project.fn_getComponent("form_input_login_pass");                                
-    obj_item.fn_setDisplay(true);             
-
-    
-    obj_item=obj_project.fn_getComponent("form_button_login_email");                
-    obj_item.fn_setDisplay(false);                 
-
-    obj_item=obj_project.fn_getComponent("form_button_login_pass");                
-    obj_item.fn_setDisplay(true);             
-    
-    
-    if(!obj_auth.AuthorizeUserPass){
-      bln_value=this.fn_requireAuthorizeUserPass();        
-      if(!bln_value){return false;}             
-    }
-
-    //obj_auth.AuthorizeUserStatus=true;
-    console.log("obj_auth.AuthorizeUserStatus: " + obj_auth.AuthorizeUserStatus);
-    if(!obj_auth.AuthorizeUserStatus){      
-      return;
-    }
-    
-    let str_returnURL=obj_shared.fn_getURLParam("returnURL");    
-    if(str_returnURL){                  
-      window.location.href=str_returnURL;
-    }
-    else{      
-      obj_path.fn_navigateSubdomain("desk");
-    }
-
-    
-  }  
-  fn_requireAuthorizeUserEmail(){                                      
-    let obj_item=obj_project.fn_getComponent("form_input_login_email");                    
-    
-    let MetaUserEmail;
-    if(obj_item){      
-      MetaUserEmail=obj_item.fn_getValue();        
-    }
-    
-    let bln_valid=obj_shared.fn_validEmail(MetaUserEmail);      
-    if(!bln_valid){              
-      return false;
-    }
-
-    this.fn_setAuthorizeUserEmail(MetaUserEmail);      
-    return true;
-  }
-  
-  fn_requireAuthorizeUserPass(){
-    
-    let AuthorizeUserPass;                                
-    let obj_item=obj_project.fn_getComponent("form_input_login_pass");                                
-    if(obj_item){      
-      AuthorizeUserPass=obj_item.fn_getValue();
-    }
-    if(!AuthorizeUserPass){              
-      return false;
-    }
-    this.fn_setAuthorizeUserPass(AuthorizeUserPass);    
-    obj_item.fn_setText("");              
-    return true;
-  }
-}//END CLS
-//END TAG
-//END component/login_dashboard
-/*type: login_dashboard//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: loginpanelform//*/
-
-            //XSTART component/loginpanelform
-              class loginpanelform extends form_form{
-                constructor(obj_ini) {      
-                  super(obj_ini);        
-                } 
-                fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                                  
-                }
-                fn_onSubmit(e){      
-                  
-                  obj_project.fn_forgetEvent(e);                                    
-                  let obj_dashboard=obj_project.fn_locateItem("login_dashboard");
-                  if(obj_dashboard){                    
-                    obj_dashboard.fn_startAuthorize();
-                  }                                    
-                }
-              }//END CLS
-              //END TAG
-              //END component/loginpanelform
-/*type: loginpanelform//*/
 /*END COMPONENT//*/
 
 
@@ -18065,7 +17857,7 @@ class login_dashboard extends xapp_dashboard{
 //START COMPONENTMAP
 
 //START AUTO GENERATED COMPONENT MAP
-const obj_ComponentMap = new Map([['component', component],['xapp_ajax', xapp_ajax],['xapp_component', xapp_component],['form_fieldset', form_fieldset],['form_input', form_input],['tablecell', tablecell],['tableheader', tableheader],['tablerow', tablerow],['table', table],['form_button', form_button],['form_button_rich', form_button_rich],['xapp_menu_operation', xapp_menu_operation],['xapp_menu', xapp_menu],['form_menu_panel', form_menu_panel],['xapp_base', xapp_base],['xapp_console_container', xapp_console_container],['xapp_data', xapp_data],['xapp_dataform', xapp_dataform],['form_inputandbutton', form_inputandbutton],['xapp_button', xapp_button],['xapp_console_button', xapp_console_button],['form_form', form_form],['xapp_dashboard', xapp_dashboard],['xapp', xapp],['form_tablecell', form_tablecell],['form_inputandbutton_submit', form_inputandbutton_submit],['authorise_end', authorise_end],['block', block],['form_anchor', form_anchor],['form_button_anchor', form_button_anchor],['form_button_icon', form_button_icon],['form_button_search', form_button_search],['form_button_showhide', form_button_showhide],['form_button_span', form_button_span],['form_button_submit', form_button_submit],['form_checkbox', form_checkbox],['form_field', form_field],['form_hardrule', form_hardrule],['form_icon', form_icon],['form_iframe', form_iframe],['form_input_login_email', form_input_login_email],['form_input_login_pass', form_input_login_pass],['form_label', form_label],['form_legend', form_legend],['form_nonbreakingspace', form_nonbreakingspace],['form_panel', form_panel],['form_panellist', form_panellist],['form_radio', form_radio],['form_section', form_section],['form_section_panel', form_section_panel],['form_select', form_select],['form_span', form_span],['form_tab', form_tab],['form_table', form_table],['form_tableheader', form_tableheader],['form_tablerow', form_tablerow],['form_tablist', form_tablist],['form_tabset', form_tabset],['form_text', form_text],['form_textarea', form_textarea],['lock', lock],['login_dashboard', login_dashboard],['loginpanelform', loginpanelform],['xapp_accordion', xapp_accordion],['xapp_button_general_archive_hide', xapp_button_general_archive_hide],['xapp_button_general_archive_show', xapp_button_general_archive_show],['xapp_button_general_form_down', xapp_button_general_form_down],['xapp_button_general_form_gap', xapp_button_general_form_gap],['xapp_button_general_form_group', xapp_button_general_form_group],['xapp_button_general_form_up', xapp_button_general_form_up],['xapp_button_general_row_hide', xapp_button_general_row_hide],['xapp_button_general_row_show', xapp_button_general_row_show],['xapp_button_general_use_task_date', xapp_button_general_use_task_date],['xapp_button_general_use_task_datetime', xapp_button_general_use_task_datetime],['xapp_button_navigate_desktop', xapp_button_navigate_desktop],['xapp_button_navigate_lobby', xapp_button_navigate_lobby],['xapp_button_navigate_login', xapp_button_navigate_login],['xapp_button_navigate_mall', xapp_button_navigate_mall],['xapp_button_navigate_newcolumn', xapp_button_navigate_newcolumn],['xapp_button_navigate_newrow', xapp_button_navigate_newrow],['xapp_button_navigate_office', xapp_button_navigate_office],['xapp_button_navigate_rowz', xapp_button_navigate_rowz],['xapp_button_navigate_settings', xapp_button_navigate_settings],['xapp_button_queryterm', xapp_button_queryterm],['xapp_column', xapp_column],['xapp_console', xapp_console],['xapp_console_search', xapp_console_search],['xapp_context_holder', xapp_context_holder],['xapp_data_childmenu', xapp_data_childmenu],['xapp_data_view', xapp_data_view],['xapp_dynamic_content', xapp_dynamic_content],['xapp_form_container_search', xapp_form_container_search],['xapp_menu_panel', xapp_menu_panel],['xapp_menuform', xapp_menuform],['xapp_propertysheet', xapp_propertysheet],['xapp_propertysheet_input', xapp_propertysheet_input],['xapp_queryterm_interface', xapp_queryterm_interface],['xapp_report_interface_fieldcriteria', xapp_report_interface_fieldcriteria],['xapp_report_interface_fieldlist', xapp_report_interface_fieldlist],['xapp_row', xapp_row],['xapp_theme', xapp_theme],['xapp_widgetboard', xapp_widgetboard]]);
+const obj_ComponentMap = new Map([['component', component],['xapp_ajax', xapp_ajax],['xapp_component', xapp_component],['form_fieldset', form_fieldset],['form_input', form_input],['tablecell', tablecell],['tableheader', tableheader],['tablerow', tablerow],['table', table],['form_button', form_button],['form_button_rich', form_button_rich],['xapp_menu_operation', xapp_menu_operation],['xapp_menu', xapp_menu],['form_menu_panel', form_menu_panel],['xapp_base', xapp_base],['xapp_console_container', xapp_console_container],['xapp_data', xapp_data],['xapp_dataform', xapp_dataform],['form_inputandbutton', form_inputandbutton],['xapp_button', xapp_button],['xapp_console_button', xapp_console_button],['form_tablecell', form_tablecell],['form_inputandbutton_submit', form_inputandbutton_submit],['xapp_dashboard', xapp_dashboard],['xapp', xapp],['authorise_gate', authorise_gate],['block', block],['desk', desk],['desk_dashboard', desk_dashboard],['desk_form_button', desk_form_button],['form_anchor', form_anchor],['form_button_anchor', form_button_anchor],['form_button_icon', form_button_icon],['form_button_search', form_button_search],['form_button_showhide', form_button_showhide],['form_button_span', form_button_span],['form_button_submit', form_button_submit],['form_checkbox', form_checkbox],['form_field', form_field],['form_form', form_form],['form_hardrule', form_hardrule],['form_icon', form_icon],['form_iframe', form_iframe],['form_label', form_label],['form_legend', form_legend],['form_nonbreakingspace', form_nonbreakingspace],['form_panel', form_panel],['form_panellist', form_panellist],['form_radio', form_radio],['form_section', form_section],['form_section_panel', form_section_panel],['form_select', form_select],['form_span', form_span],['form_tab', form_tab],['form_table', form_table],['form_tableheader', form_tableheader],['form_tablerow', form_tablerow],['form_tablist', form_tablist],['form_tabset', form_tabset],['form_text', form_text],['form_textarea', form_textarea],['xapp_accordion', xapp_accordion],['xapp_button_general_archive_hide', xapp_button_general_archive_hide],['xapp_button_general_archive_show', xapp_button_general_archive_show],['xapp_button_general_form_down', xapp_button_general_form_down],['xapp_button_general_form_gap', xapp_button_general_form_gap],['xapp_button_general_form_group', xapp_button_general_form_group],['xapp_button_general_form_up', xapp_button_general_form_up],['xapp_button_general_row_hide', xapp_button_general_row_hide],['xapp_button_general_row_show', xapp_button_general_row_show],['xapp_button_general_use_task_date', xapp_button_general_use_task_date],['xapp_button_general_use_task_datetime', xapp_button_general_use_task_datetime],['xapp_button_navigate_desktop', xapp_button_navigate_desktop],['xapp_button_navigate_lobby', xapp_button_navigate_lobby],['xapp_button_navigate_login', xapp_button_navigate_login],['xapp_button_navigate_mall', xapp_button_navigate_mall],['xapp_button_navigate_newcolumn', xapp_button_navigate_newcolumn],['xapp_button_navigate_newrow', xapp_button_navigate_newrow],['xapp_button_navigate_office', xapp_button_navigate_office],['xapp_button_navigate_rowz', xapp_button_navigate_rowz],['xapp_button_navigate_settings', xapp_button_navigate_settings],['xapp_button_queryterm', xapp_button_queryterm],['xapp_column', xapp_column],['xapp_console', xapp_console],['xapp_console_search', xapp_console_search],['xapp_context_holder', xapp_context_holder],['xapp_data_childmenu', xapp_data_childmenu],['xapp_data_view', xapp_data_view],['xapp_dynamic_content', xapp_dynamic_content],['xapp_form_container_search', xapp_form_container_search],['xapp_menu_panel', xapp_menu_panel],['xapp_menuform', xapp_menuform],['xapp_propertysheet', xapp_propertysheet],['xapp_propertysheet_input', xapp_propertysheet_input],['xapp_queryterm_interface', xapp_queryterm_interface],['xapp_report_interface_fieldcriteria', xapp_report_interface_fieldcriteria],['xapp_report_interface_fieldlist', xapp_report_interface_fieldlist],['xapp_row', xapp_row],['xapp_theme', xapp_theme],['xapp_widgetboard', xapp_widgetboard]]);
 //END AUTO GENERATED MAP
 
 
@@ -18078,7 +17870,7 @@ const obj_ComponentMap = new Map([['component', component],['xapp_ajax', xapp_aj
 /*type: TemplateCode//*/
 
 //START Project.js
-class Project extends lock{
+class Project extends desk{
     constructor(obj_ini) {
         super(obj_ini); // call the super class constructor
         
@@ -18224,7 +18016,7 @@ class Project extends lock{
   }//END OF CLS
 
   /*START DESIGN BOOT VARIABLE//*/
-obj_boot.obj_design.int_idRecord=6014; 
+obj_boot.obj_design.int_idRecord=6051; 
 /*END DESIGN BOOT VARIABLE//*/
 //END Project.js
 
@@ -18241,15 +18033,20 @@ obj_boot.obj_design.int_idRecord=6014;
 
 /*START INSTANCE JSON MAP//*/
 var obj_InstanceJSONMap = new Map([
-[6014, {"obj_design":{"int_idRecord":6014,"str_idXDesign":"myId_60426365","str_name":"lock","str_nameShort":"lock","str_type":"lock","str_tag":"lock","str_classExtend":"xapp","str_createdDate":"2022-09-11 20:12:26","str_modifiedDate":"2022-09-11 20:12:26","str_categoryName":"Lock","bln_isLocalHome":true,"arr_item":[{"obj_design":{"int_idRecord":77570,"str_type":"xapp_theme"}},{"obj_design":{"int_idRecord":77532,"str_type":"authorise_end"}},{"obj_design":{"int_idRecord":"76967","str_type":"xapp_dynamic_content"}},{"obj_design":{"int_idRecord":"76968","str_type":"xapp_context_holder"}}],"bln_classController":true,"bln_editPin":true,"str_themeType":"lock","int_radioDisplayMode":3,"str_text":"CRUD","str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_releaseLabel":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_60426365"},"obj_domStyle":{"visibility":"visible"},"bln_togglePeersPin":true,"bln_closePeersPin":true,"MetaDataViewId":101426,"MetaDataViewName":"meta_data","MetaUserViewId":1,"MetaUserViewName":"meta_user","MetaLinkViewId":100475,"MetaLinkViewName":"meta_link","user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_60426365"},"obj_theme":{"obj_design":{"int_idRecord":77570,"str_type":"xapp_theme"}}}],
+[117, {"obj_design":{"int_idRecord":117,"str_idXDesign":"myId_13220336","str_name":"xapp_dynamic_content","str_nameShort":"xapp_dynamic_content","str_type":"xapp_dynamic_content","str_tag":"xapp_dynamic_content","bln_registerAtContainer":true,"str_createdDate":"2022-02-02 20:12:17","str_modifiedDate":"2022-02-02 20:12:17","bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"Anchor","bln_createRelease":"false","bln_isLocalHome":true,"bln_classController":true,"bln_dynamicPin":true,"bln_editPin":true,"str_idProject":"myId_24662136","str_themeType":"xapp_dynamic_content"},"obj_domProperty":{"Id":"myId_13220336"},"obj_domStyle":{"cursor":"default","display":"flex","flex-wrap":"wrap","height":"100%","width":"100%","overflow":"auto"},"dom_objContentContainer":{"Id":"myId_13220336"}}],
+[6009, {"obj_design":{"int_idRecord":6009,"str_idXDesign":"myId_26668681","str_name":"authorise_gate","str_nameShort":"authorise_gate","str_type":"authorise_gate","str_tag":"authorise_gate","str_createdDate":"2022-09-10 18:52:39","str_modifiedDate":"2022-09-10 18:52:39","bln_isLocalHome":true,"str_idProject":"myId_38012811","bln_classController":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_classExtend":"xapp_ajax","str_categoryName":"Anchor","str_themeType":"authorise_gate","bln_editPin":true,"bln_lockComponent":true,"str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"user_agent":"Firefox"}],
+[6051, {"obj_design":{"arr_item":[{"obj_design":{"int_idRecord":77570,"str_type":"xapp_theme"}},{"obj_design":{"int_idRecord":117,"str_type":"xapp_dynamic_content"}},{"obj_design":{"int_idRecord":76385,"str_type":"xapp_context_holder"}},{"obj_design":{"int_idRecord":6009,"str_type":"authorise_gate"}}],"int_idRecord":6051,"str_idXDesign":"myId_24662136","str_name":"desk","str_nameShort":"desk","str_type":"desk","str_tag":"desk","bln_classController":true,"str_createdDate":"2022-09-18 17:59:11","str_modifiedDate":"2022-09-18 17:59:11","str_categoryName":"Desk","bln_isLocalHome":true,"bln_editPin":true,"int_idMetaMenu":"186","int_radioDisplayMode":3,"bln_lockComponent":true,"str_classExtend":"xapp","str_themeType":"desk","str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset","str_iconStyle":"default"},"obj_domProperty":{"Id":"myId_24662136"},"bln_togglePeersPin":true,"bln_closePeersPin":true,"MetaDataViewId":101426,"MetaDataViewName":"meta_data","MetaUserViewId":1,"MetaUserViewName":"meta_user","MetaLinkViewId":100475,"MetaLinkViewName":"meta_link","user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_24662136"},"obj_theme":{"obj_design":{"int_idRecord":77570,"str_type":"xapp_theme"}}}],
 [7585, {"obj_design":{"int_idRecord":7585,"str_idXDesign":"myId_98446896","str_name":"form_inputandbutton_input","str_nameShort":"form_inputandbutton_input","str_type":"form_input","str_tag":"input","str_createdDate":"2022-02-02 19:57:30","str_modifiedDate":"2022-02-02 19:57:30","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_input","bln_registerAtContainer":true,"bln_classController":true,"bln_lockComponent":true,"bln_mouseDown":true,"bln_debug":true,"str_categoryName":"Xtra","str_idProject":"notset","str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"","str_lastVersionDate":"notset","str_value":""},"obj_domStyle":{"cursor":"pointer","border":"0px none","display":"block","border-radius":"4px","padding":"10px"}}],
 [7775, {"obj_design":{"int_idRecord":7775,"str_idXDesign":"myId_71626268","str_name":"form_context","str_nameShort":"form_context","str_type":"xapp_context_holder","str_tag":"form_context","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"str_themeType":"xapp_context_holder","bln_isLocalHome":true,"str_categoryName":"Form","bln_palettePinRelease":true,"bln_palettePin":true,"arr_item":[{"obj_design":{"int_idRecord":77012,"str_type":"form_form"}},{"obj_design":{"int_idRecord":77018,"str_type":"form_menu_panel"}},{"obj_design":{"int_idRecord":"77019","str_type":"form_panel"}},{"obj_design":{"int_idRecord":76691,"str_type":"component"}},{"obj_design":{"int_idRecord":76753,"str_type":"form_iframe"}},{"obj_design":{"int_idRecord":77020,"str_type":"form_section"}},{"obj_design":{"int_idRecord":"77021","str_type":"form_section_panel"}},{"obj_design":{"int_idRecord":77024,"str_type":"form_field"}},{"obj_design":{"int_idRecord":77025,"str_type":"form_textarea"}},{"obj_design":{"int_idRecord":77084,"str_type":"form_checkbox"}},{"obj_design":{"int_idRecord":77026,"str_type":"form_input"}},{"obj_design":{"int_idRecord":"77335","str_type":"form_radio"}},{"obj_design":{"int_idRecord":77490,"str_type":"form_button"}},{"obj_design":{"int_idRecord":77489,"str_type":"form_button_rich"}},{"obj_design":{"int_idRecord":77379,"str_type":"form_button_search"}},{"obj_design":{"int_idRecord":77491,"str_type":"form_button_showhide"}},{"obj_design":{"int_idRecord":77195,"str_type":"form_tab"}},{"obj_design":{"int_idRecord":"77027","str_type":"form_select"}},{"obj_design":{"int_idRecord":77030,"str_type":"form_inputandbutton"}},{"obj_design":{"int_idRecord":77032,"str_type":"block"}},{"obj_design":{"int_idRecord":76764,"str_type":"form_table"}},{"obj_design":{"int_idRecord":76766,"str_type":"form_tablerow"}},{"obj_design":{"int_idRecord":76767,"str_type":"form_tablecell"}},{"obj_design":{"int_idRecord":76765,"str_type":"form_tableheader"}},{"obj_design":{"int_idRecord":77033,"str_type":"form_hardrule"}},{"obj_design":{"int_idRecord":"77337","str_type":"form_nonbreakingspace"}},{"obj_design":{"int_idRecord":77034,"str_type":"form_anchor"}},{"obj_design":{"int_idRecord":77381,"str_type":"form_icon"}},{"obj_design":{"int_idRecord":77184,"str_type":"form_fieldset"}},{"obj_design":{"int_idRecord":77187,"str_type":"form_legend"}},{"obj_design":{"int_idRecord":77192,"str_type":"form_tabset"}},{"obj_design":{"int_idRecord":77339,"str_type":"form_label"}},{"obj_design":{"int_idRecord":77341,"str_type":"form_span"}}],"bln_isContextHolder":true,"bln_lockComponent":true,"bln_classController":"false","str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_71626268"},"obj_domStyle":{"flex-flow":"wrap","gap":"10px","display":"flex"},"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_71626268"}}],
 [75368, {"obj_design":{"int_idRecord":75368,"str_idXDesign":"myId_67217171","str_name":"menu_context","str_nameShort":"menu_context","str_type":"xapp_context_holder","str_tag":"menu_context","bln_registerAtContainer":true,"str_classExtend":"xapp_ajax","str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"str_themeType":"xapp_context_holder","bln_isLocalHome":true,"str_categoryName":"Xapp","bln_isContextHolder":true,"bln_lockComponent":true,"bln_classController":true,"bln_palettePinRelease":true,"bln_palettePin":true,"arr_item":[{"obj_design":{"int_idRecord":77082,"str_type":"xapp_base"}},{"obj_design":{"int_idRecord":77451,"str_type":"xapp_menu"}},{"obj_design":{"int_idRecord":76683,"str_type":"xapp_menuform"}},{"obj_design":{"int_idRecord":76596,"str_type":"xapp_context_holder"}},{"obj_design":{"int_idRecord":76650,"str_type":"xapp_menu_operation"}},{"obj_design":{"int_idRecord":76146,"str_type":"xapp_menu_panel"}},{"obj_design":{"int_idRecord":"77454","str_type":"xapp_console"}},{"obj_design":{"int_idRecord":76771,"str_type":"xapp_component"}},{"obj_design":{"int_idRecord":76255,"str_type":"xapp_dashboard"}},{"obj_design":{"int_idRecord":76171,"str_type":"xapp_widgetboard"}},{"obj_design":{"int_idRecord":76677,"str_type":"xapp_accordion"}},{"obj_design":{"int_idRecord":76799,"str_type":"xapp_propertysheet"}},{"obj_design":{"int_idRecord":76801,"str_type":"xapp_propertysheet_input"}}],"str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_67217171"},"obj_domStyle":{"flex-flow":"wrap","gap":"10px","display":"flex"},"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_67217171"}}],
 [75418, {"obj_design":{"int_idRecord":75418,"str_idXDesign":"myId_16137562","str_name":"xapp_console_button","str_nameShort":"xapp_console_button","str_type":"xapp_console_button","str_themeType":"form_button","str_tag":"button","bln_registerAtContainer":true,"str_createdDate":"2022-11-20 23:26:20","str_modifiedDate":"2022-11-20 23:26:20","bln_editPin":true,"str_text":"xapp_console_button","bln_classController":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_classExtend":"xapp_button","bln_lockComponent":true,"str_categoryName":"Xtra"},"obj_domProperty":{"innerText":"My Button","innerHTML":"xapp_console_button"},"obj_domStyle":{"padding":"10px"}}],
 [76146, {"obj_design":{"int_idRecord":76146,"str_idXDesign":"myId_11592266","str_name":"xapp_menu_panel","str_nameShort":"xapp_menu_panel","str_type":"xapp_menu_panel","str_themeType":"form_menu_panel","str_tag":"xapp_menu_panel","bln_registerAtContainer":true,"str_createdDate":"2022-11-15 08:47:57","str_modifiedDate":"2022-11-15 08:47:57","bln_editPin":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_classExtend":"form_menu_panel","str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domStyle":{"flexdirection":"column","gap":"10px","padding":"10px","background":"grey","display":"flex","flex flow":"column wrap","flex-direction":"column","column":"wrap","flex-wrap":"wrap"}}],
 [76171, {"obj_design":{"int_idRecord":76171,"str_idXDesign":"myId_25555422","str_name":"xapp_widgetboard","str_nameShort":"xapp_widgetboard","str_type":"xapp_widgetboard","str_tag":"xapp_widgetboard","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_section","bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_classExtend":"xapp_component"},"obj_domStyle":{"flex-direction":"column","padding":"10px","flex-wrap":"wrap","flex-flow":"row wrap","border":"1px solid white","gap":"10px","display":"none"}}],
+[76250, {"obj_design":{"int_idRecord":76250,"str_idXDesign":"myId_13201177","str_name":"desk_dashboard","str_nameShort":"desk_dashboard","str_type":"desk_dashboard","str_tag":"desk_dashboard","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_section","bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_classExtend":"xapp_dashboard","bln_dynamicPin":true,"bln_classController":true,"str_categoryName":"Xtra","bln_lockComponent":true},"obj_domStyle":{"flex-direction":"column","flex-wrap":"wrap","gap":"10px","border":"0px solid black","flex-flow":"row wrap","padding":"0px","display":"none"}}],
 [76255, {"obj_design":{"int_idRecord":76255,"str_idXDesign":"myId_81785083","str_name":"xapp_dashboard","str_nameShort":"xapp_dashboard","str_type":"xapp_dashboard","str_tag":"xapp_dashboard","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_classExtend":"xapp_component","bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_themeType":"form_section"},"obj_domStyle":{"flex-direction":"column","flex-wrap":"wrap","flex-flow":"row wrap","border":"1px solid white","gap":"10px","display":"none","padding":"0px"}}],
+[76385, {"obj_design":{"int_idRecord":76385,"str_idXDesign":"myId_81377477","str_name":"xapp_context_holder","str_nameShort":"xapp_context_holder","str_type":"xapp_context_holder","str_tag":"xapp_context_holder","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"str_themeType":"xapp_context_holder","bln_isLocalHome":true,"bln_isContextHolder":true,"bln_palettePinRelease":true,"bln_palettePin":true,"arr_item":[{"obj_design":{"int_idRecord":76418,"str_type":"xapp_context_holder"}},{"obj_design":{"int_idRecord":76394,"str_type":"xapp_context_holder"}}],"bln_classController":"false"},"obj_domStyle":{"display":"none"}}],
 [76394, {"obj_design":{"int_idRecord":76394,"str_idXDesign":"myId_91985606","str_name":"xapp_menu_context_holder","str_nameShort":"xapp_menu_context_holder","str_type":"xapp_context_holder","str_tag":"xapp_menu_context_holder","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"bln_isLocalHome":true,"bln_isContextHolder":true,"bln_palettePinRelease":true,"bln_palettePin":true,"arr_item":[{"obj_design":{"int_idRecord":7775,"str_type":"xapp_context_holder"}},{"obj_design":{"int_idRecord":75368,"str_type":"xapp_context_holder"}},{"obj_design":{"int_idRecord":76686,"str_type":"xapp_context_holder"}}],"bln_classController":"false","bln_lockComponent":true,"str_categoryName":"Xapp","str_themeType":"xapp_context_holder"},"obj_domProperty":{"Id":"myId_91985606"},"obj_domStyle":{"flex flow":"row wrap","flex-flow":"row wrap","gap":"10px","display":"none"},"dom_objContentContainer":{"Id":"myId_91985606"}}],
+[76418, {"obj_design":{"int_idRecord":76418,"str_idXDesign":"myId_66315517","str_name":"desk_context_holder","str_nameShort":"desk_context_holder","str_type":"xapp_context_holder","str_tag":"desk_context_holder","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"str_themeType":"xapp_context_holder","bln_isLocalHome":true,"bln_isContextHolder":true,"bln_palettePinRelease":true,"bln_palettePin":true,"arr_item":[{"obj_design":{"int_idRecord":76250,"str_type":"desk_dashboard"}},{"obj_design":{"int_idRecord":77431,"str_type":"desk_form_button"}}],"bln_classController":"false","bln_lockComponent":true,"str_categoryName":"Desk","str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_66315517"},"obj_domStyle":{"flex-flow":"wrap","gap":"10px","display":"flex"},"user_agent":"Chrome","dom_objContentContainer":{"Id":"myId_66315517"}}],
 [76596, {"obj_design":{"int_idRecord":76596,"str_idXDesign":"myId_58935386","str_name":"menu_console","str_nameShort":"menu_console","str_type":"xapp_context_holder","str_tag":"menu_console","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"str_themeType":"xapp_context_holder","bln_isLocalHome":true,"bln_isContextHolder":true,"bln_palettePinRelease":true,"bln_palettePin":true,"arr_item":[{"obj_design":{"int_idRecord":76746,"str_type":"xapp_console_container"}},{"obj_design":{"int_idRecord":77152,"str_type":"xapp_button"}},{"obj_design":{"int_idRecord":75418,"str_type":"xapp_console_button"}},{"obj_design":{"int_idRecord":76655,"str_type":"xapp_console_container"}},{"obj_design":{"int_idRecord":76626,"str_type":"xapp_form_container_search"}},{"obj_design":{"int_idRecord":76605,"str_type":"xapp_console_container"}},{"obj_design":{"int_idRecord":77171,"str_type":"xapp_button_queryterm"}},{"obj_design":{"int_idRecord":77173,"str_type":"xapp_queryterm_interface"}},{"obj_design":{"int_idRecord":77200,"str_type":"xapp_report_interface_fieldlist"}},{"obj_design":{"int_idRecord":77201,"str_type":"xapp_report_interface_fieldcriteria"}}],"bln_classController":"false","str_categoryName":"Other","bln_lockComponent":true,"str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_58935386"},"obj_domStyle":{"gap":"10px","flex-flow":"row wrap","display":"flex"},"dom_objContentContainer":{"Id":"myId_58935386"}}],
 [76605, {"obj_design":{"int_idRecord":76605,"str_idXDesign":"myId_36985869","str_name":"xapp_console_container_general","str_nameShort":"xapp_console_container_general","str_type":"xapp_console_container","str_tag":"xapp_console_container_general","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":"false","arr_item":[{"obj_design":{"int_idRecord":77396,"str_type":"xapp_button_navigate_settings"}},{"obj_design":{"int_idRecord":77037,"str_type":"xapp_button_navigate_mall"}},{"obj_design":{"int_idRecord":77397,"str_type":"xapp_button_navigate_desktop"}},{"obj_design":{"int_idRecord":77485,"str_type":"xapp_button_navigate_lobby"}},{"obj_design":{"int_idRecord":77486,"str_type":"xapp_button_navigate_rowz"}},{"obj_design":{"int_idRecord":77038,"str_type":"xapp_button_navigate_office"}},{"obj_design":{"int_idRecord":77430,"str_type":"xapp_button_navigate_login"}},{"obj_design":{"int_idRecord":77496,"str_type":"xapp_button_navigate_newrow"}},{"obj_design":{"int_idRecord":77497,"str_type":"xapp_button_navigate_newcolumn"}},{"obj_design":{"int_idRecord":77520,"str_type":"xapp_button_general_archive_hide"}},{"obj_design":{"int_idRecord":77519,"str_type":"xapp_button_general_archive_show"}},{"obj_design":{"int_idRecord":77530,"str_type":"xapp_button_general_use_task_date"}},{"obj_design":{"int_idRecord":77531,"str_type":"xapp_button_general_use_task_datetime"}},{"obj_design":{"int_idRecord":77517,"str_type":"xapp_button_general_row_hide"}},{"obj_design":{"int_idRecord":77518,"str_type":"xapp_button_general_row_show"}},{"obj_design":{"int_idRecord":77523,"str_type":"xapp_button_general_form_up"}},{"obj_design":{"int_idRecord":77522,"str_type":"xapp_button_general_form_down"}},{"obj_design":{"int_idRecord":77524,"str_type":"xapp_button_general_form_gap"}},{"obj_design":{"int_idRecord":77525,"str_type":"xapp_button_general_form_group"}}],"bln_lockComponent":true,"str_categoryName":"Xapp","str_themeType":"form_section","str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_36985869"},"obj_domStyle":{"str_name":"crud_console_record_control","display":"flex","gap":"10px","backkground":"red","flex-flow":"row wrap","border":"0px solid purple"},"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_36985869"}}],
 [76626, {"obj_design":{"int_idRecord":76626,"str_idXDesign":"myId_66136639","str_name":"xapp_form_container_search","str_nameShort":"xapp_form_container_search","str_type":"xapp_form_container_search","str_tag":"form","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"bln_isLocalHome":true,"bln_palettePinRelease":true,"bln_palettePin":true,"arr_item":[{"obj_design":{"int_idRecord":76627,"str_type":"xapp_console_search"}}],"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_themeType":"form_section","str_classExtend":"xapp_console_container","str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_66136639"},"obj_domStyle":{"display":"flex","flex-flow":"row wrap","gap":"10px"},"dom_objContentContainer":{"1":{"Id":"myId_50437881","aria-label":"New Record"},"Id":"myId_66136639"}}],
@@ -18274,10 +18071,6 @@ var obj_InstanceJSONMap = new Map([
 [76771, {"obj_design":{"int_idRecord":76771,"str_idXDesign":"myId_12259382","str_name":"xapp_component","str_nameShort":"xapp_component","str_type":"xapp_component","str_tag":"xapp_component","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_classExtend":"xapp_ajax","bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_themeType":"xapp_component"},"obj_domStyle":{"flex-direction":"column","padding":"10px","flex-wrap":"wrap","flex-flow":"row wrap","border":"1px solid white","gap":"10px","display":"none"}}],
 [76799, {"obj_design":{"int_idRecord":76799,"str_idXDesign":"myId_78332315","str_name":"xapp_propertysheet","str_nameShort":"xapp_propertysheet","str_type":"xapp_propertysheet","str_tag":"xapp_propertysheet","bln_classController":true,"str_createdDate":"2022-10-22 22:43:39","str_modifiedDate":"2022-10-22 22:43:39","bln_editPin":true,"bln_isLocalHome":true,"str_classList":"input,table","blnIsTag":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_themeType":"xapp_propertysheet"}}],
 [76801, {"obj_design":{"int_idRecord":76801,"str_idXDesign":"myId_11033391","str_name":"xapp_propertysheet_input","str_nameShort":"xapp_propertysheet_input","str_type":"xapp_propertysheet_input","str_tag":"input","str_createdDate":"2022-02-02 19:57:30","str_modifiedDate":"2022-02-02 19:57:30","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_input","bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_classExtend":"form_input"},"obj_domStyle":{"padding":"10px","cursor":"pointer","border":"0px none"}}],
-[76967, {"obj_design":{"int_idRecord":"76967","str_idXDesign":"myId_67767017","str_name":"xapp_dynamic_content","str_nameShort":"xapp_dynamic_content","str_type":"xapp_dynamic_content","str_tag":"xapp_dynamic_content","bln_registerAtContainer":true,"str_createdDate":"2022-02-02 20:12:17","str_modifiedDate":"2022-02-02 20:12:17","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_dynamicPin":true,"bln_editPin":true,"str_idProject":"myId_24662136","str_themeType":"xapp_dynamic_content","str_nameRegistrator":"notset","str_content":"","bln_classController":"false","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_67767017"},"obj_domStyle":{"cursor":"default","display":"flex","flex-wrap":"wrap","height":"100%","width":"100%","overflow":"auto"},"dom_objContentContainer":{"Id":"myId_67767017"}}],
-[76968, {"obj_design":{"int_idRecord":"76968","str_idXDesign":"myId_42742327","str_name":"xapp_context_holder","str_nameShort":"xapp_context_holder","str_type":"xapp_context_holder","str_tag":"xapp_context_holder","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"bln_isLocalHome":true,"bln_isContextHolder":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_themeType":"xapp_context_holder","arr_item":[{"obj_design":{"int_idRecord":76969,"str_type":"xapp_context_holder"}},{"obj_design":{"int_idRecord":76394,"str_type":"xapp_context_holder"}}],"bln_classController":"false","str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_42742327"},"obj_domStyle":{"flex-flow":"wrap","gap":"10px","display":"none"},"dom_objContentContainer":{"Id":"myId_42742327"}}],
-[76969, {"obj_design":{"int_idRecord":76969,"str_idXDesign":"myId_11678710","str_name":"login_context_holder","str_nameShort":"login_context_holder","str_type":"xapp_context_holder","str_tag":"login_context_holder","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"bln_isLocalHome":true,"bln_isContextHolder":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_themeType":"xapp_context_holder","bln_classController":"false","arr_item":[{"obj_design":{"int_idRecord":76970,"str_type":"login_dashboard"}}],"str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_11678710"},"obj_domStyle":{"flex-flow":"wrap","gap":"10px","display":"none"},"dom_objContentContainer":{"Id":"myId_11678710"}}],
-[76970, {"obj_design":{"int_idRecord":76970,"str_idXDesign":"myId_79770339","str_name":"login_dashboard","str_nameShort":"login_dashboard","str_type":"login_dashboard","str_tag":"login_dashboard","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_classExtend":"xapp_dashboard","bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Lock","str_themeType":"login_dashboard","str_idProject":"myId_60426365","str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset","arr_item":[{"obj_design":{"int_idRecord":77544,"str_type":"form_section"}}]},"obj_domProperty":{"Id":"myId_79770339"},"obj_domStyle":{"flex-direction":"column","flex-wrap":"wrap","flex-flow":"row wrap","gap":"10px","align-items":"center","justify-content":"center","border":"0px solid white","display":"none"},"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_79770339"}}],
 [77012, {"obj_design":{"int_idRecord":77012,"str_idXDesign":"myId_09399160","str_name":"form_form","str_nameShort":"form_form","str_type":"form_form","str_tag":"form","bln_registerAtContainer":true,"str_classExtend":"component","str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"str_themeType":"form_form","bln_isLocalHome":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":"false","str_categoryName":"Xtra","str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domStyle":{"flex-wrap":"wrap","display":"flex"," background-color":"coral","flex-direction":"column","gap":"10px"},"user_agent":"Firefox"}],
 [77013, {"obj_design":{"int_idRecord":"77013","str_idXDesign":"myId_74808611","str_name":"form_label","str_nameShort":"form_label","str_type":"form_label","str_themeType":"form_label","str_tag":"label","str_createdDate":"2022-11-13 21:59:51","str_modifiedDate":"2022-11-13 21:59:51","bln_editPin":true,"bln_typeable":true,"str_text":"My Label","bln_registerAtContainer":true,"bln_isThemeItem":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":"false"},"obj_domProperty":{"innerText":"My Label"},"obj_domStyle":{"padding":"10px","word-break":"normal","overflow":"auto","color":"white"}}],
 [77014, {"obj_design":{"str_tag":"text","str_type":"form_span","str_idXDesign":"myId_16970921","str_name":"form_span","str_nameShort":"form_span","str_themeType":"form_input","int_idRecord":"77014","str_createdDate":"2022-11-18 16:02:10","str_modifiedDate":"2022-11-18 16:02:10","blnIsTag":true,"bln_editPin":true,"bln_typeable":true,"bln_registerAtContainer":true,"bln_isThemeItem":true,"str_text":" -","bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":"false"},"obj_domProperty":{"innerText":" -"},"obj_domStyle":{"padding":"10px","word-break":"normal","maxheight":"175","overflow":"auto","background":"white","border":"0px solid black","border-radius":"4px","min-width":"0px"}}],
@@ -18319,7 +18112,6 @@ var obj_InstanceJSONMap = new Map([
 [77337, {"obj_design":{"int_idRecord":"77337","str_idXDesign":"myId_88201141","str_name":"form_nonbreakingspace","str_nameShort":"form_nonbreakingspace","str_type":"form_nonbreakingspace","str_themeType":"form_nonbreakingspace","str_tag":"br","bln_registerAtContainer":true,"str_createdDate":"2023-09-28 17:30:59","str_modifiedDate":"2023-09-28 17:30:59","bln_editPin":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":"false","str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_88201141"},"obj_domStyle":{"height":"10px","width":"100%","background":"yellow","border":"0px"},"dom_objContentContainer":{"Id":"myId_88201141"}}],
 [77339, {"obj_design":{"int_idRecord":77339,"str_idXDesign":"myId_11122295","str_name":"form_label","str_nameShort":"form_label","str_type":"form_label","str_themeType":"form_label","str_tag":"label","str_createdDate":"2022-11-13 21:59:51","str_modifiedDate":"2022-11-13 21:59:51","bln_editPin":true,"bln_typeable":true,"str_text":"My Label","bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":"false","str_categoryName":"Xtra","str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"My Label","Id":"myId_11122295"},"obj_domStyle":{"padding":"10px","word-break":"normal","min-width":"175px","max-width":"175px","max-height":"175px","overflow":"auto","color":"black","align-self":"flex-start","border":"1px solid rgba(255, 255, 255, 0.0)","margin":"3px","cursor":"pointer","border-radius":"4px"},"dom_objContentContainer":{"Id":"myId_11122295"}}],
 [77341, {"obj_design":{"str_tag":"span","str_type":"form_span","str_idXDesign":"myId_18418551","str_name":"form_span","str_nameShort":"form_span","str_themeType":"form_input","int_idRecord":77341,"str_createdDate":"2022-11-18 16:02:10","str_modifiedDate":"2022-11-18 16:02:10","blnIsTag":true,"bln_editPin":true,"bln_typeable":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":"false","str_categoryName":"Form","str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_18418551"},"obj_domStyle":{"padding":"10px","word-break":"normal","background":"white","maxheight":"175","overflow":"auto","color":"black","border-radius":"4px","border":"0px solid black","font-family":"Tahoma","max-height":"500px"},"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_18418551"}}],
-[77377, {"obj_design":{"int_idRecord":77377,"str_idXDesign":"myId_29131132","str_name":"loginpanelform","str_nameShort":"loginpanelform","str_type":"loginpanelform","str_tag":"form","str_classExtend":"form_form","str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"str_themeType":"form_form","bln_isLocalHome":true,"bln_palettePinRelease":true,"bln_palettePin":true,"arr_item":[{"obj_design":{"int_idRecord":77538,"str_type":"form_input_login_email"}},{"obj_design":{"int_idRecord":77533,"str_type":"form_input_login_pass"}},{"obj_design":{"int_idRecord":77541,"str_type":"form_button_rich"}},{"obj_design":{"int_idRecord":77545,"str_type":"form_button_rich"}}],"str_idProject":"myId_06166711","bln_classController":true,"str_categoryName":"lock","bln_lockComponent":true,"bln_registerAtProject":true,"str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_29131132"},"obj_domStyle":{"flex-wrap":"wrap","display":"flex"," background-color":"coral","flex-direction":"column","gap":"10px"},"user_agent":"Firefox","dom_objContentContainer":{"0":{"maxlength":"100","font-weight":"bold","Id":"myId_37191444"},"1":{"Id":"myId_17521741","minlength":"6","maxlength":"6","inputmode":"numeric"},"2":{"Id":"myId_07559595","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"},"3":{"Id":"myId_78332329","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"},"Id":"myId_29131132"}}],
 [77379, {"obj_design":{"int_idRecord":77379,"str_idXDesign":"myId_48693643","str_name":"form_button_search","str_nameShort":"form_button_search","str_type":"form_button_search","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"str_text":"Search","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"form_inputandbutton_submit","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_isThemeItem":true,"bln_classController":true,"str_categoryName":"Xtra","bln_lockComponent":true,"str_nameRegistrator":"notset","str_idProject":"notset","str_classList":"notset","str_releaseLabel":"notset","str_lastVersionDate":"notset","str_value":"Search"},"obj_domProperty":{"type":"submit","innerText":"Submit","Id":"myId_48693643","innerHTML":"Search"},"obj_domStyle":{"padding":"10px","cursor":"pointer","border-radius":"2px","border":"0px none white","background-color":"white","flex flow":"column wrap","pointer":"black","rgb(18, 47, 66)":"rgb(18, 47, 66)"},"bln_enabled":true,"dom_objContentContainer":{"data":"","Id":"myId_48693643"}}],
 [77381, {"obj_design":{"int_idRecord":77381,"str_idXDesign":"myId_92278787","str_name":"form_icon","str_nameShort":"form_icon","str_type":"form_icon","str_tag":"i","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_icon","bln_editPin":true,"bln_registerAtContainer":true,"bln_classController":true,"str_categoryName":"Xtra","str_idProject":"notset","str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_92278787"},"obj_domStyle":{"margin":"10px"},"dom_objContentContainer":{"Id":"myId_92278787"}}],
 [77386, {"obj_design":{"str_tag":"span","str_type":"form_button_span","str_idXDesign":"myId_57242915","str_name":"form_button_span","str_nameShort":"form_button_span","str_themeType":"form_button_span","int_idRecord":77386,"str_createdDate":"2022-11-18 16:02:10","str_modifiedDate":"2022-11-18 16:02:10","blnIsTag":true,"bln_editPin":true,"bln_typeable":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_idProject":"myId_11190110","bln_classController":true,"str_text":"form_button_span","str_categoryName":"Form","bln_lockComponent":true},"obj_domProperty":{"Id":"myId_57242915","innerHTML":"form_button_span"},"obj_domStyle":{"maxheight":"175"},"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_57242915"}}],
@@ -18329,6 +18121,7 @@ var obj_InstanceJSONMap = new Map([
 [77396, {"obj_design":{"int_idRecord":77396,"str_idXDesign":"myId_25205280","str_name":"xapp_button_navigate_settings","str_nameShort":"xapp_button_navigate_settings","str_type":"xapp_button_navigate_settings","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Other","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_idProject":"myId_25365115","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"","str_lastVersionDate":"notset","str_icon":"xapp_settings"},"obj_domProperty":{"innerText":"Complete","innerHTML":"Refresh","aria-label":"Settings","Id":"myId_25205280","title":"Settings"},"obj_domStyle":{"padding":"10px","cursor":"pointer","opacity":"1"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_25205280","aria-label":"Settings"}}],
 [77397, {"obj_design":{"int_idRecord":77397,"str_idXDesign":"myId_15925355","str_name":"xapp_button_navigate_desktop","str_nameShort":"xapp_button_navigate_desktop","str_type":"xapp_button_navigate_desktop","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_idProject":"myId_25365115","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Home","str_lastVersionDate":"notset","str_icon":"xapp_desk"},"obj_domProperty":{"innerText":"Complete","innerHTML":"Refresh","aria-label":"Home","title":"Home","Id":"myId_15925355"},"obj_domStyle":{"padding":"10px","cursor":"pointer","opacity":"1"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_15925355","aria-label":"Home"}}],
 [77430, {"obj_design":{"int_idRecord":77430,"str_idXDesign":"myId_23559322","str_name":"xapp_button_navigate_login","str_nameShort":"xapp_button_navigate_login","str_type":"xapp_button_navigate_login","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_lock","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Exit","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_23559322"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"dom_objContentContainer":{"Id":"myId_23559322","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
+[77431, {"obj_design":{"int_idRecord":77431,"str_idXDesign":"myId_02608297","str_name":"desk_form_button","str_nameShort":"desk_form_button","str_type":"desk_form_button","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Desk","str_idProject":"notset","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_star","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"App","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_02608297"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"dom_objContentContainer":{"Id":"myId_02608297","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
 [77451, {"obj_design":{"int_idRecord":77451,"str_idXDesign":"myId_77377077","str_name":"xapp_menu","str_nameShort":"xapp_menu","str_type":"xapp_menu","str_tag":"button","str_createdDate":"2022-02-02 20:04:57","str_modifiedDate":"2022-02-02 20:04:57","str_text":"xapp_menu","bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"Xtra","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"menu_button","bln_registerAtContainer":true,"str_classExtend":"xapp_menu_operation","blnIsTag":true,"arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_releaseLabel":"","str_lastVersionDate":"notset","bln_classController":"false"},"obj_domProperty":{"innerText":"xapp_menu","innerHTML":"xapp_menu","xDesign_MenuButtonClick":"fn_MenuButtonClick","Id":"myId_77377077"},"obj_domStyle":{"color":"white","font-size":"100%","padding-bottom":"2px","margin-bottom":"1px","justify-content":"center","align-items":"center","border-radius":"0px","cursor":"pointer","border":"0px","padding":"15px 15px","width":"100%","display":"flex","background":"rgb(65, 65, 65)"},"bln_enabled":true,"str_defaultTypeMenu":"xapp_menu","str_defaultTypeData":"xapp_data_view","str_defaultTypeDataChildMenu":"xapp_data_childmenu","obj_meta":{"bln_togglePeersPin":true,"str_metaConstraintName":"","str_metaRowzName":"","int_idMetaRowz":0,"int_idParentMetaRowz":0,"int_idMetaView":0,"bln_viewPin":0,"str_buttonConsole":"","MetaPermissionTag":"100","str_metaTypeDashboard":"","str_metaTypeData":"","str_optionChildMenu":"","str_text":""},"str_optionData":"Data","str_optionReport":"Report","str_optionWidget":"Widget","str_optionDashboard":"Dashboard","str_optionMenu":"Menu","str_optionMenuForm":"MenuForm","str_listSeparator":"-","bln_constraintKeyPin":true,"user_agent":"Firefox"}],
 [77452, {"obj_design":{"int_idRecord":"77452","str_idXDesign":"myId_37013033","str_name":"block_left","str_nameShort":"block_left","str_type":"block","str_tag":"block_left","str_createdDate":"2022-01-31 21:10:58","str_modifiedDate":"2022-01-31 21:10:58","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"block","bln_editPin":true,"bln_registerAtContainer":true,"str_categoryName":"","str_idProject":"myId_85290688","str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_37013033"},"obj_domStyle":{"justify-content":"start","gap":"10px","display":"flex","1 1 50%":"10px","flex":"1 1 auto","border":"0px solid yellow","flex-wrap":"wrap"},"dom_objContentContainer":{"Id":"myId_37013033"}}],
 [77453, {"obj_design":{"int_idRecord":"77453","str_idXDesign":"myId_01401823","str_name":"block_right","str_nameShort":"block_right","str_type":"block","str_tag":"block_right","str_createdDate":"2022-01-31 21:10:58","str_modifiedDate":"2022-01-31 21:10:58","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"block","bln_editPin":true,"bln_registerAtContainer":true,"str_categoryName":"","str_nameRegistrator":"notset","str_idProject":"myId_01221712","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_01401823"},"obj_domStyle":{"justify-content":"end","gap":"10px","display":"flex","flex":"1 1 auto","border":"0px solid blue","flex-wrap":"wrap"},"dom_objContentContainer":{"Id":"myId_01401823"}}],
@@ -18351,12 +18144,6 @@ var obj_InstanceJSONMap = new Map([
 [77525, {"obj_design":{"int_idRecord":77525,"str_idXDesign":"myId_43777772","str_name":"xapp_button_general_form_group","str_nameShort":"xapp_button_general_form_group","str_type":"xapp_button_general_form_group","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Form Group","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_43777772"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_43777772","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
 [77530, {"obj_design":{"int_idRecord":77530,"str_idXDesign":"myId_92128822","str_name":"xapp_button_general_use_task_date","str_nameShort":"xapp_button_general_use_task_date","str_type":"xapp_button_general_use_task_date","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_calendar_month","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Use Task Date","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_92128822"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"dom_objContentContainer":{"Id":"myId_92128822","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
 [77531, {"obj_design":{"int_idRecord":77531,"str_idXDesign":"myId_22868883","str_name":"xapp_button_general_use_task_datetime","str_nameShort":"xapp_button_general_use_task_datetime","str_type":"xapp_button_general_use_task_datetime","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_calendar_month","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Use Date & Time","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_22868883"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"dom_objContentContainer":{"Id":"myId_22868883","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
-[77532, {"obj_design":{"int_idRecord":77532,"str_idXDesign":"myId_17387151","str_name":"authorise_end","str_nameShort":"authorise_end","str_type":"authorise_end","str_tag":"authorise_end","str_createdDate":"2022-09-10 18:52:39","str_modifiedDate":"2022-09-10 18:52:39","bln_isLocalHome":true,"str_idProject":"myId_38012811","bln_classController":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_classExtend":"xapp_ajax","str_categoryName":"Anchor","str_themeType":"authorise_end","bln_editPin":true,"bln_lockComponent":true,"str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_17387151"},"dom_objContentContainer":{"Id":"myId_17387151"}}],
-[77533, {"obj_design":{"int_idRecord":77533,"str_idXDesign":"myId_17521741","str_name":"form_input_login_pass","str_nameShort":"form_input_login_pass","str_type":"form_input_login_pass","str_tag":"input","str_createdDate":"2022-02-02 19:57:30","str_modifiedDate":"2022-02-02 19:57:30","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_input","bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"Other","str_nameRegistrator":"notset","str_idProject":"myId_29131132","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset","bln_registerAtProject":true,"bln_classController":true,"bln_expand":true,"bln_lockComponent":true},"obj_domProperty":{"Id":"myId_17521741","minlength":"6","maxlength":"6","placeholder":"One Time Pass","inputmode":"numeric","pattern":"[0-9]*","size":"20","type":""},"obj_domStyle":{"cursor":"pointer","border":"0px none","background-color":"","border-radius":"","display":"none","padding":"270px","font-weight":"bold"},"dom_objContentContainer":{"Id":"myId_17521741","minlength":"6","maxlength":"6","inputmode":"numeric"}}],
-[77538, {"obj_design":{"int_idRecord":77538,"str_idXDesign":"myId_37191444","str_name":"form_input_login_email","str_nameShort":"form_input_login_email","str_type":"form_input_login_email","str_tag":"input","str_createdDate":"2022-02-02 19:57:30","str_modifiedDate":"2022-02-02 19:57:30","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_input","bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_nameRegistrator":"notset","str_idProject":"myId_29131132","str_content":"","str_classList":"notset","str_classExtend":"form_input","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset","bln_registerAtProject":true,"bln_expand":true,"bln_classController":"false"},"obj_domProperty":{"maxlength":"100","placeholder":"Your email address","type":"email","required":true,"autocomplete":"on","font-weight":"bold","Id":"myId_37191444","name":"email"},"obj_domStyle":{"cursor":"pointer","border":"0px none","padding":"30px","font-weight":"bold"},"user_agent":"Firefox","dom_objContentContainer":{"maxlength":"100","font-weight":"bold","Id":"myId_37191444"}}],
-[77541, {"obj_design":{"int_idRecord":77541,"str_idXDesign":"myId_07559595","str_name":"form_button_login_email","str_nameShort":"form_button_login_email","str_type":"form_button_rich","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"form_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_lockComponent":true,"str_categoryName":"lock","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_send","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Send Key","str_lastVersionDate":"notset","bln_classController":"false","bln_expand":true,"bln_registerAtProject":true},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","type":"submit","Id":"myId_07559595"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_07559595","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
-[77544, {"obj_design":{"int_idRecord":"77544","str_idXDesign":"myId_34183798","str_name":"form_section","str_nameShort":"form_section","str_type":"form_section","str_tag":"section","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_section","bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_nameRegistrator":"notset","str_idProject":"myId_06166711","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset","arr_item":[{"obj_design":{"int_idRecord":77377,"str_type":"loginpanelform"}}],"bln_expand":true},"obj_domProperty":{"Id":"myId_34183798"},"obj_domStyle":{"display":"flex","flex-direction":"column","flex-wrap":"wrap","gap":"10px","flex-flow":"wrap","align-items":"center","justify-content":"center","padding":"30px","font-weight":"bold"},"dom_objContentContainer":{"Id":"myId_34183798"}}],
-[77545, {"obj_design":{"int_idRecord":77545,"str_idXDesign":"myId_78332329","str_name":"form_button_login_pass","str_nameShort":"form_button_login_pass","str_type":"form_button_rich","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"form_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_lockComponent":true,"str_categoryName":"lock","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_key","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Enter Pass","str_lastVersionDate":"notset","bln_classController":"false","bln_expand":true,"bln_registerAtProject":true},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","type":"submit","Id":"myId_78332329"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_78332329","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
 [77570, {"obj_design":{"int_idRecord":77570,"str_idXDesign":"myId_29727565","str_name":"theme_ocean","str_nameRegistrator":"notset","str_nameShort":"theme_ocean","str_idProject":"myId_01221712","str_type":"xapp_theme","str_themeType":"xapp_theme","str_tag":"theme_ocean","str_content":"","bln_registerAtProject":true,"bln_registerAtContainer":true,"bln_classController":true,"str_classList":"notset","str_classExtend":"notset","str_createdDate":"2024-11-30 12:02:09","str_modifiedDate":"2024-11-30 12:02:09","bln_editPin":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset","str_categoryName":"Anchor","bln_isThemeItem":true,"bln_lockComponent":true,"arr_item":[{"obj_design":{"int_idRecord":"77773","str_type":"xapp_accordion"}},{"obj_design":{"int_idRecord":"77774","str_type":"form_span"}},{"obj_design":{"int_idRecord":"77775","str_type":"form_span"}},{"obj_design":{"int_idRecord":"77776","str_type":"form_span"}},{"obj_design":{"int_idRecord":"77777","str_type":"form_span"}}]},"obj_domProperty":{"Id":"myId_29727565"},"obj_domStyle":{"font-family":"","font-size":"","display":"block"},"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_29727565"}}],
 [77760, {"obj_design":{"int_idRecord":"77760","str_idXDesign":"myId_37077381","str_name":"form_legend","str_nameShort":"form_legend","str_type":"form_legend","str_tag":"legend","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_legend","bln_editPin":true,"bln_registerAtContainer":true,"str_classExtend":"form_button","str_nameRegistrator":"notset","str_idProject":"myId_29727565","str_content":"","str_classList":"notset","str_releaseLabel":"","str_text":"MyText","str_lastVersionDate":"notset","str_categoryName":"","bln_isThemeItem":true},"obj_domProperty":{"href":"https:\/\/www.mycode.buzz","target":"_blank","innerHTML":"MyText","tabIndex":"0","Id":"myId_37077381"},"obj_domStyle":{"display":"block","text-decoration":"none","color":"white","user-select":"none","border-radius":"4px","padding":"10px","background":"rgb(64, 169, 236)","border":"1px outset rgb(64, 169, 236)","opacity":"1"},"bln_enabled":true,"dom_objContentContainer":{"href":"https:\/\/www.mycode.buzz","target":"_blank","Id":"myId_37077381"}}],
 [77761, {"obj_design":{"int_idRecord":"77761","str_idXDesign":"myId_37000894","str_name":"form_label","str_nameShort":"form_label","str_type":"form_label","str_themeType":"form_label","str_tag":"label","str_createdDate":"2022-11-13 21:59:51","str_modifiedDate":"2022-11-13 21:59:51","bln_editPin":true,"bln_typeable":true,"str_text":"My Label","bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_nameRegistrator":"notset","str_idProject":"myId_13000276","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_lastVersionDate":"notset","bln_isThemeItem":true},"obj_domProperty":{"innerText":"My Label","Id":"myId_37000894"},"obj_domStyle":{"padding":"10px","align-self":"flex-start","cursor":"pointer","border-radius":"4px","border":"1px solid transparent","color":"white","margin":"","max-height":"","max-width":"","min-width":"","overflow":"","word-break":""},"dom_objContentContainer":{"Id":"myId_37000894"}}],
@@ -18365,7 +18152,7 @@ var obj_InstanceJSONMap = new Map([
 [77764, {"obj_design":{"str_tag":"span","str_type":"form_button_span","str_idXDesign":"myId_87111743","str_name":"form_button_span","str_nameShort":"form_button_span","str_themeType":"form_button_span","int_idRecord":"77764","str_createdDate":"2022-11-18 16:02:10","str_modifiedDate":"2022-11-18 16:02:10","blnIsTag":true,"bln_editPin":true,"bln_typeable":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_idProject":"myId_11190110","str_text":"My Button","str_categoryName":"","str_nameRegistrator":"notset","bln_isThemeItem":true,"str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_lastVersionDate":"notset"},"obj_domProperty":{"innerHTML":"My Button","Id":"myId_87111743"},"obj_domStyle":{"maxheight":"175","font-wiegth":"bold","font-weight":"bold","font-size":"1rem","color":"rgb(64, 169, 236)","display":"block"},"dom_objContentContainer":{"Id":"myId_87111743"}}],
 [77765, {"obj_design":{"int_idRecord":"77765","str_idXDesign":"myId_17078909","str_name":"form_button_icon","str_nameShort":"form_button_icon","str_type":"form_button_icon","str_tag":"i","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_button_icon","bln_editPin":true,"bln_registerAtContainer":true,"str_idProject":"myId_79120090","str_categoryName":"","str_nameRegistrator":"notset","bln_isThemeItem":true,"str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"star","str_lastVersionDate":"notset","str_class":"star","bln":"expand","bln_expand":true},"obj_domProperty":{"innerHTML":"star","Id":"myId_17078909"},"obj_domStyle":{"font-weight":"bold","font-size":"1.5em","color":"rgb(64, 169, 236)","display":"block"},"dom_objContentContainer":{"Id":"myId_17078909"}}],
 [77766, {"obj_design":{"int_idRecord":"77766","str_idXDesign":"myId_14890434","str_name":"form_button_anchor","str_nameShort":"form_button_anchor","str_type":"form_button_anchor","str_tag":"a","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_button_anchor","bln_editPin":true,"bln_registerAtContainer":true,"str_idProject":"myId_11190110","arr_item":[{"obj_design":{"int_idRecord":77764,"str_type":"form_button_span"}},{"obj_design":{"int_idRecord":77765,"str_type":"form_button_icon"}}],"str_categoryName":"","str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset","bln_isThemeItem":true},"obj_domProperty":{"target":"_blank","Id":"myId_14890434"},"obj_domStyle":{"justify-content":"center","align-items":"center","text-decoration":"none","font-size":"1rem","display":"flex","text":"de","border":"0px solid black","gap":"5px","font-weight":"bold","color":"rgb(64, 169, 236)"},"dom_objContentContainer":{"Id":"myId_14890434"},"obj_icon":{"obj_design":{"int_idRecord":77765,"str_type":"form_button_icon"}},"obj_span":{"obj_design":{"int_idRecord":77764,"str_type":"form_button_span"}}}],
-[77767, {"obj_design":{"int_idRecord":"77767","str_idXDesign":"myId_31379983","str_name":"form_button_rich","str_nameShort":"form_button_rich","str_type":"form_button_rich","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"form_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_idProject":"myId_29727565","arr_item":[{"obj_design":{"int_idRecord":"77766","str_type":"form_button_anchor"}}],"str_icon":"xapp_star","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"","str_text":"My Button","str_lastVersionDate":"notset","bln_isThemeItem":true,"bln_classController":"false"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_31379983"},"obj_domStyle":{"5":"rem","border-radius":"4px","align-items":"center","font-size":"1rem","font-weight":"bold","padding":"10px","cursor":"pointer","background":"white","border":"1px solid white","color":"rgb(64, 169, 236)","display":"flex"},"bln_enabled":true,"dom_objContentContainer":{"Id":"myId_31379983","str_name":"xapp_button_navigate_desktop"}}],
+[77767, {"obj_design":{"int_idRecord":"77767","str_idXDesign":"myId_31379983","str_name":"form_button_rich","str_nameShort":"form_button_rich","str_type":"form_button_rich","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"form_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_idProject":"myId_29727565","arr_item":[{"obj_design":{"int_idRecord":"77766","str_type":"form_button_anchor"}}],"str_icon":"xapp_star","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"","str_text":"My Button","str_lastVersionDate":"notset","bln_isThemeItem":true,"bln_classController":"false"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_31379983"},"obj_domStyle":{"5":"rem","border-radius":"4px","align-items":"center","font-size":"1.5rem","font-weight":"bold","padding":"10px","cursor":"pointer","background":"white","border":"1px solid white","color":"rgb(64, 169, 236)","display":"flex"},"bln_enabled":true,"dom_objContentContainer":{"Id":"myId_31379983","str_name":"xapp_button_navigate_desktop"}}],
 [77769, {"obj_design":{"int_idRecord":"77769","str_idXDesign":"myId_71379914","str_name":"form_fieldset","str_nameShort":"form_fieldset","str_type":"form_fieldset","str_tag":"fieldset","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_section","bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_nameRegistrator":"notset","str_idProject":"myId_29727565","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset","arr_item":[{"obj_design":{"int_idRecord":"77760","str_type":"form_legend"}},{"obj_design":{"int_idRecord":"77763","str_type":"form_field"}},{"obj_design":{"int_idRecord":"77767","str_type":"form_button_rich"}}],"bln_isThemeItem":true,"lockOpen":true,"bln_classController":"false"},"obj_domProperty":{"Id":"myId_71379914"},"obj_domStyle":{"display":"flex","flex-direction":"column","flex-wrap":"wrap","gap":"10px","flex-flow":"wrap","align-self":"flex-start","border-radius":"4px","padding-top":"0px","padding-bottom":"0px","background-color":"transparent","background":"rgb(64, 169, 236)","border":"1px outset rgb(64, 169, 236)","box-shadow":"","padding":"10px"},"dom_objContentContainer":{"Id":"myId_71379914"},"bln_toggleState":true}],
 [77770, {"obj_design":{"int_idRecord":"77770","str_idXDesign":"myId_78947874","str_name":"form_hardrule","str_nameShort":"form_hardrule","str_type":"form_hardrule","str_themeType":"form_hardrule","str_tag":"hr","bln_registerAtContainer":true,"str_createdDate":"2023-09-28 17:30:59","str_modifiedDate":"2023-09-28 17:30:59","bln_editPin":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_nameRegistrator":"notset","str_idProject":"myId_29727565","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset","bln_isThemeItem":true},"obj_domProperty":{"Id":"myId_78947874"},"obj_domStyle":{"height":"10px","width":"100%","border":"0px","background":"rgb(64, 169, 236)"},"dom_objContentContainer":{"Id":"myId_78947874"}}],
 [77771, {"obj_design":{"int_idRecord":"77771","str_idXDesign":"myId_99777780","str_name":"form_menu_panel","str_nameShort":"form_menu_panel","str_type":"form_menu_panel","str_themeType":"form_menu_panel","str_tag":"form_menu_panel","bln_registerAtContainer":true,"str_createdDate":"2022-11-15 08:47:57","str_modifiedDate":"2022-11-15 08:47:57","bln_editPin":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_isThemeItem":true,"str_nameRegistrator":"notset","str_idProject":"myId_29727565","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset","str_categoryName":"","arr_item":[{"obj_design":{"int_idRecord":"77769","str_type":"form_fieldset"}},{"obj_design":{"int_idRecord":"77770","str_type":"form_hardrule"}}],"bln_classController":"false"},"obj_domProperty":{"Id":"myId_99777780"},"obj_domStyle":{"flexdirection":"column","gap":"10px","display":"flex","padding":"10px","flex-direction":"column","flex flow":"column wrap","border":"0px solid white"},"dom_objContentContainer":{"Id":"myId_99777780"}}],

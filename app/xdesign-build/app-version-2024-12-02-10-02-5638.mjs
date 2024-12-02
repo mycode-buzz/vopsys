@@ -12567,781 +12567,6 @@ class table extends component {
 
 
 /*START COMPONENT//*/
-/*type: xapp_menuform//*/
-
-            //XSTART component/xapp_menuform
-            class xapp_menuform extends xapp_menu{
-              constructor(obj_ini) {      
-                super(obj_ini);        
-              } 
-              fn_initialize(obj_ini){                
-    
-                super.fn_initialize(obj_ini);
-
-                this.obj_meta.bln_debugMenu=false;           
-
-                
-                this.str_defaultTypeMenu="xapp_menuform";                  
-                this.str_defaultTypeData="xapp_dataform_view";                  
-                this.str_defaultTypeDataChildMenu="xapp_dataform_childmenu";
-                
-
-                this.fn_initialize_var();                
-              } 
-
-              fn_initialize_var(){
-                super.fn_initialize_var();
-                this.fn_resetArrayDynamicMenu();
-
-                this.int_totalRowCount=0;
-
-              }
-
-              
-              fn_setMenuPanel(){     
-                super.fn_setMenuPanel();                  
-
-                if(this.obj_menuPanel){                  
-
-                  this.obj_consoleContainerRecord=this.obj_menuPanel.fn_addConsoleContainer("console_container_record", true);                                                        
-                  this.obj_button_new_record=this.obj_consoleContainerRecord.fn_getComponent("xapp_button_new_record");                  
-                  this.obj_button_filteroff_record=this.obj_consoleContainerRecord.fn_getComponent("xapp_button_filteroff_record");
-                  this.obj_button_filteron_record=this.obj_consoleContainerRecord.fn_getComponent("xapp_button_filteron_record");
-                  this.obj_button_navigate_record=this.obj_consoleContainerRecord.fn_getComponent("xapp_button_navigate_record");
-                  this.obj_button_linkon_record=this.obj_consoleContainerRecord.fn_getComponent("xapp_button_linkon_record");
-                  this.obj_button_linkoff_record=this.obj_consoleContainerRecord.fn_getComponent("xapp_button_linkoff_record");
-                  
-                  this.obj_button_complete_record=this.obj_consoleContainerRecord.fn_getComponent("xapp_button_complete_record");                    
-
-                  this.obj_button_archive_record=this.obj_consoleContainerRecord.fn_getComponent("xapp_button_archive_record");
-                  if(this.obj_columnArchiveDate){                                        
-                    if(this.obj_columnArchiveDate.str_value){
-                      this.obj_button_archive_record.fn_setText("Restore Record");
-
-                    }
-                  }
-                  
-                }
-              }              
-
-              fn_runSearch(){
-
-                this.bln_runSearch=true;
-                
-                if(this.bln_modeNewRecord){                                
-                    this.fn_formRefreshRecord(); 
-                    return;
-
-                }                 
-                
-                
-                this.fn_formViewRecord();             
-                
-                
-              }
-              fn_formRefreshRecord(obj_menuButton){           
-            
-                if(!obj_menuButton){
-                  obj_menuButton=this;    
-                  if(this.bln_dynamicMenu){                            
-                    obj_menuButton=this.obj_parentMenu;      
-                  }    
-                }
-                obj_menuButton.fn_exitNewRecord();                  
-                obj_menuButton.fn_formViewRecord();
-              }
-
-              fn_exitNewRecord(){                                  
-                this.bln_modeNewRecord=false;                   
-                if(this.obj_dataView){                            
-                  this.obj_dataView.fn_setQueryModeNewRecord(false);      
-                }    
-                if(this.obj_parentMenu && this.obj_parentMenu["fn_exitNewRecord"]){
-                  this.obj_parentMenu.fn_exitNewRecord();
-                  //this.obj_parentMenu.fn_debugText("2 this.obj_parentMenu fn_exitNewRecord");
-                  //this.fn_debugText("2 this fn_exitNewRecord");
-                }
-              }
-
-              fn_formNavigateRecord(){
-                //*
-                const obj_navigate=this.fn_getNavigate();                
-                obj_path.fn_navigateRecordURL(obj_navigate.str_urlMetaRowzName, obj_navigate.str_urlMetaRecordId);                
-                //*/
-
-                /*
-                const obj_navigate=this.fn_getNavigate();                
-                const str_urlBase="";
-                const str_url=obj_path.fn_getNavigateRecordURL(obj_navigate.str_urlMetaRowzName, obj_navigate.str_urlMetaRecordId, str_urlBase);
-                window.location.href=str_url;
-                //*/
-              }
-              fn_onClose(){
-                super.fn_onClose();    
-                
-                if(this.bln_flagReview){
-                  let bln_removeSearch=true;
-                  this.fn_removeConstraint(bln_removeSearch);
-                }
-                this.bln_flagReview=false;
-              }
-              fn_removeConstraint(bln_removeSearch=false){
-                this.fn_setAutoJoinFilterPin(false);
-                if(bln_removeSearch){
-                  this.fn_setQueryList("");                      
-                }    
-                this.bln_flagRunOnce=false;    
-            
-              }
-              fn_exitConstraint(){   
-                this.fn_setConstraintKeyPin(false);        
-              }
-              fn_formArchiveRecord(){        
-                this.fn_archiveRecord(true);        
-              }                 
-              fn_formDeleteRecord(){                  
-                this.fn_archiveRecord(false);        
-              }                 
-              fn_archiveRecord(bln_recycle){      
-        
-                if(!this.obj_dataView){return;}    
-                let obj_columnKey;
-                //obj_columnKey=this.obj_columnKey;                
-                obj_columnKey=this.obj_columnDataId
-                if(!obj_columnKey.str_value){return;}//only 1 record with columnkey can be deleted. 
-                
-                this.obj_dataView.fn_archiveRecord(obj_columnKey, bln_recycle); 
-              }
-              fn_onArchiveRecord(){                            
-                this.fn_formCompleteRecord(false);
-              }
-              fn_onDeleteDynamicRow(){                
-            
-                this.fn_displayObject(false);
-                this.fn_configureObject(false);//can cause issues     
-                this.fn_setDisplay(false);       
-                //this.obj_parentMenu.fn_formRefreshRecord();
-                this.fn_displayOnPeers();//keep for the momentr , but probably refresh is need for counts etc                  
-              }
-
-              fn_debugAutoJoin(str_message=""){    
-                console.log("START " + str_message);
-                console.log("this.obj_meta.bln_autoJoinPin: "+ this.obj_meta.bln_autoJoinPin);
-                console.log("this.obj_meta.str_autoJoinToSource: "+ this.obj_meta.str_autoJoinToSource);
-                
-                console.log("this.bln_modeNewRecord: "+ this.bln_modeNewRecord);    
-                console.log("this.obj_columnKey: "+ this.obj_columnKey);    
-                console.log("this.bln_autoJoinFilterPin: "+ this.bln_autoJoinFilterPin);        
-                if(this.obj_columnKey){
-                  console.log("this.obj_columnKey.str_value: "+ this.obj_columnKey.str_value);    
-                }        
-                
-                console.log("this.obj_parentMenu.obj_meta.bln_autoJoinPin: "+ this.obj_parentMenu.obj_meta.bln_autoJoinPin);
-                console.log("this.obj_parentMenu.obj_meta.str_autoJoinToSource: "+ this.obj_parentMenu.obj_meta.str_autoJoinToSource);
-                
-                console.log("this.obj_parentMenu.bln_modeNewRecord: "+ this.obj_parentMenu.bln_modeNewRecord);    
-                console.log("this.obj_parentMenu.obj_columnKey: "+ this.obj_parentMenu.obj_columnKey);    
-                console.log("this.obj_parentMenu.bln_autoJoinFilterPin: "+ this.obj_parentMenu.bln_autoJoinFilterPin);    
-                if(this.obj_parentMenu.obj_columnKey){
-                  console.log("this.obj_parentMenu.obj_columnKey.str_value: "+ this.obj_parentMenu.obj_columnKey.str_value);    
-                }
-                   
-                console.log("END " + str_message);
-              }
-
-              fn_formViewRecord(){  //called by crud menu operation data end child menu and search              
-        
-                //if Menu is applied in MetaTypeViewMenu, the data set will be "menufyed"
-                //if Data is applied in MetaTypeViewData, the data set will be "datafyed"
-                //if Widget is applied in MetaTypeViewWidget, the data set will be "widgetfyed"
-                //if Dashboard is applied in MetaTypeViewDashboard, the data set will be "dashboardfyed"        
-            
-                if(this.bln_modeNewRecord){      
-                  this.fn_formNewRecord();
-                  return;
-                }         
-                
-                super.fn_formViewRecord();                  
-              }              
-
-              
-
-              fn_setButtonViewRecord(){                
-        
-                super.fn_setButtonViewRecord();                              
-
-                let bln_settingOperationPin=this.fn_getSettingOperationPin();
-
-                
-                this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_archive_record);                                      
-                this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_complete_record);                                      
-
-                if(bln_settingOperationPin){                      
-                  return;            
-                }
-                if(this.obj_parentMenu && this.obj_parentMenu.fn_getSettingOperationPin()){                      
-                  return;            
-                }
-
-                
-
-                let bln_showButtonComplete=true;
-                if(this.bln_dynamicMenu){
-                  bln_showButtonComplete=false;
-                }
-                if(bln_settingOperationPin){
-                  bln_showButtonComplete=false;
-                }
-                if(bln_showButtonComplete){                  
-                    this.obj_consoleContainerRecord.fn_showItem(this.obj_button_complete_record);                                                                            
-                }
-            
-                //*
-                //this.fn_classifyLevel();                           
-                if(this.bln_isJoinedChildMenu){                                    
-                  if(this.fn_getAllowAutoJoinPin()){  
-                    this.fn_setButtonChildFilterDisplay();                                  
-                    if(this.obj_meta.bln_joinTypeMany){                                              
-                      this.obj_consoleContainerRecord.fn_showItem(this.obj_button_navigate_record);                                            
-                      //this.fn_setLimitEndMenuChain(true);
-                      
-                    }                    
-                  }
-                }  
-                  //*/                    
-                
-                
-                //this.fn_debugText("this.bln_hasChildForm: " + this.bln_hasChildForm);
-                if(this.bln_hasChildForm){                                    
-                  //this.fn_debugText("this.obj_meta.int_idParentMetaRowz: " + this.obj_meta.int_idParentMetaRowz);
-                  let bln_value=this.fn_hasTopLevelRowzParent(this.obj_meta.int_idParentMetaRowz);
-                  //this.fn_debugText("xxx bln_value: " + bln_value);                  
-                  if(bln_value){//show view button if there is a dynamic menu above to the                  
-                    this.bln_applyAnchor=true;                    
-                    this.str_urlNavigateURL=this.fn_getNavigateURL()                    
-                    this.obj_button_navigate_record.fn_setNavigationURL(this.str_urlNavigateURL);
-                    this.fn_setNavigationURL(this.str_urlNavigateURL);
-                    //this.obj_consoleContainerRecord.fn_showItem(this.obj_button_navigate_record);
-                  }
-                  
-
-                  this.obj_consoleContainerRecord.fn_showItem(this.obj_button_archive_record);                  
-                  
-                  if(this.bln_multiRecordDisplay){  //All Record "Report View"                                              
-                    if(this.bln_recordConsole){                                  
-                      this.obj_consoleContainerRecord.fn_showItem(this.obj_button_new_record);
-                      this.obj_consoleContainerSearch.fn_showItem(this.obj_console_search);
-                    }        
-                  }
-                  
-                }
-                else if(this.bln_isParentMenuWithView){                    
-                  this.fn_setButtonParentFilterDisplay();        
-                  if(this.bln_recordConsole){                              
-                    this.obj_consoleContainerRecord.fn_showItem(this.obj_button_new_record);                      
-                    //this.obj_consoleContainerSearch.fn_showItem(this.obj_console_search);
-                  }     
-                } 
-                if(this.bln_isJoinedChildMenu){                  
-                  this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_archive_record);                                      
-                  this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_complete_record);                                      
-                }
-              }
-
-              fn_setButtonChildFilterDisplay(bln_hideItem=false){
-                if(this.obj_parentMenu.bln_autoJoinFilterPin){//any records displayed must therefore be linked                                
-                  this.obj_consoleContainerRecord.fn_showItem(this.obj_button_linkoff_record);                                            
-                }
-                else{        
-                  this.obj_consoleContainerRecord.fn_showItem(this.obj_button_linkon_record);//any records displayed may or may not  be linked
-                  //run ajax view to see if contact is linked or not.      
-                }     
-                this.obj_consoleContainerRecord.fn_showItem(this.obj_button_complete_record);                
-              }
-
-              fn_setButtonParentFilterDisplay(bln_hideItem=false){
-            
-            
-                //start get Status CanBeFiltered
-                let bln_value=false;                  
-                if(this.obj_parentMenu.obj_columnKey && this.obj_parentMenu.obj_columnKey.str_value){bln_value=true;}                  
-                //end get Status CanBeFiltered   
-            
-                if(!bln_value){return;}
-                //*
-                if(bln_hideItem){
-                  this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_filteron_record);            
-                  this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_filteroff_record);            
-                  return;
-                }
-                //*/
-                if(!this.fn_getAllowAutoJoinPin()){return false;}                                
-                if(this.fn_getAutoJoinFilterPin()){                    
-                  this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_filteron_record);            
-                  this.obj_consoleContainerRecord.fn_showItem(this.obj_button_filteroff_record);                              
-                }
-                else{                    
-                  this.obj_consoleContainerRecord.fn_showItem(this.obj_button_filteron_record);            
-                  this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_filteroff_record);            
-                }
-                this.obj_consoleContainerRecord.fn_showItem(this.obj_button_complete_record);
-              }  
-
-              fn_setQueryList(str_value, bln_isNewRecord){                                      
-                super.fn_setQueryList(str_value);                  
-                if(!bln_isNewRecord){
-                  this.fn_exitNewRecord();                               
-                }
-              }                                                 
-
-              fn_formNewRecord(){        
-
-                this.bln_modeNewRecord=true;        
-            
-                this.obj_dataView.fn_setQueryModeNewRecord(true);                            
-                
-                let bln_isNewRecord=true;
-                this.fn_setQueryList("", bln_isNewRecord);
-
-                obj_path.fn_resetNavigateRecordURL();
-                let str_metaRowzName=this.obj_meta.str_metaRowzName;                              
-                obj_path.fn_pushStateNavigateRecordURL(this.obj_meta.str_metaRowzName);
-                
-                
-                this.fn_setModeNewRecord();            
-                this.fn_runDataView();              
-                
-              }  
-              fn_formNewColumn(){        
-            
-                this.bln_modeNewRecord=true; 
-            
-                this.obj_dataView.fn_setQueryModeNewRecord(true);                            
-                
-                let bln_isNewRecord=true;
-                this.fn_setQueryList("", bln_isNewRecord);
-
-                obj_path.fn_resetNavigateRecordURL();
-                let str_metaRowzName=this.obj_meta.str_metaRowzName;                              
-                obj_path.fn_pushStateNavigateRecordURL(this.obj_meta.str_metaRowzName);
-                
-                
-                this.fn_setModeNewRecord();            
-                this.fn_runDataView();              
-                
-              }  
-              fn_maintainDebugOn(){        
-                
-                this.fn_setMaintainDebugOn(true);    
-                this.fn_formViewRecord();    
-              }  
-              fn_formApplyJoinFilter(){                                        
-                if(this.obj_dataView){
-                  this.obj_dataView.fn_resetDataView();//important to avoid page mis match                
-                }                
-                this.fn_setAutoJoinFilterPin(true);    
-                this.fn_formViewRecord();    
-              }  
-              fn_formRemoveJoinFilter(){       
-                if(this.obj_dataView){
-                  this.obj_dataView.fn_resetDataView();//important to avoid page mis match                
-                }                
-                this.fn_setAutoJoinFilterPin(false);
-                this.fn_formViewRecord();    
-              }     
-              
-              fn_formEditRecord(){                   
-                
-                this.fn_setModeExecuteEdit();            
-                this.fn_runDataView();      
-              }  
-              fn_formLinkOffRecord(){
-                
-                if(this.obj_parentMenu.obj_dataView){
-                  this.obj_parentMenu.obj_dataView.fn_resetDataView();//important to avoid page mis match
-                }                
-                
-                this.bln_linkOffPin=true;            
-                this.fn_setQueryList("");                
-                this.fn_runDataView();      
-              }  
-              fn_formLinkOnRecord(){
-                if(this.obj_parentMenu.obj_dataView){
-                  this.obj_parentMenu.obj_dataView.fn_resetDataView();//important to avoid page mis match
-                }                
-                this.bln_linkOnPin=true;            
-                this.fn_setQueryList("");                
-                this.fn_runDataView();      
-              }  
-            
-              fn_onNewRecordUpdateMetaKey(obj_columnKey){
-                this.obj_columnKey=obj_columnKey;                  
-                this.fn_exitNewRecord();                                    
-                /*
-                this.fn_resetMenu();
-                this.obj_dataView.fn_setModeExecuteView(); //update mode value    
-                if(this.bln_dynamicMenu){
-                  this.obj_parentMenu.fn_onNewRecordUpdateMetaKey();
-                }
-                //*/
-              }
-
-              fn_formCompleteRecord(bln_selfMenu=false){                
-
-                bln_selfMenu=false;
-
-                let int_countDynamic=this.obj_holder.arr_dynamicMenu.length;
-                let int_countStandard=this.obj_holder.arr_standardMenu.length;
-
-                if((int_countDynamic>1) || (int_countStandard>1)){
-                  if(this.bln_childrenOpen ){
-                    bln_selfMenu=true;
-                  }                 
-                }
-                
-              
-                if(this.fn_getModeNewRecord()){
-                  this.fn_exitNewRecord();                                                                      
-                  bln_selfMenu=true;
-                }
-
-                if(!bln_selfMenu){
-                  this.obj_parentMenu.fn_refreshMenu();
-                  return;
-                }                
-
-                if(this.obj_dataView){
-                  this.obj_dataView.fn_resetDataView();//important to avoid page mis match                
-                }                
-                
-                this.fn_formViewRecord();                               
-              }
-              
-              
-
-              fn_setModeExecuteEdit(){                               
-                super.fn_setModeExecuteEdit();
-                
-                this.fn_setButtonEditRecord();                          
-                this.obj_dataView.fn_setModeExecuteEdit();        
-              }
-              
-              fn_setButtonEditRecord(){              
-                alert("no longer in use fn_setButtonEditRecord");
-
-                if(this.obj_meta.bln_displayData){
-                  
-                  this.obj_consoleContainerRecord.fn_showItem(this.obj_button_archive_record);                  
-                  this.obj_consoleContainerRecord.fn_showItem(this.obj_button_complete_record);                  
-                  this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_navigate_record);
-                }   
-              }
-            
-              fn_setModeNewRecord(){    
-                this.fn_setButtonNewRecord();                      
-                this.obj_dataView.fn_setModeExecuteNew(); //update mode value        
-               }
-               fn_getModeNewRecord(){                    
-                return this.obj_dataView.fn_getModeExecuteNew(); //update mode value        
-               }
-               fn_setButtonNewRecord(){                  
-
-                this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_archive_record);
-                this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_navigate_record);                
-                //this.obj_consoleContainerRecord.fn_showItem(this.obj_button_complete_record);
-                //this.obj_button_complete_record.fn_setDisabled(true); //on in the wrong menu
-                
-                if(this.bln_multiRecordDisplay){  //All Record "Report View"                                                                    
-                  this.obj_consoleContainerSearch.fn_showItem(this.obj_console_search);
-                }
-
-                let bln_hideItem=true;
-                this.fn_setButtonParentFilterDisplay(bln_hideItem);
-                
-              }
-
-              
-            
-    
-
-              fn_onDataStart(obj_post){        
-                super.fn_onDataStart(obj_post);                              
-                
-                if(this.bln_linkOffPin || this.bln_linkOnPin){      
-                  if(this.bln_linkOffPin){
-                    //this.obj_parentMenu.fn_setAutoJoinFilterPin(false);
-                    this.obj_parentMenu.fn_setQueryList("");                    
-                  }
-                  else if(this.bln_linkOnPin){
-                    this.obj_parentMenu.fn_setAutoJoinFilterPin(true);
-                  }
-                  this.bln_linkOffPin=false;
-                  this.bln_linkOnPin=false;                        
-                  this.obj_parentMenu.fn_resetMenu();
-                  this.obj_parentMenu.fn_formRefreshRecord();     
-                  //this.obj_parentMenu.fn_open();
-                }    
-                
-                
-              }
-              fn_onDataEnd(obj_post){                              
-                //console.log("xapp_menuform fn_onDataEnd");
-                super.fn_onDataEnd(obj_post);
-                
-              }
-
-              fn_getConsoleValues(){          
-                super.fn_getConsoleValues();
-                if(this.fn_getConsoleValue("Record")){this.bln_recordConsole=true;}                       
-              }
-            
-              fn_configureSelfShared(obj_row){ //standard from add to accordion   
-                
-                //this.fn_debugText("fn_configureSelfShared");
-                
-                this.bln_modeNewRecord=this.obj_parentMenu.bln_modeNewRecord;
-                if(this.bln_modeNewRecord){
-                  this.fn_setAutoOpenPin(true);
-                  this.obj_meta.bln_displayAccordionChildMenu=false;    
-                  //copy autojoin value                
-                  this.fn_setAutoJoinPin(this.obj_parentMenu.fn_getAutoJoinPin());                
-                  this.fn_setAutoJoinToSource(this.obj_parentMenu.fn_getAutoJoinToSource());                        
-                }    
-                
-                this.fn_setAutoJoinFilterPin(this.obj_meta.bln_autoJoinPin);                
-                //console.log("this.fn_getAutoJoinFilterPin: " + this.fn_getAutoJoinFilterPin());
-                  
-                this.obj_meta.bln_joinTypeOne=false;
-                this.obj_meta.bln_joinTypeMany=false;
-                this.fn_setAllowAutoJoinPin(false);    
-                switch(this.obj_meta.int_joinType){            
-                  case(1):
-                    this.obj_meta.bln_joinTypeOne=true;
-                    break;
-                  case(2):
-                    this.obj_meta.bln_joinTypeMany=true;                
-                    this.fn_setAllowAutoJoinPin(true);    
-                    break;
-                }    
-                
-                super.fn_configureSelfShared(obj_row);        
-                  
-                } 
-
-                
-
-                fn_addStandardMenuToAccordion(obj_row){
-                  //Standard Child Menu    
-
-                  let obj_item=super.fn_addStandardMenuToAccordion(obj_row);
-
-                  if(!obj_item){return;}
-                  
-                  //Parent Menus can be Dynamic Menus to which Standard Menus are added
-                  //Parent Menus can be Standard Menus to which Dynamic Menus are added  
-                  if(this.fn_getAllowAutoJoinPin()){
-                    
-                    if(!obj_item.fn_getSettingOperationPin()){
-                      let str_text=obj_item.fn_getText();
-                      obj_item.fn_setText("[" + str_text + "]", str_text);                  
-                      obj_item.fn_setMetaRowzTitle("[" + str_text + "]");                      
-                    }
-                    else{                      
-                    }
-                    
-                  
-                  
-                    if(this.bln_dynamicMenu && (obj_item.obj_meta.int_idMetaRowz!==this.obj_meta.int_idMetaRowz)){            
-                      obj_item.fn_setAutoJoinPin(true);
-                      obj_item.fn_setAutoJoinFilterPin(true);                          
-                    }        
-                  }            
-                }             
-
-                
-                
-                fn_getRunDataViewQueryExpression(){
-
-                  let str_expr="";              
-                  return str_expr;
-                  
-                  
-                }
-                
-
-                fn_getContextColumnKey(){
-
-                  //this.fn_debugText("START fn_getContextColumnKey");
-                  
-                  let obj_columnKey=this.obj_columnKey;  
-                  //console.log(obj_columnKey);  
-                  //this.fn_debugText("this.bln_autoJoinFilterPin: " + this.bln_autoJoinFilterPin);
-                  if(!obj_columnKey && this.bln_autoJoinFilterPin){
-                    obj_columnKey=this.obj_parentMenu.obj_columnKey;
-                    //this.fn_debugText("get parent column key: " + this.bln_autoJoinFilterPin);
-                    //console.log(obj_columnKey);
-                  }                      
-                  if(this.bln_modeNewRecord && this.bln_autoJoinFilterPin){obj_columnKey=this.obj_parentMenu.obj_parentMenu.obj_columnKey;}
-                  
-                  
-
-                  //this.fn_debugText("END fn_getContextColumnKey");
-                  return obj_columnKey;
-                }
-
-                fn_configureDataViewQuery(){
-
-                  super.fn_configureDataViewQuery();       
-                  
-                  let obj_columnKey=this.fn_getContextColumnKey();                          
-                  this.obj_dataView.fn_setMetaKey(obj_columnKey);
-            
-                  
-                  if(this.obj_meta.bln_autoJoinPin && this.bln_autoJoinFilterPin){
-                    if(!this.bln_modeNewRecord){
-                      this.obj_meta.str_autoJoinToSource=this.obj_parentMenu.fn_getMetaViewId();      
-                      //console.log("runDataView adjusted this str_autoJoinToSource: "+ this.obj_meta.str_autoJoinToSource);      
-                    }      
-                    this.obj_dataView.fn_setAutoJoin(true);      
-                    this.obj_dataView.fn_setAutoJoinToSource(this.obj_meta.str_autoJoinToSource);    
-                    if(obj_columnKey && obj_columnKey.str_value){
-                      this.obj_dataView.fn_setAutoJoinToKeyValue(obj_columnKey.str_value);            
-                      this.obj_dataView.fn_setAutoJoinToKeyName(obj_columnKey.fn_getMetaColumnName());            
-                    }      
-                  }
-              
-                  if(this.bln_linkOffPin || this.bln_linkOnPin){   
-                        
-                    this.obj_meta.str_autoJoinToSource=this.obj_parentMenu.obj_parentMenu.fn_getMetaViewId();      
-                    this.obj_meta.str_autoJoinToKeyValue=this.obj_parentMenu.obj_parentMenu.obj_columnKey.str_value;                    
-                    this.obj_meta.str_autoJoinToKeyName=this.obj_parentMenu.obj_parentMenu.obj_columnKey.fn_getMetaColumnName();
-                    this.obj_meta.str_autoJoinFromKeyValue=this.obj_columnKey.str_value;      
-              
-                    this.obj_dataView.fn_setLinkOffPin(this.bln_linkOffPin);      
-                    this.obj_dataView.fn_setLinkOnPin(this.bln_linkOnPin);            
-                    this.obj_dataView.fn_setAutoJoinToSource(this.obj_meta.str_autoJoinToSource);    
-                    this.obj_dataView.fn_setAutoJoinToKeyValue(this.obj_meta.str_autoJoinToKeyValue);                  
-                    this.obj_dataView.fn_setAutoJoinToKeyName(this.obj_meta.str_autoJoinToKeyName);                  
-                    this.obj_dataView.fn_setAutoJoinFromKeyValue(this.obj_meta.str_autoJoinFromKeyValue);            
-                    this.obj_dataView.fn_setAutoJoinFromKeyName(this.obj_meta.str_autoJoinFromKeyName);                  
-                  } 
-                  
-                }
-
-                fn_getMetaDefault(){
-
-                  let obj_meta=super.fn_getMetaDefault();                                    
-                  obj_meta.bln_allowAutoJoinPin=false;                                
-                  obj_meta.bln_autoJoinPin=false;            
-                  obj_meta.int_joinType=0;            
-
-                  return obj_meta;
-                }
-
-                fn_getMetaDefaultDynamic(){
-
-                  let obj_meta=super.fn_getMetaDefaultDynamic();                
-                  obj_meta.bln_allowAutoJoinPin=this.fn_getAllowAutoJoinPin();    
-                  obj_meta.int_joinType=this.obj_meta.int_joinType;    
-                  return obj_meta;
-                }
-
-                fn_setConstraintKeyPin(bln_value){
-                  this.bln_constraintKeyPin=bln_value;
-                }
-                
-                fn_getConstraintKeyPin(){
-                  return this.bln_constraintKeyPin;    
-                }  
-
-                fn_setConstraintNamePin(){
-                  this.bln_constraintNamePin=false;
-                  
-                  if(this.bln_dynamicMenu && !this.bln_useMetaTemplate){return;}
-                  if(!this.obj_meta.bln_joinTypeOne){return;}
-                  if(this.obj_parentMenu.obj_meta.str_metaConstraintName){
-                    this.bln_constraintNamePin=true;
-                  }
-                }
-                
-                fn_getConstraintNamePin(){
-                  return this.bln_constraintNamePin;
-                  
-                }                                
-                fn_setAllowAutoJoinPin(bln_value){
-                  //this.fn_debugText("fn_setAllowAutoJoinPin: " + bln_value);
-                  this.obj_meta.bln_allowAutoJoinPin=bln_value;    
-                }
-                fn_getAllowAutoJoinPin(){
-                  //this.fn_debugText("fn_getAllowAutoJoinPin: " + this.obj_meta.bln_allowAutoJoinPin);
-                  return this.obj_meta.bln_allowAutoJoinPin;
-                }
-                fn_getAutoJoinToSource(){
-                  //this.fn_debugText("fn_getAutoJoinToSource: " + this.obj_meta.str_autoJoinToSource);
-                  return this.obj_meta.str_autoJoinToSource;
-                }
-                fn_setAutoJoinToSource(str_value){
-                  //this.fn_debugText("fn_setAutoJoinToSource: " + str_value);
-                  this.obj_meta.str_autoJoinToSource=str_value;
-                }
-                fn_getAutoJoinPin(){
-                  return this.obj_meta.bln_autoJoinPin;
-                }
-                fn_setAutoJoinPin(bln_value){
-                  this.obj_meta.bln_autoJoinPin=bln_value;    
-                }
-                fn_getAutoJoinFilterPin(){    
-                  return this.bln_autoJoinFilterPin;    
-                }
-                fn_setAutoJoinFilterPin(bln_value){
-                  this.bln_autoJoinFilterPin=bln_value;  
-                  if(!bln_value){                    
-                    if(this.obj_dataView){
-                      this.obj_dataView.fn_setMetaKey(false);
-                    }
-                    
-                  }
-                }
-                fn_resetMenu(){
-            
-                  super.fn_resetMenu();
-                  //this.fn_setAutoJoinFilterPin(false);
-                }  
-
-                //Menu Command Func
-                fn_hideMenu(obj_exclude){
-                  this.fn_hideStandardMenu(obj_exclude);              
-                  this.fn_hideDynamicMenu(obj_exclude);              
-                }
-                fn_closeMenu(obj_exclude){    
-                  this.fn_closeStandardMenu(obj_exclude)
-                  this.fn_closeDynamicMenu(obj_exclude)
-                }
-                fn_menuCloseAndDisable(obj_exclude){
-                  this.fn_standardMenuCloseAndDisable(obj_exclude);
-                  this.fn_dynamicMenuCloseAndDisable(obj_exclude);
-                }                
-
-                fn_notifyMenu(str_nameFunction, obj_arg=false){
-                  this.fn_notifyStandardMenu(str_nameFunction);                    
-                  this.fn_notifyDynamicMenu(str_nameFunction);                    
-                }
-                //Menu Command Func
-
-                
-                
-                
-                
-
-      
-            }//END CLS
-            //END TAG
-            //END component/xapp_menuform
-/*type: xapp_menuform//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
 /*type: form_menu_panel//*/
       //XSTART component/form_menu_panel
       class form_menu_panel extends component{
@@ -13632,6 +12857,82 @@ class table extends component {
               //END TAG
               //END component/xapp_console_container
 /*type: xapp_console_container//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_dashboard//*/
+
+            //XSTART component/xapp_dashboard
+              class xapp_dashboard extends xapp_component{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                                  
+                }
+                fn_onLoad(){    
+                  super.fn_onLoad();                  
+                  if(this.fn_getDebugPin()){this.fn_highlightBorder("pink");}                  
+                }
+                fn_loadDashboard(){//should be overidden
+                  //console.log("default load xapp_dashboard");                                           
+
+                  let obj_menuButton=this.fn_getMenuButton();                  
+                  let bln_adminPin=obj_menuButton.fn_getAdminPin();
+                  if(bln_adminPin){
+                    let bln_isAdminUser=obj_userHome.Admin;
+                    if(!bln_isAdminUser){                                            
+                      return false;
+                    }                    
+                  }
+                  return true;                  
+
+                  //console.log("bln_adminPin: " + bln_adminPin);
+                  //console.log("bln_isAdminUser: " + bln_isAdminUser);
+                  //console.log(obj_userHome);                  
+                }
+
+                
+
+                fn_refreshDashboard(){
+                  //console.log("default refresh xapp_dashboard");                  
+                }
+
+                fn_hide(){
+                  
+                  let obj_console;
+                  obj_console=this.obj_consoleContainerDashboard;
+                  if(obj_console){obj_console.fn_hide();}
+                  obj_console=this.obj_consoleContainerDashboardLeft;
+                  if(obj_console){obj_console.fn_hide();}
+
+                  //will cause other consoles to be hidden so dont use
+                  //let obj_menuButton=this.fn_getMenuButton();                  
+                  //obj_menuButton.fn_hideMenuPanel();                                    
+                  
+                }
+                fn_disable(){
+                  let obj_menuButton=this.fn_getMenuButton();                  
+                  obj_menuButton.fn_disableConsole();                                    
+                }
+                fn_getMetaColumn(str_fieldName){
+                  let obj_menuButton=this.obj_holder.obj_parentMenu;          
+                  let obj_recordset=obj_menuButton.obj_dataView;                                      
+                  return obj_recordset.fn_getMetaColumnViaName(str_fieldName);                    
+                }
+                fn_getMetaDataValue(str_fieldName){
+                  let obj_metaColumn=this.fn_getMetaColumn(str_fieldName);
+                  if(obj_metaColumn){
+                    return obj_metaColumn.str_value;                                  
+                  }          
+                }
+                
+                
+              }//END
+              //END TAG
+              //END component/xapp_dashboard
+/*type: xapp_dashboard//*/
 /*END COMPONENT//*/
 
 
@@ -15213,78 +14514,71 @@ class table extends component {
 
 
 /*START COMPONENT//*/
-/*type: xapp_dashboard//*/
+/*type: form_tablecell//*/
 
-            //XSTART component/xapp_dashboard
-              class xapp_dashboard extends xapp_component{
+            //XSTART component/form_tablecell
+              class form_tablecell extends component{
                 constructor(obj_ini) {      
                   super(obj_ini);        
                 } 
                 fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                                  
+                  super.fn_initialize(obj_ini);            
+                }         
+              fn_locateItem(str_idXDesign, str_type){
+                let arr, obj_item;
+                arr=this.obj_design.arr_item;
+                for(let i=0;i<arr.length;i++){
+                    obj_item=arr[i];     
+                    
+                    if(obj_item.fn_getType()===str_type){
+                      if(obj_item.obj_design.str_idXDesign==str_idXDesign){
+                        return obj_item;
+                      }
+                      if(obj_item.obj_design.str_linkId==str_idXDesign){
+                        return obj_item;
+                      }
+                    }
                 }
-                fn_onLoad(){    
-                  super.fn_onLoad();                  
-                  if(this.fn_getDebugPin()){this.fn_highlightBorder("pink");}                  
-                }
-                fn_loadDashboard(){//should be overidden
-                  //console.log("default load xapp_dashboard");                                           
-
-                  let obj_menuButton=this.fn_getMenuButton();                  
-                  let bln_adminPin=obj_menuButton.fn_getAdminPin();
-                  if(bln_adminPin){
-                    let bln_isAdminUser=obj_userHome.Admin;
-                    if(!bln_isAdminUser){                                            
-                      return false;
-                    }                    
-                  }
-                  return true;                  
-
-                  //console.log("bln_adminPin: " + bln_adminPin);
-                  //console.log("bln_isAdminUser: " + bln_isAdminUser);
-                  //console.log(obj_userHome);                  
-                }
-
-                
-
-                fn_refreshDashboard(){
-                  //console.log("default refresh xapp_dashboard");                  
-                }
-
-                fn_hide(){
-                  
-                  let obj_console;
-                  obj_console=this.obj_consoleContainerDashboard;
-                  if(obj_console){obj_console.fn_hide();}
-                  obj_console=this.obj_consoleContainerDashboardLeft;
-                  if(obj_console){obj_console.fn_hide();}
-
-                  //will cause other consoles to be hidden so dont use
-                  //let obj_menuButton=this.fn_getMenuButton();                  
-                  //obj_menuButton.fn_hideMenuPanel();                                    
-                  
-                }
-                fn_disable(){
-                  let obj_menuButton=this.fn_getMenuButton();                  
-                  obj_menuButton.fn_disableConsole();                                    
-                }
-                fn_getMetaColumn(str_fieldName){
-                  let obj_menuButton=this.obj_holder.obj_parentMenu;          
-                  let obj_recordset=obj_menuButton.obj_dataView;                                      
-                  return obj_recordset.fn_getMetaColumnViaName(str_fieldName);                    
-                }
-                fn_getMetaDataValue(str_fieldName){
-                  let obj_metaColumn=this.fn_getMetaColumn(str_fieldName);
-                  if(obj_metaColumn){
-                    return obj_metaColumn.str_value;                                  
-                  }          
-                }
-                
-                
-              }//END
+                return false;
+              } 
+              }//END CLS
               //END TAG
-              //END component/xapp_dashboard
-/*type: xapp_dashboard//*/
+              //END component/form_tablecell
+/*type: form_tablecell//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_inputandbutton_submit//*/
+
+            //XSTART component/form_inputandbutton_submit
+            class form_inputandbutton_submit extends form_button_rich{
+              constructor(obj_ini) {      
+                super(obj_ini);        
+              } 
+              fn_initialize(obj_ini){
+                super.fn_initialize(obj_ini);           
+
+                this.obj_holder.bln_listenClick=true;
+                this.obj_holder.bln_listenDblClick=true;
+
+                
+                this.bln_enabled=true;
+              }                              
+              fn_onClick(e){                                                      
+                
+                this.fn_notifyParent("fn_onLinkButtonClick", e);                                    
+                obj_project.fn_unsetEvent();    
+              }
+              fn_onDblClick(e){                                                                    
+                //console.log("form_inputandbutton_submit fn_onDblClick");
+                
+                obj_project.fn_unsetEvent();    
+              }
+            }//END CLS
+            //END TAG
+            //END component/form_inputandbutton_submit
+/*type: form_inputandbutton_submit//*/
 /*END COMPONENT//*/
 
 
@@ -15423,71 +14717,19 @@ class table extends component {
 
 
 /*START COMPONENT//*/
-/*type: form_tablecell//*/
-
-            //XSTART component/form_tablecell
-              class form_tablecell extends component{
-                constructor(obj_ini) {      
-                  super(obj_ini);        
-                } 
-                fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);            
-                }         
-              fn_locateItem(str_idXDesign, str_type){
-                let arr, obj_item;
-                arr=this.obj_design.arr_item;
-                for(let i=0;i<arr.length;i++){
-                    obj_item=arr[i];     
-                    
-                    if(obj_item.fn_getType()===str_type){
-                      if(obj_item.obj_design.str_idXDesign==str_idXDesign){
-                        return obj_item;
-                      }
-                      if(obj_item.obj_design.str_linkId==str_idXDesign){
-                        return obj_item;
-                      }
-                    }
-                }
-                return false;
-              } 
-              }//END CLS
-              //END TAG
-              //END component/form_tablecell
-/*type: form_tablecell//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_inputandbutton_submit//*/
-
-            //XSTART component/form_inputandbutton_submit
-            class form_inputandbutton_submit extends form_button_rich{
-              constructor(obj_ini) {      
-                super(obj_ini);        
-              } 
-              fn_initialize(obj_ini){
-                super.fn_initialize(obj_ini);           
-
-                this.obj_holder.bln_listenClick=true;
-                this.obj_holder.bln_listenDblClick=true;
-
-                
-                this.bln_enabled=true;
-              }                              
-              fn_onClick(e){                                                      
-                
-                this.fn_notifyParent("fn_onLinkButtonClick", e);                                    
-                obj_project.fn_unsetEvent();    
-              }
-              fn_onDblClick(e){                                                                    
-                //console.log("form_inputandbutton_submit fn_onDblClick");
-                
-                obj_project.fn_unsetEvent();    
-              }
-            }//END CLS
-            //END TAG
-            //END component/form_inputandbutton_submit
-/*type: form_inputandbutton_submit//*/
+/*type: app//*/
+      //XSTART component/app
+      class app extends xapp{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/app        
+/*type: app//*/
 /*END COMPONENT//*/
 
 
@@ -16915,128 +16157,6 @@ class table extends component {
 
 
 /*START COMPONENT//*/
-/*type: mall_dashboard//*/
-
-            //XSTART component/mall_dashboard
-              class mall_dashboard extends xapp_dashboard{
-                constructor(obj_ini) {      
-                  super(obj_ini);        
-                } 
-                fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                
-
-                  this.obj_holder.bln_debugServer=false;                  
-                }
-                fn_loadDashboard(){
-                  if(!super.fn_loadDashboard()){return;}                      
-      
-                  let obj_ini=new Object;            
-                  obj_ini.str_action="getMallList";                           
-                  this.fn_runServerAction(obj_ini);                                      
-                }                
-                getMallList(obj_post){
-                  
-                  this.fn_removeChildren();                         
-            
-                  let arr_row=obj_post.RowData;    
-              
-                  let obj_row, obj_item;
-
-                  if(arr_row.length){
-
-                    for(var i=0;i<arr_row.length;i++){                      
-                      obj_row=arr_row[i];
-                      if(obj_shared.fn_isObjectEmpty(obj_row)){continue;}//RowData Can contain a single empty object              
-                      /*
-                      let str_color="";
-                      let bln_livePin=obj_shared.fn_parseBool(obj_row.MetaDeskLivePin);                      
-                      console.log("bln_livePin: " + bln_livePin);
-                      if(bln_livePin){
-                        str_color="green";
-                      }
-                      //*/
-                      
-                      obj_item=this.fn_addContextItem("mall_form_button");
-                      if(!obj_item){continue;}
-                      obj_item.fn_setSubDomain(obj_row.Subdomain);
-                      obj_item.fn_setText(obj_row.MetaMallTitle);
-                      //obj_item.fn_setColor(str_color);
-                      obj_item.obj_design.int_idRecord=obj_row.MetaMallId;
-                    }
-
-                  }
-                  else{
-
-                    obj_item=this.fn_addContextItem("form_section");                      
-                    obj_item.fn_setText("No More Apps Available");                  
-
-                  }
-                  
-                  
-                }
-
-                fn_subscribeToApp(int_idRecord){                      
-      
-                  console.log("fn_subscribeToApp");
-                  let obj_ini=new Object;            
-                  obj_ini.RecordId=int_idRecord;                  
-                  obj_ini.str_action="subscribeToApp";                           
-                  this.fn_runServerAction(obj_ini);                                      
-                }
-                subscribeToApp(){   
-                  alert("Subscription Updated");                  
-                  obj_path.fn_navigateSubdomain("desk");                  
-                }
-              }//END CLS
-              //END TAG
-              //END component/mall_dashboard
-/*type: mall_dashboard//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: mall_form_button//*/
-
-            //XSTART component/mall_form_button
-              class mall_form_button extends xapp_console_button{
-                constructor(obj_ini) {      
-                  super(obj_ini);        
-                } 
-                fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                                             
-                }                                
-                fn_onClick(e){                                      
-                  let obj_parentDashboard=this.fn_getParentComponent();
-                  obj_parentDashboard.fn_subscribeToApp(this.obj_design.int_idRecord);
-                  //obj_path.fn_navigateSubdomain(this.obj_design.str_subdomain);
-                  
-                  obj_project.fn_forgetEvent(e);    
-                }  
-              }//END CLS
-              //END TAG
-              //END component/mall_form_button
-/*type: mall_form_button//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: office//*/
-      //XSTART component/office
-      class office extends xapp{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-      }//END CLS
-      //END TAG
-      //END component/office        
-/*type: office//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
 /*type: report_column//*/
 //START component/report_column
 class report_column extends xapp_columnform{
@@ -17073,931 +16193,6 @@ class report_column extends xapp_columnform{
 //END TAG              
 //END component/report_column
 /*type: report_column//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: topup_dashboard//*/
-      //XSTART component/topup_dashboard
-      class topup_dashboard extends xapp_dashboard{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                      
-
-          //IMPORTANT: SAFE TO USE FOR PRODUCTION RELEASE, CHECKS FOR LOCAL HOST
-          this.bln_usePaymentProviderSandbox=false;                              
-          this.bln_debug=false;                    
-          if(obj_path.bln_isLocal){
-            this.bln_usePaymentProviderSandbox=true;                              
-            this.bln_debug=false;                    
-          }          
-          this.bln_emphasis=true;
-          this.int_emphasis=4;
-          this.int_boldWeight=500;          
-          this.str_textPay="Payment";
-          //this.str_iconPay="fa-solid fa-star";
-          //IMPORTANT: SAFE TO USE FOR PRODUCTION RELEASE, CHECKS FOR LOCAL HOST
-        }  
-
-        fn_loadDashboard(){
-          if(!super.fn_loadDashboard()){
-          
-            //let obj_control=this.fn_addContextItem("form_span");                                                          
-            //obj_control.fn_setText("ADMIN AREA");                                                                              
-            
-
-            let obj_menuButton=this.fn_getMenuButton();                  
-            this.obj_consoleContainer=obj_menuButton.obj_menuPanel.fn_addConsoleContainer("console_container_system", true);            
-            let obj_button=this.obj_consoleContainer.fn_getConsoleComponent("xapp_button_system_home", true);
-            this.obj_consoleContainer.fn_showItem(obj_button);            
-
-            return;
-          }              
-          
-
-          this.str_goPayLabel=obj_path.fn_getQueryStringValue("goPayLabel");            
-          if(this.str_goPayLabel==="success"){
-            this.bln_paymentSuccess=true;
-          }
-          else if(this.str_goPayLabel==="topup"){
-            this.bln_forceTopup=true;
-          }          
-          
-
-          this.str_debug=obj_path.fn_getQueryStringValue("mode");            
-          if(this.str_debug==="debug"){
-            this.bln_debug=true;
-          }
-          //this.bln_debug=true;
-
-          this.date_now=new Date();                  
-          this.int_customerTokenz=obj_userHome.MetaSystem.Credit;
-          this.str_expireSubscription=obj_userHome.MetaSystem.CreditExpiryDate;                              
-          this.date_expireSubscription=obj_shared.fn_getDateObjectFromSystemDate(this.str_expireSubscription);                    
-
-          this.obj_themeBackground=this.fn_getThemeObject("form_blockbackground");
-          this.obj_themeMidground=this.fn_getThemeObject("form_blockmidground");
-          this.obj_themeForground=this.fn_getThemeObject("form_blockforground");
-          this.obj_themeHighlight=this.fn_getThemeObject("form_blockhighlight");
-          this.obj_themeBlock1=this.fn_getThemeObject("form_block1");
-          this.obj_themeBlock2=this.fn_getThemeObject("form_block2");
-          this.obj_themeBlock3=this.fn_getThemeObject("form_block3");
-          this.obj_themeBlock4=this.fn_getThemeObject("form_block4");
-          
-          this.str_nameProduct=obj_shared.fn_removeSpace(obj_userHome.MetaSystem.CreditName);
-
-          this.int_fiscalYearEnd=obj_userHome.MetaSystem.FiscalYearEnd;//ZeroIndexed Month                    
-          if(this.int_fiscalYearEnd===undefined){
-            this.int_fiscalYearEnd=11;
-          }
-          if(this.str_nameProduct===undefined){
-            this.str_nameProduct="CALENDARMONTH";
-          }
-
-          this.fn_loadPriceList();
-          this.obj_product=obj_shared.fn_searchObject(this.obj_priceList, this.str_nameProduct);          
-          
-
-          let obj_param;
-
-          let str_text;
-          let obj_control;
-          let obj_container=this;          
-          obj_control=obj_container.fn_addContextItem("form_hardrule");                              
-          
-          //---------------------
-          obj_param={
-            bln_customerSummary:true,
-            str_labelProduct:"Subscription",
-            int_priceTokenz:undefined,
-            int_packageTokenz:undefined,            
-            str_nameProduct:"Subscription",                        
-            obj_themeItem:this.obj_themeMidground,
-            str_textSubmit:"&nbsp;",
-            str_color:this.obj_themeMidground.fn_getStyleProperty("backgroundColor"),            
-            bln_boldText:true,            
-          };
-          this.fn_setDefaultPackageOption(obj_param);
-          obj_param.bln_expiredSubscription=false;          
-          if(this.date_expireSubscription<this.date_now){
-            obj_param.bln_expiredSubscription=true;                        
-          }                
-
-          this.fn_addSubscriptionSummary(obj_param);           
-          this.fn_displayPriceList();   
-          this.fn_checkForUpgradeOptions(false);    
-          
-          
-          obj_control=obj_container.fn_addContextItem("form_hardrule");                    
-          
-
-          obj_container=this.fn_addContextItem("form_form");                                                      
-          obj_container.fn_setStyleProperty("flexFlow", "column wrap");
-
-          str_text=`More Information`;          
-          
-          let obj_showHide=obj_container.fn_addContextItem("form_button_showhide");                    
-          obj_showHide.fn_setText(str_text);                      
-          obj_showHide.fn_showIcon("info");
-
-          let str_paymentLink;
-          //let str_paymentLink =window.location.href;
-          //str_paymentLink+="?goPayLabel=topup";
-
-          /*
-          str_paymentLink=window.location.pathname;
-          if(!this.bln_forceTopup){
-            str_paymentLink=obj_path.fn_setQueryStringValue("goPayLabel", "topup");                      
-          }
-          //*/
-          str_paymentLink=obj_path.fn_setQueryStringValue("goPayLabel", "topup");                      
-          
-          /*
-          <li><div style="text-decoration:underline" class="question">Is there a maximum number of tokens ?</div>          
-          <div class="answer">Double the package amount. 
-          </div></li>          
-          //*/
-
-          /*
-          str_text=`<ul class="faq-list">
-          <li><div style="text-decoration:underline" class="question">When is a token deducted ? </div>          
-          <div class="answer">A Customer Record is fetched from the database.
-          </div></li>                    
-          <li><div style="text-decoration:underline" class="question">Do existing tokens rollover ?</div>          
-          <div class="answer">On purchase. 
-          </div></li>
-          <li><div style="text-decoration:underline" class="question">If I allow tokens to expire ?</div>          
-          <div class="answer">Data remains securely online until next purchase.
-          </div></li>          
-          <li><div style="text-decoration:underline" class="question">More options for purchase ?</div>          
-          <div class="answer">Click <a href="` + str_paymentLink + `">here.</a>
-          </div></li>          
-          </ul>`;
-          //*/
-
-          //*
-          str_text=
-          `<ul class="faq-list">
-          <li>1 token is deducted when a Customer Record is fetched from the database.</li>                    
-          <li>Existing tokens rollover on purchase.</li>                    
-          <li>If tokens expire, data remains securely online until next purchase.</li>
-          <li>For more options, <a href="` + str_paymentLink + `">click here</a>.</li>          
-          </ul>`;
-          //*/
-          
-          obj_control=obj_container.fn_addContextItem("form_span");          
-          if(this.bln_emphasis){
-            if(obj_param.bln_boldText){              
-              obj_control.fn_setStyleProperty("fontWeight", "bold");                    
-            }                                 
-          }
-          if(obj_param.str_color){
-            obj_control.fn_setStyleProperty("color", obj_param.str_color);                                
-          }         
-          
-          obj_control.fn_setText(str_text);
-          obj_control.fn_setDisplay(false);
-
-          obj_showHide.obj_controlTarget=obj_control;
-        } 
-
-        fn_loadPriceList(){
-
-          this.obj_priceList={};
-
-          let obj_param;
-          let obj_themeItem, str_textPay, str_iconPay, str_color, bln_boldText; 
-          
-          obj_themeItem=this.obj_themeMidground;
-          str_textPay=this.str_textPay;
-          str_iconPay=this.str_icon;
-          str_color=this.obj_themeMidground.fn_getStyleProperty("backgroundColor");
-          bln_boldText=true;
-          
-          //---------------------
-          obj_param={            
-            str_labelProduct:"CALENDAR DAY",
-            int_priceTokenz:2.50,
-            int_packageTokenz:500,            
-            str_nameProduct:"CALENDARDAY",                                    
-            obj_themeItem:obj_themeItem,
-            str_textSubmit:str_textPay,
-            str_icon:str_iconPay,
-            str_color:str_color,            
-            bln_boldText:bln_boldText,            
-          };
-          this.obj_priceList[obj_param.str_nameProduct]=obj_param;                    
-
-          //---------------------
-          obj_param={            
-            str_labelProduct:"CALENDAR MONTH",
-            int_priceTokenz:15,
-            int_packageTokenz:5000,            
-            str_nameProduct:"CALENDARMONTH",      
-            obj_themeItem:obj_themeItem,
-            str_textSubmit:str_textPay,
-            str_icon:str_iconPay,
-            str_color:str_color,            
-            bln_boldText:bln_boldText,            
-          };
-          this.obj_priceList[obj_param.str_nameProduct]=obj_param;                    
-          
-          //---------------------
-          obj_param={            
-            str_labelProduct:"FISCAL QUARTER",
-            int_priceTokenz:100,
-            int_packageTokenz:60000,            
-            str_nameProduct:"FISCALQUARTER",                  
-            obj_themeItem:obj_themeItem,
-            str_textSubmit:str_textPay,
-            str_icon:str_iconPay,
-            str_color:str_color,            
-            bln_boldText:bln_boldText,            
-          };
-          this.obj_priceList[obj_param.str_nameProduct]=obj_param;                              
-          
-          if(this.bln_forceTopup){
-            //---------------------
-            obj_param={            
-              str_labelProduct:"FISCAL YEAR",
-              int_priceTokenz:1000,
-              int_packageTokenz:1000000,            
-              str_nameProduct:"FISCALYEAR",
-              obj_themeItem:obj_themeItem,
-              str_textSubmit:str_textPay,
-              str_icon:str_iconPay,
-              str_color:str_color,            
-              bln_boldText:bln_boldText,            
-            };
-            this.obj_priceList[obj_param.str_nameProduct]=obj_param;          
-          }
-        }        
-        
-        fn_setDefaultPackageOption(obj_param){
-
-          //Run time otions
-          
-          
-          this.bln_disableOnLimitTokenz=false;
-          this.bln_disableOnPay=true;          
-          //Run time otions
-
-          //initial setting
-          obj_param.bln_limitToPackageTokenz=false;
-          obj_param.bln_limitToMinTokenz=false;
-          obj_param.bln_limitToMaxTokenz=false;
-          obj_param.bln_limitToMinExpiry=false;
-          obj_param.bln_limitToThisPeriod=false;
-          //initial setting          
-
-          obj_param.date_expireSubscription=this.date_expireSubscription;
-          obj_param.int_customerTokenz=this.int_customerTokenz;
-
-          //turn on for console debug
-          obj_param.bln_debugPeriod=false;
-          //turn on for console debug
-          
-        }
-
-        fn_debugDashboard(obj_param){
-          
-          console.log("obj_param.str_labelProduct: " + obj_param.str_labelProduct);
-          console.log("obj_param.int_packageTokenz: " + obj_param.int_packageTokenz);
-          console.log("obj_param.int_limitMaxTokenz: " + obj_param.int_limitMaxTokenz);          
-          console.log("obj_param.int_customerTokenz: " + obj_param.int_customerTokenz);          
-          console.log("obj_param.int_purchaseTokenz: " + obj_param.int_purchaseTokenz);
-
-        }
-
-        fn_formatPeriod(obj_param){       
-          
-          
-          
-          let obj_period;                    
-          let bln_debugPeriod=obj_param.bln_debugPeriod;                    
-
-          //25% percent over the packageTokenz is added to maxTokenz to allow for "comforatable upgrade" without having to go to exactly 50% of the limit.
-          
-          // options where you would lose tokens are not displayed - to prevent the very same. If you have previously used a high value ticket you wont be able to keep those by adding a month. 
-          // you need to subscribe to same package , or allow your subsscription to expire (lositng the tokens) , then you can start again on a lower package.
-          //so the principal is once yous start on a bigger package e.g move form day to mont , or moth to quarter or quarter to annual, you wont be able to subscribe to a lower package and keep the tokens. you can only allow the existing tokens to expire and then start afresh.
-
-          // options where you would lose subscription time are displayed.
-
-          //options where you would receive zero tokens are not displayed.
-          switch(obj_param.str_nameProduct){
-            case("CALENDARDAY"):            
-            if(bln_debugPeriod){console.log("CALENDARDAY")};              
-              obj_period=obj_shared.fn_getDatePeriod();                  
-              break;
-            case("CALENDARMONTH"):            
-              if(bln_debugPeriod){console.log("CALENDARMONTH")};                          
-              obj_period=obj_shared.fn_getMonthPeriod();                                
-              break;
-            case("FISCALQUARTER"):            
-              if(bln_debugPeriod){console.log("FISCALQUARTER")}; 
-              obj_period=obj_shared.fn_getQuarterPeriod(this.int_fiscalYearEnd);                                
-              break;
-            case("FISCALYEAR"):              
-              if(bln_debugPeriod){console.log("FISCALYEAR")};              
-              obj_period=obj_shared.fn_getYearPeriod(this.int_fiscalYearEnd);                  
-              break;
-          }
-
-          //PURCHASE  TOKENS = NUMBER OF TOKENZ THAT WILL BE ADDEDD
-          //TOTAL TOKENS = TOTAL NUMBER OF TOKENZ IN CUSTOMER ACCOUNT         
-
-          //Set Max Tokenz
-          obj_param.int_limitMaxTokenz=obj_param.int_packageTokenz*2;          
-          obj_param.int_purchaseTokenz=obj_param.int_packageTokenz;            
-
-          if(obj_param.bln_expiredSubscription){                      
-            this.int_customerTokenz=0;//set base for addition            
-            obj_param.int_customerTokenz=0;//set base for addition            
-          }          
-
-          if(this.bln_debug){
-            this.fn_debugDashboard(obj_param);            
-          }
-          
-          obj_param.int_customerTokenz=obj_param.int_customerTokenz+obj_param.int_purchaseTokenz;
-          if(obj_param.int_customerTokenz>obj_param.int_limitMaxTokenz){            
-            obj_param.bln_limitToMaxTokenz=true;
-            obj_param.int_customerTokenz=obj_param.int_limitMaxTokenz;                        
-          }                             
-          
-          if(obj_param.bln_limitToMaxTokenz){
-            obj_param.int_purchaseTokenz=obj_param.int_customerTokenz-this.int_customerTokenz;            
-          }                    
-          
-          if(!obj_param.int_purchaseTokenz){//disable on zero package             
-            obj_param.bln_limitToMinTokenz=true;
-          }          
-          
-          if(!this.bln_forceTopup){
-            if(obj_param.int_purchaseTokenz>obj_param.int_packageTokenz){//disable on package tokens  greater than
-              obj_param.bln_limitToPackageTokenz=true;
-            }            
-          }                
-
-          if(obj_param.int_customerTokenz<this.int_customerTokenz){
-            //obj_param.bln_limitToMinTokenz=true;                        
-          }                   
-          if(obj_param.int_purchaseTokenz<0){
-            obj_param.int_purchaseTokenz=0;
-          }                   
-          
-          //Set Number of Tokens but check for Max
-          
-          //Set Date of Expiry but check for Lapsed
-          obj_param.date_expireSubscription=obj_period.date_expireNextPeriod;
-          //console.log("obj_param.date_expireSubscription: " + obj_param.date_expireSubscription);
-          obj_param.bln_expiredSubscription=false;          
-          if(obj_param.date_expireSubscription<this.date_now){
-            obj_param.bln_expiredSubscription=true;                        
-          }                          
-          
-          if(obj_param.date_expireSubscription<=this.date_expireSubscription){              
-            obj_param.bln_limitToMinExpiry=true;
-          }
-          
-          //Set Date of Expiry but check for Lapsed
-          obj_param.obj_period=obj_period;
-          obj_param.date_expireThisPeriod=obj_period.date_expireThisPeriod;
-          obj_param.date_expireNextPeriod=obj_period.date_expireNextPeriod;                                                
-        }
-
-        
-        fn_addSubscriptionSummary(obj_param){
-            
-          let str_labelProduct;
-          let str_customerTokenz, str_expireSubscription;          
-          let str_statusSubscription;
-
-          if(obj_param.bln_expiredSubscription){            
-            obj_param.int_customerTokenz=0;                      
-          }
-          else{            
-          }                          
-          str_labelProduct=obj_param.str_labelProduct;          
-          
-          str_customerTokenz=obj_shared.fn_formatDisplayNumber(obj_param.int_customerTokenz);          
-          str_customerTokenz+=" Tokens";
-         
-          str_expireSubscription=this.fn_getDisplayExpireSubcription(obj_param);
-          
-          let arr_item=[];
-          //arr_item.push(obj_param.str_labelProduct);
-          arr_item.push(this.obj_product.str_labelProduct);
-          if(obj_param.bln_expiredSubscription){
-            str_statusSubscription="COMPLETE";                
-          }
-          else{
-            str_statusSubscription="ACTIVE";                                        
-            if(this.bln_paymentSuccess){
-              str_statusSubscription="Thank you for subscribing!";    
-            }          
-          }                                   
-
-          arr_item.push(str_statusSubscription);
-          arr_item.push(str_customerTokenz);
-          arr_item.push(str_expireSubscription);
-          obj_param.arr_item=arr_item;
-          
-          this.fn_writeTopUpForm(obj_param);          
-          
-          this.fn_themePanelBackgroundColor(obj_param);          
-        }
-
-        fn_themePanelBackgroundColor(obj_param){
-          let obj_control=obj_param.obj_topupPanel;                    
-          this.fn_themeBackgroundColor(obj_control, obj_param);
-        }
-
-        fn_themeBackgroundColor(obj_control, obj_param){
-          let obj_themeItem=obj_param.obj_themeItem;
-          let str_backgroundColor="grey";          
-
-          if(obj_themeItem){
-            str_backgroundColor=obj_themeItem.fn_getStyleProperty("backgroundColor");            
-          }
-          
-          if((this.bln_disableOnLimitTokenz)){          
-            str_backgroundColor="grey";                                  
-          }
-          if(obj_param.bln_expiredSubscription){          
-            str_backgroundColor="grey";                      
-            if(this.bln_debug){
-              console.log(obj_param.str_labelProduct + ": bln_expiredSubscription caused str_backgroundColor = grey ")    
-            }
-          }
-          if(str_backgroundColor){
-            obj_control.fn_setStyleProperty("backgroundColor", str_backgroundColor);          
-            obj_control.fn_setStyleProperty("borderColor", str_backgroundColor);                      
-          }
-        }
-        
-        fn_getDisplayExpireSubcription(obj_param){
-          
-          let str_expireSubscription;
-          let str_expireLabel="Expiry";
-          if(obj_param.bln_expiredSubscription){
-            str_expireLabel="Expired";
-          }
-
-          let bln_value=obj_shared.fn_isTomorrow(obj_param.date_expireSubscription);            
-          str_expireSubscription=obj_shared.fn_getCalendarDateStringFromDateObject(obj_param.date_expireSubscription, false, false);
-          obj_param.str_expireSubscriptionSystem=obj_shared.fn_getUnixTimeStampFromDateObject(obj_param.date_expireSubscription);
-
-          str_expireSubscription=str_expireLabel + " " + str_expireSubscription;                        
-          if(bln_value){
-            str_expireSubscription=str_expireLabel + " Tomorrow";
-          }   
-          /*    
-          if(obj_param.bln_limitToMaxTokenz){
-            //str_expireSubscription="<span style=\"color:grey\">"+str_expireSubscription+"</span>";
-
-          }
-          //*/
-
-          return str_expireSubscription;
-
-        }
-
-        fn_displayPriceList(){
-
-          for (const [key, value] of Object.entries(this.obj_priceList)) {
-            //console.log(`Key: ${key}, Value: ${value}`);
-
-            let obj_param=value;
-            this.fn_setDefaultPackageOption(obj_param);                    
-            this.fn_formatPeriod(obj_param);                               
-            if(obj_param.str_nameProduct==="FISCALQUARTER"){
-              obj_param.str_labelProduct="FISCAL " + obj_param.obj_period.str_nextPeriod + " QUARTER";
-            }              
-            this.fn_addTicket(obj_param);            
-          }                   
-        }
-
-        fn_addTicket(obj_param){          
-
-          if(obj_param.bln_limitToPackageTokenz){            
-            this.bln_disableOnLimitTokenz=true;            
-            if(this.bln_debug){
-              console.log(obj_param.str_labelProduct + ": bln_limitToPackageTokenz caused bln_disableOnLimitTokenz = true ")    
-            }
-          }
-
-          if(obj_param.bln_limitToMinTokenz && !this.bln_forceTopup){            
-            this.bln_disableOnLimitTokenz=true;            
-            if(this.bln_debug){
-              console.log(obj_param.str_labelProduct + ": bln_limitToMinTokenz caused bln_disableOnLimitTokenz = true ")    
-            }
-          }
-
-          if(obj_param.bln_limitToMaxTokenz && !this.bln_forceTopup){            
-            this.bln_disableOnLimitTokenz=true;            
-            if(this.bln_debug){
-              console.log(obj_param.str_labelProduct + ": bln_limitToMaxTokenz caused bln_disableOnLimitTokenz = true ")    
-            }
-          }         
-
-          
-          if(obj_param.bln_limitToMinExpiry){            
-            this.bln_disableOnLimitTokenz=true;            
-            if(this.bln_debug){
-              console.log(obj_param.str_labelProduct + ": bln_limitToMinExpiry caused bln_disableOnLimitTokenz = true ")    
-            }
-          }
-          
-          let str_labelProduct, str_priceTokenz, str_purchaseTokenz, str_customerTokenz, str_expireSubscription, date_expireSubscription;                              
-          
-          /////////////
-          str_labelProduct=obj_param.str_labelProduct;
-          obj_param.str_labelProduct=str_labelProduct;
-          /////////////
-          
-          /////////////
-          str_priceTokenz="";
-          if(obj_param.int_priceTokenz!==undefined){
-            str_priceTokenz=obj_shared.fn_formatDisplayNumber(obj_param.int_priceTokenz, 2);
-            str_priceTokenz="EUR " + str_priceTokenz;
-          }                    
-          obj_param.str_priceTokenz=str_priceTokenz;
-          /////////////
-
-          /////////////
-          str_purchaseTokenz="";          
-          if(obj_param.int_purchaseTokenz!==undefined){            
-            str_purchaseTokenz=obj_shared.fn_formatDisplayNumber(obj_param.int_purchaseTokenz);
-            str_purchaseTokenz="+ " + str_purchaseTokenz + obj_shared.fn_formatPlural(obj_param.int_purchaseTokenz, " Token");
-          }          
-          obj_param.str_purchaseTokenz=str_purchaseTokenz;
-          /////////////
-
-          /////////////          
-          str_customerTokenz="";          
-          if(obj_param.int_customerTokenz!==undefined){
-            str_customerTokenz=obj_shared.fn_formatDisplayNumber(obj_param.int_customerTokenz);
-            str_customerTokenz="= " + str_customerTokenz + obj_shared.fn_formatPlural(obj_param.int_customerTokenz, " Token");            
-            if(obj_param.bln_limitToMaxTokenz){
-              str_customerTokenz+=" (Max)";              
-            }               
-          }                    
-          obj_param.str_customerTokenz=str_customerTokenz;
-          /////////////
-
-          /////////////
-          str_expireSubscription="";
-          str_expireSubscription=this.fn_getDisplayExpireSubcription(obj_param);          
-          obj_param.str_expireSubscription=str_expireSubscription;          
-          /////////////
-          
-          this.fn_formatDisplayParam(obj_param);
-
-          let arr_item=[];                              
-          arr_item.push(obj_param.str_labelProduct);
-          arr_item.push(obj_param.str_priceTokenz);
-          arr_item.push(obj_param.str_purchaseTokenz);                    
-          //arr_item.push(obj_param.str_customerTokenz);
-          arr_item.push(obj_param.str_expireSubscription);
-          obj_param.arr_item=arr_item;          
-          
-          this.fn_writeTopUpForm(obj_param);
-          
-          if(this.bln_disableOnLimitTokenz){            
-            obj_param.obj_controlSubmit.fn_setDisabled(true);                                  
-          }
-          else{
-            obj_param.obj_controlSubmit            
-          }          
-          //obj_param.obj_controlSubmit.fn_debug();
-
-          this.fn_themePanelBackgroundColor(obj_param);          
-
-          
-          
-        }
-
-        fn_formatDisplayParam(obj_param){
-          
-          if(this.bln_disableOnLimitTokenz){                                  
-            obj_param.str_labelProduct=this.fn_setSpanTextDisabled(obj_param.str_labelProduct);
-            obj_param.str_priceTokenz=this.fn_setSpanTextDisabled(obj_param.str_priceTokenz);
-            obj_param.str_purchaseTokenz=this.fn_setSpanTextDisabled(obj_param.str_purchaseTokenz);
-            obj_param.str_customerTokenz=this.fn_setSpanTextDisabled(obj_param.str_customerTokenz);
-            obj_param.str_expireSubscription=this.fn_setSpanTextDisabled(obj_param.str_expireSubscription);            
-          }
-        }
-        fn_setSpanTextDisabled(str_value){
-          return "<span style=\"color:grey\">"+str_value+"</span>";          
-        }
-        
-        fn_writeTopUpForm(obj_param){
-          
-          let obj_topupPanel, obj_form, obj_control;                    
-
-          let arr_item=obj_param.arr_item;
-
-          obj_param.bln_hasForm=true;
-          
-          obj_topupPanel=this.fn_addContextItem("topup_panel");                                                          
-          obj_param.obj_topupPanel=obj_topupPanel;//refernce used by button
-
-          obj_form=obj_topupPanel.fn_addContextItem("form_form");                                            
-          obj_param.obj_form=obj_form;
-          obj_topupPanel.fn_setStyleProperty("boxShadow", "1px 1px 3px rgba(0, 0, 0, 0.5)");                              
-
-          for (const str_item of arr_item) {
-            obj_control=obj_form.fn_addContextItem("form_span");                              
-            obj_control.fn_setText(str_item);            
-            if(this.bln_emphasis){
-              if(obj_param.bln_boldText){              
-                obj_control.fn_setStyleProperty("fontWeight", "bold");                    
-              }                     
-            }   
-            if(obj_param.str_color){
-              obj_control.fn_setStyleProperty("color", obj_param.str_color);                                
-            }         
-          }
-
-          obj_control=this.fn_addTopUpSubmit(obj_form, obj_param);                    
-          obj_param.obj_controlSubmit=obj_control;          
-
-          if(!obj_param.bln_customerSummary && !this.bln_forceTopup){
-            obj_topupPanel.fn_setDisplay(false);            
-          }
-        }
-        
-        fn_addTopUpSubmit(obj_container, obj_param){
-
-          let str_name=obj_param.str_nameProduct;
-          if(!obj_param.str_textSubmit){
-            //return;
-          }          
-          
-          let obj_control=obj_container.fn_addContextItem("topup_form_button");                       
-          obj_control.obj_holder.obj_dashboard=this;
-          obj_control.obj_holder.obj_product=obj_param;
-          obj_control.fn_setDomProperty("name", str_name);                    
-          obj_control.fn_setText(obj_param.str_textSubmit);          
-          obj_control.fn_showIcon(obj_param.str_icon);          
-          obj_control.fn_setStyleProperty("cursor", "pointer");                     
-          if(obj_param.bln_customerSummary){            
-            this.obj_submitSummary=obj_control;
-            this.obj_submitSummary.bln_open=false;
-            if(this.bln_forceTopup){
-              this.obj_submitSummary.bln_open=true;
-            }
-            this.fn_setTextSubscription();            
-          }
-          else{
-            //obj_control.fn_setStyleProperty("backgroundColor", "green");                              
-          }
-          return obj_control;
-        }        
-
-        fn_setTextSubscription(){
-          
-          let str_text;
-          if(this.obj_submitSummary.bln_open){            
-            str_text="Close Options";                        
-          }
-          else{            
-            str_text="Show Options";            
-          }
-          if(this.bln_paymentSuccess && this.bln_disableOnPay){
-            str_text="Let's Go!";            
-          }           
-         
-          this.obj_submitSummary.fn_setText(str_text);                                        
-          this.obj_submitSummary.fn_showIcon("replace-summary");
-        }        
-
-        fn_checkForUpgradeOptions(bln_action=false){
-          let bln_found=false;
-          let  obj_submitSummary=this.obj_submitSummary;
-          for (const [key, value] of Object.entries(this.obj_priceList)) {        
-
-            
-            let obj_param=value;                                    
-            if(!obj_param.bln_customerSummary){              
-              if(obj_param.bln_hasForm && obj_param.obj_topupPanel){//or subscription didnt get a form , was rejected prior
-                if(bln_action){
-                  obj_param.obj_topupPanel.fn_setDisplay(obj_submitSummary.bln_open);
-                }                
-                bln_found=true;
-              }              
-            }
-          }
-          if(!bln_found){
-            this.obj_submitSummary.fn_setText("Checkback later!");
-            this.obj_submitSummary.fn_setDisabled(true);
-          }          
-        }
-
-        fn_toggleOptions(){
-
-          //console.log("fn_toggleOptions");          
-          
-          let  obj_submitSummary=this.obj_submitSummary;
-          if(obj_submitSummary.bln_open){
-            obj_submitSummary.bln_open=false;            
-          }
-          else{
-            obj_submitSummary.bln_open=true;                        
-          }
-          
-          this.fn_checkForUpgradeOptions(true);          
-          this.fn_setTextSubscription();          
-        }
-
-        fn_topUpSubmitOnClick(obj_submit){                    
-          
-          //console.log("HEY HEY 123");
-
-          let obj_product=obj_submit.obj_holder.obj_product;
-
-          if(this.bln_paymentSuccess){
-            obj_path.fn_navigateSubdomain("desk");
-            return;
-          }
-
-          if(obj_submit===this.obj_submitSummary){                        
-            this.fn_toggleOptions();
-          }          
-          else{
-            this.fn_proceedToPayment(obj_submit);
-          } 
-        }  
-
-        fn_proceedToPayment(obj_submit){
-
-          let str_href;
-
-          //console.log("fn_proceedToPayment");
-          //return ;
-          
-          ////CALENDAR DAY TEST sandbox1
-
-          //console.log(obj_submit);
-
-          let str_nameProduct=obj_submit.obj_holder.obj_product.str_nameProduct;
-          let str_expireSubscription=obj_submit.obj_holder.obj_product.str_expireSubscriptionSystem;
-          let int_purchaseTokenz=obj_submit.obj_holder.obj_product.int_purchaseTokenz;          
-          
-
-          let obj_paymentProvider=new paymentProviderStripe();          
-          obj_paymentProvider.fn_getPaymentURL(str_nameProduct, str_expireSubscription, int_purchaseTokenz);
-
-          
-          
-          let str_paymentURL=obj_paymentProvider.str_paymentURL;
-          if(this.bln_usePaymentProviderSandbox){
-            str_paymentURL=obj_paymentProvider.str_paymentURLSandbox;
-          }
-          
-
-          if(this.bln_debug){
-            console.log("str_paymentURL: " + str_paymentURL);
-            //return;
-          }
-          
-          window.location.href=str_paymentURL;
-        }
-
-        //////////////////////////
-        //////////////////////////
-        
-        //////////////////////////        
-        //////////////////////////        
-        
-      }//END CLS
-      
-      class paymentProviderStripe{
-
-        constructor(){                    
-          
-          //this.str_paymentURLSandbox="https://buy.stripe.com/test_dR63dCe31ccyaQgfYZ" + str_queryString;//real
-
-          this.str_paymentURL="";          
-          this.str_paymentURLSandbox="";
-          
-        }
-        
-        fn_getPaymentURL(str_nameProduct, str_expireSubscription, int_purchaseTokenz){
-
-          //USE these 2 redirect links for live and Sandbox respectively
-          //http://checkout.rowz.app/onpay/?application=Rowz&paymentProvider=Stripe&token={CHECKOUT_SESSION_ID}
-          //http://checkout.lokal-mycode.buzz/onpay/?application=Rowz&paymentProvider=STRIPE&token={CHECKOUT_SESSION_ID}
-          //USE these 2 redirect links for live and Sandbox respectively
-
-          
-
-          let str_queryString="";        
-          str_queryString+="?";
-          str_queryString+="&prefilled_email=" + obj_userHome.MetaUserEmail;
-          str_queryString+="&client_reference_id=" + obj_userHome.MetaUserSystemId + "ROWZ" + str_expireSubscription + "ROWZ" + int_purchaseTokenz;
-
-          switch(str_nameProduct){
-            case "CALENDARDAY":                
-                this.str_paymentURL="https://buy.stripe.com/eVa17MfcP2li8zS289" + str_queryString;        
-                this.str_paymentURLSandbox="https://buy.stripe.com/test_dR63dCe31ccyaQgfYZ" + str_queryString;//real                                                                
-                break;
-              case "CALENDARMONTH":   
-                this.str_paymentURL="https://buy.stripe.com/14k9Ei2q35xubM4aEE" + str_queryString;                                                        
-                this.str_paymentURLSandbox="https://buy.stripe.com/test_9AQdSg4sr4K60bC288" + str_queryString;//real                                                          
-                break;
-              case "FISCALQUARTER":                
-                this.str_paymentURL="https://buy.stripe.com/eVa03IggTf84dUc6oq" + str_queryString;        
-                this.str_paymentURLSandbox="https://buy.stripe.com/test_9AQ7tS3on6Se5vW3ce" + str_queryString;//real                                
-                break;
-              case "FISCALYEAR":                
-                this.str_paymentURL="https://buy.stripe.com/28o6s6ggT3pm17q6or" + str_queryString;        
-                this.str_paymentURLSandbox="https://buy.stripe.com/test_aEUbK87EDfoKf6w3cf" + str_queryString;//real                                
-                break;
-          }
-        }
-
-        
-
-      }
-
-      class tempControl{        
-        
-
-        fn_addSelectField(obj_container, str_label){
-          let obj_field=obj_container.fn_addContextItem("form_field");                              
-          let obj_label=obj_field.fn_getComponent("form_label");
-          obj_label.fn_setText(str_label);         
-          let obj_span=obj_field.fn_getComponent("form_span");   
-          obj_span.fn_setDisplay("none");
-          return obj_field;
-        }
-
-        fn_addSelect(obj_container){
-
-          let obj_select=obj_container.fn_addContextItem("form_select");                    
-          obj_select.fn_setStyleProperty("fontWeight", "bold");          
-          return obj_select;
-        }
-
-        fn_addSelectOption(obj_select, str_text, str_value){
-          let dom_option=obj_select.fn_addOption(str_text, str_value);
-          dom_option.style.fontWeight="bold";
-          return dom_option;
-        }
-
-        fn_addTopUpRadio(obj_container, str_name, str_value){
-
-          let obj_control=obj_container.fn_addContextItem("form_input");                    
-          obj_control.fn_setDomProperty("type", "radio");
-          obj_control.fn_setDomProperty("name", str_name);          
-          obj_control.fn_setValue(str_value);          
-          return obj_control;
-
-        }
-
-
-        fn_addSpanField(obj_container, str_label="", str_span=""){
-          let obj_field=obj_container.fn_addContextItem("form_field");                    
-          //obj_field.fn_setStyleProperty("flex-flow", "row wrap");          
-          let obj_label=obj_field.fn_getComponent("form_label");
-          obj_label.fn_setText(str_label);            
-          let obj_span=obj_field.fn_getComponent("form_span");
-          obj_span.fn_setText(str_span);            
-          obj_span.fn_setStyleProperty("fontWeight", "bold");                    
-          return obj_field;
-        }
-      }
-      //END TAG
-      //END component/topup_dashboard        
-/*type: topup_dashboard//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: topup_form_button//*/
-      //XSTART component/topup_form_button
-      class topup_form_button extends xapp_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }                
-        fn_onClick(e){                    
-          
-          obj_project.fn_forgetEvent(e);    
-          this.obj_holder.obj_dashboard.fn_topUpSubmitOnClick(this);          
-        }  
-        
-      }//END CLS
-      //END TAG
-      //END component/topup_form_button        
-/*type: topup_form_button//*/
 /*END COMPONENT//*/
 
 
@@ -18149,6 +16344,32 @@ class report_column extends xapp_columnform{
       //END TAG
       //END component/xapp_button_archive_record        
 /*type: xapp_button_archive_record//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_backup//*/
+      //XSTART component/xapp_button_backup
+      class xapp_button_backup extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                                    
+          
+          obj_project.fn_forgetEvent(e);                  
+          let obj_menuButton=this.fn_getMenuButton();          
+          let obj_dashboard=obj_menuButton.fn_locateItem("xapp_dashboard_setting");          
+          if(obj_dashboard){                    
+            obj_dashboard.fn_backup();
+          }                  
+        }     
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_backup        
+/*type: xapp_button_backup//*/
 /*END COMPONENT//*/
 
 
@@ -18671,130 +16892,54 @@ class report_column extends xapp_columnform{
 
 
 /*START COMPONENT//*/
-/*type: xapp_button_mover_disable//*/
-      //XSTART component/xapp_button_mover_disable
-      class xapp_button_mover_disable extends xapp_console_button{
+/*type: xapp_button_maintain//*/
+      //XSTART component/xapp_button_maintain
+      class xapp_button_maintain extends xapp_console_button{
         constructor(obj_ini) {      
           super(obj_ini);        
         } 
         fn_initialize(obj_ini){
           super.fn_initialize(obj_ini);                
         }
-        fn_onClick(e){                  
-          let obj_menuButton=this.fn_getMenuButton();                  
-          if(!obj_menuButton){return;}                          
+        fn_onClick(e){                                    
           
-          obj_menuButton.fn_formDisable();
-          
-          
-          obj_project.fn_forgetEvent(e);
-        }
+          obj_project.fn_forgetEvent(e);                  
+          let obj_menuButton=this.fn_getMenuButton();          
+          let obj_dashboard=obj_menuButton.fn_locateItem("xapp_dashboard_setting");          
+          if(obj_dashboard){                    
+            obj_dashboard.fn_maintain();
+          }                  
+        }                
       }//END CLS
       //END TAG
-      //END component/xapp_button_mover_disable        
-/*type: xapp_button_mover_disable//*/
+      //END component/xapp_button_maintain        
+/*type: xapp_button_maintain//*/
 /*END COMPONENT//*/
 
 
 /*START COMPONENT//*/
-/*type: xapp_button_mover_enable//*/
-      //XSTART component/xapp_button_mover_enable
-      class xapp_button_mover_enable extends xapp_console_button{
+/*type: xapp_button_maintain_debug_release//*/
+      //XSTART component/xapp_button_maintain_debug_release
+      class xapp_button_maintain_debug_release extends xapp_console_button{
         constructor(obj_ini) {      
           super(obj_ini);        
         } 
         fn_initialize(obj_ini){
           super.fn_initialize(obj_ini);                
         }
-        fn_onClick(e){                  
-          let obj_menuButton=this.fn_getMenuButton();                  
-          if(!obj_menuButton){return;}                          
+        fn_onClick(e){                                    
           
-          obj_menuButton.fn_formEnable();
-          
-          
-          obj_project.fn_forgetEvent(e);
-        }
+          obj_project.fn_forgetEvent(e);                  
+          let obj_menuButton=this.fn_getMenuButton();
+          let obj_dashboard=obj_menuButton.fn_locateItem("xapp_dashboard_setting");          
+          if(obj_dashboard){                    
+            obj_dashboard.fn_maintain_debug_release();
+          }                  
+        }                        
       }//END CLS
       //END TAG
-      //END component/xapp_button_mover_enable        
-/*type: xapp_button_mover_enable//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button_mover_home//*/
-      //XSTART component/xapp_button_mover_home
-      class xapp_button_mover_home extends xapp_console_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        fn_onClick(e){                  
-          let obj_menuButton=this.fn_getMenuButton();                  
-          if(!obj_menuButton){return;}                          
-          
-          obj_menuButton.fn_formHome();
-          obj_project.fn_forgetEvent(e);
-        }
-      }//END CLS
-      //END TAG
-      //END component/xapp_button_mover_home        
-/*type: xapp_button_mover_home//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button_mover_invite//*/
-      //XSTART component/xapp_button_mover_invite
-      class xapp_button_mover_invite extends xapp_console_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        fn_onClick(e){                  
-          let obj_menuButton=this.fn_getMenuButton();                  
-          if(!obj_menuButton){return;}                          
-          
-          obj_menuButton.fn_formInvite();
-          
-          
-          obj_project.fn_forgetEvent(e);
-        }
-      }//END CLS
-      //END TAG
-      //END component/xapp_button_mover_invite        
-/*type: xapp_button_mover_invite//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button_mover_open//*/
-      //XSTART component/xapp_button_mover_open
-      class xapp_button_mover_open extends xapp_console_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        fn_onClick(e){                  
-          let obj_menuButton=this.fn_getMenuButton();                  
-          if(!obj_menuButton){return;}                          
-          
-          obj_menuButton.fn_formOpen();
-          
-          
-          obj_project.fn_forgetEvent(e);
-        }
-      }//END CLS
-      //END TAG
-      //END component/xapp_button_mover_open        
-/*type: xapp_button_mover_open//*/
+      //END component/xapp_button_maintain_debug_release        
+/*type: xapp_button_maintain_debug_release//*/
 /*END COMPONENT//*/
 
 
@@ -19095,6 +17240,220 @@ class report_column extends xapp_columnform{
 
 
 /*START COMPONENT//*/
+/*type: xapp_button_provision//*/
+      //XSTART component/xapp_button_provision
+      class xapp_button_provision extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                                    
+          
+          obj_project.fn_forgetEvent(e);                  
+          let obj_menuButton=this.fn_getMenuButton();          
+          let obj_dashboard=obj_menuButton.fn_locateItem("xapp_dashboard_setting");          
+          if(obj_dashboard){                    
+            obj_dashboard.fn_provision();
+          }       
+        }           
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_provision        
+/*type: xapp_button_provision//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_provision_b2b//*/
+      //XSTART component/xapp_button_provision_b2b
+      class xapp_button_provision_b2b extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_provision_b2b        
+/*type: xapp_button_provision_b2b//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_provision_b2c//*/
+      //XSTART component/xapp_button_provision_b2c
+      class xapp_button_provision_b2c extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_provision_b2c        
+/*type: xapp_button_provision_b2c//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_provision_linked_contact_hide//*/
+      //XSTART component/xapp_button_provision_linked_contact_hide
+      class xapp_button_provision_linked_contact_hide extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_provision_linked_contact_hide        
+/*type: xapp_button_provision_linked_contact_hide//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_provision_linked_contact_show//*/
+      //XSTART component/xapp_button_provision_linked_contact_show
+      class xapp_button_provision_linked_contact_show extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_provision_linked_contact_show        
+/*type: xapp_button_provision_linked_contact_show//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_provision_linked_opportunity_hide//*/
+      //XSTART component/xapp_button_provision_linked_opportunity_hide
+      class xapp_button_provision_linked_opportunity_hide extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_provision_linked_opportunity_hide        
+/*type: xapp_button_provision_linked_opportunity_hide//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_provision_linked_opportunity_show//*/
+      //XSTART component/xapp_button_provision_linked_opportunity_show
+      class xapp_button_provision_linked_opportunity_show extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_provision_linked_opportunity_show        
+/*type: xapp_button_provision_linked_opportunity_show//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_provision_linked_task_hide//*/
+      //XSTART component/xapp_button_provision_linked_task_hide
+      class xapp_button_provision_linked_task_hide extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_provision_linked_task_hide        
+/*type: xapp_button_provision_linked_task_hide//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_provision_linked_task_show//*/
+      //XSTART component/xapp_button_provision_linked_task_show
+      class xapp_button_provision_linked_task_show extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_provision_linked_task_show        
+/*type: xapp_button_provision_linked_task_show//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_push_reset//*/
+      //XSTART component/xapp_button_push_reset
+      class xapp_button_push_reset extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                                    
+          
+          obj_project.fn_forgetEvent(e);                  
+          let obj_menuButton=this.fn_getMenuButton();
+          let obj_dashboard=obj_menuButton.fn_locateItem("xapp_dashboard_push_row");
+          if(obj_dashboard){                    
+            obj_dashboard.fn_push_reset();
+          }                  
+        }                                     
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_push_reset        
+/*type: xapp_button_push_reset//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_push_schedule//*/
+      //XSTART component/xapp_button_push_schedule
+      class xapp_button_push_schedule extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                                    
+          
+          obj_project.fn_forgetEvent(e);              
+          let str_url;          
+          let str_lokalDomain=obj_path.fn_getLokalDomain();
+          str_url="api."+str_lokalDomain+"/interface/push/"; 
+          str_url=obj_path.fn_getURLSiteProtocol(str_url);                    
+          window.open(str_url, "_push");
+        }                
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_push_schedule        
+/*type: xapp_button_push_schedule//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
 /*type: xapp_button_queryterm//*/
       //XSTART component/xapp_button_queryterm
       class xapp_button_queryterm extends form_button{
@@ -19136,32 +17495,6 @@ class report_column extends xapp_columnform{
       //END TAG
       //END component/xapp_button_queryterm        
 /*type: xapp_button_queryterm//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button_system_home//*/
-      //XSTART component/xapp_button_system_home
-      class xapp_button_system_home extends xapp_console_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        fn_onClick(e){                  
-          let obj_menuButton=this.fn_getMenuButton();                  
-          if(!obj_menuButton){return;}                          
-          
-          obj_menuButton.fn_formHome();
-          
-          
-          obj_project.fn_forgetEvent(e);
-        }
-      }//END CLS
-      //END TAG
-      //END component/xapp_button_system_home        
-/*type: xapp_button_system_home//*/
 /*END COMPONENT//*/
 
 
@@ -19706,6 +18039,291 @@ class report_column extends xapp_columnform{
 
 
 /*START COMPONENT//*/
+/*type: xapp_dashboard_push//*/
+      //XSTART component/xapp_dashboard_push
+      class xapp_dashboard_push extends xapp_dashboard{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_loadDashboard(){
+          if(!super.fn_loadDashboard()){return;}                                                                                              
+          
+          this.obj_menuPanel=this.fn_getParentComponent();                  
+          if(this.obj_menuPanel){
+            
+            this.obj_consoleContainerMaintain=this.obj_menuPanel.fn_addConsoleContainer("console_container_maintain", true);            
+            this.obj_button_push_schedule=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_push_schedule");                                    
+            this.obj_consoleContainerMaintain.fn_showItem(this.obj_button_push_schedule);            
+          }                    
+        }         
+        
+      }//END CLS
+      //END TAG
+      //END component/xapp_dashboard_push        
+/*type: xapp_dashboard_push//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_dashboard_push_row//*/
+      //XSTART component/xapp_dashboard_push_row
+      class xapp_dashboard_push_row extends xapp_dashboard{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_loadDashboard(){
+          if(!super.fn_loadDashboard()){return;}                                                                                              
+          
+          this.obj_menuPanel=this.fn_getParentComponent();                  
+          if(this.obj_menuPanel){
+            this.obj_consoleContainerMaintain=this.obj_menuPanel.fn_addConsoleContainer("console_container_maintain", true);            
+            this.obj_button_push_reset=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_push_reset");                                    
+            this.obj_consoleContainerMaintain.fn_showItem(this.obj_button_push_reset);                                    
+          }                    
+        } 
+        
+        fn_push_reset(){
+
+          let obj_column, obj_row;
+          let obj_menuButton=this.obj_holder.obj_parentMenu;                             
+          let obj_recordset=obj_menuButton.obj_dataView;                              
+          obj_row=obj_recordset.fn_getRow(0);          
+          
+          obj_column=obj_row.fn_getColumnViaName("`meta_push`.`meta_push`.`ScriptStatus`");                    
+          this.fn_updateColumnValue(obj_column, "READY");   
+          obj_column=obj_row.fn_getColumnViaName("`meta_push`.`meta_push`.`SystemIdCurrent`");                    
+          this.fn_updateColumnValue(obj_column, "0");   
+          obj_column=obj_row.fn_getColumnViaName("`meta_push`.`meta_push`.`SystemIdTo`");                              
+          this.fn_updateColumnValue(obj_column, "0");   
+          obj_column=obj_row.fn_getColumnViaName("`meta_push`.`meta_push`.`ScriptDate`");                    
+          this.fn_updateColumnValue(obj_column, "");   
+
+        }
+
+        fn_updateColumnValue(obj_column, str_value){
+          obj_column.fn_setValue(str_value);
+          obj_column.fn_pushColumn();                                 
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_dashboard_push_row        
+/*type: xapp_dashboard_push_row//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_dashboard_setting//*/
+      //XSTART component/xapp_dashboard_setting
+      class xapp_dashboard_setting extends xapp_dashboard{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+
+        fn_loadDashboard(){
+          if(!super.fn_loadDashboard()){return;}                                                                                              
+          
+          this.obj_menuPanel=this.fn_getParentComponent();                  
+          if(this.obj_menuPanel){
+            let obj_consoleContainerMaintain;
+            this.obj_consoleContainerMaintain=obj_consoleContainerMaintain=this.obj_menuPanel.fn_addConsoleContainer("console_container_maintain", true);                        
+            this.obj_button_maintain=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_maintain");            
+            this.obj_button_provision=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision");
+            this.obj_button_backup=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_backup");                                    
+            this.obj_button_maintain_debug_release=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_maintain_debug_release");                                                                       
+            
+            obj_consoleContainerMaintain.fn_showItem(this.obj_button_maintain);
+            obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision);    
+            obj_consoleContainerMaintain.fn_showItem(this.obj_button_backup);                        
+            obj_consoleContainerMaintain.fn_showItem(this.obj_button_maintain_debug_release);                      
+            
+
+            /*
+            this.obj_button_provision_account=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_account");
+            this.obj_button_provision_opportunity=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_opportunity");
+            this.obj_button_provision_contact=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_contact");
+            this.obj_button_provision_task=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_task");
+            
+            this.obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_account);                 
+            this.obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_opportunity);                 
+            this.obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_contact);                 
+            this.obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_task);                 
+            //*/
+            
+            
+          }                    
+        } 
+        fn_refreshDashboard(){         
+        }
+
+        fn_refreshMenu(){
+          let obj_menuButton=this.obj_holder.obj_parentMenu;          
+          obj_menuButton.fn_refreshMenu();
+        }        
+        
+        fn_maintain(){
+          let obj_ini=new Object;            
+          obj_ini.str_action="maintain";                                     
+          this.fn_runServerAction(obj_ini);                                                                  
+        }        
+        fn_provision(){
+          let obj_ini=new Object;            
+          obj_ini.str_action="provision";                                     
+          this.fn_runServerAction(obj_ini);                                                                  
+        }        
+
+        fn_maintain_debug_release(){
+          let obj_ini=new Object;            
+          obj_ini.str_action="maintain_debug_release";                                               
+          this.fn_runServerAction(obj_ini);                                                                  
+        }
+
+        maintain_debug_release(){
+          this.fn_refreshMenu();
+        }
+
+        fn_backup(){
+          
+          let obj_ini=new Object;            
+          obj_ini.str_action="backup";                                     
+          this.fn_runServerAction(obj_ini);                                                                  
+        } 
+        
+        
+        
+      }//END CLS
+      //END TAG
+      //END component/xapp_dashboard_setting        
+/*type: xapp_dashboard_setting//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_dashboard_view//*/
+      //XSTART component/xapp_dashboard_view
+      class xapp_dashboard_view extends xapp_dashboard{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_loadDashboard(){
+          if(!super.fn_loadDashboard()){return;}                                                                                              
+          
+          this.obj_menuPanel=this.fn_getParentComponent();                  
+          if(this.obj_menuPanel){
+            //let obj_consoleContainer=this.obj_menuPanel.fn_addConsoleContainer("xapp_console_container_general", true);            
+            let obj_consoleContainer=this.obj_consoleContainerRecord=this.obj_menuPanel.fn_addConsoleContainer("console_container_record", true);                                    
+            
+            this.obj_button_file_select=obj_consoleContainer.fn_getConsoleComponent("xapp_button_file_select");                                                                                   
+            this.obj_input_file_select=this.obj_button_file_select.fn_getComponent("xapp_input_file_select");                                                                                               
+            this.obj_button_file_import=obj_consoleContainer.fn_getConsoleComponent("xapp_button_file_import");                                                                       
+
+            let obj_menuButton=this.fn_getMenuButton();
+            let obj_settingMenu=obj_menuButton.obj_parentMenu;
+            let obj_standardMenu=obj_settingMenu.obj_parentMenu;
+            let int_metaViewId=obj_standardMenu.fn_getMetaViewId();            
+            let int_metaRowzId=obj_standardMenu.fn_getMetaRowzId();            
+            let int_idParentMetaRowz=obj_standardMenu.fn_getParentRowzId();            
+            if(int_metaViewId){
+              this.int_metaViewId=int_metaViewId;
+              this.int_metaRowzId=int_metaRowzId;
+              obj_consoleContainer.fn_showItem(this.obj_button_file_select);                        
+              //obj_consoleContainer.fn_showItem(this.obj_button_file_import);                        
+            }            
+            else if(!int_idParentMetaRowz){
+              let obj_consoleContainerMaintain=this.obj_consoleContainerRecord=this.obj_menuPanel.fn_addConsoleContainer("console_container_maintain", true);                        
+              console.log("int_idParentMetaRowz: " + int_idParentMetaRowz);              
+
+              //*
+              this.obj_button_provision_b2b=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_b2b");
+              this.obj_button_provision_b2c=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_b2c");
+              this.obj_button_provision_account_opportunity=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_linked_opportunity_hide");
+              this.obj_button_provision_linked_opportunity=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_linked_opportunity_show");
+              this.obj_button_provision_account_contact=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_linked_contact_hide");
+              this.obj_button_provision_linked_contact=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_linked_contact_show");
+              this.obj_button_provision_account_task=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_linked_task_hide");
+              this.obj_button_provision_linked_task=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_linked_task_show");              
+              
+              obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_b2b);                 
+              obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_b2c);                 
+              obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_account_opportunity);                 
+              obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_linked_opportunity);                 
+              obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_account_contact);                 
+              obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_linked_contact);                 
+              obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_account_task);                 
+              obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_linked_task);                 
+              
+              //*/
+
+            }
+            
+          }                    
+        } 
+
+        fn_buttonFileSelectOnClick(){          
+          const fileInput = this.obj_input_file_select.dom_obj;
+          fileInput.click();        
+        }
+        fn_inputFileSelectOnChange(){                                        
+          
+          this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_file_select);                        
+          this.obj_consoleContainerRecord.fn_showItem(this.obj_button_file_import);                        
+          
+        }
+        fn_buttonFileImportOnClick(){          
+          
+          const fileInput = this.obj_input_file_select.dom_obj;
+          const file = fileInput.files[0]; // Get the selected file
+      
+          if (file) {        
+            
+              
+            //*
+              const formData = new FormData();      
+              formData.append('file', file); // Append the file to FormData                            
+              formData.append('str_action', "import_file");               
+              formData.int_idMetaView=this.int_metaViewId;
+              formData.int_idMetaRowz=this.int_metaRowzId;              
+              formData.str_action="import_file";            
+              formData.str_nameFolderServer="xapp_dashboard_setting";                                                                                          
+              formData.str_idAJAXNotifier=this.obj_design.str_idXDesign;              
+              this.fn_runServerFileUpload(formData);                                                                                     
+              //*/
+      
+              /*
+              let obj_ini=new Object;                                
+              obj_ini.str_action="import_file";            
+              obj_ini.str_nameFolderServer="xapp_dashboard_setting";                                                                            
+              obj_ini.data_formData=formData;
+              this.fn_runServerAction(obj_ini);                                                                       
+              //*/
+              
+          } else {              
+              obj_shared.fn_messageWarn("Please select a file");
+          }
+        }
+        import_file(){          
+          this.obj_consoleContainerRecord.fn_showItem(this.obj_button_file_select);                        
+          this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_file_import);                        
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_dashboard_view        
+/*type: xapp_dashboard_view//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
 /*type: xapp_data_childmenu//*/
 
             //XSTART component/xapp_data_childmenu
@@ -19833,84 +18451,6 @@ class report_column extends xapp_columnform{
               //END TAG
               //END component/xapp_dataform_childmenu
 /*type: xapp_dataform_childmenu//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_dataform_mover//*/
-      //XSTART component/xapp_dataform_mover
-      class xapp_dataform_mover extends xapp_dataform_view{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        fn_setQueryInvite(bln_value){
-          let int_actionCode=0;
-          if(bln_value){
-            int_actionCode=10;
-          }
-          this.obj_holder.obj_query.int_actionCode=int_actionCode;          
-        }  
-        fn_setQueryDisable(bln_value){
-          let int_actionCode=0;
-          if(bln_value){
-            int_actionCode=20;
-          }
-          this.obj_holder.obj_query.int_actionCode=int_actionCode;          
-        }  
-        fn_setQueryEnable(bln_value){
-          let int_actionCode=0;
-          if(bln_value){
-            int_actionCode=50;
-          }
-          this.obj_holder.obj_query.int_actionCode=int_actionCode;          
-        }          
-        fn_setQueryOpen(bln_value){
-          let int_actionCode=0;
-          if(bln_value){
-            int_actionCode=100;
-          }
-          this.obj_holder.obj_query.int_actionCode=int_actionCode;          
-        }  
-        fn_setQueryHome(bln_value){
-          let int_actionCode=0;
-          if(bln_value){
-            int_actionCode=200;
-          }
-          this.obj_holder.obj_query.int_actionCode=int_actionCode;          
-        }  
-        
-      }//END CLS
-      //END TAG
-      //END component/xapp_dataform_mover        
-/*type: xapp_dataform_mover//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_dataform_system//*/
-      //XSTART component/xapp_dataform_system
-      class xapp_dataform_system extends xapp_dataform_view{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }        
-        fn_setQueryHome(bln_value){
-          let int_actionCode=0;
-          if(bln_value){
-            int_actionCode=200;
-          }
-          this.obj_holder.obj_query.int_actionCode=int_actionCode;          
-        }  
-        
-      }//END CLS
-      //END TAG
-      //END component/xapp_dataform_system        
-/*type: xapp_dataform_system//*/
 /*END COMPONENT//*/
 
 
@@ -20208,231 +18748,777 @@ class report_column extends xapp_columnform{
 
 
 /*START COMPONENT//*/
-/*type: xapp_menuform_mover//*/
-      //XSTART component/xapp_menuform_mover
-      class xapp_menuform_mover extends xapp_menuform{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);          
-          
-          this.str_defaultTypeData="xapp_dataform_mover";
-          
-        }
-        fn_setMenuPanel(){     
-          super.fn_setMenuPanel();                  
+/*type: xapp_menuform//*/
 
-          
-          if(this.obj_menuPanel){                    
-            
-            this.obj_consoleContainerMover=this.obj_menuPanel.fn_addConsoleContainer("console_container_mover", true);
-            this.obj_button_mover_invite=this.obj_consoleContainerMover.fn_getConsoleComponent("xapp_button_mover_invite");            
-            this.obj_button_mover_open=this.obj_consoleContainerMover.fn_getConsoleComponent("xapp_button_mover_open");
-            this.obj_button_mover_home=this.obj_consoleContainerMover.fn_getConsoleComponent("xapp_button_mover_home");
-            this.obj_button_mover_enable=this.obj_consoleContainerMover.fn_getConsoleComponent("xapp_button_mover_enable");
-            this.obj_button_mover_disable=this.obj_consoleContainerMover.fn_getConsoleComponent("xapp_button_mover_disable");            
-          }
-        }                
+            //XSTART component/xapp_menuform
+            class xapp_menuform extends xapp_menu{
+              constructor(obj_ini) {      
+                super(obj_ini);        
+              } 
+              fn_initialize(obj_ini){                
+    
+                super.fn_initialize(obj_ini);
 
-        
-        fn_formInvite(){                       
-          this.bln_modeInvite=true;              
-          this.obj_dataView.fn_setQueryInvite(true);                                
-          this.fn_formViewRecord();
-        }    
-        fn_formDisable(){                       
-          this.bln_modeDisable=true;              
-          this.obj_dataView.fn_setQueryDisable(true);                                
-          this.fn_formViewRecord();
-        }    
-        fn_formEnable(){                       
-          this.bln_modeEnable=true;              
-          this.obj_dataView.fn_setQueryEnable(true);                                
-          this.fn_formViewRecord();
-        }    
-        fn_formOpen(){                       
-          this.bln_modeOpen=true;              
-          this.obj_dataView.fn_setQueryOpen(true);                                
-          this.fn_formViewRecord();
-        }    
-        fn_formHome(){                       
-          this.bln_modeHome=true;              
-          this.obj_dataView.fn_setQueryHome(true);                                
-          this.fn_formViewRecord();
-        }    
-        
+                this.obj_meta.bln_debugMenu=false;           
 
-        fn_onDataStart(obj_post){        
-          //alert("fn_onDataStart");
-          //console.log("fn_onDataStart");
+                
+                this.str_defaultTypeMenu="xapp_menuform";                  
+                this.str_defaultTypeData="xapp_dataform_view";                  
+                this.str_defaultTypeDataChildMenu="xapp_dataform_childmenu";
+                
 
-          super.fn_onDataStart(obj_post);    
+                this.fn_initialize_var();                
+              } 
 
-          this.obj_post=obj_post;
+              fn_initialize_var(){
+                super.fn_initialize_var();
+                this.fn_resetArrayDynamicMenu();
 
+                this.int_totalRowCount=0;
 
+              }
 
-          
-          //*
-          if(!this.bln_hasChildForm){
-            if(this.obj_meta.str_metaRowzName==="meta_system"){
               
-              let obj_button=this.obj_button_mover_home;                                      
-              this.obj_consoleContainerMover.fn_showItem(obj_button);    
-            }
-            //alert("this.obj_meta.str_metaRowzName: " + this.obj_meta.str_metaRowzName);
-            return;
-          }
-          //*/
+              fn_setMenuPanel(){     
+                super.fn_setMenuPanel();                  
 
-          
+                if(this.obj_menuPanel){                  
 
-          let arr_rows=this.obj_post.RowData;                        
-          //console.log(arr_rows);
-          
-          let arr_row=arr_rows[0];                              
-          if(arr_row){                        
-              
-              let MetaMoverUserId=obj_shared.fn_getObjectProperty(arr_row, "`meta_user`.`meta_mover`.`MetaMoverUserId`");
-              let MetaMoverType=obj_shared.fn_getObjectProperty(arr_row, "`meta_user`.`meta_mover`.`MetaMoverType`");
-              let MetaMoverStatus=obj_shared.fn_getObjectProperty(arr_row, "`meta_user`.`meta_mover`.`MetaMoverStatus`");                            
-              let MetaUserId=this.obj_post.MetaUserId;
-              //this.MetaMoverUserId refers to the id on mover record row
-              //this.obj_post.MetaUserId refers to the logged in session user record              
-              //console.log("MetaMoverType: " + MetaMoverType);
-              //console.log("MetaMoverStatus: " + MetaMoverStatus);
-
-              this.obj_consoleContainerMover.fn_hide();
-
-              let obj_button;              
-              
-              switch(MetaMoverType){
-                case "User":
-                  switch(MetaMoverStatus){
-                    case "":
-                      obj_button=this.obj_button_mover_invite;
-                      
-                    break;                  
-                    case "Enabled":                    
-                      obj_button=this.obj_button_mover_disable;                  
-                    break;
-                    case "Disabled":                    
-                      obj_button=this.obj_button_mover_enable;                                    
-                    break;
-                  }   
+                  this.obj_consoleContainerRecord=this.obj_menuPanel.fn_addConsoleContainer("console_container_record", true);                                                        
+                  this.obj_button_new_record=this.obj_consoleContainerRecord.fn_getComponent("xapp_button_new_record");                  
+                  this.obj_button_filteroff_record=this.obj_consoleContainerRecord.fn_getComponent("xapp_button_filteroff_record");
+                  this.obj_button_filteron_record=this.obj_consoleContainerRecord.fn_getComponent("xapp_button_filteron_record");
+                  this.obj_button_navigate_record=this.obj_consoleContainerRecord.fn_getComponent("xapp_button_navigate_record");
+                  this.obj_button_linkon_record=this.obj_consoleContainerRecord.fn_getComponent("xapp_button_linkon_record");
+                  this.obj_button_linkoff_record=this.obj_consoleContainerRecord.fn_getComponent("xapp_button_linkoff_record");
                   
-                  this.obj_consoleContainerMover.fn_showItem(obj_button);          
-                  if(MetaUserId===MetaMoverUserId){
-                    obj_button.fn_setDisabled();
+                  this.obj_button_complete_record=this.obj_consoleContainerRecord.fn_getComponent("xapp_button_complete_record");                    
+
+                  this.obj_button_archive_record=this.obj_consoleContainerRecord.fn_getComponent("xapp_button_archive_record");
+                  if(this.obj_columnArchiveDate){                                        
+                    if(this.obj_columnArchiveDate.str_value){
+                      this.obj_button_archive_record.fn_setText("Restore Record");
+
+                    }
                   }
                   
-                  break;
-                case "Login":
-                    obj_button=this.obj_button_mover_open;                                      
-                    this.obj_consoleContainerMover.fn_showItem(obj_button);          
-                    obj_button.fn_setDisabled();
-                    if(MetaMoverStatus==='Enabled'){
-                      obj_button.fn_setEnabled();
-                      
-                    }
-                  break;
+                }
+              }              
+
+              fn_runSearch(){
+
+                this.bln_runSearch=true;
+                
+                if(this.bln_modeNewRecord){                                
+                    this.fn_formRefreshRecord(); 
+                    return;
+
+                }                 
+                
+                
+                this.fn_formViewRecord();             
+                
+                
               }
-          }
-          
-          
-          if(this.bln_modeInvite){                      
-            this.bln_modeInvite=false;              
-            this.obj_dataView.fn_setQueryInvite(false);                                
-            this.fn_formViewRecord();
-          }             
-          if(this.bln_modeDisable){
-            this.bln_modeDisable=false;            
-            this.obj_dataView.fn_setQueryDisable(false);                                
-            this.fn_formViewRecord();
-          }             
-          if(this.bln_modeEnable){
-            this.bln_modeEnable=false;            
-            this.obj_dataView.fn_setQueryEnable(false);                                
-            this.fn_formViewRecord();
-          }             
-          if(this.bln_modeOpen){
-            this.bln_modeOpen=false;                                    
-            obj_path.fn_navigateSubdomain("desk");                    
-          }                       
-        }                  
-      }//END CLS
-      //END TAG
-      //END component/xapp_menuform_mover        
-/*type: xapp_menuform_mover//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_menuform_system//*/
-      //XSTART component/xapp_menuform_system
-      class xapp_menuform_system extends xapp_menuform{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);          
-          
-          this.str_defaultTypeData="xapp_dataform_system";                  
-          
-        }
-        fn_setMenuPanel(){     
-          super.fn_setMenuPanel();                  
-
-          if(this.obj_menuPanel){                    
-            this.obj_consoleContainer=this.obj_menuPanel.fn_addConsoleContainer("console_container_system", true);            
-            this.obj_button_system_home=this.obj_consoleContainer.fn_getConsoleComponent("xapp_button_system_home", true);
-          }
-          
-        }              
-        
-        fn_formHome(){                       
-          this.bln_modeHome=true;              
-          this.obj_dataView.fn_setQueryHome(true);                                
-          this.fn_formViewRecord();
-        }        
-
-        fn_onDataStart(obj_post){        
-          
-          //console.log("fn_onDataStart");
-          super.fn_onDataStart(obj_post);    
-
-          if(this.bln_modeHome){
-            this.bln_modeHome=false;                        
-            obj_path.fn_navigateSubdomain("desk");                    
-            return;
-          }                       
-
-          if(!this.obj_consoleContainer){//on count, not opened
-            return;
-          }
-
-          
-          this.obj_consoleContainer.fn_hide();
-          
-          
-          if(!this.bln_hasChildForm){
-            let obj_button=this.obj_button_system_home;                                                  
-            this.obj_consoleContainer.fn_showItem(obj_button);
+              fn_formRefreshRecord(obj_menuButton){           
             
-            let bln_value=obj_userHome.MetaSystemOwner;
-            if(bln_value){
-              this.obj_consoleContainer.fn_setDisabledItem(obj_button);
-            }
-          }          
+                if(!obj_menuButton){
+                  obj_menuButton=this;    
+                  if(this.bln_dynamicMenu){                            
+                    obj_menuButton=this.obj_parentMenu;      
+                  }    
+                }
+                obj_menuButton.fn_exitNewRecord();                  
+                obj_menuButton.fn_formViewRecord();
+              }
 
-          
-        }                  
+              fn_exitNewRecord(){                                  
+                this.bln_modeNewRecord=false;                   
+                if(this.obj_dataView){                            
+                  this.obj_dataView.fn_setQueryModeNewRecord(false);      
+                }    
+                if(this.obj_parentMenu && this.obj_parentMenu["fn_exitNewRecord"]){
+                  this.obj_parentMenu.fn_exitNewRecord();
+                  //this.obj_parentMenu.fn_debugText("2 this.obj_parentMenu fn_exitNewRecord");
+                  //this.fn_debugText("2 this fn_exitNewRecord");
+                }
+              }
 
-      }//END CLS
-      //END TAG
-      //END component/xapp_menuform_system        
-/*type: xapp_menuform_system//*/
+              fn_formNavigateRecord(){
+                //*
+                const obj_navigate=this.fn_getNavigate();                
+                obj_path.fn_navigateRecordURL(obj_navigate.str_urlMetaRowzName, obj_navigate.str_urlMetaRecordId);                
+                //*/
+
+                /*
+                const obj_navigate=this.fn_getNavigate();                
+                const str_urlBase="";
+                const str_url=obj_path.fn_getNavigateRecordURL(obj_navigate.str_urlMetaRowzName, obj_navigate.str_urlMetaRecordId, str_urlBase);
+                window.location.href=str_url;
+                //*/
+              }
+              fn_onClose(){
+                super.fn_onClose();    
+                
+                if(this.bln_flagReview){
+                  let bln_removeSearch=true;
+                  this.fn_removeConstraint(bln_removeSearch);
+                }
+                this.bln_flagReview=false;
+              }
+              fn_removeConstraint(bln_removeSearch=false){
+                this.fn_setAutoJoinFilterPin(false);
+                if(bln_removeSearch){
+                  this.fn_setQueryList("");                      
+                }    
+                this.bln_flagRunOnce=false;    
+            
+              }
+              fn_exitConstraint(){   
+                this.fn_setConstraintKeyPin(false);        
+              }
+              fn_formArchiveRecord(){        
+                this.fn_archiveRecord(true);        
+              }                 
+              fn_formDeleteRecord(){                  
+                this.fn_archiveRecord(false);        
+              }                 
+              fn_archiveRecord(bln_recycle){      
+        
+                if(!this.obj_dataView){return;}    
+                let obj_columnKey;
+                //obj_columnKey=this.obj_columnKey;                
+                obj_columnKey=this.obj_columnDataId
+                if(!obj_columnKey.str_value){return;}//only 1 record with columnkey can be deleted. 
+                
+                this.obj_dataView.fn_archiveRecord(obj_columnKey, bln_recycle); 
+              }
+              fn_onArchiveRecord(){                            
+                this.fn_formCompleteRecord(false);
+              }
+              fn_onDeleteDynamicRow(){                
+            
+                this.fn_displayObject(false);
+                this.fn_configureObject(false);//can cause issues     
+                this.fn_setDisplay(false);       
+                //this.obj_parentMenu.fn_formRefreshRecord();
+                this.fn_displayOnPeers();//keep for the momentr , but probably refresh is need for counts etc                  
+              }
+
+              fn_debugAutoJoin(str_message=""){    
+                console.log("START " + str_message);
+                console.log("this.obj_meta.bln_autoJoinPin: "+ this.obj_meta.bln_autoJoinPin);
+                console.log("this.obj_meta.str_autoJoinToSource: "+ this.obj_meta.str_autoJoinToSource);
+                
+                console.log("this.bln_modeNewRecord: "+ this.bln_modeNewRecord);    
+                console.log("this.obj_columnKey: "+ this.obj_columnKey);    
+                console.log("this.bln_autoJoinFilterPin: "+ this.bln_autoJoinFilterPin);        
+                if(this.obj_columnKey){
+                  console.log("this.obj_columnKey.str_value: "+ this.obj_columnKey.str_value);    
+                }        
+                
+                console.log("this.obj_parentMenu.obj_meta.bln_autoJoinPin: "+ this.obj_parentMenu.obj_meta.bln_autoJoinPin);
+                console.log("this.obj_parentMenu.obj_meta.str_autoJoinToSource: "+ this.obj_parentMenu.obj_meta.str_autoJoinToSource);
+                
+                console.log("this.obj_parentMenu.bln_modeNewRecord: "+ this.obj_parentMenu.bln_modeNewRecord);    
+                console.log("this.obj_parentMenu.obj_columnKey: "+ this.obj_parentMenu.obj_columnKey);    
+                console.log("this.obj_parentMenu.bln_autoJoinFilterPin: "+ this.obj_parentMenu.bln_autoJoinFilterPin);    
+                if(this.obj_parentMenu.obj_columnKey){
+                  console.log("this.obj_parentMenu.obj_columnKey.str_value: "+ this.obj_parentMenu.obj_columnKey.str_value);    
+                }
+                   
+                console.log("END " + str_message);
+              }
+
+              fn_formViewRecord(){  //called by crud menu operation data end child menu and search              
+        
+                //if Menu is applied in MetaTypeViewMenu, the data set will be "menufyed"
+                //if Data is applied in MetaTypeViewData, the data set will be "datafyed"
+                //if Widget is applied in MetaTypeViewWidget, the data set will be "widgetfyed"
+                //if Dashboard is applied in MetaTypeViewDashboard, the data set will be "dashboardfyed"        
+            
+                if(this.bln_modeNewRecord){      
+                  this.fn_formNewRecord();
+                  return;
+                }         
+                
+                super.fn_formViewRecord();                  
+              }              
+
+              
+
+              fn_setButtonViewRecord(){                
+        
+                super.fn_setButtonViewRecord();                              
+
+                let bln_settingOperationPin=this.fn_getSettingOperationPin();
+
+                
+                this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_archive_record);                                      
+                this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_complete_record);                                      
+
+                if(bln_settingOperationPin){                      
+                  return;            
+                }
+                if(this.obj_parentMenu && this.obj_parentMenu.fn_getSettingOperationPin()){                      
+                  return;            
+                }
+
+                
+
+                let bln_showButtonComplete=true;
+                if(this.bln_dynamicMenu){
+                  bln_showButtonComplete=false;
+                }
+                if(bln_settingOperationPin){
+                  bln_showButtonComplete=false;
+                }
+                if(bln_showButtonComplete){                  
+                    this.obj_consoleContainerRecord.fn_showItem(this.obj_button_complete_record);                                                                            
+                }
+            
+                //*
+                //this.fn_classifyLevel();                           
+                if(this.bln_isJoinedChildMenu){                                    
+                  if(this.fn_getAllowAutoJoinPin()){  
+                    this.fn_setButtonChildFilterDisplay();                                  
+                    if(this.obj_meta.bln_joinTypeMany){                                              
+                      this.obj_consoleContainerRecord.fn_showItem(this.obj_button_navigate_record);                                            
+                      //this.fn_setLimitEndMenuChain(true);
+                      
+                    }                    
+                  }
+                }  
+                  //*/                    
+                
+                
+                //this.fn_debugText("this.bln_hasChildForm: " + this.bln_hasChildForm);
+                if(this.bln_hasChildForm){                                    
+                  //this.fn_debugText("this.obj_meta.int_idParentMetaRowz: " + this.obj_meta.int_idParentMetaRowz);
+                  let bln_value=this.fn_hasTopLevelRowzParent(this.obj_meta.int_idParentMetaRowz);
+                  //this.fn_debugText("xxx bln_value: " + bln_value);                  
+                  if(bln_value){//show view button if there is a dynamic menu above to the                  
+                    this.bln_applyAnchor=true;                    
+                    this.str_urlNavigateURL=this.fn_getNavigateURL()                    
+                    this.obj_button_navigate_record.fn_setNavigationURL(this.str_urlNavigateURL);
+                    this.fn_setNavigationURL(this.str_urlNavigateURL);
+                    //this.obj_consoleContainerRecord.fn_showItem(this.obj_button_navigate_record);
+                  }
+                  
+
+                  this.obj_consoleContainerRecord.fn_showItem(this.obj_button_archive_record);                  
+                  
+                  if(this.bln_multiRecordDisplay){  //All Record "Report View"                                              
+                    if(this.bln_recordConsole){                                  
+                      this.obj_consoleContainerRecord.fn_showItem(this.obj_button_new_record);
+                      this.obj_consoleContainerSearch.fn_showItem(this.obj_console_search);
+                    }        
+                  }
+                  
+                }
+                else if(this.bln_isParentMenuWithView){                    
+                  this.fn_setButtonParentFilterDisplay();        
+                  if(this.bln_recordConsole){                              
+                    this.obj_consoleContainerRecord.fn_showItem(this.obj_button_new_record);                      
+                    //this.obj_consoleContainerSearch.fn_showItem(this.obj_console_search);
+                  }     
+                } 
+                if(this.bln_isJoinedChildMenu){                  
+                  this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_archive_record);                                      
+                  this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_complete_record);                                      
+                }
+              }
+
+              fn_setButtonChildFilterDisplay(bln_hideItem=false){
+                if(this.obj_parentMenu.bln_autoJoinFilterPin){//any records displayed must therefore be linked                                
+                  this.obj_consoleContainerRecord.fn_showItem(this.obj_button_linkoff_record);                                            
+                }
+                else{        
+                  this.obj_consoleContainerRecord.fn_showItem(this.obj_button_linkon_record);//any records displayed may or may not  be linked
+                  //run ajax view to see if contact is linked or not.      
+                }     
+                this.obj_consoleContainerRecord.fn_showItem(this.obj_button_complete_record);                
+              }
+
+              fn_setButtonParentFilterDisplay(bln_hideItem=false){
+            
+            
+                //start get Status CanBeFiltered
+                let bln_value=false;                  
+                if(this.obj_parentMenu.obj_columnKey && this.obj_parentMenu.obj_columnKey.str_value){bln_value=true;}                  
+                //end get Status CanBeFiltered   
+            
+                if(!bln_value){return;}
+                //*
+                if(bln_hideItem){
+                  this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_filteron_record);            
+                  this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_filteroff_record);            
+                  return;
+                }
+                //*/
+                if(!this.fn_getAllowAutoJoinPin()){return false;}                                
+                if(this.fn_getAutoJoinFilterPin()){                    
+                  this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_filteron_record);            
+                  this.obj_consoleContainerRecord.fn_showItem(this.obj_button_filteroff_record);                              
+                }
+                else{                    
+                  this.obj_consoleContainerRecord.fn_showItem(this.obj_button_filteron_record);            
+                  this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_filteroff_record);            
+                }
+                this.obj_consoleContainerRecord.fn_showItem(this.obj_button_complete_record);
+              }  
+
+              fn_setQueryList(str_value, bln_isNewRecord){                                      
+                super.fn_setQueryList(str_value);                  
+                if(!bln_isNewRecord){
+                  this.fn_exitNewRecord();                               
+                }
+              }                                                 
+
+              fn_formNewRecord(){        
+
+                this.bln_modeNewRecord=true;        
+            
+                this.obj_dataView.fn_setQueryModeNewRecord(true);                            
+                
+                let bln_isNewRecord=true;
+                this.fn_setQueryList("", bln_isNewRecord);
+
+                obj_path.fn_resetNavigateRecordURL();
+                let str_metaRowzName=this.obj_meta.str_metaRowzName;                              
+                obj_path.fn_pushStateNavigateRecordURL(this.obj_meta.str_metaRowzName);
+                
+                
+                this.fn_setModeNewRecord();            
+                this.fn_runDataView();              
+                
+              }  
+              fn_formNewColumn(){        
+            
+                this.bln_modeNewRecord=true; 
+            
+                this.obj_dataView.fn_setQueryModeNewRecord(true);                            
+                
+                let bln_isNewRecord=true;
+                this.fn_setQueryList("", bln_isNewRecord);
+
+                obj_path.fn_resetNavigateRecordURL();
+                let str_metaRowzName=this.obj_meta.str_metaRowzName;                              
+                obj_path.fn_pushStateNavigateRecordURL(this.obj_meta.str_metaRowzName);
+                
+                
+                this.fn_setModeNewRecord();            
+                this.fn_runDataView();              
+                
+              }  
+              fn_maintainDebugOn(){        
+                
+                this.fn_setMaintainDebugOn(true);    
+                this.fn_formViewRecord();    
+              }  
+              fn_formApplyJoinFilter(){                                        
+                if(this.obj_dataView){
+                  this.obj_dataView.fn_resetDataView();//important to avoid page mis match                
+                }                
+                this.fn_setAutoJoinFilterPin(true);    
+                this.fn_formViewRecord();    
+              }  
+              fn_formRemoveJoinFilter(){       
+                if(this.obj_dataView){
+                  this.obj_dataView.fn_resetDataView();//important to avoid page mis match                
+                }                
+                this.fn_setAutoJoinFilterPin(false);
+                this.fn_formViewRecord();    
+              }     
+              
+              fn_formEditRecord(){                   
+                
+                this.fn_setModeExecuteEdit();            
+                this.fn_runDataView();      
+              }  
+              fn_formLinkOffRecord(){
+                
+                if(this.obj_parentMenu.obj_dataView){
+                  this.obj_parentMenu.obj_dataView.fn_resetDataView();//important to avoid page mis match
+                }                
+                
+                this.bln_linkOffPin=true;            
+                this.fn_setQueryList("");                
+                this.fn_runDataView();      
+              }  
+              fn_formLinkOnRecord(){
+                if(this.obj_parentMenu.obj_dataView){
+                  this.obj_parentMenu.obj_dataView.fn_resetDataView();//important to avoid page mis match
+                }                
+                this.bln_linkOnPin=true;            
+                this.fn_setQueryList("");                
+                this.fn_runDataView();      
+              }  
+            
+              fn_onNewRecordUpdateMetaKey(obj_columnKey){
+                this.obj_columnKey=obj_columnKey;                  
+                this.fn_exitNewRecord();                                    
+                /*
+                this.fn_resetMenu();
+                this.obj_dataView.fn_setModeExecuteView(); //update mode value    
+                if(this.bln_dynamicMenu){
+                  this.obj_parentMenu.fn_onNewRecordUpdateMetaKey();
+                }
+                //*/
+              }
+
+              fn_formCompleteRecord(bln_selfMenu=false){                
+
+                bln_selfMenu=false;
+
+                let int_countDynamic=this.obj_holder.arr_dynamicMenu.length;
+                let int_countStandard=this.obj_holder.arr_standardMenu.length;
+
+                if((int_countDynamic>1) || (int_countStandard>1)){
+                  if(this.bln_childrenOpen ){
+                    bln_selfMenu=true;
+                  }                 
+                }
+                
+              
+                if(this.fn_getModeNewRecord()){
+                  this.fn_exitNewRecord();                                                                      
+                  bln_selfMenu=true;
+                }
+
+                if(!bln_selfMenu){
+                  this.obj_parentMenu.fn_refreshMenu();
+                  return;
+                }                
+
+                if(this.obj_dataView){
+                  this.obj_dataView.fn_resetDataView();//important to avoid page mis match                
+                }                
+                
+                this.fn_formViewRecord();                               
+              }
+              
+              
+
+              fn_setModeExecuteEdit(){                               
+                super.fn_setModeExecuteEdit();
+                
+                this.fn_setButtonEditRecord();                          
+                this.obj_dataView.fn_setModeExecuteEdit();        
+              }
+              
+              fn_setButtonEditRecord(){              
+                alert("no longer in use fn_setButtonEditRecord");
+
+                if(this.obj_meta.bln_displayData){
+                  
+                  this.obj_consoleContainerRecord.fn_showItem(this.obj_button_archive_record);                  
+                  this.obj_consoleContainerRecord.fn_showItem(this.obj_button_complete_record);                  
+                  this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_navigate_record);
+                }   
+              }
+            
+              fn_setModeNewRecord(){    
+                this.fn_setButtonNewRecord();                      
+                this.obj_dataView.fn_setModeExecuteNew(); //update mode value        
+               }
+               fn_getModeNewRecord(){                    
+                return this.obj_dataView.fn_getModeExecuteNew(); //update mode value        
+               }
+               fn_setButtonNewRecord(){                  
+
+                this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_archive_record);
+                this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_navigate_record);                
+                //this.obj_consoleContainerRecord.fn_showItem(this.obj_button_complete_record);
+                //this.obj_button_complete_record.fn_setDisabled(true); //on in the wrong menu
+                
+                if(this.bln_multiRecordDisplay){  //All Record "Report View"                                                                    
+                  this.obj_consoleContainerSearch.fn_showItem(this.obj_console_search);
+                }
+
+                let bln_hideItem=true;
+                this.fn_setButtonParentFilterDisplay(bln_hideItem);
+                
+              }
+
+              
+            
+    
+
+              fn_onDataStart(obj_post){        
+                super.fn_onDataStart(obj_post);                              
+                
+                if(this.bln_linkOffPin || this.bln_linkOnPin){      
+                  if(this.bln_linkOffPin){
+                    //this.obj_parentMenu.fn_setAutoJoinFilterPin(false);
+                    this.obj_parentMenu.fn_setQueryList("");                    
+                  }
+                  else if(this.bln_linkOnPin){
+                    this.obj_parentMenu.fn_setAutoJoinFilterPin(true);
+                  }
+                  this.bln_linkOffPin=false;
+                  this.bln_linkOnPin=false;                        
+                  this.obj_parentMenu.fn_resetMenu();
+                  this.obj_parentMenu.fn_formRefreshRecord();     
+                  //this.obj_parentMenu.fn_open();
+                }    
+                
+                
+              }
+              fn_onDataEnd(obj_post){                              
+                //console.log("xapp_menuform fn_onDataEnd");
+                super.fn_onDataEnd(obj_post);
+                
+              }
+
+              fn_getConsoleValues(){          
+                super.fn_getConsoleValues();
+                if(this.fn_getConsoleValue("Record")){this.bln_recordConsole=true;}                       
+              }
+            
+              fn_configureSelfShared(obj_row){ //standard from add to accordion   
+                
+                //this.fn_debugText("fn_configureSelfShared");
+                
+                this.bln_modeNewRecord=this.obj_parentMenu.bln_modeNewRecord;
+                if(this.bln_modeNewRecord){
+                  this.fn_setAutoOpenPin(true);
+                  this.obj_meta.bln_displayAccordionChildMenu=false;    
+                  //copy autojoin value                
+                  this.fn_setAutoJoinPin(this.obj_parentMenu.fn_getAutoJoinPin());                
+                  this.fn_setAutoJoinToSource(this.obj_parentMenu.fn_getAutoJoinToSource());                        
+                }    
+                
+                this.fn_setAutoJoinFilterPin(this.obj_meta.bln_autoJoinPin);                
+                //console.log("this.fn_getAutoJoinFilterPin: " + this.fn_getAutoJoinFilterPin());
+                  
+                this.obj_meta.bln_joinTypeOne=false;
+                this.obj_meta.bln_joinTypeMany=false;
+                this.fn_setAllowAutoJoinPin(false);    
+                switch(this.obj_meta.int_joinType){            
+                  case(1):
+                    this.obj_meta.bln_joinTypeOne=true;
+                    break;
+                  case(2):
+                    this.obj_meta.bln_joinTypeMany=true;                
+                    this.fn_setAllowAutoJoinPin(true);    
+                    break;
+                }    
+                
+                super.fn_configureSelfShared(obj_row);        
+                  
+                } 
+
+                
+
+                fn_addStandardMenuToAccordion(obj_row){
+                  //Standard Child Menu    
+
+                  let obj_item=super.fn_addStandardMenuToAccordion(obj_row);
+
+                  if(!obj_item){return;}
+                  
+                  //Parent Menus can be Dynamic Menus to which Standard Menus are added
+                  //Parent Menus can be Standard Menus to which Dynamic Menus are added  
+                  if(this.fn_getAllowAutoJoinPin()){
+                    
+                    if(!obj_item.fn_getSettingOperationPin()){
+                      let str_text=obj_item.fn_getText();
+                      obj_item.fn_setText("[" + str_text + "]", str_text);                  
+                      obj_item.fn_setMetaRowzTitle("[" + str_text + "]");                      
+                    }
+                    else{                      
+                    }
+                    
+                  
+                  
+                    if(this.bln_dynamicMenu && (obj_item.obj_meta.int_idMetaRowz!==this.obj_meta.int_idMetaRowz)){            
+                      obj_item.fn_setAutoJoinPin(true);
+                      obj_item.fn_setAutoJoinFilterPin(true);                          
+                    }        
+                  }            
+                }             
+
+                
+                
+                fn_getRunDataViewQueryExpression(){
+
+                  let str_expr="";              
+                  return str_expr;
+                  
+                  
+                }
+                
+
+                fn_getContextColumnKey(){
+
+                  //this.fn_debugText("START fn_getContextColumnKey");
+                  
+                  let obj_columnKey=this.obj_columnKey;  
+                  //console.log(obj_columnKey);  
+                  //this.fn_debugText("this.bln_autoJoinFilterPin: " + this.bln_autoJoinFilterPin);
+                  if(!obj_columnKey && this.bln_autoJoinFilterPin){
+                    obj_columnKey=this.obj_parentMenu.obj_columnKey;
+                    //this.fn_debugText("get parent column key: " + this.bln_autoJoinFilterPin);
+                    //console.log(obj_columnKey);
+                  }                      
+                  if(this.bln_modeNewRecord && this.bln_autoJoinFilterPin){obj_columnKey=this.obj_parentMenu.obj_parentMenu.obj_columnKey;}
+                  
+                  
+
+                  //this.fn_debugText("END fn_getContextColumnKey");
+                  return obj_columnKey;
+                }
+
+                fn_configureDataViewQuery(){
+
+                  super.fn_configureDataViewQuery();       
+                  
+                  let obj_columnKey=this.fn_getContextColumnKey();                          
+                  this.obj_dataView.fn_setMetaKey(obj_columnKey);
+            
+                  
+                  if(this.obj_meta.bln_autoJoinPin && this.bln_autoJoinFilterPin){
+                    if(!this.bln_modeNewRecord){
+                      this.obj_meta.str_autoJoinToSource=this.obj_parentMenu.fn_getMetaViewId();      
+                      //console.log("runDataView adjusted this str_autoJoinToSource: "+ this.obj_meta.str_autoJoinToSource);      
+                    }      
+                    this.obj_dataView.fn_setAutoJoin(true);      
+                    this.obj_dataView.fn_setAutoJoinToSource(this.obj_meta.str_autoJoinToSource);    
+                    if(obj_columnKey && obj_columnKey.str_value){
+                      this.obj_dataView.fn_setAutoJoinToKeyValue(obj_columnKey.str_value);            
+                      this.obj_dataView.fn_setAutoJoinToKeyName(obj_columnKey.fn_getMetaColumnName());            
+                    }      
+                  }
+              
+                  if(this.bln_linkOffPin || this.bln_linkOnPin){   
+                        
+                    this.obj_meta.str_autoJoinToSource=this.obj_parentMenu.obj_parentMenu.fn_getMetaViewId();      
+                    this.obj_meta.str_autoJoinToKeyValue=this.obj_parentMenu.obj_parentMenu.obj_columnKey.str_value;                    
+                    this.obj_meta.str_autoJoinToKeyName=this.obj_parentMenu.obj_parentMenu.obj_columnKey.fn_getMetaColumnName();
+                    this.obj_meta.str_autoJoinFromKeyValue=this.obj_columnKey.str_value;      
+              
+                    this.obj_dataView.fn_setLinkOffPin(this.bln_linkOffPin);      
+                    this.obj_dataView.fn_setLinkOnPin(this.bln_linkOnPin);            
+                    this.obj_dataView.fn_setAutoJoinToSource(this.obj_meta.str_autoJoinToSource);    
+                    this.obj_dataView.fn_setAutoJoinToKeyValue(this.obj_meta.str_autoJoinToKeyValue);                  
+                    this.obj_dataView.fn_setAutoJoinToKeyName(this.obj_meta.str_autoJoinToKeyName);                  
+                    this.obj_dataView.fn_setAutoJoinFromKeyValue(this.obj_meta.str_autoJoinFromKeyValue);            
+                    this.obj_dataView.fn_setAutoJoinFromKeyName(this.obj_meta.str_autoJoinFromKeyName);                  
+                  } 
+                  
+                }
+
+                fn_getMetaDefault(){
+
+                  let obj_meta=super.fn_getMetaDefault();                                    
+                  obj_meta.bln_allowAutoJoinPin=false;                                
+                  obj_meta.bln_autoJoinPin=false;            
+                  obj_meta.int_joinType=0;            
+
+                  return obj_meta;
+                }
+
+                fn_getMetaDefaultDynamic(){
+
+                  let obj_meta=super.fn_getMetaDefaultDynamic();                
+                  obj_meta.bln_allowAutoJoinPin=this.fn_getAllowAutoJoinPin();    
+                  obj_meta.int_joinType=this.obj_meta.int_joinType;    
+                  return obj_meta;
+                }
+
+                fn_setConstraintKeyPin(bln_value){
+                  this.bln_constraintKeyPin=bln_value;
+                }
+                
+                fn_getConstraintKeyPin(){
+                  return this.bln_constraintKeyPin;    
+                }  
+
+                fn_setConstraintNamePin(){
+                  this.bln_constraintNamePin=false;
+                  
+                  if(this.bln_dynamicMenu && !this.bln_useMetaTemplate){return;}
+                  if(!this.obj_meta.bln_joinTypeOne){return;}
+                  if(this.obj_parentMenu.obj_meta.str_metaConstraintName){
+                    this.bln_constraintNamePin=true;
+                  }
+                }
+                
+                fn_getConstraintNamePin(){
+                  return this.bln_constraintNamePin;
+                  
+                }                                
+                fn_setAllowAutoJoinPin(bln_value){
+                  //this.fn_debugText("fn_setAllowAutoJoinPin: " + bln_value);
+                  this.obj_meta.bln_allowAutoJoinPin=bln_value;    
+                }
+                fn_getAllowAutoJoinPin(){
+                  //this.fn_debugText("fn_getAllowAutoJoinPin: " + this.obj_meta.bln_allowAutoJoinPin);
+                  return this.obj_meta.bln_allowAutoJoinPin;
+                }
+                fn_getAutoJoinToSource(){
+                  //this.fn_debugText("fn_getAutoJoinToSource: " + this.obj_meta.str_autoJoinToSource);
+                  return this.obj_meta.str_autoJoinToSource;
+                }
+                fn_setAutoJoinToSource(str_value){
+                  //this.fn_debugText("fn_setAutoJoinToSource: " + str_value);
+                  this.obj_meta.str_autoJoinToSource=str_value;
+                }
+                fn_getAutoJoinPin(){
+                  return this.obj_meta.bln_autoJoinPin;
+                }
+                fn_setAutoJoinPin(bln_value){
+                  this.obj_meta.bln_autoJoinPin=bln_value;    
+                }
+                fn_getAutoJoinFilterPin(){    
+                  return this.bln_autoJoinFilterPin;    
+                }
+                fn_setAutoJoinFilterPin(bln_value){
+                  this.bln_autoJoinFilterPin=bln_value;  
+                  if(!bln_value){                    
+                    if(this.obj_dataView){
+                      this.obj_dataView.fn_setMetaKey(false);
+                    }
+                    
+                  }
+                }
+                fn_resetMenu(){
+            
+                  super.fn_resetMenu();
+                  //this.fn_setAutoJoinFilterPin(false);
+                }  
+
+                //Menu Command Func
+                fn_hideMenu(obj_exclude){
+                  this.fn_hideStandardMenu(obj_exclude);              
+                  this.fn_hideDynamicMenu(obj_exclude);              
+                }
+                fn_closeMenu(obj_exclude){    
+                  this.fn_closeStandardMenu(obj_exclude)
+                  this.fn_closeDynamicMenu(obj_exclude)
+                }
+                fn_menuCloseAndDisable(obj_exclude){
+                  this.fn_standardMenuCloseAndDisable(obj_exclude);
+                  this.fn_dynamicMenuCloseAndDisable(obj_exclude);
+                }                
+
+                fn_notifyMenu(str_nameFunction, obj_arg=false){
+                  this.fn_notifyStandardMenu(str_nameFunction);                    
+                  this.fn_notifyDynamicMenu(str_nameFunction);                    
+                }
+                //Menu Command Func
+
+                
+                
+                
+                
+
+      
+            }//END CLS
+            //END TAG
+            //END component/xapp_menuform
+/*type: xapp_menuform//*/
 /*END COMPONENT//*/
 
 
@@ -21239,7 +20325,7 @@ class report_column extends xapp_columnform{
 //START COMPONENTMAP
 
 //START AUTO GENERATED COMPONENT MAP
-const obj_ComponentMap = new Map([['component', component],['xapp_ajax', xapp_ajax],['xapp_component', xapp_component],['xapp_row', xapp_row],['xapp_data', xapp_data],['xapp_dataform', xapp_dataform],['xapp_dataform_view', xapp_dataform_view],['form_fieldset', form_fieldset],['form_input', form_input],['tablecell', tablecell],['tableheader', tableheader],['tablerow', tablerow],['table', table],['form_button', form_button],['form_button_rich', form_button_rich],['xapp_menu_operation', xapp_menu_operation],['xapp_menu', xapp_menu],['xapp_menuform', xapp_menuform],['form_menu_panel', form_menu_panel],['xapp_base', xapp_base],['xapp_console_container', xapp_console_container],['form_inputandbutton', form_inputandbutton],['xapp_button', xapp_button],['xapp_column', xapp_column],['xapp_columnform', xapp_columnform],['xapp_console_button', xapp_console_button],['xapp_dashboard', xapp_dashboard],['xapp', xapp],['form_tablecell', form_tablecell],['form_inputandbutton_submit', form_inputandbutton_submit],['authorise_gate', authorise_gate],['block', block],['form_anchor', form_anchor],['form_button_anchor', form_button_anchor],['form_button_icon', form_button_icon],['form_button_search', form_button_search],['form_button_showhide', form_button_showhide],['form_button_span', form_button_span],['form_button_submit', form_button_submit],['form_checkbox', form_checkbox],['form_field', form_field],['form_form', form_form],['form_hardrule', form_hardrule],['form_icon', form_icon],['form_iframe', form_iframe],['form_label', form_label],['form_legend', form_legend],['form_nonbreakingspace', form_nonbreakingspace],['form_panel', form_panel],['form_panellist', form_panellist],['form_radio', form_radio],['form_section', form_section],['form_section_panel', form_section_panel],['form_select', form_select],['form_span', form_span],['form_tab', form_tab],['form_table', form_table],['form_tableheader', form_tableheader],['form_tablerow', form_tablerow],['form_tablist', form_tablist],['form_tabset', form_tabset],['form_text', form_text],['form_textarea', form_textarea],['mall_dashboard', mall_dashboard],['mall_form_button', mall_form_button],['office', office],['report_column', report_column],['topup_dashboard', topup_dashboard],['topup_form_button', topup_form_button],['xapp_accordion', xapp_accordion],['xapp_button_archive_record', xapp_button_archive_record],['xapp_button_complete_record', xapp_button_complete_record],['xapp_button_data_nav_back', xapp_button_data_nav_back],['xapp_button_data_nav_forward', xapp_button_data_nav_forward],['xapp_button_data_nav_toggle', xapp_button_data_nav_toggle],['xapp_button_file_import', xapp_button_file_import],['xapp_button_file_select', xapp_button_file_select],['xapp_button_filteroff_record', xapp_button_filteroff_record],['xapp_button_filteron_record', xapp_button_filteron_record],['xapp_button_general_archive_hide', xapp_button_general_archive_hide],['xapp_button_general_archive_show', xapp_button_general_archive_show],['xapp_button_general_form_down', xapp_button_general_form_down],['xapp_button_general_form_gap', xapp_button_general_form_gap],['xapp_button_general_form_group', xapp_button_general_form_group],['xapp_button_general_form_up', xapp_button_general_form_up],['xapp_button_general_row_hide', xapp_button_general_row_hide],['xapp_button_general_row_show', xapp_button_general_row_show],['xapp_button_general_use_task_date', xapp_button_general_use_task_date],['xapp_button_general_use_task_datetime', xapp_button_general_use_task_datetime],['xapp_button_linkoff_record', xapp_button_linkoff_record],['xapp_button_linkon_record', xapp_button_linkon_record],['xapp_button_mover_disable', xapp_button_mover_disable],['xapp_button_mover_enable', xapp_button_mover_enable],['xapp_button_mover_home', xapp_button_mover_home],['xapp_button_mover_invite', xapp_button_mover_invite],['xapp_button_mover_open', xapp_button_mover_open],['xapp_button_navigate_desktop', xapp_button_navigate_desktop],['xapp_button_navigate_lobby', xapp_button_navigate_lobby],['xapp_button_navigate_login', xapp_button_navigate_login],['xapp_button_navigate_mall', xapp_button_navigate_mall],['xapp_button_navigate_newcolumn', xapp_button_navigate_newcolumn],['xapp_button_navigate_newrow', xapp_button_navigate_newrow],['xapp_button_navigate_office', xapp_button_navigate_office],['xapp_button_navigate_record', xapp_button_navigate_record],['xapp_button_navigate_rowz', xapp_button_navigate_rowz],['xapp_button_navigate_settings', xapp_button_navigate_settings],['xapp_button_new_record', xapp_button_new_record],['xapp_button_next_record', xapp_button_next_record],['xapp_button_queryterm', xapp_button_queryterm],['xapp_button_system_home', xapp_button_system_home],['xapp_columnform_metajointype', xapp_columnform_metajointype],['xapp_console', xapp_console],['xapp_console_search', xapp_console_search],['xapp_context_holder', xapp_context_holder],['xapp_data_childmenu', xapp_data_childmenu],['xapp_data_view', xapp_data_view],['xapp_dataform_childmenu', xapp_dataform_childmenu],['xapp_dataform_mover', xapp_dataform_mover],['xapp_dataform_system', xapp_dataform_system],['xapp_dynamic_content', xapp_dynamic_content],['xapp_form_container_search', xapp_form_container_search],['xapp_form_select', xapp_form_select],['xapp_input_file_select', xapp_input_file_select],['xapp_menu_panel', xapp_menu_panel],['xapp_menuform_mover', xapp_menuform_mover],['xapp_menuform_system', xapp_menuform_system],['xapp_propertysheet', xapp_propertysheet],['xapp_propertysheet_input', xapp_propertysheet_input],['xapp_queryterm_interface', xapp_queryterm_interface],['xapp_report_interface_fieldcriteria', xapp_report_interface_fieldcriteria],['xapp_report_interface_fieldlist', xapp_report_interface_fieldlist],['xapp_report_view', xapp_report_view],['xapp_rowform', xapp_rowform],['xapp_theme', xapp_theme],['xapp_widgetboard', xapp_widgetboard]]);
+const obj_ComponentMap = new Map([['component', component],['xapp_ajax', xapp_ajax],['xapp_component', xapp_component],['xapp_row', xapp_row],['xapp_data', xapp_data],['xapp_dataform', xapp_dataform],['xapp_dataform_view', xapp_dataform_view],['form_fieldset', form_fieldset],['form_input', form_input],['tablecell', tablecell],['tableheader', tableheader],['tablerow', tablerow],['table', table],['form_button', form_button],['form_button_rich', form_button_rich],['xapp_menu_operation', xapp_menu_operation],['xapp_menu', xapp_menu],['form_menu_panel', form_menu_panel],['xapp_base', xapp_base],['xapp_console_container', xapp_console_container],['xapp_dashboard', xapp_dashboard],['form_inputandbutton', form_inputandbutton],['xapp_button', xapp_button],['xapp_column', xapp_column],['xapp_columnform', xapp_columnform],['xapp_console_button', xapp_console_button],['form_tablecell', form_tablecell],['form_inputandbutton_submit', form_inputandbutton_submit],['xapp', xapp],['app', app],['authorise_gate', authorise_gate],['block', block],['form_anchor', form_anchor],['form_button_anchor', form_button_anchor],['form_button_icon', form_button_icon],['form_button_search', form_button_search],['form_button_showhide', form_button_showhide],['form_button_span', form_button_span],['form_button_submit', form_button_submit],['form_checkbox', form_checkbox],['form_field', form_field],['form_form', form_form],['form_hardrule', form_hardrule],['form_icon', form_icon],['form_iframe', form_iframe],['form_label', form_label],['form_legend', form_legend],['form_nonbreakingspace', form_nonbreakingspace],['form_panel', form_panel],['form_panellist', form_panellist],['form_radio', form_radio],['form_section', form_section],['form_section_panel', form_section_panel],['form_select', form_select],['form_span', form_span],['form_tab', form_tab],['form_table', form_table],['form_tableheader', form_tableheader],['form_tablerow', form_tablerow],['form_tablist', form_tablist],['form_tabset', form_tabset],['form_text', form_text],['form_textarea', form_textarea],['report_column', report_column],['xapp_accordion', xapp_accordion],['xapp_button_archive_record', xapp_button_archive_record],['xapp_button_backup', xapp_button_backup],['xapp_button_complete_record', xapp_button_complete_record],['xapp_button_data_nav_back', xapp_button_data_nav_back],['xapp_button_data_nav_forward', xapp_button_data_nav_forward],['xapp_button_data_nav_toggle', xapp_button_data_nav_toggle],['xapp_button_file_import', xapp_button_file_import],['xapp_button_file_select', xapp_button_file_select],['xapp_button_filteroff_record', xapp_button_filteroff_record],['xapp_button_filteron_record', xapp_button_filteron_record],['xapp_button_general_archive_hide', xapp_button_general_archive_hide],['xapp_button_general_archive_show', xapp_button_general_archive_show],['xapp_button_general_form_down', xapp_button_general_form_down],['xapp_button_general_form_gap', xapp_button_general_form_gap],['xapp_button_general_form_group', xapp_button_general_form_group],['xapp_button_general_form_up', xapp_button_general_form_up],['xapp_button_general_row_hide', xapp_button_general_row_hide],['xapp_button_general_row_show', xapp_button_general_row_show],['xapp_button_general_use_task_date', xapp_button_general_use_task_date],['xapp_button_general_use_task_datetime', xapp_button_general_use_task_datetime],['xapp_button_linkoff_record', xapp_button_linkoff_record],['xapp_button_linkon_record', xapp_button_linkon_record],['xapp_button_maintain', xapp_button_maintain],['xapp_button_maintain_debug_release', xapp_button_maintain_debug_release],['xapp_button_navigate_desktop', xapp_button_navigate_desktop],['xapp_button_navigate_lobby', xapp_button_navigate_lobby],['xapp_button_navigate_login', xapp_button_navigate_login],['xapp_button_navigate_mall', xapp_button_navigate_mall],['xapp_button_navigate_newcolumn', xapp_button_navigate_newcolumn],['xapp_button_navigate_newrow', xapp_button_navigate_newrow],['xapp_button_navigate_office', xapp_button_navigate_office],['xapp_button_navigate_record', xapp_button_navigate_record],['xapp_button_navigate_rowz', xapp_button_navigate_rowz],['xapp_button_navigate_settings', xapp_button_navigate_settings],['xapp_button_new_record', xapp_button_new_record],['xapp_button_next_record', xapp_button_next_record],['xapp_button_provision', xapp_button_provision],['xapp_button_provision_b2b', xapp_button_provision_b2b],['xapp_button_provision_b2c', xapp_button_provision_b2c],['xapp_button_provision_linked_contact_hide', xapp_button_provision_linked_contact_hide],['xapp_button_provision_linked_contact_show', xapp_button_provision_linked_contact_show],['xapp_button_provision_linked_opportunity_hide', xapp_button_provision_linked_opportunity_hide],['xapp_button_provision_linked_opportunity_show', xapp_button_provision_linked_opportunity_show],['xapp_button_provision_linked_task_hide', xapp_button_provision_linked_task_hide],['xapp_button_provision_linked_task_show', xapp_button_provision_linked_task_show],['xapp_button_push_reset', xapp_button_push_reset],['xapp_button_push_schedule', xapp_button_push_schedule],['xapp_button_queryterm', xapp_button_queryterm],['xapp_columnform_metajointype', xapp_columnform_metajointype],['xapp_console', xapp_console],['xapp_console_search', xapp_console_search],['xapp_context_holder', xapp_context_holder],['xapp_dashboard_push', xapp_dashboard_push],['xapp_dashboard_push_row', xapp_dashboard_push_row],['xapp_dashboard_setting', xapp_dashboard_setting],['xapp_dashboard_view', xapp_dashboard_view],['xapp_data_childmenu', xapp_data_childmenu],['xapp_data_view', xapp_data_view],['xapp_dataform_childmenu', xapp_dataform_childmenu],['xapp_dynamic_content', xapp_dynamic_content],['xapp_form_container_search', xapp_form_container_search],['xapp_form_select', xapp_form_select],['xapp_input_file_select', xapp_input_file_select],['xapp_menu_panel', xapp_menu_panel],['xapp_menuform', xapp_menuform],['xapp_propertysheet', xapp_propertysheet],['xapp_propertysheet_input', xapp_propertysheet_input],['xapp_queryterm_interface', xapp_queryterm_interface],['xapp_report_interface_fieldcriteria', xapp_report_interface_fieldcriteria],['xapp_report_interface_fieldlist', xapp_report_interface_fieldlist],['xapp_report_view', xapp_report_view],['xapp_rowform', xapp_rowform],['xapp_theme', xapp_theme],['xapp_widgetboard', xapp_widgetboard]]);
 //END AUTO GENERATED MAP
 
 
@@ -21252,7 +20338,7 @@ const obj_ComponentMap = new Map([['component', component],['xapp_ajax', xapp_aj
 /*type: TemplateCode//*/
 
 //START Project.js
-class Project extends office{
+class Project extends app{
     constructor(obj_ini) {
         super(obj_ini); // call the super class constructor
         
@@ -21398,7 +20484,7 @@ class Project extends office{
   }//END OF CLS
 
   /*START DESIGN BOOT VARIABLE//*/
-obj_boot.obj_design.int_idRecord=77039; 
+obj_boot.obj_design.int_idRecord=76974; 
 /*END DESIGN BOOT VARIABLE//*/
 //END Project.js
 
@@ -21415,7 +20501,6 @@ obj_boot.obj_design.int_idRecord=77039;
 
 /*START INSTANCE JSON MAP//*/
 var obj_InstanceJSONMap = new Map([
-[117, {"obj_design":{"int_idRecord":117,"str_idXDesign":"myId_13220336","str_name":"xapp_dynamic_content","str_nameShort":"xapp_dynamic_content","str_type":"xapp_dynamic_content","str_tag":"xapp_dynamic_content","bln_registerAtContainer":true,"str_createdDate":"2022-02-02 20:12:17","str_modifiedDate":"2022-02-02 20:12:17","bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"Anchor","bln_createRelease":"false","bln_isLocalHome":true,"bln_classController":true,"bln_dynamicPin":true,"bln_editPin":true,"str_idProject":"myId_24662136","str_themeType":"xapp_dynamic_content"},"obj_domProperty":{"Id":"myId_13220336"},"obj_domStyle":{"cursor":"default","display":"flex","flex-wrap":"wrap","height":"100%","width":"100%","overflow":"auto"},"dom_objContentContainer":{"Id":"myId_13220336"}}],
 [6009, {"obj_design":{"int_idRecord":6009,"str_idXDesign":"myId_26668681","str_name":"authorise_gate","str_nameShort":"authorise_gate","str_type":"authorise_gate","str_tag":"authorise_gate","str_createdDate":"2022-09-10 18:52:39","str_modifiedDate":"2022-09-10 18:52:39","bln_isLocalHome":true,"str_idProject":"myId_38012811","bln_classController":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_classExtend":"xapp_ajax","str_categoryName":"Anchor","str_themeType":"authorise_gate","bln_editPin":true,"bln_lockComponent":true,"str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"user_agent":"Firefox"}],
 [7585, {"obj_design":{"int_idRecord":7585,"str_idXDesign":"myId_98446896","str_name":"form_inputandbutton_input","str_nameShort":"form_inputandbutton_input","str_type":"form_input","str_tag":"input","str_createdDate":"2022-02-02 19:57:30","str_modifiedDate":"2022-02-02 19:57:30","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_input","bln_registerAtContainer":true,"bln_classController":true,"bln_lockComponent":true,"bln_mouseDown":true,"bln_debug":true,"str_categoryName":"Xtra","str_idProject":"notset","str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"","str_lastVersionDate":"notset","str_value":""},"obj_domStyle":{"cursor":"pointer","border":"0px none","display":"block","border-radius":"4px","padding":"10px"}}],
 [7775, {"obj_design":{"int_idRecord":7775,"str_idXDesign":"myId_71626268","str_name":"form_context","str_nameShort":"form_context","str_type":"xapp_context_holder","str_tag":"form_context","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"str_themeType":"xapp_context_holder","bln_isLocalHome":true,"str_categoryName":"Form","bln_palettePinRelease":true,"bln_palettePin":true,"arr_item":[{"obj_design":{"int_idRecord":77012,"str_type":"form_form"}},{"obj_design":{"int_idRecord":77018,"str_type":"form_menu_panel"}},{"obj_design":{"int_idRecord":"77019","str_type":"form_panel"}},{"obj_design":{"int_idRecord":76691,"str_type":"component"}},{"obj_design":{"int_idRecord":76753,"str_type":"form_iframe"}},{"obj_design":{"int_idRecord":77020,"str_type":"form_section"}},{"obj_design":{"int_idRecord":"77021","str_type":"form_section_panel"}},{"obj_design":{"int_idRecord":77024,"str_type":"form_field"}},{"obj_design":{"int_idRecord":77025,"str_type":"form_textarea"}},{"obj_design":{"int_idRecord":77084,"str_type":"form_checkbox"}},{"obj_design":{"int_idRecord":77026,"str_type":"form_input"}},{"obj_design":{"int_idRecord":"77335","str_type":"form_radio"}},{"obj_design":{"int_idRecord":77490,"str_type":"form_button"}},{"obj_design":{"int_idRecord":77489,"str_type":"form_button_rich"}},{"obj_design":{"int_idRecord":77379,"str_type":"form_button_search"}},{"obj_design":{"int_idRecord":77491,"str_type":"form_button_showhide"}},{"obj_design":{"int_idRecord":77195,"str_type":"form_tab"}},{"obj_design":{"int_idRecord":"77027","str_type":"form_select"}},{"obj_design":{"int_idRecord":77030,"str_type":"form_inputandbutton"}},{"obj_design":{"int_idRecord":77032,"str_type":"block"}},{"obj_design":{"int_idRecord":76764,"str_type":"form_table"}},{"obj_design":{"int_idRecord":76766,"str_type":"form_tablerow"}},{"obj_design":{"int_idRecord":76767,"str_type":"form_tablecell"}},{"obj_design":{"int_idRecord":76765,"str_type":"form_tableheader"}},{"obj_design":{"int_idRecord":77033,"str_type":"form_hardrule"}},{"obj_design":{"int_idRecord":"77337","str_type":"form_nonbreakingspace"}},{"obj_design":{"int_idRecord":77034,"str_type":"form_anchor"}},{"obj_design":{"int_idRecord":77381,"str_type":"form_icon"}},{"obj_design":{"int_idRecord":77184,"str_type":"form_fieldset"}},{"obj_design":{"int_idRecord":77187,"str_type":"form_legend"}},{"obj_design":{"int_idRecord":77192,"str_type":"form_tabset"}},{"obj_design":{"int_idRecord":77339,"str_type":"form_label"}},{"obj_design":{"int_idRecord":77341,"str_type":"form_span"}}],"bln_isContextHolder":true,"bln_lockComponent":true,"bln_classController":"false","str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_71626268"},"obj_domStyle":{"flex-flow":"wrap","gap":"10px","display":"flex"},"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_71626268"}}],
@@ -21433,9 +20518,6 @@ var obj_InstanceJSONMap = new Map([
 [76198, {"obj_design":{"int_idRecord":76198,"str_idXDesign":"myId_91898889","str_name":"xapp_rowform","str_nameShort":"xapp_rowform","str_type":"xapp_rowform","str_themeType":"xapp_row","str_tag":"xapp_rowform","bln_registerAtContainer":true,"str_createdDate":"2022-11-20 17:23:17","str_modifiedDate":"2022-11-20 17:23:17","bln_editPin":true,"str_context":"crud_context","bln_dynamicPin":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_classExtend":"xapp_row"},"obj_domStyle":{"gap":"10px","display":"flex","flex-flow":"row wrap"}}],
 [76255, {"obj_design":{"int_idRecord":76255,"str_idXDesign":"myId_81785083","str_name":"xapp_dashboard","str_nameShort":"xapp_dashboard","str_type":"xapp_dashboard","str_tag":"xapp_dashboard","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_classExtend":"xapp_component","bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_themeType":"form_section"},"obj_domStyle":{"flex-direction":"column","flex-wrap":"wrap","flex-flow":"row wrap","border":"1px solid white","gap":"10px","display":"none","padding":"0px"}}],
 [76259, {"obj_design":{"int_idRecord":76259,"str_idXDesign":"myId_87869460","str_name":"xapp_context_dataform","str_nameShort":"xapp_context_dataform","str_type":"xapp_context_holder","str_tag":"xapp_context_dataform","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"str_themeType":"xapp_context_holder","bln_isLocalHome":true,"bln_isContextHolder":true,"bln_palettePinRelease":true,"bln_palettePin":true,"arr_item":[{"obj_design":{"int_idRecord":76682,"str_type":"xapp_dataform"}},{"obj_design":{"int_idRecord":75415,"str_type":"xapp_dataform_view"}},{"obj_design":{"int_idRecord":75398,"str_type":"xapp_dataform_childmenu"}},{"obj_design":{"int_idRecord":76198,"str_type":"xapp_rowform"}},{"obj_design":{"int_idRecord":75518,"str_type":"xapp_columnform"}},{"obj_design":{"int_idRecord":76031,"str_type":"xapp_columnform_metajointype"}},{"obj_design":{"int_idRecord":76680,"str_type":"xapp_form_select"}}],"str_categoryName":"Xtra","bln_lockComponent":true,"bln_classController":"false"},"obj_domProperty":{"Id":"myId_87869460"},"obj_domStyle":{"display":"flex"},"dom_objContentContainer":{"Id":"myId_87869460"}}],
-[76292, {"obj_design":{"int_idRecord":76292,"str_idXDesign":"myId_13201177","str_name":"mall_dashboard","str_nameShort":"mall_dashboard","str_type":"mall_dashboard","str_tag":"mall_dashboard","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_section","bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_classExtend":"xapp_dashboard","str_classList":"programiconbutton","bln_dynamicPin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra"},"obj_domStyle":{"flex-direction":"column","padding":"10px","flex-wrap":"wrap","gap":"10px","width":"100%","border":"0px solid black","display":"none","flex-flow":"row wrap"}}],
-[76388, {"obj_design":{"int_idRecord":76388,"str_idXDesign":"myId_87741168","str_name":"mall_context_holder","str_nameShort":"mall_context_holder","str_type":"xapp_context_holder","str_tag":"mall_context_holder","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"str_themeType":"mall_context_holder","bln_isLocalHome":true,"bln_isContextHolder":true,"bln_palettePinRelease":true,"bln_palettePin":true,"arr_item":[{"obj_design":{"int_idRecord":76292,"str_type":"mall_dashboard"}},{"obj_design":{"int_idRecord":76391,"str_type":"mall_form_button"}}],"bln_classController":"false","str_categoryName":"Xtra","bln_lockComponent":true},"obj_domProperty":{"Id":"myId_87741168"},"obj_domStyle":{"display":"none"},"dom_objContentContainer":{"Id":"myId_87741168"}}],
-[76391, {"obj_design":{"int_idRecord":76391,"str_idXDesign":"myId_52065165","str_name":"mall_form_button","str_nameShort":"mall_form_button","str_type":"mall_form_button","str_themeType":"form_button","str_tag":"button","bln_registerAtContainer":true,"str_createdDate":"2022-11-20 23:26:20","str_modifiedDate":"2022-11-20 23:26:20","bln_editPin":true,"str_text":"mall_form_button","bln_classController":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_classExtend":"xapp_console_button","bln_lockComponent":true,"str_categoryName":"Xtra"},"obj_domProperty":{"innerText":"mall_form_button"},"obj_domStyle":{"cursor":"pointer","border":"0px none","height":"40px","padding":"10px","border-radius":"2px"}}],
 [76392, {"obj_design":{"int_idRecord":76392,"str_idXDesign":"myId_88282206","str_name":"xapp_context_report","str_nameShort":"xapp_context_report","str_type":"xapp_context_holder","str_tag":"xapp_context_report","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"bln_isLocalHome":true,"bln_isContextHolder":true,"bln_palettePinRelease":true,"bln_palettePin":true,"arr_item":[{"obj_design":{"int_idRecord":75499,"str_type":"report_column"}},{"obj_design":{"int_idRecord":75523,"str_type":"report_column"}},{"obj_design":{"int_idRecord":75502,"str_type":"xapp_report_view"}}],"bln_classController":"false","bln_lockComponent":true,"str_categoryName":"Xtra","str_themeType":"xapp_context_holder"},"obj_domStyle":{"display":"flex"}}],
 [76394, {"obj_design":{"int_idRecord":76394,"str_idXDesign":"myId_91985606","str_name":"xapp_menu_context_holder","str_nameShort":"xapp_menu_context_holder","str_type":"xapp_context_holder","str_tag":"xapp_menu_context_holder","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"bln_isLocalHome":true,"bln_isContextHolder":true,"bln_palettePinRelease":true,"bln_palettePin":true,"arr_item":[{"obj_design":{"int_idRecord":7775,"str_type":"xapp_context_holder"}},{"obj_design":{"int_idRecord":75368,"str_type":"xapp_context_holder"}},{"obj_design":{"int_idRecord":76686,"str_type":"xapp_context_holder"}}],"bln_classController":"false","bln_lockComponent":true,"str_categoryName":"Xapp","str_themeType":"xapp_context_holder"},"obj_domProperty":{"Id":"myId_91985606"},"obj_domStyle":{"flex flow":"row wrap","flex-flow":"row wrap","gap":"10px","display":"none"},"dom_objContentContainer":{"Id":"myId_91985606"}}],
 [76519, {"obj_design":{"int_idRecord":76519,"str_idXDesign":"myId_51756751","str_name":"xapp_button_filteroff_record","str_nameShort":"xapp_button_filteroff_record","str_type":"xapp_button_filteroff_record","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Other","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_idProject":"myId_25365115","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Filter is On","str_lastVersionDate":"notset","str_icon":""},"obj_domProperty":{"innerText":"Show Others","innerHTML":"Show Others","arial-label":"Show Others","Id":"myId_51756751"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_51756751","arial-label":"Show Others"}}],
@@ -21472,6 +20554,10 @@ var obj_InstanceJSONMap = new Map([
 [76771, {"obj_design":{"int_idRecord":76771,"str_idXDesign":"myId_12259382","str_name":"xapp_component","str_nameShort":"xapp_component","str_type":"xapp_component","str_tag":"xapp_component","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_classExtend":"xapp_ajax","bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_themeType":"xapp_component"},"obj_domStyle":{"flex-direction":"column","padding":"10px","flex-wrap":"wrap","flex-flow":"row wrap","border":"1px solid white","gap":"10px","display":"none"}}],
 [76799, {"obj_design":{"int_idRecord":76799,"str_idXDesign":"myId_78332315","str_name":"xapp_propertysheet","str_nameShort":"xapp_propertysheet","str_type":"xapp_propertysheet","str_tag":"xapp_propertysheet","bln_classController":true,"str_createdDate":"2022-10-22 22:43:39","str_modifiedDate":"2022-10-22 22:43:39","bln_editPin":true,"bln_isLocalHome":true,"str_classList":"input,table","blnIsTag":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_themeType":"xapp_propertysheet"}}],
 [76801, {"obj_design":{"int_idRecord":76801,"str_idXDesign":"myId_11033391","str_name":"xapp_propertysheet_input","str_nameShort":"xapp_propertysheet_input","str_type":"xapp_propertysheet_input","str_tag":"input","str_createdDate":"2022-02-02 19:57:30","str_modifiedDate":"2022-02-02 19:57:30","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_input","bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_classExtend":"form_input"},"obj_domStyle":{"padding":"10px","cursor":"pointer","border":"0px none"}}],
+[76974, {"obj_design":{"int_idRecord":76974,"str_idXDesign":"myId_63641161","str_name":"app","str_nameShort":"app","str_type":"app","str_tag":"app","bln_classController":true,"str_createdDate":"2023-09-23 14:55:13","str_modifiedDate":"2023-09-23 14:55:13","bln_editPin":true,"bln_lockComponent":true,"str_categoryName":"App","str_themeType":"xapp_theme","str_classExtend":"xapp","int_radioDisplayMode":3,"arr_item":[{"obj_design":{"int_idRecord":77570,"str_type":"xapp_theme"}},{"obj_design":{"int_idRecord":6009,"str_type":"authorise_gate"}},{"obj_design":{"int_idRecord":"76977","str_type":"xapp_dynamic_content"}},{"obj_design":{"int_idRecord":76978,"str_type":"xapp_context_holder"}}],"str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_63641161"},"obj_domStyle":{"font-family":"","font-size":""},"bln_togglePeersPin":true,"bln_closePeersPin":true,"MetaDataViewId":101426,"MetaDataViewName":"meta_data","MetaUserViewId":1,"MetaUserViewName":"meta_user","MetaLinkViewId":100475,"MetaLinkViewName":"meta_link","user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_63641161"},"obj_theme":{"obj_design":{"int_idRecord":77570,"str_type":"xapp_theme"}}}],
+[76977, {"obj_design":{"int_idRecord":"76977","str_idXDesign":"myId_17564540","str_name":"xapp_dynamic_content","str_nameShort":"xapp_dynamic_content","str_type":"xapp_dynamic_content","str_tag":"xapp_dynamic_content","bln_registerAtContainer":true,"str_createdDate":"2022-02-02 20:12:17","str_modifiedDate":"2022-02-02 20:12:17","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_dynamicPin":true,"bln_editPin":true,"str_idProject":"myId_24662136","str_themeType":"xapp_dynamic_content","bln_classController":"false"},"obj_domProperty":{"Id":"myId_17564540"},"obj_domStyle":{"cursor":"default","display":"flex","flex-wrap":"wrap","height":"100%","width":"100%","overflow":"auto"},"dom_objContentContainer":{"Id":"myId_17564540"}}],
+[76978, {"obj_design":{"int_idRecord":76978,"str_idXDesign":"myId_90019415","str_name":"xapp_context_holder","str_nameShort":"xapp_context_holder","str_type":"xapp_context_holder","str_tag":"xapp_context_holder","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"bln_isLocalHome":true,"bln_isContextHolder":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_themeType":"xapp_context_holder","arr_item":[{"obj_design":{"int_idRecord":76979,"str_type":"xapp_context_holder"}},{"obj_design":{"int_idRecord":76394,"str_type":"xapp_context_holder"}},{"obj_design":{"int_idRecord":76681,"str_type":"xapp_context_holder"}},{"obj_design":{"int_idRecord":77111,"str_type":"xapp_context_holder"}}],"bln_classController":"false"},"obj_domProperty":{"Id":"myId_90019415"},"obj_domStyle":{"flex-flow":"wrap","gap":"10px","display":"none"},"dom_objContentContainer":{"Id":"myId_90019415"}}],
+[76979, {"obj_design":{"int_idRecord":76979,"str_idXDesign":"myId_52777788","str_name":"mycrm_context_holder","str_nameShort":"mycrm_context_holder","str_type":"xapp_context_holder","str_tag":"mycrm_context_holder","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"bln_isLocalHome":true,"bln_isContextHolder":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_themeType":"xapp_context_holder","bln_classController":"false","str_categoryName":"Xtra"},"obj_domStyle":{"flex-flow":"wrap","gap":"10px","display":"flex"},"user_agent":"Firefox"}],
 [76987, {"obj_design":{"int_idRecord":76987,"str_idXDesign":"myId_96679567","str_name":"xapp_button_data_nav_back","str_nameShort":"xapp_button_data_nav_back","str_type":"xapp_button_data_nav_back","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"str_text":"","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Other","str_idProject":"notset","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_lastVersionDate":"notset","str_icon":"xapp_chevron_left"},"obj_domProperty":{"innerText":"<","innerHTML":"<","type":"submit","Id":"myId_96679567"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"dom_objContentContainer":{"Id":"myId_96679567"}}],
 [76988, {"obj_design":{"int_idRecord":76988,"str_idXDesign":"myId_75699707","str_name":"xapp_button_data_nav_forward","str_nameShort":"xapp_button_data_nav_forward","str_type":"xapp_button_data_nav_forward","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"str_text":"","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"notset","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_lastVersionDate":"notset","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_chevron_right"},"obj_domProperty":{"innerText":">","innerHTML":">","type":"submit","Id":"myId_75699707"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"dom_objContentContainer":{"Id":"myId_75699707"}}],
 [76997, {"obj_design":{"int_idRecord":76997,"str_idXDesign":"myId_73660700","str_name":"xapp_button_data_nav_toggle","str_nameShort":"xapp_button_data_nav_toggle","str_type":"xapp_button_data_nav_toggle","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"str_text":"xapp_button_data_nav_toggle","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"myId_25365115","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"toggle","innerHTML":"Toggle","Id":"myId_73660700"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_73660700"}}],
@@ -21499,16 +20585,17 @@ var obj_InstanceJSONMap = new Map([
 [77034, {"obj_design":{"int_idRecord":77034,"str_idXDesign":"myId_79120090","str_name":"form_anchor","str_nameShort":"form_anchor","str_type":"form_anchor","str_tag":"a","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_anchor","bln_editPin":true,"bln_registerAtContainer":true,"bln_classController":"false","str_categoryName":"Xtra","str_idProject":"notset","str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"target":"_blank","Id":"myId_79120090"},"obj_domStyle":{"width":"100%","display":"block","text-decoration":"none","border":"1px solid black"},"dom_objContentContainer":{"Id":"myId_79120090"}}],
 [77037, {"obj_design":{"int_idRecord":77037,"str_idXDesign":"myId_01089000","str_name":"xapp_button_navigate_mall","str_nameShort":"xapp_button_navigate_mall","str_type":"xapp_button_navigate_mall","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"str_text":"Mall","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"myId_36985869"},"obj_domProperty":{"innerText":"Desktop","str_name":"xapp_button_navigate_desktop","innerHTML":"Mall"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"dom_objContentContainer":{"str_name":"xapp_button_navigate_desktop"}}],
 [77038, {"obj_design":{"int_idRecord":77038,"str_idXDesign":"myId_76211896","str_name":"xapp_button_navigate_office","str_nameShort":"xapp_button_navigate_office","str_type":"xapp_button_navigate_office","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_office","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Office","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_76211896"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_76211896","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
-[77039, {"obj_design":{"arr_item":[{"obj_design":{"int_idRecord":77570,"str_type":"xapp_theme"}},{"obj_design":{"int_idRecord":6009,"str_type":"authorise_gate"}},{"obj_design":{"int_idRecord":117,"str_type":"xapp_dynamic_content"}},{"obj_design":{"int_idRecord":"77040","str_type":"xapp_context_holder"}}],"int_idRecord":77039,"str_idXDesign":"myId_77877717","str_name":"office","str_nameShort":"office","str_type":"office","str_themeType":"office","str_tag":"office","bln_registerAtContainer":true,"bln_classController":true,"str_classExtend":"xapp","str_createdDate":"2023-07-30 15:06:06","str_modifiedDate":"2023-07-30 15:06:06","bln_editPin":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_lockComponent":true,"str_categoryName":"Office","int_radioDisplayMode":3,"str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_77877717"},"obj_domStyle":{"font-family":"Helvetica, Arial, sans-serif","xapp_theme":"xapp_theme"},"bln_togglePeersPin":true,"bln_closePeersPin":true,"MetaDataViewId":101426,"MetaDataViewName":"meta_data","MetaUserViewId":1,"MetaUserViewName":"meta_user","MetaLinkViewId":100475,"MetaLinkViewName":"meta_link","user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_77877717"},"obj_theme":{"obj_design":{"int_idRecord":77570,"str_type":"xapp_theme"}}}],
-[77040, {"obj_design":{"int_idRecord":"77040","str_idXDesign":"myId_41831689","str_name":"xapp_context_holder","str_nameShort":"xapp_context_holder","str_type":"xapp_context_holder","str_tag":"xapp_context_holder","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"bln_isLocalHome":true,"bln_isContextHolder":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_themeType":"xapp_context_holder","arr_item":[{"obj_design":{"int_idRecord":76394,"str_type":"xapp_context_holder"}},{"obj_design":{"int_idRecord":76681,"str_type":"xapp_context_holder"}},{"obj_design":{"int_idRecord":77327,"str_type":"xapp_context_holder"}},{"obj_design":{"int_idRecord":76388,"str_type":"xapp_context_holder"}},{"obj_design":{"int_idRecord":"77351","str_type":"xapp_context_holder"}},{"obj_design":{"int_idRecord":"77353","str_type":"xapp_context_holder"}}],"bln_classController":"false","str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_41831689"},"obj_domStyle":{"flex-flow":"wrap","gap":"10px","display":"none"},"dom_objContentContainer":{"Id":"myId_41831689"}}],
-[77043, {"obj_design":{"int_idRecord":77043,"str_idXDesign":"myId_08359389","str_name":"xapp_menuform_mover","str_nameShort":"xapp_menuform_mover","str_type":"xapp_menuform_mover","str_tag":"button","str_createdDate":"2022-02-02 20:04:57","str_modifiedDate":"2022-02-02 20:04:57","str_text":"xapp_menuform_mover","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"menu_button","bln_registerAtContainer":true,"str_classExtend":"xapp_menuform","str_categoryName":"Xtra","bln_classController":true,"bln_lockComponent":true,"arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_releaseLabel":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"xapp_menu_admin","innerHTML":"xapp_menuform_mover","xDesign_MenuButtonClick":"fn_MenuButtonClick","type":"submit","Id":"myId_08359389"},"obj_domStyle":{"color":"white","font-size":"100%","padding-bottom":"2px","corner-radius":"4px","border-radius":"4px","align-items":"center","justify-content":"center","margin-bottom":"1px","cursor":"pointer","width":"100%","border":"0px","background":"rgb(65, 65, 65)","padding":"15px 15px","display":"flex"},"bln_enabled":true,"str_defaultTypeMenu":"xapp_menuform","str_defaultTypeData":"xapp_dataform_mover","str_defaultTypeDataChildMenu":"xapp_dataform_childmenu","obj_meta":{"bln_togglePeersPin":true,"str_metaConstraintName":"","str_metaRowzName":"","int_idMetaRowz":0,"int_idParentMetaRowz":0,"int_idMetaView":0,"bln_viewPin":0,"str_buttonConsole":"","MetaPermissionTag":"100","str_metaTypeDashboard":"","str_metaTypeData":"","str_optionChildMenu":"","str_text":"","int_joinType":0},"str_optionData":"Data","str_optionReport":"Report","str_optionWidget":"Widget","str_optionDashboard":"Dashboard","str_optionMenu":"Menu","str_optionMenuForm":"MenuForm","str_listSeparator":"-","bln_constraintKeyPin":true,"int_totalRowCount":0}],
-[77046, {"obj_design":{"int_idRecord":77046,"str_idXDesign":"myId_38368366","str_name":"xapp_dataform_mover","str_nameShort":"xapp_dataform_mover","str_type":"xapp_dataform_mover","str_tag":"xapp_dataform_mover","str_createdDate":"2022-02-02 20:10:52","str_modifiedDate":"2022-02-02 20:10:52","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_classExtend":"xapp_dataform_view","bln_registerAtContainer":true,"bln_dynamicPin":true,"bln_classController":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_themeType":"xapp_dataform_mover","str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domStyle":{"flex-wrap":"wrap","display":"flex","gap":"10px","flex-direction":"column","width":"100%"},"str_defaultTypeRow":"xapp_rowform","str_defaultTypeColumn":"xapp_columnform"}],
-[77066, {"obj_design":{"int_idRecord":77066,"str_idXDesign":"myId_00779008","str_name":"xapp_menuform_system","str_nameShort":"xapp_menuform_system","str_type":"xapp_menuform_system","str_tag":"button","str_createdDate":"2022-02-02 20:04:57","str_modifiedDate":"2022-02-02 20:04:57","str_text":"xapp_menuform_system","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"menu_button","bln_registerAtContainer":true,"str_classExtend":"xapp_menuform","bln_classController":true,"str_categoryName":"Xtra","bln_lockComponent":true,"arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_releaseLabel":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"xapp_menu_admin","innerHTML":"xapp_menuform_system","xDesign_MenuButtonClick":"fn_MenuButtonClick","type":"submit","Id":"myId_00779008"},"obj_domStyle":{"color":"white","font-size":"100%","padding-bottom":"2px","corner-radius":"4px","border-radius":"4px","align-items":"center","justify-content":"center","margin-bottom":"1px","cursor":"pointer","width":"100%","border":"0px","background":"rgb(65, 65, 65)","padding":"15px 15px","display":"flex"},"bln_enabled":true,"str_defaultTypeMenu":"xapp_menuform","str_defaultTypeData":"xapp_dataform_system","str_defaultTypeDataChildMenu":"xapp_dataform_childmenu","obj_meta":{"bln_togglePeersPin":true,"str_metaConstraintName":"","str_metaRowzName":"","int_idMetaRowz":0,"int_idParentMetaRowz":0,"int_idMetaView":0,"bln_viewPin":0,"str_buttonConsole":"","MetaPermissionTag":"100","str_metaTypeDashboard":"","str_metaTypeData":"","str_optionChildMenu":"","str_text":"","int_joinType":0},"str_optionData":"Data","str_optionReport":"Report","str_optionWidget":"Widget","str_optionDashboard":"Dashboard","str_optionMenu":"Menu","str_optionMenuForm":"MenuForm","str_listSeparator":"-","bln_constraintKeyPin":true,"int_totalRowCount":0}],
-[77075, {"obj_design":{"int_idRecord":77075,"str_idXDesign":"myId_09810060","str_name":"console_container_system","str_nameShort":"console_container_system","str_type":"xapp_console_container","str_tag":"console_container_system","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"bln_isLocalHome":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_themeType":"form_section","arr_item":[{"obj_design":{"int_idRecord":77526,"str_type":"xapp_button_system_home"}}],"str_categoryName":"Xtra","bln_classController":"false","bln_lockComponent":true,"str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_09810060"},"obj_domStyle":{"display":"flex","flex-flow":"row wrap","gap":"10px","justify-content":"end"},"dom_objContentContainer":{"Id":"myId_09810060"}}],
 [77082, {"obj_design":{"int_idRecord":77082,"str_idXDesign":"myId_76307086","str_name":"xapp_base","str_nameShort":"xapp_base","str_type":"xapp_base","str_themeType":"component","str_tag":"xapp_base","bln_classController":true,"str_createdDate":"2023-11-19 12:58:13","str_modifiedDate":"2023-11-19 12:58:13","bln_editPin":true,"bln_lockComponent":true,"str_categoryName":"Xtra","bln_palettePinRelease":true,"bln_palettePin":true,"blnIsTag":true}}],
 [77084, {"obj_design":{"int_idRecord":77084,"str_idXDesign":"myId_61351551","str_name":"form_checkbox","str_nameShort":"form_checkbox","str_type":"form_checkbox","str_tag":"input","str_createdDate":"2022-02-02 19:57:30","str_modifiedDate":"2022-02-02 19:57:30","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_input","bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":"false","str_categoryName":"Xtra","str_text":"on","str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"type":"checkbox","checked":true},"obj_domStyle":{"cursor":"pointer","border":"0px none","content":"\\2713","height":"40px","width":"40px","vertical-align":"middle","margin":"0px"}}],
+[77110, {"obj_design":{"int_idRecord":77110,"str_idXDesign":"myId_20107211","str_name":"console_container_maintain","str_nameShort":"console_container_maintain","str_type":"xapp_console_container","str_tag":"console_container_maintain","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_themeType":"form_section","arr_item":[{"obj_design":{"int_idRecord":77505,"str_type":"xapp_button_provision"}},{"obj_design":{"int_idRecord":77510,"str_type":"xapp_button_maintain"}},{"obj_design":{"int_idRecord":77508,"str_type":"xapp_button_provision_b2b"}},{"obj_design":{"int_idRecord":77513,"str_type":"xapp_button_provision_b2c"}},{"obj_design":{"int_idRecord":77514,"str_type":"xapp_button_provision_linked_opportunity_hide"}},{"obj_design":{"int_idRecord":77506,"str_type":"xapp_button_provision_linked_opportunity_show"}},{"obj_design":{"int_idRecord":77515,"str_type":"xapp_button_provision_linked_contact_hide"}},{"obj_design":{"int_idRecord":77507,"str_type":"xapp_button_provision_linked_contact_show"}},{"obj_design":{"int_idRecord":77516,"str_type":"xapp_button_provision_linked_task_hide"}},{"obj_design":{"int_idRecord":77509,"str_type":"xapp_button_provision_linked_task_show"}},{"obj_design":{"int_idRecord":77511,"str_type":"xapp_button_maintain_debug_release"}},{"obj_design":{"int_idRecord":77165,"str_type":"xapp_button_push_reset"}},{"obj_design":{"int_idRecord":77168,"str_type":"xapp_button_push_schedule"}},{"obj_design":{"int_idRecord":77512,"str_type":"xapp_button_backup"}}],"bln_classController":"false","str_categoryName":"Xapp","bln_lockComponent":true,"str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_20107211"},"obj_domStyle":{"str_name":"crud_console_record_control","flex-flow":"row wrap","display":"flex","gap":"10px","backkground":"red","justify-content":"end","border":"0px solid purple"},"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_20107211"}}],
+[77111, {"obj_design":{"int_idRecord":77111,"str_idXDesign":"myId_00383002","str_name":"xapp_admin_context","str_nameShort":"xapp_admin_context","str_type":"xapp_context_holder","str_tag":"xapp_admin_context","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"bln_isLocalHome":true,"bln_isContextHolder":true,"bln_palettePinRelease":true,"bln_palettePin":true,"arr_item":[{"obj_design":{"int_idRecord":77110,"str_type":"xapp_console_container"}},{"obj_design":{"int_idRecord":77133,"str_type":"xapp_dashboard_setting"}},{"obj_design":{"int_idRecord":77164,"str_type":"xapp_dashboard_push"}},{"obj_design":{"int_idRecord":77167,"str_type":"xapp_dashboard_push_row"}},{"obj_design":{"int_idRecord":"77215","str_type":"xapp_dashboard_view"}}],"str_themeType":"xapp_context_holder","bln_classController":"false","str_categoryName":"Xapp","bln_lockComponent":true,"str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_00383002"},"obj_domStyle":{"display":"flex"},"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_00383002"}}],
 [77114, {"obj_design":{"int_idRecord":77114,"str_idXDesign":"myId_09060272","str_name":"xapp_console_container_datasummary","str_nameShort":"xapp_console_container_datasummary","str_type":"xapp_console_container","str_tag":"xapp_console_container_datasummary","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":"false","arr_item":[{"obj_design":{"int_idRecord":76987,"str_type":"xapp_button_data_nav_back"}},{"obj_design":{"int_idRecord":76988,"str_type":"xapp_button_data_nav_forward"}},{"obj_design":{"int_idRecord":76997,"str_type":"xapp_button_data_nav_toggle"}}],"bln_lockComponent":true,"str_categoryName":"Xtra","str_themeType":"xapp_console_container"},"obj_domProperty":{"Id":"myId_09060272"},"obj_domStyle":{"str_name":"crud_console_record_control","display":"flex","gap":"10px","backkground":"red","flex-flow":"row wrap","border":"0px solid purple"},"dom_objContentContainer":{"Id":"myId_09060272"}}],
+[77133, {"obj_design":{"int_idRecord":77133,"str_idXDesign":"myId_74077442","str_name":"xapp_dashboard_setting","str_nameShort":"xapp_dashboard_setting","str_type":"xapp_dashboard_setting","str_tag":"xapp_dashboard_setting","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_section","bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_classExtend":"xapp_dashboard","str_classList":"programiconbutton","str_idProject":"myId_63641161","bln_classController":"false","str_categoryName":"Xtra"},"obj_domStyle":{"flex-direction":"column","padding":"10px","flex-wrap":"wrap","gap":"10px","width":"100%","border":"0px solid black","display":"none","flex-flow":"row wrap"}}],
 [77152, {"obj_design":{"int_idRecord":77152,"str_idXDesign":"myId_11190110","str_name":"xapp_button","str_nameShort":"xapp_button","str_type":"xapp_button","str_themeType":"form_button","str_tag":"button","bln_registerAtContainer":true,"str_createdDate":"2022-11-20 23:26:20","str_modifiedDate":"2022-11-20 23:26:20","bln_editPin":true,"str_text":"xapp_button","bln_classController":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_classExtend":"form_button_rich","bln_lockComponent":true,"str_categoryName":"Xtra","str_icon":"xapp_desk","arr_item":[{"obj_design":{"int_idRecord":77388,"str_type":"form_anchor"}}],"str_idProject":"myId_36985869","str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_releaseLabel":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"My Button","innerHTML":"xapp_button","Id":"myId_11190110"},"obj_domStyle":{"aliign-items":"center","padding":"10px"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_11190110"}}],
+[77164, {"obj_design":{"int_idRecord":77164,"str_idXDesign":"myId_37341954","str_name":"xapp_dashboard_push","str_nameShort":"xapp_dashboard_push","str_type":"xapp_dashboard_push","str_tag":"xapp_dashboard_push","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_section","bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_classExtend":"xapp_dashboard","str_classList":"programiconbutton","bln_classController":true,"str_categoryName":"Xtra","bln_lockComponent":true},"obj_domStyle":{"flex-direction":"column","padding":"10px","flex-wrap":"wrap","gap":"10px","width":"100%","border":"0px solid black","display":"none","flex-flow":"row wrap"}}],
+[77165, {"obj_design":{"int_idRecord":77165,"str_idXDesign":"myId_76468180","str_name":"xapp_button_push_reset","str_nameShort":"xapp_button_push_reset","str_type":"xapp_button_push_reset","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"str_text":"Reset Push","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_nameRegistrator":"notset","str_idProject":"myId_20107211","str_classList":"notset","str_releaseLabel":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","str_name":"xapp_button_navigate_desktop","innerHTML":"Reset Push"},"obj_domStyle":{"padding":"10px","cursor":"pointer","opacity":"1"},"bln_enabled":true,"dom_objContentContainer":{"data":"","str_name":"xapp_button_navigate_desktop"}}],
+[77167, {"obj_design":{"int_idRecord":77167,"str_idXDesign":"myId_25022733","str_name":"xapp_dashboard_push_row","str_nameShort":"xapp_dashboard_push_row","str_type":"xapp_dashboard_push_row","str_tag":"xapp_dashboard_push_row","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_section","bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_classExtend":"xapp_dashboard","str_classList":"programiconbutton","bln_classController":true,"str_categoryName":"Xtra","bln_lockComponent":true},"obj_domStyle":{"flex-direction":"column","padding":"10px","flex-wrap":"wrap","gap":"10px","width":"100%","border":"0px solid black","display":"none","flex-flow":"row wrap"}}],
+[77168, {"obj_design":{"int_idRecord":77168,"str_idXDesign":"myId_37771064","str_name":"xapp_button_push_schedule","str_nameShort":"xapp_button_push_schedule","str_type":"xapp_button_push_schedule","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"str_text":"Push","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_nameRegistrator":"notset","str_idProject":"myId_20107211","str_classList":"notset","str_releaseLabel":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"str_name":"xapp_button_navigate_desktop","innerText":"Auto Maintain","innerHTML":"Push"},"obj_domStyle":{"padding":"10px","cursor":"pointer","opacity":"1"},"bln_enabled":true,"dom_objContentContainer":{"data":"","str_name":"xapp_button_navigate_desktop"}}],
 [77171, {"obj_design":{"int_idRecord":77171,"str_idXDesign":"myId_05444353","str_name":"xapp_button_queryterm","str_nameShort":"xapp_button_queryterm","str_type":"xapp_button_queryterm","str_themeType":"form_button","str_tag":"button","bln_registerAtContainer":true,"str_createdDate":"2022-11-20 23:26:20","str_modifiedDate":"2022-11-20 23:26:20","bln_editPin":true,"str_text":"My Button","bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"str_categoryName":"Xtra","bln_lockComponent":true,"str_classExtend":"form_button"},"obj_domProperty":{"innerText":"My Button"},"obj_domStyle":{"cursor":"pointer","border":"0px none","height":"40px","padding":"10px","border-radius":"2px"}}],
 [77173, {"obj_design":{"int_idRecord":77173,"str_idXDesign":"myId_41499791","str_name":"xapp_queryterm_interface","str_nameShort":"xapp_queryterm_interface","str_type":"xapp_queryterm_interface","str_tag":"fieldset","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_section","bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"str_categoryName":"Xtra","bln_lockComponent":true,"str_classExtend":"form_fieldset"},"obj_domStyle":{"display":"flex","flex-direction":"column","padding":"10px","flex-wrap":"wrap","gap":"10px","flex-flow":"wrap"}}],
 [77177, {"obj_design":{"int_idRecord":77177,"str_idXDesign":"myId_11729888","str_name":"xapp_button_queryterm","str_nameShort":"xapp_button_queryterm","str_type":"xapp_button_queryterm","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","str_text":"Query Term","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"form_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Other","str_idProject":"myId_25365115"},"obj_domProperty":{"innerText":"Add","innerHTML":"Query Term"},"obj_domStyle":{"padding":"10px","cursor":"pointer","opacity":"1"},"bln_enabled":true,"dom_objContentContainer":{}}],
@@ -21520,21 +20607,12 @@ var obj_InstanceJSONMap = new Map([
 [77195, {"obj_design":{"int_idRecord":77195,"str_idXDesign":"myId_03131030","str_name":"form_tab","str_nameShort":"form_tab","str_type":"form_tab","str_themeType":"form_button","str_tag":"button","bln_registerAtContainer":true,"str_createdDate":"2022-11-20 23:26:20","str_modifiedDate":"2022-11-20 23:26:20","bln_editPin":true,"str_text":"My Button","bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"str_categoryName":"Xtra","bln_lockComponent":true,"str_classExtend":"form_button","str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_releaseLabel":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"My Button","innerHTML":"My Button"},"obj_domStyle":{"cursor":"pointer","border":"0px none","height":"40px","padding":"10px","border-radius":"2px"},"bln_enabled":true}],
 [77200, {"obj_design":{"int_idRecord":77200,"str_idXDesign":"myId_04630046","str_name":"xapp_report_interface_fieldlist","str_nameShort":"xapp_report_interface_fieldlist","str_type":"xapp_report_interface_fieldlist","str_tag":"fieldset","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_section","bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"str_categoryName":"Xtra","bln_lockComponent":true,"str_classExtend":"form_fieldset"},"obj_domStyle":{"display":"flex","flex-direction":"column","padding":"10px","flex-wrap":"wrap","gap":"10px","flex-flow":"wrap"}}],
 [77201, {"obj_design":{"int_idRecord":77201,"str_idXDesign":"myId_30910110","str_name":"xapp_report_interface_fieldcriteria","str_nameShort":"xapp_report_interface_fieldcriteria","str_type":"xapp_report_interface_fieldcriteria","str_tag":"fieldset","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_section","bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"str_categoryName":"Xtra","bln_lockComponent":true,"str_classExtend":"form_fieldset"},"obj_domStyle":{"display":"flex","flex-direction":"column","padding":"10px","flex-wrap":"wrap","gap":"10px","flex-flow":"wrap"}}],
+[77215, {"obj_design":{"int_idRecord":"77215","str_idXDesign":"myId_55117575","str_name":"xapp_dashboard_view","str_nameShort":"xapp_dashboard_view","str_type":"xapp_dashboard_view","str_tag":"xapp_dashboard_view","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_section","bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_classExtend":"xapp_dashboard","str_classList":"programiconbutton"},"obj_domStyle":{"flex-direction":"column","padding":"10px","flex-wrap":"wrap","gap":"10px","width":"100%","border":"0px solid black","display":"none","flex-flow":"row wrap"}}],
 [77218, {"obj_design":{"int_idRecord":77218,"str_idXDesign":"myId_28226265","str_name":"xapp_input_file_select","str_nameShort":"xapp_input_file_select","str_type":"xapp_input_file_select","str_tag":"input","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"str_text":"Select File","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"notset","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_lockComponent":true,"str_categoryName":"Xapp","str_idProject":"myId_36985869","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_lastVersionDate":"notset","bln_classController":true},"obj_domProperty":{"innerText":"View","innerHTML":"Import File","type":"file"},"obj_domStyle":{"padding":"10px","cursor":"pointer","opacity":"1","display":"none"},"dom_objContentContainer":{"data":""}}],
-[77327, {"obj_design":{"int_idRecord":77327,"str_idXDesign":"myId_88198848","str_name":"topup_context_holder","str_nameShort":"topup_context_holder","str_type":"xapp_context_holder","str_tag":"topup_context_holder","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"bln_isLocalHome":true,"bln_isContextHolder":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_themeType":"topup_context_holder","bln_classController":"false","str_categoryName":"Topup","arr_item":[{"obj_design":{"int_idRecord":77328,"str_type":"topup_dashboard"}},{"obj_design":{"int_idRecord":77329,"str_type":"component"}},{"obj_design":{"int_idRecord":77488,"str_type":"topup_form_button"}}],"bln_lockComponent":true,"str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_88198848"},"obj_domStyle":{"flex-flow":"wrap","gap":"10px","display":"none"},"dom_objContentContainer":{"Id":"myId_88198848"}}],
-[77328, {"obj_design":{"int_idRecord":77328,"str_idXDesign":"myId_06046648","str_name":"topup_dashboard","str_nameShort":"topup_dashboard","str_type":"topup_dashboard","str_tag":"topup_dashboard","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_classExtend":"xapp_dashboard","bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_themeType":"topup_dashboard"},"obj_domProperty":{"Id":"myId_06046648"},"obj_domStyle":{"flex-direction":"column","flex-wrap":"wrap","flex-flow":"row wrap","gap":"10px","display":"none","border":"0px solid white","align-items":"center","justify-content":"center"},"bln_usePaymentProviderSandbox":true,"bln_emphasis":true,"dom_objContentContainer":{"Id":"myId_06046648"}}],
-[77329, {"obj_design":{"int_idRecord":77329,"str_idXDesign":"myId_14488377","str_name":"topup_panel","str_nameShort":"topup_panel","str_type":"component","str_tag":"topup_panel","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"bln_classController":"false","str_categoryName":"Xtra","bln_registerAtContainer":true,"bln_lockComponent":true,"str_themeType":"component"},"obj_domProperty":{"Id":"myId_14488377"},"obj_domStyle":{"display":"flex","align-items":"center","justify-content":"center","background-color":"rgb(64, 169, 236)","border":"1px outset rgb(64, 169, 236)","border-radius":"4px","padding":"10px"},"dom_objContentContainer":{"Id":"myId_14488377"}}],
 [77335, {"obj_design":{"int_idRecord":"77335","str_idXDesign":"myId_74996919","str_name":"form_radio","str_nameShort":"form_radio","str_type":"form_radio","str_tag":"input","str_createdDate":"2022-02-02 19:57:30","str_modifiedDate":"2022-02-02 19:57:30","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_input","bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":"false","str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"checked":true,"type":"radio","Id":"myId_74996919","innerHTML":"&nbsp;"},"obj_domStyle":{"cursor":"pointer","border":"0px none","content":"\\2713","height":"40px","width":"40px","vertical-align":"middle","margin":"0px"},"dom_objContentContainer":{"Id":"myId_74996919"}}],
 [77337, {"obj_design":{"int_idRecord":"77337","str_idXDesign":"myId_88201141","str_name":"form_nonbreakingspace","str_nameShort":"form_nonbreakingspace","str_type":"form_nonbreakingspace","str_themeType":"form_nonbreakingspace","str_tag":"br","bln_registerAtContainer":true,"str_createdDate":"2023-09-28 17:30:59","str_modifiedDate":"2023-09-28 17:30:59","bln_editPin":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":"false","str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_88201141"},"obj_domStyle":{"height":"10px","width":"100%","background":"yellow","border":"0px"},"dom_objContentContainer":{"Id":"myId_88201141"}}],
 [77339, {"obj_design":{"int_idRecord":77339,"str_idXDesign":"myId_11122295","str_name":"form_label","str_nameShort":"form_label","str_type":"form_label","str_themeType":"form_label","str_tag":"label","str_createdDate":"2022-11-13 21:59:51","str_modifiedDate":"2022-11-13 21:59:51","bln_editPin":true,"bln_typeable":true,"str_text":"My Label","bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":"false","str_categoryName":"Xtra","str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"My Label","Id":"myId_11122295"},"obj_domStyle":{"padding":"10px","word-break":"normal","min-width":"175px","max-width":"175px","max-height":"175px","overflow":"auto","color":"black","align-self":"flex-start","border":"1px solid rgba(255, 255, 255, 0.0)","margin":"3px","cursor":"pointer","border-radius":"4px"},"dom_objContentContainer":{"Id":"myId_11122295"}}],
 [77341, {"obj_design":{"str_tag":"span","str_type":"form_span","str_idXDesign":"myId_18418551","str_name":"form_span","str_nameShort":"form_span","str_themeType":"form_input","int_idRecord":77341,"str_createdDate":"2022-11-18 16:02:10","str_modifiedDate":"2022-11-18 16:02:10","blnIsTag":true,"bln_editPin":true,"bln_typeable":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":"false","str_categoryName":"Form","str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_18418551"},"obj_domStyle":{"padding":"10px","word-break":"normal","background":"white","maxheight":"175","overflow":"auto","color":"black","border-radius":"4px","border":"0px solid black","font-family":"Tahoma","max-height":"500px"},"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_18418551"}}],
-[77345, {"obj_design":{"int_idRecord":"77345","str_idXDesign":"myId_17789023","str_name":"xapp_button_mover_invite","str_nameShort":"xapp_button_mover_invite","str_type":"xapp_button_mover_invite","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"str_text":"Enable","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":"false","str_idProject":"myId_77877717"},"obj_domProperty":{"str_name":"xapp_button_navigate_desktop","innerText":"Auto Maintain","innerHTML":"Enable"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"dom_objContentContainer":{}}],
-[77346, {"obj_design":{"int_idRecord":"77346","str_idXDesign":"myId_96176072","str_name":"xapp_button_mover_enable","str_nameShort":"xapp_button_mover_enable","str_type":"xapp_button_mover_enable","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"str_text":"Enable","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":"false","str_idProject":"myId_77877717"},"obj_domProperty":{"str_name":"xapp_button_navigate_desktop","innerText":"Auto Maintain","innerHTML":"Enable"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"dom_objContentContainer":{}}],
-[77347, {"obj_design":{"int_idRecord":"77347","str_idXDesign":"myId_29767678","str_name":"xapp_button_mover_disable","str_nameShort":"xapp_button_mover_disable","str_type":"xapp_button_mover_disable","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"str_text":"Disable","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":"false","str_idProject":"myId_77877717"},"obj_domProperty":{"str_name":"xapp_button_navigate_desktop","innerText":"Auto Maintain","innerHTML":"Disable"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"dom_objContentContainer":{}}],
-[77350, {"obj_design":{"int_idRecord":77350,"str_idXDesign":"myId_26127270","str_name":"console_container_mover","str_nameShort":"console_container_mover","str_type":"xapp_console_container","str_tag":"console_container_mover","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"bln_isLocalHome":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_themeType":"form_section","arr_item":[{"obj_design":{"int_idRecord":"77345","str_type":"xapp_button_mover_invite"}},{"obj_design":{"int_idRecord":"77346","str_type":"xapp_button_mover_enable"}},{"obj_design":{"int_idRecord":"77347","str_type":"xapp_button_mover_disable"}},{"obj_design":{"int_idRecord":77529,"str_type":"xapp_button_mover_open"}},{"obj_design":{"int_idRecord":77528,"str_type":"xapp_button_mover_home"}}],"bln_classController":"false","str_idProject":"myId_77877717","str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset","str_categoryName":"Other"},"obj_domProperty":{"Id":"myId_26127270"},"obj_domStyle":{"display":"flex","flex-flow":"row wrap","gap":"10px","justify-content":"end"},"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_26127270"}}],
-[77351, {"obj_design":{"int_idRecord":"77351","str_idXDesign":"myId_68192268","str_name":"mover_context_holder","str_nameShort":"mover_context_holder","str_type":"xapp_context_holder","str_tag":"mover_context_holder","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"bln_isLocalHome":true,"bln_isContextHolder":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_themeType":"xapp_context_holder","arr_item":[{"obj_design":{"int_idRecord":77043,"str_type":"xapp_menuform_mover"}},{"obj_design":{"int_idRecord":77350,"str_type":"xapp_console_container"}},{"obj_design":{"int_idRecord":77046,"str_type":"xapp_dataform_mover"}}],"bln_classController":"false"},"obj_domProperty":{"Id":"myId_68192268"},"obj_domStyle":{"flex-flow":"wrap","gap":"10px","display":"none"},"dom_objContentContainer":{"Id":"myId_68192268"}}],
-[77352, {"obj_design":{"int_idRecord":"77352","str_idXDesign":"myId_57368376","str_name":"xapp_dataform_system","str_nameShort":"xapp_dataform_system","str_type":"xapp_dataform_system","str_tag":"xapp_dataform_system","str_createdDate":"2022-02-02 20:10:52","str_modifiedDate":"2022-02-02 20:10:52","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_classExtend":"xapp_dataform_view","bln_registerAtContainer":true,"bln_dynamicPin":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_themeType":"xapp_dataform_system","bln_classController":"false","str_idProject":"myId_77877717"},"obj_domStyle":{"flex-wrap":"wrap","display":"flex","gap":"10px","flex-direction":"column","width":"100%"},"str_defaultTypeRow":"xapp_rowform","str_defaultTypeColumn":"xapp_columnform"}],
-[77353, {"obj_design":{"int_idRecord":"77353","str_idXDesign":"myId_63383556","str_name":"system_context_holder","str_nameShort":"system_context_holder","str_type":"xapp_context_holder","str_tag":"system_context_holder","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"bln_isLocalHome":true,"bln_isContextHolder":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_themeType":"xapp_context_holder","bln_classController":"false","arr_item":[{"obj_design":{"int_idRecord":77066,"str_type":"xapp_menuform_system"}},{"obj_design":{"int_idRecord":77352,"str_type":"xapp_dataform_system"}},{"obj_design":{"int_idRecord":77075,"str_type":"xapp_console_container"}}]},"obj_domProperty":{"Id":"myId_63383556"},"obj_domStyle":{"flex-flow":"wrap","gap":"10px","display":"none"},"dom_objContentContainer":{"Id":"myId_63383556"}}],
 [77379, {"obj_design":{"int_idRecord":77379,"str_idXDesign":"myId_48693643","str_name":"form_button_search","str_nameShort":"form_button_search","str_type":"form_button_search","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"str_text":"Search","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"form_inputandbutton_submit","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_isThemeItem":true,"bln_classController":true,"str_categoryName":"Xtra","bln_lockComponent":true,"str_nameRegistrator":"notset","str_idProject":"notset","str_classList":"notset","str_releaseLabel":"notset","str_lastVersionDate":"notset","str_value":"Search"},"obj_domProperty":{"type":"submit","innerText":"Submit","Id":"myId_48693643","innerHTML":"Search"},"obj_domStyle":{"padding":"10px","cursor":"pointer","border-radius":"2px","border":"0px none white","background-color":"white","flex flow":"column wrap","pointer":"black","rgb(18, 47, 66)":"rgb(18, 47, 66)"},"bln_enabled":true,"dom_objContentContainer":{"data":"","Id":"myId_48693643"}}],
 [77381, {"obj_design":{"int_idRecord":77381,"str_idXDesign":"myId_92278787","str_name":"form_icon","str_nameShort":"form_icon","str_type":"form_icon","str_tag":"i","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_icon","bln_editPin":true,"bln_registerAtContainer":true,"bln_classController":true,"str_categoryName":"Xtra","str_idProject":"notset","str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_92278787"},"obj_domStyle":{"margin":"10px"},"dom_objContentContainer":{"Id":"myId_92278787"}}],
 [77386, {"obj_design":{"str_tag":"span","str_type":"form_button_span","str_idXDesign":"myId_57242915","str_name":"form_button_span","str_nameShort":"form_button_span","str_themeType":"form_button_span","int_idRecord":77386,"str_createdDate":"2022-11-18 16:02:10","str_modifiedDate":"2022-11-18 16:02:10","blnIsTag":true,"bln_editPin":true,"bln_typeable":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_idProject":"myId_11190110","bln_classController":true,"str_text":"form_button_span","str_categoryName":"Form","bln_lockComponent":true},"obj_domProperty":{"Id":"myId_57242915","innerHTML":"form_button_span"},"obj_domStyle":{"maxheight":"175"},"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_57242915"}}],
@@ -21551,7 +20629,6 @@ var obj_InstanceJSONMap = new Map([
 [77454, {"obj_design":{"int_idRecord":"77454","str_idXDesign":"myId_22307377","str_name":"xapp_console","str_nameShort":"xapp_console","str_type":"xapp_console","str_tag":"xapp_console","str_createdDate":"2022-02-02 20:10:52","str_modifiedDate":"2022-02-02 20:10:52","bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"arr_item":[{"obj_design":{"int_idRecord":77452,"str_type":"block"}},{"obj_design":{"int_idRecord":77453,"str_type":"block"}}],"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_themeType":"xapp_console","str_nameRegistrator":"notset","str_idProject":"myId_01221712","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_22307377"},"obj_domStyle":{"flexdirection":"column","gap":"10px","display":"flex","flex-wrap":"wrap"},"dom_objContentContainer":{"Id":"myId_22307377"},"obj_blockLeft":{"obj_design":{"int_idRecord":77452,"str_type":"block"}},"obj_blockRight":{"obj_design":{"int_idRecord":77453,"str_type":"block"}}}],
 [77485, {"obj_design":{"int_idRecord":77485,"str_idXDesign":"myId_31653329","str_name":"xapp_button_navigate_lobby","str_nameShort":"xapp_button_navigate_lobby","str_type":"xapp_button_navigate_lobby","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_star","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Lobby","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_31653329"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_31653329","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
 [77486, {"obj_design":{"int_idRecord":77486,"str_idXDesign":"myId_36003113","str_name":"xapp_button_navigate_rowz","str_nameShort":"xapp_button_navigate_rowz","str_type":"xapp_button_navigate_rowz","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"www","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"rowz_hashtag","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Rowz","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_36003113"},"obj_domStyle":{"padding":"10px","cursor":"pointer","background":"white","border":"1px solid white","border-radius":"4px"},"bln_enabled":true,"dom_objContentContainer":{"Id":"myId_36003113","str_name":"xapp_button_navigate_desktop"}}],
-[77488, {"obj_design":{"int_idRecord":77488,"str_idXDesign":"myId_19177339","str_name":"topup_form_button","str_nameShort":"topup_form_button","str_type":"topup_form_button","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Topup","str_idProject":"notset","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_star","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Topup","str_lastVersionDate":"notset","bln_expand":true},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_19177339"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_19177339","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
 [77489, {"obj_design":{"int_idRecord":77489,"str_idXDesign":"myId_11150032","str_name":"form_button_rich","str_nameShort":"form_button_rich","str_type":"form_button_rich","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"form_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Form","str_idProject":"notset","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_star","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"My Button","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_11150032"},"obj_domStyle":{"padding":"10px","cursor":"pointer","background":"white","border":"1px solid white","display":"flex","align-items":"center","justify-content":"center"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_11150032","str_name":"xapp_button_navigate_desktop"}}],
 [77490, {"obj_design":{"int_idRecord":77490,"str_idXDesign":"myId_12330123","str_name":"form_button","str_nameShort":"form_button","str_type":"form_button","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"notset","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"notset","str_icon":"xapp_star","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"My Button","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","str_name":"xapp_button_navigate_desktop","Id":"myId_12330123","innerHTML":"My Button"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"dom_objContentContainer":{"data":"","str_name":"xapp_button_navigate_desktop","Id":"myId_12330123"}}],
 [77491, {"obj_design":{"int_idRecord":77491,"str_idXDesign":"myId_78802071","str_name":"form_button_showhide","str_nameShort":"form_button_showhide","str_type":"form_button_showhide","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"form_button_rich","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"notset","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_star","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"My Button","str_lastVersionDate":"notset","bln_expand":true},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_78802071"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"dom_objContentContainer":{"Id":"myId_78802071","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
@@ -21561,6 +20638,18 @@ var obj_InstanceJSONMap = new Map([
 [77499, {"obj_design":{"int_idRecord":77499,"str_idXDesign":"myId_22102372","str_name":"xapp_button_archive_record","str_nameShort":"xapp_button_archive_record","str_type":"xapp_button_archive_record","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Other","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_idProject":"myId_25365115","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Archive Record","str_lastVersionDate":"notset","str_icon":""},"obj_domProperty":{"innerText":"Complete","innerHTML":"Refresh","aria-label":"New Record","Id":"myId_22102372"},"obj_domStyle":{"padding":"10px","cursor":"pointer","opacity":"1"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_22102372","aria-label":"New Record"}}],
 [77500, {"obj_design":{"int_idRecord":77500,"str_idXDesign":"myId_50437881","str_name":"form_button_search","str_nameShort":"form_button_search","str_type":"form_button_search","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"form_inputandbutton_submit","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_idProject":"notset","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Search","str_lastVersionDate":"notset","str_icon":"xapp_search","str_value":"Search"},"obj_domProperty":{"innerText":"Complete","innerHTML":"Refresh","aria-label":"New Record","Id":"myId_50437881"},"obj_domStyle":{"padding":"10px","cursor":"pointer","opacity":"1"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_50437881","aria-label":"New Record"}}],
 [77501, {"obj_design":{"int_idRecord":77501,"str_idXDesign":"myId_28207122","str_name":"xapp_button_file_select","str_nameShort":"xapp_button_file_select","str_type":"xapp_button_file_select","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}},{"obj_design":{"int_idRecord":77218,"str_type":"xapp_input_file_select"}}],"str_icon":"rowz_upload_file","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Step 1: Choose File","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_28207122"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_28207122","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
+[77505, {"obj_design":{"int_idRecord":77505,"str_idXDesign":"myId_14322737","str_name":"xapp_button_provision","str_nameShort":"xapp_button_provision","str_type":"xapp_button_provision","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_wrench","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Provision","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_14322737"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"dom_objContentContainer":{"Id":"myId_14322737","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
+[77506, {"obj_design":{"int_idRecord":77506,"str_idXDesign":"myId_35323172","str_name":"xapp_button_provision_linked_opportunity_show","str_nameShort":"xapp_button_provision_linked_opportunity_show","str_type":"xapp_button_provision_linked_opportunity_show","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Other","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_star","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Show Linked Opportunities","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_35323172"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_35323172","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
+[77507, {"obj_design":{"int_idRecord":77507,"str_idXDesign":"myId_13373239","str_name":"xapp_button_provision_linked_contact_show","str_nameShort":"xapp_button_provision_linked_contact_show","str_type":"xapp_button_provision_linked_contact_show","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Other","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_star","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Show Linked Contacts","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_13373239"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_13373239","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
+[77508, {"obj_design":{"int_idRecord":77508,"str_idXDesign":"myId_27734227","str_name":"xapp_button_provision_b2b","str_nameShort":"xapp_button_provision_b2b","str_type":"xapp_button_provision_b2b","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_star","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"B2B Model","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_27734227"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"dom_objContentContainer":{"Id":"myId_27734227","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
+[77509, {"obj_design":{"int_idRecord":77509,"str_idXDesign":"myId_25422221","str_name":"xapp_button_provision_linked_task_show","str_nameShort":"xapp_button_provision_linked_task_show","str_type":"xapp_button_provision_linked_task_show","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Other","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_star","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Show Linked Tasks","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_25422221"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_25422221","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
+[77510, {"obj_design":{"int_idRecord":77510,"str_idXDesign":"myId_37233216","str_name":"xapp_button_maintain","str_nameShort":"xapp_button_maintain","str_type":"xapp_button_maintain","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_wrench","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Maintain","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_37233216"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"dom_objContentContainer":{"Id":"myId_37233216","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
+[77511, {"obj_design":{"int_idRecord":77511,"str_idXDesign":"myId_35617732","str_name":"xapp_button_maintain_debug_release","str_nameShort":"xapp_button_maintain_debug_release","str_type":"xapp_button_maintain_debug_release","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_wrench","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Debug Release","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_35617732"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"dom_objContentContainer":{"Id":"myId_35617732","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
+[77512, {"obj_design":{"int_idRecord":77512,"str_idXDesign":"myId_28218884","str_name":"xapp_button_backup","str_nameShort":"xapp_button_backup","str_type":"xapp_button_backup","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_wrench","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Backup","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_28218884"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"dom_objContentContainer":{"Id":"myId_28218884","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
+[77513, {"obj_design":{"int_idRecord":77513,"str_idXDesign":"myId_73811662","str_name":"xapp_button_provision_b2c","str_nameShort":"xapp_button_provision_b2c","str_type":"xapp_button_provision_b2c","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_star","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"B2C Model","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_73811662"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"dom_objContentContainer":{"Id":"myId_73811662","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
+[77514, {"obj_design":{"int_idRecord":77514,"str_idXDesign":"myId_42235730","str_name":"xapp_button_provision_linked_opportunity_hide","str_nameShort":"xapp_button_provision_linked_opportunity_hide","str_type":"xapp_button_provision_linked_opportunity_hide","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Other","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_star","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Hide Linked Opportunities","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_42235730"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_42235730","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
+[77515, {"obj_design":{"int_idRecord":77515,"str_idXDesign":"myId_22206726","str_name":"xapp_button_provision_linked_contact_hide","str_nameShort":"xapp_button_provision_linked_contact_hide","str_type":"xapp_button_provision_linked_contact_hide","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Other","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_star","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Hide Linked Contacts","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_22206726"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_22206726","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
+[77516, {"obj_design":{"int_idRecord":77516,"str_idXDesign":"myId_77777817","str_name":"xapp_button_provision_linked_task_hide","str_nameShort":"xapp_button_provision_linked_task_hide","str_type":"xapp_button_provision_linked_task_hide","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Other","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_star","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Hide Linked Tasks","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_77777817"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_77777817","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
 [77517, {"obj_design":{"int_idRecord":77517,"str_idXDesign":"myId_07873870","str_name":"xapp_button_general_row_hide","str_nameShort":"xapp_button_general_row_hide","str_type":"xapp_button_general_row_hide","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_visibility_off","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Hide Row","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_07873870"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_07873870","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
 [77518, {"obj_design":{"int_idRecord":77518,"str_idXDesign":"myId_70742723","str_name":"xapp_button_general_row_show","str_nameShort":"xapp_button_general_row_show","str_type":"xapp_button_general_row_show","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_visibility_on","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Show Row","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_70742723"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_70742723","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
 [77519, {"obj_design":{"int_idRecord":77519,"str_idXDesign":"myId_11317771","str_name":"xapp_button_general_archive_show","str_nameShort":"xapp_button_general_archive_show","str_type":"xapp_button_general_archive_show","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_visibility_on","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Show Archive","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_11317771"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"dom_objContentContainer":{"Id":"myId_11317771","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
@@ -21569,10 +20658,7 @@ var obj_InstanceJSONMap = new Map([
 [77523, {"obj_design":{"int_idRecord":77523,"str_idXDesign":"myId_37265133","str_name":"xapp_button_general_form_up","str_nameShort":"xapp_button_general_form_up","str_type":"xapp_button_general_form_up","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Move Up","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_37265133"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_37265133","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
 [77524, {"obj_design":{"int_idRecord":77524,"str_idXDesign":"myId_23224334","str_name":"xapp_button_general_form_gap","str_nameShort":"xapp_button_general_form_gap","str_type":"xapp_button_general_form_gap","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Form Gap","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_23224334"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_23224334","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
 [77525, {"obj_design":{"int_idRecord":77525,"str_idXDesign":"myId_43777772","str_name":"xapp_button_general_form_group","str_nameShort":"xapp_button_general_form_group","str_type":"xapp_button_general_form_group","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Form Group","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_43777772"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_43777772","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
-[77526, {"obj_design":{"int_idRecord":77526,"str_idXDesign":"myId_73677956","str_name":"xapp_button_system_home","str_nameShort":"xapp_button_system_home","str_type":"xapp_button_system_home","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_idProject":"notset","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Home System","str_lastVersionDate":"notset","str_icon":"xapp_desk"},"obj_domProperty":{"innerText":"Complete","innerHTML":"Refresh","aria-label":"Home","title":"Home","Id":"myId_73677956"},"obj_domStyle":{"padding":"10px","cursor":"pointer","opacity":"1"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_73677956","aria-label":"Home"}}],
 [77527, {"obj_design":{"int_idRecord":77527,"str_idXDesign":"myId_48221342","str_name":"xapp_button_next_record","str_nameShort":"xapp_button_next_record","str_type":"xapp_button_next_record","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_idProject":"myId_25365115","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Next Record","str_lastVersionDate":"notset","str_icon":""},"obj_domProperty":{"innerText":"Complete","innerHTML":"Refresh","aria-label":"New Record","Id":"myId_48221342"},"obj_domStyle":{"padding":"10px","cursor":"pointer","opacity":"1"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_48221342","aria-label":"New Record"}}],
-[77528, {"obj_design":{"int_idRecord":77528,"str_idXDesign":"myId_31817112","str_name":"xapp_button_mover_home","str_nameShort":"xapp_button_mover_home","str_type":"xapp_button_mover_home","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_idProject":"myId_26127270","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Home System","str_lastVersionDate":"notset","str_icon":"xapp_desk"},"obj_domProperty":{"innerText":"Complete","innerHTML":"Refresh","aria-label":"Home","title":"Home","Id":"myId_31817112"},"obj_domStyle":{"padding":"10px","cursor":"pointer","opacity":"1"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_31817112","aria-label":"Home"}}],
-[77529, {"obj_design":{"int_idRecord":77529,"str_idXDesign":"myId_23322328","str_name":"xapp_button_mover_open","str_nameShort":"xapp_button_mover_open","str_type":"xapp_button_mover_open","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_idProject":"myId_26127270","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Open System","str_lastVersionDate":"notset","str_icon":"xapp_desk"},"obj_domProperty":{"innerText":"Complete","innerHTML":"Refresh","aria-label":"Home","title":"Home","Id":"myId_23322328"},"obj_domStyle":{"padding":"10px","cursor":"pointer","opacity":"1"},"bln_enabled":true,"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_23322328","aria-label":"Home"}}],
 [77530, {"obj_design":{"int_idRecord":77530,"str_idXDesign":"myId_92128822","str_name":"xapp_button_general_use_task_date","str_nameShort":"xapp_button_general_use_task_date","str_type":"xapp_button_general_use_task_date","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_calendar_month","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Use Task Date","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_92128822"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"dom_objContentContainer":{"Id":"myId_92128822","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
 [77531, {"obj_design":{"int_idRecord":77531,"str_idXDesign":"myId_22868883","str_name":"xapp_button_general_use_task_datetime","str_nameShort":"xapp_button_general_use_task_datetime","str_type":"xapp_button_general_use_task_datetime","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"Xtra","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"xapp_calendar_month","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Use Date & Time","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_22868883"},"obj_domStyle":{"padding":"10px","cursor":"pointer"},"bln_enabled":true,"dom_objContentContainer":{"Id":"myId_22868883","str_name":"xapp_button_navigate_desktop","arial-label":"Goto Office"}}],
 [77570, {"obj_design":{"int_idRecord":77570,"str_idXDesign":"myId_29727565","str_name":"theme_ocean","str_nameRegistrator":"notset","str_nameShort":"theme_ocean","str_idProject":"myId_01221712","str_type":"xapp_theme","str_themeType":"xapp_theme","str_tag":"theme_ocean","str_content":"","bln_registerAtProject":true,"bln_registerAtContainer":true,"bln_classController":true,"str_classList":"notset","str_classExtend":"notset","str_createdDate":"2024-11-30 12:02:09","str_modifiedDate":"2024-11-30 12:02:09","bln_editPin":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset","str_categoryName":"Anchor","bln_isThemeItem":true,"bln_lockComponent":true,"arr_item":[{"obj_design":{"int_idRecord":"77773","str_type":"xapp_accordion"}},{"obj_design":{"int_idRecord":"77774","str_type":"form_span"}},{"obj_design":{"int_idRecord":"77775","str_type":"form_span"}},{"obj_design":{"int_idRecord":"77776","str_type":"form_span"}},{"obj_design":{"int_idRecord":"77777","str_type":"form_span"}}]},"obj_domProperty":{"Id":"myId_29727565"},"obj_domStyle":{"font-family":"","font-size":"","display":"block"},"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_29727565"}}],
@@ -21583,7 +20669,7 @@ var obj_InstanceJSONMap = new Map([
 [77764, {"obj_design":{"str_tag":"span","str_type":"form_button_span","str_idXDesign":"myId_87111743","str_name":"form_button_span","str_nameShort":"form_button_span","str_themeType":"form_button_span","int_idRecord":"77764","str_createdDate":"2022-11-18 16:02:10","str_modifiedDate":"2022-11-18 16:02:10","blnIsTag":true,"bln_editPin":true,"bln_typeable":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_idProject":"myId_11190110","str_text":"My Button","str_categoryName":"","str_nameRegistrator":"notset","bln_isThemeItem":true,"str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_lastVersionDate":"notset"},"obj_domProperty":{"innerHTML":"My Button","Id":"myId_87111743"},"obj_domStyle":{"maxheight":"175","font-wiegth":"bold","font-weight":"bold","font-size":"1rem","color":"rgb(64, 169, 236)","display":"block"},"dom_objContentContainer":{"Id":"myId_87111743"}}],
 [77765, {"obj_design":{"int_idRecord":"77765","str_idXDesign":"myId_17078909","str_name":"form_button_icon","str_nameShort":"form_button_icon","str_type":"form_button_icon","str_tag":"i","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_button_icon","bln_editPin":true,"bln_registerAtContainer":true,"str_idProject":"myId_79120090","str_categoryName":"","str_nameRegistrator":"notset","bln_isThemeItem":true,"str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"star","str_lastVersionDate":"notset","str_class":"star","bln":"expand","bln_expand":true},"obj_domProperty":{"innerHTML":"star","Id":"myId_17078909"},"obj_domStyle":{"font-weight":"bold","font-size":"1.5em","color":"rgb(64, 169, 236)","display":"block"},"dom_objContentContainer":{"Id":"myId_17078909"}}],
 [77766, {"obj_design":{"int_idRecord":"77766","str_idXDesign":"myId_14890434","str_name":"form_button_anchor","str_nameShort":"form_button_anchor","str_type":"form_button_anchor","str_tag":"a","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_button_anchor","bln_editPin":true,"bln_registerAtContainer":true,"str_idProject":"myId_11190110","arr_item":[{"obj_design":{"int_idRecord":77764,"str_type":"form_button_span"}},{"obj_design":{"int_idRecord":77765,"str_type":"form_button_icon"}}],"str_categoryName":"","str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset","bln_isThemeItem":true},"obj_domProperty":{"target":"_blank","Id":"myId_14890434"},"obj_domStyle":{"justify-content":"center","align-items":"center","text-decoration":"none","font-size":"1rem","display":"flex","text":"de","border":"0px solid black","gap":"5px","font-weight":"bold","color":"rgb(64, 169, 236)"},"dom_objContentContainer":{"Id":"myId_14890434"},"obj_icon":{"obj_design":{"int_idRecord":77765,"str_type":"form_button_icon"}},"obj_span":{"obj_design":{"int_idRecord":77764,"str_type":"form_button_span"}}}],
-[77767, {"obj_design":{"int_idRecord":"77767","str_idXDesign":"myId_31379983","str_name":"form_button_rich","str_nameShort":"form_button_rich","str_type":"form_button_rich","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"form_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_idProject":"myId_29727565","arr_item":[{"obj_design":{"int_idRecord":"77766","str_type":"form_button_anchor"}}],"str_icon":"xapp_star","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"","str_text":"My Button","str_lastVersionDate":"notset","bln_isThemeItem":true,"bln_classController":"false"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_31379983"},"obj_domStyle":{"5":"rem","border-radius":"4px","align-items":"center","font-size":"1rem","font-weight":"bold","padding":"10px","cursor":"pointer","background":"white","border":"1px solid white","color":"rgb(64, 169, 236)","display":"flex"},"bln_enabled":true,"dom_objContentContainer":{"Id":"myId_31379983","str_name":"xapp_button_navigate_desktop"}}],
+[77767, {"obj_design":{"int_idRecord":"77767","str_idXDesign":"myId_31379983","str_name":"form_button_rich","str_nameShort":"form_button_rich","str_type":"form_button_rich","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"form_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_idProject":"myId_29727565","arr_item":[{"obj_design":{"int_idRecord":"77766","str_type":"form_button_anchor"}}],"str_icon":"xapp_star","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"","str_text":"My Button","str_lastVersionDate":"notset","bln_isThemeItem":true,"bln_classController":"false"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_31379983"},"obj_domStyle":{"5":"rem","border-radius":"4px","align-items":"center","font-size":"1.5rem","font-weight":"bold","padding":"10px","cursor":"pointer","background":"white","border":"1px solid white","color":"rgb(64, 169, 236)","display":"flex"},"bln_enabled":true,"dom_objContentContainer":{"Id":"myId_31379983","str_name":"xapp_button_navigate_desktop"}}],
 [77769, {"obj_design":{"int_idRecord":"77769","str_idXDesign":"myId_71379914","str_name":"form_fieldset","str_nameShort":"form_fieldset","str_type":"form_fieldset","str_tag":"fieldset","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_section","bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_nameRegistrator":"notset","str_idProject":"myId_29727565","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset","arr_item":[{"obj_design":{"int_idRecord":"77760","str_type":"form_legend"}},{"obj_design":{"int_idRecord":"77763","str_type":"form_field"}},{"obj_design":{"int_idRecord":"77767","str_type":"form_button_rich"}}],"bln_isThemeItem":true,"lockOpen":true,"bln_classController":"false"},"obj_domProperty":{"Id":"myId_71379914"},"obj_domStyle":{"display":"flex","flex-direction":"column","flex-wrap":"wrap","gap":"10px","flex-flow":"wrap","align-self":"flex-start","border-radius":"4px","padding-top":"0px","padding-bottom":"0px","background-color":"transparent","background":"rgb(64, 169, 236)","border":"1px outset rgb(64, 169, 236)","box-shadow":"","padding":"10px"},"dom_objContentContainer":{"Id":"myId_71379914"},"bln_toggleState":true}],
 [77770, {"obj_design":{"int_idRecord":"77770","str_idXDesign":"myId_78947874","str_name":"form_hardrule","str_nameShort":"form_hardrule","str_type":"form_hardrule","str_themeType":"form_hardrule","str_tag":"hr","bln_registerAtContainer":true,"str_createdDate":"2023-09-28 17:30:59","str_modifiedDate":"2023-09-28 17:30:59","bln_editPin":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_nameRegistrator":"notset","str_idProject":"myId_29727565","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset","bln_isThemeItem":true},"obj_domProperty":{"Id":"myId_78947874"},"obj_domStyle":{"height":"10px","width":"100%","border":"0px","background":"rgb(64, 169, 236)"},"dom_objContentContainer":{"Id":"myId_78947874"}}],
 [77771, {"obj_design":{"int_idRecord":"77771","str_idXDesign":"myId_99777780","str_name":"form_menu_panel","str_nameShort":"form_menu_panel","str_type":"form_menu_panel","str_themeType":"form_menu_panel","str_tag":"form_menu_panel","bln_registerAtContainer":true,"str_createdDate":"2022-11-15 08:47:57","str_modifiedDate":"2022-11-15 08:47:57","bln_editPin":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_isThemeItem":true,"str_nameRegistrator":"notset","str_idProject":"myId_29727565","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset","str_categoryName":"","arr_item":[{"obj_design":{"int_idRecord":"77769","str_type":"form_fieldset"}},{"obj_design":{"int_idRecord":"77770","str_type":"form_hardrule"}}],"bln_classController":"false"},"obj_domProperty":{"Id":"myId_99777780"},"obj_domStyle":{"flexdirection":"column","gap":"10px","display":"flex","padding":"10px","flex-direction":"column","flex flow":"column wrap","border":"0px solid white"},"dom_objContentContainer":{"Id":"myId_99777780"}}],

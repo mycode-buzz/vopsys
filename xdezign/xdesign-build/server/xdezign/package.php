@@ -8,6 +8,8 @@ require_once dirname($_SERVER["DOCUMENT_ROOT"], 2)."/upgrade/xdesign-build/autho
 require_once __DIR__."/xdezign.php";
 /////////////////////////HEADER
 
+set_time_limit(200);
+
 class package extends xdezign{
   function __construct() {          
     parent::__construct();

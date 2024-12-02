@@ -12,7 +12,7 @@
                   if(this.fn_getDebugPin()){this.fn_highlightBorder("red");}                  
                 }
                 fn_expand(){//called by base onload
-                  this.fn_expandMutliple(3);
+                  //this.fn_expandMutliple(3);
                 }
               }//END CLS
               //END TAG
