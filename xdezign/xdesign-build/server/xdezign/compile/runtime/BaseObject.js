@@ -534,17 +534,7 @@ class BaseObject extends LevelObject{
           }
       }
     
-    fn_expandFraction(int_number){
-        if(this.obj_design.bln_expand){                     
-          let str_fontSize;
-          str_fontSize="1.1rem";                   
-          let int_padding=10;   
-          let int_paddingExpand=int_padding + (int_padding/int_number);
-          this.fn_setStyleProperty("padding", +int_paddingExpand+"px");        
-          this.fn_setStyleProperty("font-weight", "bold");                                                                    
-          this.fn_setStyleProperty("font-size", str_fontSize);        
-          }
-      }
+    
       fn_expand(){        
       }
     
