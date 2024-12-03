@@ -130,8 +130,21 @@ $str_header2=<<<heredoc
     color: black;
   }  
   body {
-    overflow-y: scroll;
+    overflow-y: scroll;     
+    /*
+    margin-left: 10%;
+    margin-right: 10%
+    //*/
   }
+
+  /* For screens smaller than 768px (adjust as needed) */
+@media (max-width: 768px) {
+  body {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+    
 </style>
 <body>
 heredoc;

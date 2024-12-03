@@ -19,16 +19,16 @@
                     console.log("xapp_console fn_disable");      
                   }               
                   
-                  this.fn_disableBlock(this.obj_blockLeft);
-                  this.fn_disableBlock(this.obj_blockRight);
+                  this.fn_disableBlock(this.obj_blockStart);
+                  this.fn_disableBlock(this.obj_blockEnd);
                 }
                 fn_hide(){        
                   if(this.bln_debugContainer){
                     console.log("xapp_console fn_hide");      
                   }                                  
                   
-                  this.fn_hideBlock(this.obj_blockLeft);
-                  this.fn_hideBlock(this.obj_blockRight);
+                  this.fn_hideBlock(this.obj_blockStart);
+                  this.fn_hideBlock(this.obj_blockEnd);
                 }
 
                 fn_disableBlock(obj_block){          
@@ -63,10 +63,10 @@
                     console.log("xapp_console fn_addConsoleContainer");       
                   }                                         
                   let obj_block, obj_item;                  
-                  obj_block=this.obj_blockLeft;                                                                        
+                  obj_block=this.obj_blockStart;                                                                        
                   
                   if(bln_side){
-                    obj_block=this.obj_blockRight;                    
+                    obj_block=this.obj_blockEnd;                    
                   }
 
                   if(!obj_block){return;}                  
@@ -107,12 +107,12 @@
                 fn_getConsoleContainer(str_nameConsoleContainer){
                   let obj_block, obj_item;                  
                   
-                  obj_block=this.obj_blockLeft;
+                  obj_block=this.obj_blockStart;
                   if(!obj_block){return;}                  
                   obj_item=obj_block.fn_getComponent(str_nameConsoleContainer);
                   if(obj_item){return obj_item;}
                   
-                  obj_block=this.obj_blockRight;
+                  obj_block=this.obj_blockEnd;
                   if(!obj_block){return;}                  
                   obj_item=obj_block.fn_getComponent(str_nameConsoleContainer);
                   if(obj_item){return obj_item;}                  
@@ -120,11 +120,12 @@
                 fn_onLoad(){
                   super.fn_onLoad();                                                      
                   
-                  this.obj_blockLeft=this.fn_getItemGoSouth("block_left");                  
-                  this.obj_blockRight=this.fn_getItemGoSouth("block_right");                 
+                  this.obj_blockStart=this.fn_getItemGoSouth("block_start");                  
+                  this.obj_blockEnd=this.fn_getItemGoSouth("block_end");                 
+                  
 
-                  if(this.fn_getDebugPin()){this.obj_blockLeft.fn_highlightBorder("green");}
-                  if(this.fn_getDebugPin()){this.obj_blockRight.fn_highlightBorder("purple");}                  
+                  //this.obj_blockStart.fn_highlightBorder("green");
+                  //this.obj_blockEnd.fn_highlightBorder("purple");                
                   
                 }
                 

@@ -20,7 +20,7 @@
                   this.obj_paramRow.int_ordinalPosition=this.obj_paramRS.int_ordinalPosition;                                    
                   this.obj_paramRow.obj_paramRS=this.obj_paramRS;  
                   
-                  
+                  this.obj_holder.obj_fieldset=this;//"menu" columns will be added to this row
                   
 
                   this.fn_computeMetaColumn();                                  
@@ -28,11 +28,9 @@
                   this.fn_removeChildren();                                       
                 }    
                   
-                fn_preComputeColumn(){                  
-                  if(!this.obj_holder.obj_section){this.obj_holder.obj_section=this;}                                                           
-
-                  
+                fn_preComputeColumn(){
                 }
+
                 fn_postComputeColumn(){}
 
                 fn_computeMetaColumn(){ 
@@ -241,14 +239,14 @@
                     str_type=this.obj_paramRow.obj_metaColumn.MetaClassType;                    
                   }
 
-                  obj_column=this.obj_holder.obj_section.fn_addContextItem(str_type);   
+                  obj_column=this.obj_holder.obj_fieldset.fn_addContextItem(str_type);   
                   
                   //console.log("str_type:" + str_type);
                   
                   if(obj_column){
                     this.obj_paramRow.arr_column.push(obj_column);                    
-                    obj_column.fn_initializeColumn(this);//after value will now in place.                    
-                    obj_column.fn_computeField();
+                    obj_column.fn_initializeColumn(this);//after value will now in place.                                        
+                    obj_column.fn_computeField();                  
                   
                     this.fn_onComputecolumn(obj_column);                  
                   

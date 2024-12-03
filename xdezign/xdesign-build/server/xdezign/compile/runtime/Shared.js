@@ -86,6 +86,11 @@ class Shared{
     }
     return true;
   }
+
+  fn_isSmallScreen() {
+    return window.innerWidth < 420;
+  }
+  
    
   fn_extractNumbers(str) {
     const numbers = str.match(/\d+/g);

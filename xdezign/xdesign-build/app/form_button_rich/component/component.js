@@ -56,7 +56,18 @@
         } 
         fn_setText(str_value){          
           
-          super.fn_setText(str_value);                    
+          super.fn_setText(str_value);
+          
+          if(this.obj_design.str_themeType==="form_button"){
+            if(obj_project.bln_isMobile){
+              if(obj_shared.fn_isSmallScreen()){//less than 400              
+                if(this.obj_design.str_icon){
+                  this.fn_showIcon(this.obj_design.str_icon);                  
+                  str_value="";
+                } 
+              }
+            }
+          }
 
           let obj_anchor=this.fn_getComponent("form_button_anchor");          
           if(obj_anchor){          

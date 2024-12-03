@@ -31,13 +31,13 @@
           let bln_debug=false;          
           
           switch(str_value){                        
-            case "":                         
-            case "rowz_icon_blank":                         
+              case "":                         
+              case "rowz_icon_blank":                         
               //str_value="blank";
               str_value='<svg width="0px" height="24px"></svg>';
-              break;
-              brush
+              break;              
               case "xapp_xdezign":
+              //brush
               str_value="brush";
               break;
               case "xdezign_project":
@@ -138,7 +138,11 @@
               break;              
               case "xapp_key":  
               str_value="key";   
-              break;              
+              break;            
+              case "xapp_add":  
+              str_value="add";   
+              break;            
+              
               
             default:
               str_value=str_value;
@@ -172,7 +176,7 @@
           
           if(str_value=="notset"){
             str_value="";
-          }
+          }          
           
           if(str_value){                                                    
             this.obj_span.fn_setText(str_value);

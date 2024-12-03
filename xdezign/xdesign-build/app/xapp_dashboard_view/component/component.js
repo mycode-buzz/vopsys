@@ -10,8 +10,7 @@
           if(!super.fn_loadDashboard()){return;}                                                                                              
           
           this.obj_menuPanel=this.fn_getParentComponent();                  
-          if(this.obj_menuPanel){
-            //let obj_consoleContainer=this.obj_menuPanel.fn_addConsoleContainer("xapp_console_container_general", true);            
+          if(this.obj_menuPanel){            
             let obj_consoleContainer=this.obj_consoleContainerRecord=this.obj_menuPanel.fn_addConsoleContainer("console_container_record", true);                                    
             
             this.obj_button_file_select=obj_consoleContainer.fn_getConsoleComponent("xapp_button_file_select");                                                                                   

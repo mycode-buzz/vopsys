@@ -96,13 +96,14 @@ class component extends BaseObject {
         this.fn_setAxis(bln_axis);        
     }    
 
-    //fn_flipAxis(bln_axis){                
-        //if(bln_axis===undefined){bln_axis=this.fn_getAxis();}        
-        //this.fn_setAxis(obj_shared.fn_flipBool(bln_axis));                
-    //}
+    fn_flipAxis(bln_axis){                
+        if(bln_axis===undefined){bln_axis=this.fn_getAxis();}        
+        this.fn_setAxis(obj_shared.fn_flipBool(bln_axis));                
+    }
 
     fn_setAxis(bln_axis){
         this.obj_holder.bln_axis=bln_axis;        
+        //this.fn_setStyleProperty("display", "flex");
         if(!bln_axis){//true=row
             this.fn_setStyleProperty("flex-direction", "row");
             

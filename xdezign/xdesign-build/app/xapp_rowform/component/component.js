@@ -19,30 +19,7 @@
                 fn_onLoad(){    
                   super.fn_onLoad();                  
                   if(this.fn_getDebugPin()){this.fn_highlightBorder("yellow");}                                    
-                }
-                fn_addFormPanel(){                                                  
-                  
-                  if(this.obj_paramRS.bln_reportView){return;}
-                  
-
-                  let obj_panel=this.fn_addContextItem("form_panel");                   
-                  if(obj_panel){
-                    //console.log("panel is true");
-                    //obj_panel.fn_maintainAxis(this.obj_paramRS.bln_axis);
-                    this.obj_holder.obj_panel=obj_panel;                                    
-                    this.obj_holder.obj_sectionPanel=obj_panel;                                      
-
-                    if(this.obj_paramRS.bln_axis){ // only add section panel to vertical form                    
-                      let obj_sectionPanel=obj_panel.fn_addContextItem("form_section_panel");                                    
-                      //obj_sectionPanel.fn_flipAxis(this.obj_paramRS.bln_axis);                  
-                      this.obj_holder.obj_sectionPanel=obj_sectionPanel;                                        
-                    }
-                    //this.obj_holder.obj_sectionPanel.fn_flipAxis(this.obj_paramRS.bln_axis);                                      
-                  }             
-                  else{
-                    //console.log("panel is false");
-                  }
-                }        
+                }                
                 fn_onNewRecordPushDefaultValueColumns(bln_isData=false){
                   let arr, i, obj_column;
                   arr=this.obj_paramRow.arr_column;
@@ -92,6 +69,7 @@
                 }
                 
                 fn_preComputeColumn(){
+                  super.fn_preComputeColumn();
                 }
 
                 fn_postComputeColumn(){
@@ -111,12 +89,21 @@
 
                   super.fn_postComputeColumns();
                   
-                  if(this.obj_holder.obj_section){//refers only to the last section on the form
-                    if(!this.obj_holder.obj_section.obj_design.lockOpen){                    
-                      this.obj_holder.obj_section.fn_close();
+                  const obj_fieldset=this.obj_holder.obj_fieldset;
+                  if(obj_fieldset){//refers only to the last section on the form
+                    if(!obj_fieldset.obj_design.lockOpen){                    
+                      obj_fieldset.fn_close();
                     }
                   }
                 }
+
+                fn_addFormPanel(){                                                                    
+                  if(this.obj_paramRS.bln_reportView){return;}
+                  const obj_formPanel=this.fn_addContextItem("form_panel");                                    
+                  obj_formPanel.fn_onRowMember(this);                                    
+                  this.obj_holder.obj_formPanel=obj_formPanel;                  
+                  
+                }        
 
                 fn_computeColumn(int_countColumn){ 
 
@@ -129,21 +116,16 @@
                   //console.log("str_type:" + str_type);
 
                   this.fn_configureSection(int_countColumn);
+                  
+                  const obj_fieldset=this.obj_holder.obj_fieldset;                  
 
-                  
-                  let obj_section=this.obj_holder.obj_section;
-                  if(!obj_section){
-                    obj_section=this.obj_holder.obj_sectionPanel;
-                  }
-                  obj_column=obj_section.fn_addContextItem(str_type);
-
-                  
-                  
+                  obj_column=obj_fieldset.fn_addContextItem(str_type);
                   
                   if(obj_column){
                     this.obj_paramRow.arr_column.push(obj_column);
-                    obj_column.fn_initializeColumn(this);//paramrow has the current metacolumn
-                    obj_column.fn_computeField();                     
+                    obj_column.fn_initializeColumn(this);//paramrow has the current metacolumn                    
+                    obj_column.fn_computeField();                  
+
                     this.fn_onComputecolumn(obj_column);                                      
                     
                   }
@@ -161,16 +143,10 @@
                       //str_sectionTitle="Record";
                     }                    
                   }
-                  if(this.obj_paramRow.int_sectionColumnCount===this.obj_paramRS.int_separator){
-                    //this.bln_shift=true;
-                  } 
+                  
                   if(str_sectionTitle){                                                          
                     this.bln_shift=true;                    
                   }                  
-
-                  if(!this.obj_holder.obj_section){
-                    //this.bln_shift=true;                    
-                  }
 
                   if(this.bln_shift){
                     this.fn_addSection(this.obj_paramRow.obj_metaColumn);                                     
@@ -212,20 +188,18 @@
                 
 
                 fn_addSection(obj_metaColumn){                                                      
-
-                  let obj_section;
+                  
                   
                   this.obj_paramRow.int_countSection++;                  
                   this.obj_paramRow.int_sectionColumnCount=0;                                     
                   
-                  obj_section=this.obj_holder.obj_section=this.obj_holder.obj_sectionPanel.fn_addContextItem("form_fieldset");                                                                                                            
-                  obj_section.fn_setStyleProperty("overflow", "hidden");                  
-                  obj_section.obj_design.lockOpen=true;
+                  const obj_fieldset=this.obj_holder.obj_fieldset=this.obj_holder.obj_formPanel.fn_addContextItem("form_fieldset");
+                  obj_fieldset.fn_onRowMember(this);
 
                   
                   let str_sectionTitle=obj_metaColumn.SectionTitle;
                   if(str_sectionTitle){                                                                                
-                    obj_section.fn_setText(str_sectionTitle);                                                       
+                    obj_fieldset.fn_setText(str_sectionTitle);                                                       
                   }
 
                   let bln_lockOpen=true;                                      
@@ -233,7 +207,7 @@
                   if(bln_sectionClose){                         
                     bln_lockOpen=false;                                                                           
                   }
-                  obj_section.obj_design.lockOpen=bln_lockOpen;                    
+                  obj_fieldset.obj_design.lockOpen=bln_lockOpen;                    
                 }               
 
                 

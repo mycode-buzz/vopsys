@@ -4,9 +4,9 @@ class report_column extends xapp_columnform{
     super(obj_ini);        
   } 
   fn_initialize(obj_ini){
-    super.fn_initialize(obj_ini);                    
+    super.fn_initialize(obj_ini);                        
   }                                               
-
+  
   fn_computeField(){                                    
     
     let obj_field, obj_label, obj_control, str_type;                  

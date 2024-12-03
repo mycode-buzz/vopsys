@@ -5,7 +5,7 @@ class form_fieldset extends component{
   } 
   fn_initialize(obj_ini){
     super.fn_initialize(obj_ini);                
-    
+    this.obj_design.lockOpen=true;
   }
   fn_onLoad(){
     super.fn_onLoad();
@@ -14,6 +14,20 @@ class form_fieldset extends component{
     this.bln_toggleState=true;
     
     this.obj_themeItemSection=this.fn_getThemeObject("form_section");    
+    this.fn_setStyleProperty("overflow", "hidden");                      
+    this.fn_setStyleProperty("margin", "0px");                      
+  }
+  fn_onRowMember(obj_row){
+
+    this.obj_row=obj_row;                  
+    this.obj_paramRow=this.obj_row.obj_paramRow;                                    
+    this.obj_paramRS=this.obj_paramRow.obj_paramRS;                                                       
+    
+    this.fn_setStyleProperty("display", "flex");
+    this.fn_setStyleProperty("flex-wrap", "wrap");
+    this.fn_setAxis(this.obj_paramRS.bln_axisFieldset);
+    
+
   }
   
   fn_setText(str_value){         

@@ -10,7 +10,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>var ServerQueryString = "<?php echo $_SERVER['QUERY_STRING']; ?>";</script>
-<script type="module" src="/app-version-2024-12-02-11-25-2953.mjs"></script>
+<script type="module" src="/app-version-2024-12-03-01-31-4597.mjs"></script>
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
@@ -28,8 +28,21 @@
     color: black;
   }  
   body {
-    overflow-y: scroll;
+    overflow-y: scroll;     
+    /*
+    margin-left: 10%;
+    margin-right: 10%
+    //*/
   }
+
+  /* For screens smaller than 768px (adjust as needed) */
+@media (max-width: 768px) {
+  body {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+    
 </style>
 <body>
 </body>

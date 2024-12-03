@@ -27,8 +27,7 @@
 
                   this.debugTypeColumn="xapp_column";                  
 
-                  this.obj_row=obj_row;
-                  
+                  this.obj_row=obj_row;                  
                   this.obj_paramRow=this.obj_row.obj_paramRow;                                    
                   this.obj_paramRS=this.obj_paramRow.obj_paramRS;                                                       
 

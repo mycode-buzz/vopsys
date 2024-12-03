@@ -732,6 +732,11 @@ class Shared{
     }
     return true;
   }
+
+  fn_isSmallScreen() {
+    return window.innerWidth < 420;
+  }
+  
    
   fn_extractNumbers(str) {
     const numbers = str.match(/\d+/g);
@@ -3537,7 +3542,8 @@ class BaseObject extends LevelObject{
         }
         
         
-        this.fn_applyTheme();        
+        this.fn_applyTheme();
+        this.fn_getFormBlockTheme();        
         this.fn_applyDesign();                                                                         
         this.fn_applyDomProperty();                                                                         
         //this.fn_applyDomAttribute();
@@ -3582,6 +3588,19 @@ class BaseObject extends LevelObject{
         this.fn_setStyleProperty("borderWidth", "3px");
         this.fn_setStyleProperty("borderColor", str_colorBorder);
     }    
+
+    fn_getFormBlockTheme(){
+        this.obj_themeBackground=this.fn_getThemeObject("form_blockbackground");
+        this.obj_themeMidground=this.fn_getThemeObject("form_blockmidground");
+        this.obj_themeForground=this.fn_getThemeObject("form_blockforground");
+        this.obj_themeHighlight=this.fn_getThemeObject("form_blockhighlight");          
+        /*
+        this.obj_themeBlock1=this.fn_getThemeObject("form_block1");
+        this.obj_themeBlock2=this.fn_getThemeObject("form_block2");
+        this.obj_themeBlock3=this.fn_getThemeObject("form_block3");
+        this.obj_themeBlock4=this.fn_getThemeObject("form_block4");
+        //*/
+    }
 
     fn_getThemeObject(str_themeType){   
 
@@ -4520,13 +4539,14 @@ class component extends BaseObject {
         this.fn_setAxis(bln_axis);        
     }    
 
-    //fn_flipAxis(bln_axis){                
-        //if(bln_axis===undefined){bln_axis=this.fn_getAxis();}        
-        //this.fn_setAxis(obj_shared.fn_flipBool(bln_axis));                
-    //}
+    fn_flipAxis(bln_axis){                
+        if(bln_axis===undefined){bln_axis=this.fn_getAxis();}        
+        this.fn_setAxis(obj_shared.fn_flipBool(bln_axis));                
+    }
 
     fn_setAxis(bln_axis){
         this.obj_holder.bln_axis=bln_axis;        
+        //this.fn_setStyleProperty("display", "flex");
         if(!bln_axis){//true=row
             this.fn_setStyleProperty("flex-direction", "row");
             

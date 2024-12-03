@@ -79,6 +79,104 @@
                 console.log("this.obj_meta.str_metaRowzName: " + this.obj_meta.str_metaRowzName);
                 console.log("obj_path.str_urlMetaRowzNameArchive: " + obj_path.str_urlMetaRowzNameArchive);
                 console.log("obj_path.str_urlMetaRecordIdArchive: " + obj_path.str_urlMetaRecordIdArchive);
+                //*/                
+
+                const int_horizontal=false, int_vertical=true;
+                
+                /*
+                // Horizontal-tb: English, French, Spanish, etc. 
+                p {
+                  writing-mode: horizontal-tb;
+                }
+
+                //* Vertical-lr: Chinese, Japanese, Korean 
+                p.vertical-lr {
+                  writing-mode: vertical-lr;
+                  text-orientation: upright;
+                }
+
+                // Vertical-rl: Arabic, Hebrew 
+                p.vertical-rl {
+                  writing-mode: vertical-rl;
+                  text-orientation: upright;
+                }
+
+                // Horizontal-bt: A less common direction, but could be used for artistic effects or specific languages 
+                p.horizontal-bt {
+                  writing-mode: horizontal-bt;
+                  text-orientation: mixed;
+                }
+                //*/
+                
+                /*
+                //HORIZONTAL, HORIZONTAL, HORIZONTAL OK
+                this.obj_paramRS.bln_axisPanel=int_horizontal;
+                this.obj_paramRS.bln_axisFieldset=int_horizontal;
+                this.obj_paramRS.bln_axisColumn=int_horizontal;                
+                //*/
+
+                //STANDARD
+                /*
+                //HORIZONTAL, HORIZONTAL, VERTICAL OK
+                this.obj_paramRS.bln_axisPanel=int_horizontal;
+                this.obj_paramRS.bln_axisFieldset=int_horizontal;
+                this.obj_paramRS.bln_axisColumn=int_vertical;                
+                //*/
+
+                /*
+                //HORIZONTAL, VERTICAL, VERTICAL OK FOR VERTICAL WRITING SYSTEMS
+                //writing-mode: vertical-lr;
+                this.obj_paramRS.bln_axisPanel=int_horizontal;
+                this.obj_paramRS.bln_axisFieldset=int_vertical;
+                this.obj_paramRS.bln_axisColumn=int_vertical;                
+                //*/
+                
+                /*
+                //HORIZONTAL, VERTICAL, HORIZONTAL OK FOR VERTICAL WRITING SYSTEMS
+                this.obj_paramRS.bln_axisPanel=int_horizontal;
+                this.obj_paramRS.bln_axisFieldset=int_vertical;
+                this.obj_paramRS.bln_axisColumn=int_horizontal;                
+                //*/
+
+                /*
+                //VERTICAL, VERTICAL, VERTICAL - no good, only 1 column down the page
+                this.obj_paramRS.bln_axisPanel=int_vertical;
+                this.obj_paramRS.bln_axisFieldset=int_vertical;
+                this.obj_paramRS.bln_axisColumn=int_vertical;                
+                //*/
+
+                /*
+                //VERTICAL, VERTICAL, HORIZONTA - no good, only 1 column down the page
+                this.obj_paramRS.bln_axisPanel=int_vertical;
+                this.obj_paramRS.bln_axisFieldset=int_vertical;
+                this.obj_paramRS.bln_axisColumn=int_horizontal;                
+                //*/
+                
+
+                /* 
+                //VERTICAL, HORIZONTAL, HORIZONTAL - OK
+                this.obj_paramRS.bln_axisPanel=int_vertical;
+                this.obj_paramRS.bln_axisFieldset=int_horizontal;
+                this.obj_paramRS.bln_axisColumn=int_horizontal;                
+                //*/
+
+                /*
+                //VERTICAL, HORIZONTAL, VERTICAL OK
+                this.obj_paramRS.bln_axisPanel=int_vertical;
+                this.obj_paramRS.bln_axisFieldset=int_horizontal;
+                this.obj_paramRS.bln_axisColumn=int_vertical;                
+                //*/
+                
+                
+                //STANDARD
+                //*
+                //HORIZONTAL, HORIZONTAL, VERTICAL OK
+                this.obj_paramRS.bln_axisPanel=int_horizontal;
+                this.obj_paramRS.bln_axisFieldset=int_horizontal;
+                this.obj_paramRS.bln_axisColumn=int_vertical;                
+                if(obj_project.bln_isMobile){
+                  this.obj_paramRS.bln_axisColumn=int_vertical;
+                }
                 //*/
 
                 this.obj_paramRS.bln_axis=false;//row              

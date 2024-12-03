@@ -22,7 +22,8 @@
                       
                     //2. SET VALUE                                          
                     this.fn_setValue(this.fn_formatColumnDefaultValue());
-                  }                  
+                  }                    
+                  
                 }     
                 
                 fn_computeField(){                         
@@ -32,6 +33,12 @@
                   //We no longer use getComponent, as this can be subclassed e.g. reportcolumn                  
                   this.obj_field=this.fn_addContextItem("form_field");                  
                   if(!this.obj_field){return;}                                               
+
+                  this.obj_field.fn_setStyleProperty("display", "flex");
+                  this.fn_setStyleProperty("flex-wrap", "wrap");
+                  this.obj_field.fn_setAxis(this.obj_paramRS.bln_axisColumn);                  
+
+                  
                   
                   if(!this.obj_paramRS.bln_reportView){
                     //this.obj_field.fn_flipAxis(this.obj_paramRS.bln_axis);                  
@@ -277,17 +284,15 @@
                 } 
                 
                 fn_showLabelBorder(){    
-                  /*
-                    if(this.fn_getLocked()){  
-                      this.obj_label.fn_setLocked();
-                      return;
-                    }
-                    //*/
-                    //this.obj_label.fn_setStyleProperty("borderColor", this.str_borderHighlight);                                    
-                    this.obj_label.fn_setStyleProperty("borderColor", "white");                                    
-                }
+                    this.obj_label.fn_setStyleProperty("borderColor", this.obj_themeForground.fn_getStyleProperty("backgroundColor"));                                    
+                }        
+                fn_highlightLabelBorder(){    
+                  //this.obj_label.fn_setStyleProperty("borderColor", this.obj_themeForground.fn_getStyleProperty("backgroundColor"));                                    
+                }        
+              
                 fn_hideLabelBorder(){                                      
-                    this.obj_label.fn_setStyleProperty("borderColor", "transparent");                
+                  //this.obj_label.fn_setStyleProperty("borderColor", "transparent");                                  
+                  this.obj_label.fn_setStyleProperty("borderColor", this.obj_themeBackground.fn_getStyleProperty("backgroundColor"));                
                 }
 
                 fn_onChildMouseUp(e){                         
@@ -306,7 +311,7 @@
                 fn_onChildMouseEnter(e){                                             
                   if(obj_project.obj_itemEvent===this.obj_label){
                     //LABEL ACTION
-                    this.fn_showLabelBorder();                  
+                    this.fn_highlightLabelBorder();                  
                     //LABEL ACTION
                   }
                 } 

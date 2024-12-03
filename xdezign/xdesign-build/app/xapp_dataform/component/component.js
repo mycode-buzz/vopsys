@@ -50,14 +50,18 @@
                     case (0)://no row found
                       this.fn_setDisplay(false);                  
                     break;
-                    case (1)://single row found                 
-                    break;                    
+                    case (1)://single row found                                     
+                      this.obj_paramRS.bln_showFieldHeading=true;                               
+                      this.obj_paramRS.bln_autoSection=true;//one section                                    
+                      this.obj_paramRS.bln_axis=false;//flex column
+                      this.fn_setAxis(this.obj_paramRS.bln_axis);
+                    break;
                     default:
                       if(this.obj_paramRS.int_totalRowReturned>1){//many rows                                    
                         this.obj_paramRS.bln_showFieldHeading=false;                               
                         this.obj_paramRS.bln_autoSection=false;//one section                                    
                         this.obj_paramRS.bln_axis=false;//flex row
-                        //this.fn_setAxis(this.obj_paramRS.bln_axis);
+                        this.fn_setAxis(this.obj_paramRS.bln_axis);
                       }
                   }                                    
                 }
