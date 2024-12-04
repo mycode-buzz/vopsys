@@ -7,28 +7,37 @@
                 fn_initialize(obj_ini){
                   super.fn_initialize(obj_ini);                
 
-                  this.fn_setIsContainer(false);                                                      
+                  this.fn_setIsContainer(false);                                                                       
                   
+                }    
+                fn_holdEvent(){
 
-                  //*
                   this.obj_holder.bln_listenFocus=true;        
                   this.obj_holder.bln_listenBlur=true;        
                   this.obj_holder.bln_listenChange=true;
                   this.obj_holder.bln_listenKeyDown=true;
                   this.obj_holder.bln_listenKeyUp=true;        
-
                   this.obj_holder.bln_listenClick=true;
-                  this.obj_holder.bln_listenDblClick=true;                                    
-
-                  this.obj_holder.bln_listenMouseDown=true;                  
-
+                  this.obj_holder.bln_listenDblClick=true;
+                  this.obj_holder.bln_listenMouseDown=true;
                   this.obj_holder.bln_listenInput=true;
-
                   this.obj_holder.bln_listenSelectStart=true;
+                }
+                fn_dropEvent(){
 
-                  //*/
-                }    
-                fn_applyThemeStructure(){                    
+                  this.obj_holder.bln_listenFocus=false;        
+                  this.obj_holder.bln_listenBlur=false;        
+                  this.obj_holder.bln_listenChange=false;
+                  this.obj_holder.bln_listenKeyDown=false;
+                  this.obj_holder.bln_listenKeyUp=false;        
+                  this.obj_holder.bln_listenClick=false;
+                  this.obj_holder.bln_listenDblClick=false;                                    
+                  this.obj_holder.bln_listenMouseDown=false;                  
+                  this.obj_holder.bln_listenInput=false;
+                  this.obj_holder.bln_listenSelectStart=false;
+                }
+                fn_applyThemeStructure(){                                      
+                  
                   this.obj_themeStructure=obj_project.obj_themeFormInput;                
                   this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
                 }
@@ -74,7 +83,7 @@
                 fn_onClick(e){             
                   //obj_project.fn_forgetEvent(e);//this will cancel default actions , such as color control and checkbox from operating                       
                   obj_project.fn_calmEvent(e);//stop event bubble, not required , but can help where event is required  on parant form elements                  
-                  this.fn_parentEvent("Click", e);                                    
+                  this.fn_parentEvent("Click", e);
                 }
                 fn_onDblClick(e){             
                   obj_project.fn_calmEvent(e);                  

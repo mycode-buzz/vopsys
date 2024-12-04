@@ -88,11 +88,7 @@
                 
                 if(!obj_container.obj_console){
                   obj_container.obj_console=obj_container.fn_addContextItem("xapp_console");                  
-                }            
-                //obj_container.fn_setBorder("10px solid white");
-                //obj_container.obj_console.fn_setBorder("10px solid yellow");      
-                //obj_container.obj_console.obj_blockStart.fn_setBorder("10px solid blue");      
-                //obj_container.obj_console.obj_blockEnd.fn_setBorder("10px solid orange");      
+                }                            
                 return obj_container.obj_console.obj_blockStart;
               }
 

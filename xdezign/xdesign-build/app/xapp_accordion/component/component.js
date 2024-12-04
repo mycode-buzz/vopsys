@@ -15,8 +15,7 @@
                   if(this.obj_domStyle.display===undefined){this.obj_domStyle.display="block";}                                   
                 }
                 fn_onLoad(){    
-                  super.fn_onLoad();                  
-                  if(this.fn_getDebugPin()){this.fn_highlightBorder("white");}                  
+                  super.fn_onLoad();                                    
                 }
 
                 fn_addItem(obj_ini=false){

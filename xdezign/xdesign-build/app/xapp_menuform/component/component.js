@@ -28,6 +28,7 @@
               }
 
               fn_applyThemeStructure(){    
+                
                 this.obj_themeStructure=obj_project.obj_themeChildMenu;                
                 this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
               }

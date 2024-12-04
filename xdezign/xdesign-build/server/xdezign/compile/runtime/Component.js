@@ -272,7 +272,7 @@ class component extends BaseObject {
     } 
 
     fn_highlightBorder(str_color){
-        this.fn_setStyleProperty("border", "10px solid " + str_color);
+        this.fn_setStyleProperty("border", "1.0em solid " + str_color);
     }
     
     fn_getDebugPin(){
@@ -368,21 +368,7 @@ class component extends BaseObject {
         }            
         return false;
     }
-
     
-
-    fn_setStandardStyle(){                    
-        
-        //*
-        if(this.obj_domStyle.height===undefined){this.obj_domStyle.height="40px";}              
-        if(this.obj_domStyle.padding===undefined){this.obj_domStyle.padding="3px 12px";}
-        if(this.obj_domStyle.border===undefined){this.obj_domStyle.border="0px solid black";}                                  
-        if(this.obj_domStyle.cursor===undefined){this.obj_domStyle.cursor="pointer";}
-        if(this.obj_domStyle.marginRight===undefined){this.obj_domStyle.marginRight="1px";}      
-        if(this.obj_domStyle.marginBottom===undefined){this.obj_domStyle.marginBottom="1px";}              
-        //*/
-    }
-
     fn_call(str_method, foo_arg){    
         if(this[str_method]){
             return this[str_method](foo_arg);

@@ -119,6 +119,7 @@
           }   
 
           fn_applyThemeStructure(){                    
+            
             this.obj_themeStructure=obj_project.obj_themeMenuButton;                
             this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy                        
           }
@@ -1585,7 +1586,7 @@
           fn_setConsole(){    
             if(this.obj_console){return;}    
             this.obj_console=this.obj_menuPanel.fn_getComponent("xapp_console");                             
-            //this.obj_console.fn_setBorder("10px solid pink");
+            //this.obj_console.fn_setBorder("1.0em solid pink");
           }                                  
           //CRUD CONSOLE
           
@@ -2509,7 +2510,7 @@
             let obj_item=this.fn_addStandardMenuToAccordion(obj_row);
             if(obj_row.obj_paramRS.bln_lastRow){
               let obj_container=this.fn_getAccordionChildMenu();
-              obj_container.fn_setStyleProperty("margin-bottom", "10px");
+              obj_container.fn_setStyleProperty("margin-bottom", "1.0em");
               
             }
           }        
@@ -2790,9 +2791,9 @@
         fn_getDataSummaryContainer(obj_parent){
           let obj_container=obj_parent.fn_addContextItem("block");        
           obj_container.fn_setDisplayFlex(true);                        
-          obj_container.fn_setStyleProperty("padding", "10px");              
+          obj_container.fn_setStyleProperty("padding", "1.0em");              
           /*
-          obj_container.fn_setStyleProperty("gap", "10px");                        
+          obj_container.fn_setStyleProperty("gap", "1.0em");                        
           obj_container.fn_setStyleProperty("display", "flex");                        
           obj_container.fn_setStyleProperty("flex-flow", "column-wrap");            
           //*/
@@ -2813,7 +2814,7 @@
           let obj_container=this.fn_getDataSummaryContainer(this.obj_accordionView);                                    
           this.obj_dataSummaryContainer=obj_container;
           obj_container.fn_setStyleProperty("flex-flow", "column wrap");                        
-          obj_container.fn_setStyleProperty("gap", "10px");  
+          obj_container.fn_setStyleProperty("gap", "1.0em");  
           
           this.fn_addDataSummaryPanel(obj_container);              
 

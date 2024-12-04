@@ -5,8 +5,12 @@
                   super(obj_ini);        
                 } 
                 fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                
-                  
+                  super.fn_initialize(obj_ini);                                  
+                 
+                }
+                fn_holdEvent(){
+                  super.fn_dropEvent();
+  
                   this.obj_holder.bln_listenClick=true;
                   this.obj_holder.bln_listenMouseEnter=true;
                   this.obj_holder.bln_listenMouseLeave=true;
@@ -15,17 +19,7 @@
                 }
 
                 fn_onLoad(){
-                  super.fn_onLoad();                  
-                  
-                  /*
-                  this.fn_setStyleProperty('border', '1px solid rgba(255, 255, 255, 0.0)');                  
-                  this.fn_setStyleProperty('borderRadius', '3px');                  
-                  this.fn_setStyleProperty('margin', '3px');                  
-                  this.fn_setStyleProperty('alignSelf', 'flex-start');                  
-                  this.fn_setStyleProperty('cursor', 'pointer');                  
-                  //*/
-                  
-                  //console.log("flexBasis: " + this.fn_getStyleProperty('flexBasis'));                  
+                  super.fn_onLoad();                                                      
                 }
 
                 fn_setUnLocked(){

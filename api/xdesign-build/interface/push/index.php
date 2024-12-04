@@ -23,8 +23,8 @@
 </style>
 <body>
 
-<div style="background:white;border:10px solid gray;border-radius:10px;margin:100px;padding:100px">
-<div style="background:white;margin:10px;text-align: right;">
+<div style="background:white;border:1.0em solid gray;border-radius:1.0em;margin:100px;padding:100px">
+<div style="background:white;margin:1.0em;text-align: right;">
 <button onclick="location.reload()">Refresh</button>
 </div>
 <?php

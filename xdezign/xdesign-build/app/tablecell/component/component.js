@@ -13,7 +13,7 @@ class tablecell extends component {
       //END INITIALIZE DOM        
       
       //START INITIALIZE STYLE        
-      //if(this.obj_domStyle.padding==undefined){this.obj_domStyle.padding="10px";}                      
+      //if(this.obj_domStyle.padding==undefined){this.obj_domStyle.padding="1.0em";}                      
       
       //END INITIALIZE STYLE 
     }         

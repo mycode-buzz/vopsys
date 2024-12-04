@@ -17,6 +17,13 @@
           this.fn_setStyleProperty("opacity", "1");          
         }
 
+        fn_applyThemeStructure(){                    
+          let obj_theme=obj_project.obj_theme;
+          if(!obj_theme){return;}
+          this.obj_themeStructure=obj_project.obj_themeFormLegend;                
+          this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+        }
+
         
 
         fn_onClick(e){                            

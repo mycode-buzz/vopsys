@@ -10,7 +10,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>var ServerQueryString = "<?php echo $_SERVER['QUERY_STRING']; ?>";</script>
-<script type="module" src="/office-version-2024-12-04-03-26-1045.mjs"></script>
+<script type="module" src="/office-version-2024-12-04-23-26-0510.mjs"></script>
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
@@ -21,8 +21,7 @@
   }                
   html{        
     background-color: rgb(43, 44, 52);    
-    font-family: tahoma;    
-    
+      font-family: Arial, Helvetica, sans-serif;    
   }    
    a {
     color: black;

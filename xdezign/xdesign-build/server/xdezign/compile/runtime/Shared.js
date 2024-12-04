@@ -16,6 +16,27 @@ class Shared{
     return bln_value;
   }  
 
+  fn_getContainerWidthAvailable(obj_my) {
+    let minusValue = 0;
+    let currentElement = obj_my.dom_obj.parentElement;
+    let int_returnValue=0;
+    let int_currentValue;
+    
+    while (currentElement) {                  
+      const computedStyle = window.getComputedStyle(currentElement);               
+      const int_paddingLeft=parseInt(computedStyle.paddingLeft);
+      const int_paddingRight=parseInt(computedStyle.paddingRight);
+      const int_borderLeft=parseInt(computedStyle.borderLeftWidth);
+      const int_borderRight=parseInt(computedStyle.borderRightWidth);
+      int_currentValue=int_paddingLeft+int_paddingRight+int_borderLeft+int_borderRight;
+      minusValue+=int_currentValue;
+      int_returnValue=currentElement.offsetWidth-minusValue;
+      currentElement = currentElement.parentElement;                  
+    }
+  
+    return int_returnValue;
+  }
+
   fn_formatDisplayValueFromColumn(obj_metaColumn, str_value){                                                                                                         
 
     str_value+="";                  

@@ -8,7 +8,7 @@
                 }                   
                 fn_onLoad(){
                   super.fn_onLoad();
-                  //this.fn_setStyleProperty("border", "10px solid orange");                                    
+                  //this.fn_setStyleProperty("border", "1.0em solid orange");                                    
 
                   
                   
@@ -302,6 +302,15 @@
                   }
                   
                 }
+
+                fn_setFormExpand(obj_control){
+                  if(!obj_control){
+                    obj_control=this;
+                  }
+                  let int_clientWidth=obj_shared.fn_getContainerWidthAvailable(this);                  
+                  let str_Width=int_clientWidth + "px";                                        
+                  obj_control.fn_setStyleProperty("width", str_Width);                
+                }
                 
                 fn_moveFormPosition(str_formPosition){
 
@@ -356,7 +365,7 @@
                   let str_valueDisplay;
                   if(str_valueDisplay===undefined){
                     str_valueDisplay=this.str_valueDisplay;
-                  }
+                  }                  
                   
                   if(this.obj_control){
                     this.obj_control.fn_setValue(str_valueDisplay, this);

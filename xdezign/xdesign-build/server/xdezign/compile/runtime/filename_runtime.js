@@ -662,6 +662,27 @@ class Shared{
     return bln_value;
   }  
 
+  fn_getContainerWidthAvailable(obj_my) {
+    let minusValue = 0;
+    let currentElement = obj_my.dom_obj.parentElement;
+    let int_returnValue=0;
+    let int_currentValue;
+    
+    while (currentElement) {                  
+      const computedStyle = window.getComputedStyle(currentElement);               
+      const int_paddingLeft=parseInt(computedStyle.paddingLeft);
+      const int_paddingRight=parseInt(computedStyle.paddingRight);
+      const int_borderLeft=parseInt(computedStyle.borderLeftWidth);
+      const int_borderRight=parseInt(computedStyle.borderRightWidth);
+      int_currentValue=int_paddingLeft+int_paddingRight+int_borderLeft+int_borderRight;
+      minusValue+=int_currentValue;
+      int_returnValue=currentElement.offsetWidth-minusValue;
+      currentElement = currentElement.parentElement;                  
+    }
+  
+    return int_returnValue;
+  }
+
   fn_formatDisplayValueFromColumn(obj_metaColumn, str_value){                                                                                                         
 
     str_value+="";                  
@@ -2548,8 +2569,8 @@ class BaseObject extends LevelObject{
             this.fn_initializeDynamic();
         }   
         
-        
-    }    
+        this.fn_holdEvent();                  
+    }        
 
     fn_initializeDynamic(){}//overidden        
 
@@ -3563,6 +3584,9 @@ class BaseObject extends LevelObject{
         this.fn_onApplyFeatures();
     }
 
+    fn_holdEvent(){}
+    fn_dropEvent(){}
+
     fn_applyThemeStructure(){                        
     }
 
@@ -3598,9 +3622,7 @@ class BaseObject extends LevelObject{
     }    
     fn_setStyleOutline(str_colorBackground, str_colorBorder){        
         
-        this.fn_setStyleProperty("backgroundColor", str_colorBackground);
-        this.fn_setStyleProperty("borderWidth", "3px");
-        this.fn_setStyleProperty("borderColor", str_colorBorder);
+        this.fn_setStyleProperty("backgroundColor", str_colorBackground);        
     }    
 
     
@@ -4717,7 +4739,7 @@ class component extends BaseObject {
     } 
 
     fn_highlightBorder(str_color){
-        this.fn_setStyleProperty("border", "10px solid " + str_color);
+        this.fn_setStyleProperty("border", "1.0em solid " + str_color);
     }
     
     fn_getDebugPin(){
@@ -4813,21 +4835,7 @@ class component extends BaseObject {
         }            
         return false;
     }
-
     
-
-    fn_setStandardStyle(){                    
-        
-        //*
-        if(this.obj_domStyle.height===undefined){this.obj_domStyle.height="40px";}              
-        if(this.obj_domStyle.padding===undefined){this.obj_domStyle.padding="3px 12px";}
-        if(this.obj_domStyle.border===undefined){this.obj_domStyle.border="0px solid black";}                                  
-        if(this.obj_domStyle.cursor===undefined){this.obj_domStyle.cursor="pointer";}
-        if(this.obj_domStyle.marginRight===undefined){this.obj_domStyle.marginRight="1px";}      
-        if(this.obj_domStyle.marginBottom===undefined){this.obj_domStyle.marginBottom="1px";}              
-        //*/
-    }
-
     fn_call(str_method, foo_arg){    
         if(this[str_method]){
             return this[str_method](foo_arg);

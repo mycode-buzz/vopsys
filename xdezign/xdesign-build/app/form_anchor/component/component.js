@@ -33,11 +33,7 @@
             this.obj_icon.fn_setClassName("material-icons");                                              
           }         
           else{
-            this.obj_icon.fn_setDisplay(false);            
-            /*
-            this.fn_showIcon("check_box");                        
-            this.obj_icon.fn_setStyleProperty("color", "white");                                              
-            //*/
+            this.obj_icon.fn_setDisplay(false);                        
           }
 
         }  

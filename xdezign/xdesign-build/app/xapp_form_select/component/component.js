@@ -1,14 +1,19 @@
 
             //XSTART component/xapp_form_select
-            class xapp_form_select extends component{
+            class xapp_form_select extends form_input{
               constructor(obj_ini) {      
                 super(obj_ini);        
               } 
               fn_initialize(obj_ini){
-                super.fn_initialize(obj_ini);                                
+                super.fn_initialize(obj_ini);                                               
+              }
+              fn_holdEvent(){
+                super.fn_dropEvent();
+
                 this.obj_holder.bln_listenClick=true;
                 this.obj_holder.bln_listenChange=true;
                 this.obj_holder.bln_listenBlur=true;        
+
               }
               fn_onClick(e){             
                 obj_project.fn_forgetEvent(e);                      

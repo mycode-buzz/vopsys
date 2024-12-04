@@ -13,11 +13,12 @@
           if(this.fn_hasContextHolderParent()){return;}              
           
           this.fn_showIcon(this.obj_design.str_icon);                    
-        }                
-        
-        fn_applyThemeStructure(){                    
-          this.obj_themeStructure=obj_project.obj_themeFormButton;                
-          this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+        }                        
+
+        fn_applyThemeStructure(){                              
+          let obj_theme=obj_project.obj_theme;
+          if(!obj_theme){return;}
+          super.fn_applyThemeStructure();          
         }
         fn_setSubDomain(str_value){
           this.obj_design.str_subdomain=str_value;

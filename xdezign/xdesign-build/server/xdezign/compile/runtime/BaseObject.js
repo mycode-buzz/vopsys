@@ -126,8 +126,8 @@ class BaseObject extends LevelObject{
             this.fn_initializeDynamic();
         }   
         
-        
-    }    
+        this.fn_holdEvent();                  
+    }        
 
     fn_initializeDynamic(){}//overidden        
 
@@ -1141,6 +1141,9 @@ class BaseObject extends LevelObject{
         this.fn_onApplyFeatures();
     }
 
+    fn_holdEvent(){}
+    fn_dropEvent(){}
+
     fn_applyThemeStructure(){                        
     }
 
@@ -1176,9 +1179,7 @@ class BaseObject extends LevelObject{
     }    
     fn_setStyleOutline(str_colorBackground, str_colorBorder){        
         
-        this.fn_setStyleProperty("backgroundColor", str_colorBackground);
-        this.fn_setStyleProperty("borderWidth", "3px");
-        this.fn_setStyleProperty("borderColor", str_colorBorder);
+        this.fn_setStyleProperty("backgroundColor", str_colorBackground);        
     }    
 
     

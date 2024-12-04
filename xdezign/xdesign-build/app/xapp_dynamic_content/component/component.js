@@ -17,7 +17,7 @@
                   //START INITIALIZE STYLE            
                   //*
                   //if(this.fn_getStyleProperty("background-color")===undefined){this.fn_setStyleProperty("background-color", "red");}
-                  //if(this.fn_getStyleProperty("padding")===undefined){this.fn_setStyleProperty("padding", "10px");}            
+                  //if(this.fn_getStyleProperty("padding")===undefined){this.fn_setStyleProperty("padding", "1.0em");}            
                   //*/
 
                   

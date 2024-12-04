@@ -100,9 +100,7 @@
                 }               
                 
                 fn_onFormLabelClick(e){                    
-
-                  
-                  
+                                    
                   this.obj_row.obj_selectedColumn=this;                  
                   
                   const bln_value=this.fn_getModeExecuteEdit();                                                                        
@@ -175,6 +173,20 @@
 
                   this.fn_showLabelBorder();
                   this.fn_applyThemeEdit();
+
+                  
+                  /*
+                  if(obj_project.bln_isMobile){                                        
+                    this.fn_setFormExpand(obj_control);
+                  }
+                  else{
+                    let str_value=this.fn_getValue();                                                      
+                    let int_value=str_value.length;
+                    if(int_value<300){                  
+                      obj_control.fn_setStyleProperty("width", "300px");
+                    }                    
+                  }
+                  //*/
                   
                   
 
@@ -184,6 +196,7 @@
                   
                   return true;
                 }                
+
                 
 
                 fn_checkModeEditRecord(){  
@@ -393,6 +406,7 @@
                   this.obj_control.fn_applyThemeEdit(this.str_colorHighlight);                  
                   //this.obj_control.fn_setStyleProperty("color", "#333333");                  
                   //this.obj_control.fn_setStyleProperty("color", "#444444");                  
+                    
                 }
 
                 fn_removeThemeEdit(){
@@ -426,6 +440,8 @@
                   
                   if(this.obj_text){return;}
 
+                  let str_type;
+
                   super.fn_getControlText();                                    
 
                   /*
@@ -433,7 +449,7 @@
                   already set in design process
                   display flex
                   flexflow column wrap
-                  obj_control.fn_setStyleProperty("border", "10px solid red");
+                  obj_control.fn_setStyleProperty("border", "1.0em solid red");
                   //*/
                   
                   switch(this.obj_metaColumn.MetaColumnType.toLowerCase()){
@@ -441,6 +457,24 @@
                       this.obj_text.fn_setDisplay("none");
                       this.obj_text=this.fn_getControlInput();
                       break;                                                                        
+                      case "note":         
+                      case "json":         
+                        let obj_template, obj_target;
+                        
+                        obj_template=this.obj_text;                                                                        
+
+                        str_type="form_textarea";                      
+                        obj_target=this.obj_field.fn_addContextItem(str_type);
+
+                        this.fn_matchStyle(obj_target, obj_template);                        
+                        
+                        obj_target.fn_setDomProperty("readOnly", true);
+                        obj_template.fn_setDisplay("none");
+                        
+                        this.obj_text=obj_target;
+                        //this.fn_setFormExpand(this.obj_text);
+                        
+                        break;
                     case "date":         
                     case "datetime":                      
                       if(obj_project.bln_isMobile){
@@ -552,6 +586,13 @@
                   let obj_template, obj_target;
                   obj_template=this.obj_text;
                   obj_target=obj_control;
+                  this.fn_matchStyle(obj_target, obj_template);
+
+                  
+                  return obj_control;
+                }                  
+
+                fn_matchStyle(obj_target, obj_template){
 
                   const cssObj = window.getComputedStyle(obj_template.dom_obj, null);          
                   let str_property, str_value;
@@ -584,8 +625,8 @@
                   obj_target.fn_setStyleProperty(str_property, str_value);
                   //*/
 
-                  return obj_control;
-                }                  
+
+                }
                 
                 fn_getControlSelect(){                                                                                   
                   
@@ -824,7 +865,7 @@
                       else{str_value="off";}                                            
                       break;                                          
                     case "email":
-                      this.fn_debugLabel("case email handle"); 
+                      //this.fn_debugLabel("case email handle"); 
                       if(!str_value){str_value="";return str_value;}
                       bln_value=obj_shared.fn_validEmail(str_value);                      
                       if(!bln_value){

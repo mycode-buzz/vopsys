@@ -300,8 +300,6 @@
                 
                 const str_value=this.obj_themeStructure.marginBottom;                
                 this.fn_setStyleProperty("marginBottom", str_value);                              
-                console.log("fn_onClose this.obj_themeStructure");            
-                console.log(this.obj_themeStructure);            
                   
                 if(this.bln_rebound){this.fn_open();}
                 //this.fn_debugText("fn_onClose");
