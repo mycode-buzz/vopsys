@@ -39,8 +39,6 @@ class LevelObject {
       }    
       console.groupEnd();
   }  
-  fn_shallowCopyObject(source){      
-    return Object.assign({}, source);  
-  }  
+  
 }
 //END CLASS

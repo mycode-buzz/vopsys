@@ -5,13 +5,20 @@
         } 
         fn_initialize(obj_ini){
           super.fn_initialize(obj_ini);                
+
+
         }
         fn_onLoad(){          
           super.fn_onLoad();
-          //if(this.fn_hasContextHolderParent()){return;}              
-
-          this.fn_showIcon(this.obj_design.str_icon);          
-        }        
+          if(this.fn_hasContextHolderParent()){return;}              
+          
+          this.fn_showIcon(this.obj_design.str_icon);                    
+        }                
+        
+        fn_applyThemeStructure(){                    
+          this.obj_themeStructure=obj_project.obj_themeFormButton;                
+          this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+        }
         fn_setSubDomain(str_value){
           this.obj_design.str_subdomain=str_value;
         }

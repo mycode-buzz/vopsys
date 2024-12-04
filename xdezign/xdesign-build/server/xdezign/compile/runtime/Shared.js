@@ -87,6 +87,17 @@ class Shared{
     return true;
   }
 
+  fn_shallowCopy(obj_template){
+    return { ...obj_template };            
+  }
+
+  fn_assignProperty(obj_target, obj_template){        
+    if(!obj_target){
+      obj_target=new Object;
+    }
+    Object.assign(obj_target, obj_template);
+  }
+
   fn_isSmallScreen() {
     return window.innerWidth < 420;
   }

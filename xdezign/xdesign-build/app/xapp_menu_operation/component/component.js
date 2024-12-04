@@ -32,8 +32,7 @@
                   
               } 
               //BASIC OPS                       
-              fn_initializeDynamic(){
-              //this.fn_setType("menu_button");      
+              fn_initializeDynamic(){              
               this.fn_setTag("button", true);                      
               this.fn_setThemeType("menu_button");                      
               }
@@ -294,12 +293,18 @@
               }
         } 
             
-              fn_onOpen(){              
+              fn_onOpen(){
+                  this.fn_setStyleProperty("marginBottom", "0em");              
               }
               fn_onClose(){                      
+                
+                const str_value=this.obj_themeStructure.marginBottom;                
+                this.fn_setStyleProperty("marginBottom", str_value);                              
+                console.log("fn_onClose this.obj_themeStructure");            
+                console.log(this.obj_themeStructure);            
                   
-                  if(this.bln_rebound){this.fn_open();}
-                  //this.fn_debugText("fn_onClose");
+                if(this.bln_rebound){this.fn_open();}
+                //this.fn_debugText("fn_onClose");
               } 
               fn_clearContent(){
                 let obj_accordion=this.fn_getAccordionChildMenu();

@@ -85,9 +85,9 @@
             int_priceTokenz:undefined,
             int_packageTokenz:undefined,            
             str_nameProduct:"Subscription",                        
-            obj_themeItem:this.obj_themeMidground,
+            obj_themeItem:obj_project.obj_themeMidground,
             str_textSubmit:"&nbsp;",
-            str_color:this.obj_themeMidground.fn_getStyleProperty("backgroundColor"),            
+            str_color:obj_project.obj_themeMidground.fn_getStyleProperty("backgroundColor"),            
             bln_boldText:true,            
           };
           this.fn_setDefaultPackageOption(obj_param);
@@ -181,10 +181,10 @@
           let obj_param;
           let obj_themeItem, str_textPay, str_iconPay, str_color, bln_boldText; 
           
-          obj_themeItem=this.obj_themeMidground;
+          obj_themeItem=obj_project.obj_themeMidground;
           str_textPay=this.str_textPay;
           str_iconPay=this.str_icon;
-          str_color=this.obj_themeMidground.fn_getStyleProperty("backgroundColor");
+          str_color=obj_project.obj_themeMidground.fn_getStyleProperty("backgroundColor");
           bln_boldText=true;
           
           //---------------------

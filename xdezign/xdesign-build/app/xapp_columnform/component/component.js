@@ -284,15 +284,15 @@
                 } 
                 
                 fn_showLabelBorder(){    
-                    this.obj_label.fn_setStyleProperty("borderColor", this.obj_themeForground.fn_getStyleProperty("backgroundColor"));                                    
+                    this.obj_label.fn_setStyleProperty("borderColor", obj_project.obj_themeForground.fn_getStyleProperty("backgroundColor"));                                    
                 }        
                 fn_highlightLabelBorder(){    
-                  //this.obj_label.fn_setStyleProperty("borderColor", this.obj_themeForground.fn_getStyleProperty("backgroundColor"));                                    
+                  //this.obj_label.fn_setStyleProperty("borderColor", obj_project.obj_themeForground.fn_getStyleProperty("backgroundColor"));                                    
                 }        
               
                 fn_hideLabelBorder(){                                      
-                  //this.obj_label.fn_setStyleProperty("borderColor", "transparent");                                  
-                  this.obj_label.fn_setStyleProperty("borderColor", this.obj_themeBackground.fn_getStyleProperty("backgroundColor"));                
+                  //this.obj_label.fn_setStyleProperty("borderColor", "transparent");                                                                      
+                  this.obj_label.fn_setStyleProperty("borderColor", obj_project.obj_themeBackground.fn_getStyleProperty("backgroundColor"));                                  
                 }
 
                 fn_onChildMouseUp(e){                         

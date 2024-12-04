@@ -82,7 +82,7 @@
                   //this.fn_addDynamicItems();      
                   /*
                   let obj_selected=obj_project.obj_palettSelected;                
-                  let obj_arg=this.fn_shallowCopyObject(obj_selected.obj_holder.obj_levelLimit);                
+                  let obj_arg=obj_shared.fn_shallowCopy(obj_selected.obj_holder.obj_levelLimit);                
                   obj_arg.obj_selected=obj_selected;            
                   //*/
 

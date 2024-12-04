@@ -18,13 +18,18 @@
 
                 this.fn_initialize_var();                
               } 
+              
 
               fn_initialize_var(){
                 super.fn_initialize_var();
                 this.fn_resetArrayDynamicMenu();
 
                 this.int_totalRowCount=0;
+              }
 
+              fn_applyThemeStructure(){    
+                this.obj_themeStructure=obj_project.obj_themeChildMenu;                
+                this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
               }
 
               

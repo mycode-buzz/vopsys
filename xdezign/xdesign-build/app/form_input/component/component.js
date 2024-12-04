@@ -28,6 +28,10 @@
 
                   //*/
                 }    
+                fn_applyThemeStructure(){                    
+                  this.obj_themeStructure=obj_project.obj_themeFormInput;                
+                  this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+                }
                 fn_onSelectStart(e){
                   //console.log("hit input");
                   obj_project.eventCancelledByChild=false;

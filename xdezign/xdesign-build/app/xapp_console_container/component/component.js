@@ -10,6 +10,8 @@
                   this.obj_holder.bln_listenSubmit=true;
 
                   this.bln_debugContainer=false;
+                  this.obj_design.str_themeType="form_section";
+                  this.obj_design.str_themeType="form_container";
                 }                
 
                 fn_displayTogglePair(obj_a, obj_b, bln_value){            

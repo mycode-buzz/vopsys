@@ -28,6 +28,8 @@ class BaseObject extends LevelObject{
         if(this.obj_design.arr_item.length===0){
             //this.obj_design.arr_item=[];
         }           
+
+        this.obj_themeStructure=new Object;
         
         //this.fn_setIsContainer(false);               
 
@@ -1129,14 +1131,17 @@ class BaseObject extends LevelObject{
         }
         
         
-        this.fn_applyTheme();
-        this.fn_getFormBlockTheme();        
+        this.fn_applyTheme();        
+        this.fn_applyThemeStructure();                    
         this.fn_applyDesign();                                                                         
         this.fn_applyDomProperty();                                                                         
         //this.fn_applyDomAttribute();
         this.fn_applyStyle();               
         this.fn_expand();
         this.fn_onApplyFeatures();
+    }
+
+    fn_applyThemeStructure(){                        
     }
 
     fn_onApplyFeatures(){//overidden        
@@ -1176,18 +1181,7 @@ class BaseObject extends LevelObject{
         this.fn_setStyleProperty("borderColor", str_colorBorder);
     }    
 
-    fn_getFormBlockTheme(){
-        this.obj_themeBackground=this.fn_getThemeObject("form_blockbackground");
-        this.obj_themeMidground=this.fn_getThemeObject("form_blockmidground");
-        this.obj_themeForground=this.fn_getThemeObject("form_blockforground");
-        this.obj_themeHighlight=this.fn_getThemeObject("form_blockhighlight");          
-        /*
-        this.obj_themeBlock1=this.fn_getThemeObject("form_block1");
-        this.obj_themeBlock2=this.fn_getThemeObject("form_block2");
-        this.obj_themeBlock3=this.fn_getThemeObject("form_block3");
-        this.obj_themeBlock4=this.fn_getThemeObject("form_block4");
-        //*/
-    }
+    
 
     fn_getThemeObject(str_themeType){   
 
@@ -1198,28 +1192,23 @@ class BaseObject extends LevelObject{
     
     
     fn_applyTheme(str_themeType=false, bln_returnThemeItem=false){   
-
-        let str_type,  str_name, obj_theme, obj_themeItem;    
-        let bln_debug=false;
-        bln_debug=this.bln_debugButtonSettings;
-  
-    
-        //N.B Theme MUST be set to register with Project to run here
         
-
-        obj_theme=obj_project.obj_theme;                
+        //N.B Theme MUST be set to register with Project to run here
+        const bln_debug=this.bln_debugButtonSettings;        
+        const obj_theme=obj_project.obj_theme;                
         if(!obj_theme){
             if (bln_debug){console.log("PROJECT THEME IS FALSE" + this.obj_design.str_name);}
             return;
         }
+        if(obj_project.obj_design.str_type.toLowerCase()==="xapp_theme"){return;}//dont theme a theme project        
+
+        if(this.obj_design.bln_isThemeItem){return;}//dont theme a theme item            
+
+        const str_type=this.obj_design.str_type.toLowerCase();                
+        if(str_type==="xapp_theme"){return;}//dont theme a theme               
+
+        let str_name, obj_themeItem;
         
-        if(obj_project.obj_design.str_type.toLowerCase()==="xapp_theme"){return;}//dont theme a theme project
-        
-        if(this.obj_design.bln_isThemeItem){return;}//dont theme a theme item    
-        
-        str_type=this.obj_design.str_type.toLowerCase();                
-        if(str_type==="xapp_theme"){return;}//dont theme a theme           
-    
         
         //*//turn on to debug    
         /*
@@ -1289,7 +1278,7 @@ class BaseObject extends LevelObject{
         let str_success="NO THEME APPLIED";
         if(obj_themeItem){                        
             let str_display=this.obj_domStyle.display;
-            this.obj_domStyle=this.fn_shallowCopyObject(obj_themeItem.obj_domStyle);        
+            this.obj_domStyle=obj_shared.fn_shallowCopy(obj_themeItem.obj_domStyle);        
             this.obj_domStyle.display=str_display;    
             //note: this display needs to be block flex etc for background to be applied                
             str_success="THEME APPLIED";        
@@ -1299,6 +1288,8 @@ class BaseObject extends LevelObject{
             }
         }
         if (bln_debug){console.log("END APPLY THEME: [" + str_name + "][" + str_success + "]");}
+
+        
   }
   
   fn_getThemeViaThemeType(str_themeType, bln_debug){          
@@ -1348,10 +1339,13 @@ class BaseObject extends LevelObject{
 
     this.dom_obj.focus();
 
-  }
+  }  
 
-    fn_applyStyle(){        
-        let arr_Property=Object.entries(this.obj_domStyle);      
+    fn_applyStyle(obj_style){        
+        if(!obj_style){
+            obj_style=this.obj_domStyle;
+        }        
+        let arr_Property=Object.entries(obj_style);      
         for (let [str_key, foo_val] of arr_Property) {    
             //make sure camelCase is converted to hyphen prior to this function            
             //console.log(this.obj_design.str_name + ": " + str_key + ": " + foo_val);            
@@ -1910,8 +1904,7 @@ class BaseObject extends LevelObject{
         this.fn_setStyleProperty("color", str_value);
     }    
     fn_getColor(){
-        return this.fn_getStyleProperty("color");
-        //return this.fn_getComputedStyleProperty("color");
+        return this.fn_getStyleProperty("color");        
     }        
     
     fn_setBorder(str_value){

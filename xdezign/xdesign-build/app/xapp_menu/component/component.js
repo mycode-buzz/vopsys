@@ -108,15 +108,21 @@
         menu Will add a menu button to its accordionView for each row in data set with class in MetaTypeViewMenu (generally menu)
         The menu button will  operata as a standard menu, with menu fn_onOpen driving the operatoin
         
-        //*/
-          
-        //*          
+        //*/         
+        
           fn_onLoad(){
             super.fn_onLoad();    
             //if(this.fn_hasContextHolderParent()){return;}                        
             this.fn_setDomContainer();
+
+            
           }   
-          //*/            
+
+          fn_applyThemeStructure(){                    
+            this.obj_themeStructure=obj_project.obj_themeMenuButton;                
+            this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy                        
+          }
+          
           fn_runSearch(){//overridden by Menuform
             this.bln_runSearch=true;            
             this.fn_formViewRecord();
@@ -553,6 +559,7 @@
             super.fn_onClose();                 
           }            
           fn_onOpen(){  
+            super.fn_onOpen();
             
             this.fn_runMenu();  
             

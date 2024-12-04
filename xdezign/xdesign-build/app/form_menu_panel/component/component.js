@@ -11,24 +11,21 @@
           if(this.fn_getDebugPin()){this.fn_highlightBorder("black");}                       
         }
         fn_addConsoleContainer(str_consoleContainer, bln_side){                                    
-          let obj_item=this.obj_console.fn_addConsoleContainer(str_consoleContainer, bln_side);
+          let obj_item=this.obj_console.fn_addConsoleContainer(str_consoleContainer, bln_side);                    
           return obj_item;
           //this.obj_console.fn_debug();
         }
-        fn_disableConsole(){                                    
+        fn_disableConsole(){
           this.obj_console.fn_disable();
         }
         fn_hideConsole(){
-          console.log("fn_hideConsole");
           this.obj_console.fn_hide();
         }
-
-        fn_getConsoleContainer(str_consoleContainer){                                    
-          let obj_item=this.obj_console.fn_getConsoleContainer(str_consoleContainer);                  
+        fn_getConsoleContainer(str_consoleContainer){
+          let obj_item=this.obj_console.fn_getConsoleContainer(str_consoleContainer);
           return obj_item;
           //this.obj_console.fn_debug();
         }
-
       }//END CLS
       //END TAG
       //END component/form_menu_panel        

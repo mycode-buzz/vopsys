@@ -23,6 +23,11 @@
           
                   this.MetaLinkViewId=100475;//meta_link
                   this.MetaLinkViewName="meta_link"; 
+
+                  this.obj_themeOptions={
+                    
+
+                  };
                   
                   
                   //obj_path.fn_explainNavigateRecordURL();                  
