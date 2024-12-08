@@ -6966,7 +6966,7 @@ class table extends component {
               if(obj_shared.fn_isSmallScreen()){//less than 400              
                 if(this.obj_design.str_icon){
                   this.fn_showIcon(this.obj_design.str_icon);                  
-                  str_value="";
+                  //str_value="";
                 } 
               }
             }
