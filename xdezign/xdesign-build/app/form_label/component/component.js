@@ -1,6 +1,6 @@
 
             //XSTART component/form_label
-              class form_label extends component{
+              class form_label extends form_input{
                 constructor(obj_ini) {      
                   super(obj_ini);        
                 } 
@@ -18,8 +18,16 @@
                   this.obj_holder.bln_listenMouseDown=true;                  
                 }
 
+                fn_setText(str_value){
+                  this.fn_setDomProperty("innerHTML", str_value);                                      
+                }
+
                 fn_onLoad(){
                   super.fn_onLoad();                                                      
+                }
+                fn_applyThemeStructure(){                                                        
+                  this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeFormLabel;                
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
                 }
 
                 fn_setUnLocked(){

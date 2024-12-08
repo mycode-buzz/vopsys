@@ -29,7 +29,7 @@ class BaseObject extends LevelObject{
             //this.obj_design.arr_item=[];
         }           
 
-        this.obj_themeStructure=new Object;
+        this.obj_holder.obj_themeStructure=new Object;
         
         //this.fn_setIsContainer(false);               
 
@@ -576,11 +576,8 @@ class BaseObject extends LevelObject{
         
         
         let dom_frameElement=window.frameElement;        
-        if(!dom_frameElement){
-            return;
-        }
-        let str_name=dom_frameElement.getAttribute("name");        
-        
+        if(!dom_frameElement){return;}
+        let str_name=dom_frameElement.getAttribute("name");                
         if(str_name==="xdesign-frame"){//ie a project that is being designed}        
             if(this.obj_design.int_modeExecute<10){
                 this.fn_initializePluginDesign();//can be overidden                
@@ -1180,6 +1177,7 @@ class BaseObject extends LevelObject{
     fn_setStyleOutline(str_colorBackground, str_colorBorder){        
         
         this.fn_setStyleProperty("backgroundColor", str_colorBackground);        
+        this.fn_setStyleProperty("borderColor", str_colorBorder);                      
     }    
 
     

@@ -6,17 +6,10 @@
         fn_initialize(obj_ini){
           super.fn_initialize(obj_ini);                
         }
-        fn_applyThemeStructure(){                              
-          
-          let obj_theme=obj_project.obj_theme;
-          if(!obj_theme){return;}
-          super.fn_applyThemeStructure();          
-
-          let obj_themeItem=this.obj_themeStructure;
-          //obj_themeItem.backgroundColor="green";                          
-          this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
-          
-          
+        fn_applyThemeStructure(){                                                          
+          if(!obj_project.obj_theme){return;}
+          this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeRowzSearch;                
+          this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                                              
         }
       }//END CLS
       //END TAG

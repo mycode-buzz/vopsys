@@ -36,10 +36,9 @@
                   this.obj_holder.bln_listenInput=false;
                   this.obj_holder.bln_listenSelectStart=false;
                 }
-                fn_applyThemeStructure(){                                      
-                  
-                  this.obj_themeStructure=obj_project.obj_themeFormInput;                
-                  this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+                fn_applyThemeStructure(){                                                        
+                  this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeFormInput;                
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
                 }
                 fn_onSelectStart(e){
                   //console.log("hit input");

@@ -25954,7 +25954,7 @@ class xdezign_button_map_item extends form_button{
             arr_old=obj_instance.obj_design.arr_item;        
             arr_new=[];
             for(let i=0;i<arr_old.length;i++){
-                obj_item=arr_old[i];
+                obj_item=arr_old[i];                
                 if(!obj_item.fn_preventSave()){
                     arr_new.push(obj_item); 
                 }
@@ -25968,7 +25968,7 @@ class xdezign_button_map_item extends form_button{
             bln_allSaved=true;
             arr=obj_instance.obj_design.arr_item;
             for(let i=0;i<arr.length;i++){
-                obj_item=arr[i];
+                obj_item=arr[i];                
                 if(obj_item.fn_preventSave()){
                     console.log("ERROR obj_item.obj_design.fn_preventSave()is true");
                 }
@@ -26295,6 +26295,9 @@ class xdezign_button_map_item extends form_button{
                         
                         //This allows Controls not be saved - e.g boot controls
                         //also design control that is a special case, apparently.                        
+                        if (typeof obj_instance.fn_preventSave !== 'function') {
+                          console.log(obj_instance);
+                      }
                         if(obj_instance.fn_preventSave()){
                             //console.log(obj_instance.obj_design.str_name + ": ERROR fn_preventSave() is true but has not been removed from parent arr_item");
                             return;

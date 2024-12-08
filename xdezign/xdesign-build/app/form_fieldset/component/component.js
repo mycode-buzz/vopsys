@@ -17,6 +17,11 @@ class form_fieldset extends component{
     this.fn_setStyleProperty("overflow", "hidden");                      
     this.fn_setStyleProperty("margin", "0px");                      
   }
+  fn_applyThemeStructure(){                        
+    if(!obj_project.obj_theme){return;}
+    this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeFormFieldset;                
+    this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                          
+  }
   fn_onRowMember(obj_row){
 
     this.obj_row=obj_row;                  

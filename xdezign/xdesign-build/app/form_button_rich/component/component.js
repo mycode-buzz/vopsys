@@ -15,9 +15,8 @@
           this.fn_showIcon(this.obj_design.str_icon);                    
         }                        
 
-        fn_applyThemeStructure(){                              
-          let obj_theme=obj_project.obj_theme;
-          if(!obj_theme){return;}
+        fn_applyThemeStructure(){                                        
+          if(!obj_project.obj_theme){return;}
           super.fn_applyThemeStructure();          
         }
         fn_setSubDomain(str_value){

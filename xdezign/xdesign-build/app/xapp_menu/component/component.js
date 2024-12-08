@@ -119,9 +119,12 @@
           }   
 
           fn_applyThemeStructure(){                    
-            
-            this.obj_themeStructure=obj_project.obj_themeMenuButton;                
-            this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy                        
+          
+            this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeRowz;                
+            if(this.fn_getIsDynamicMenu()){
+              this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeRowzDynamic;                
+            }            
+            this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                        
           }
           
           fn_runSearch(){//overridden by Menuform
@@ -3036,6 +3039,7 @@
           
           obj_item.fn_configureDynamicMenuFromRow(obj_row);                                                      
           
+
           
           
           return obj_item;
@@ -3071,9 +3075,9 @@
             this.obj_columnArchiveDate=obj_rowMenu.fn_getColumnArchiveDate();//required to toggle archive / restore button text in menupane            
             this.fn_setMenuRecordId(this.obj_columnKey.str_value);            
           }
-          //END Configure Dynamic Menu Key
+          //END Configure Dynamic Menu Key         
+          
         }
-
         
         fn_updateButtonText(obj_recordset){
           let str_value=this.fn_formatButtonText(obj_recordset);        

@@ -754,6 +754,16 @@ class Shared{
     return true;
   }
 
+  fn_getRandomValueFromObject(obj_my) {
+  
+    const keys = Object.keys(obj_my);
+    const randomKey = keys[Math.floor(Math.random() * keys.length)];
+    return randomKey;
+  }
+  fn_flipVariable(str_value1, str_value2){    
+    return [str_value1, str_value2] = [str_value2, str_value1];  
+  }  
+
   fn_shallowCopy(obj_template){
     return { ...obj_template };            
   }
@@ -2285,20 +2295,151 @@ fn_maintainList(obj_list){
     }
 
     return browserName;
-}
-
-fn_isMobile() {
-  return window.matchMedia("(max-width: 767px)").matches ? true : false;
-}       
-fn_parseList(str_json){                  
-  if(!str_json){
-    return {};
   }
-  return JSON.parse(str_json);
-}
 
-        
+  fn_isMobile() {
+    return window.matchMedia("(max-width: 767px)").matches ? true : false;
+  }       
+  fn_parseList(str_json){                  
+    if(!str_json){
+      return {};
+    }
+    return JSON.parse(str_json);
+  }
 
+  //START THEME HANLDER
+  fn_getDarkShade(str_hsl, int_value, bln_linear=false){
+
+    //console.log("fn_getDarkShade");
+    //console.log("str_hsl: " + str_hsl);    
+    
+    let str_shade, int_valueLight, int_valueSaturate, int_valueHue;
+    
+    switch(int_value){
+      case 10:
+        //console.log("str_target: " + "199, 98, 41");    
+        int_valueHue=4;        
+        int_valueSaturate=16;        
+        int_valueLight=18;
+      break;
+      case 20:
+        //console.log("str_target: " + "200, 100, 35");    
+        int_valueHue=3;
+        int_valueSaturate=18;        
+        int_valueLight=24;        
+      break;
+      default:
+        int_valueHue=0;
+        int_valueSaturate=0;
+        int_valueLight=0;
+    }
+
+    str_shade=str_hsl;
+    str_shade=obj_shared.fn_setHueHSL(str_shade, int_valueHue, false);    
+    str_shade=obj_shared.fn_setSaturateHSL(str_shade, int_valueSaturate, true);    
+    str_shade=obj_shared.fn_setLightHSL(str_shade, int_valueLight, bln_linear);        
+
+    str_shade=obj_shared.fn_formatHSL(str_shade);
+
+    //console.log("str_shade: " + str_shade);        
+    //console.log("----------");
+    return str_shade;
+  }  
+  fn_getLightShade(str_hsl, int_value, bln_linear=false){
+
+    //console.log("fn_getLightShade");
+    //console.log("str_hsl: " + str_hsl);    
+    
+    let str_shade, int_valueLight, int_valueSaturate, int_valueHue;
+    
+    switch(int_value){
+      case 10:
+        //console.log("str_target: " + "203, 84, 54");    
+        int_valueHue=0;        
+        int_valueSaturate=2;
+        int_valueLight=5;        
+      break;
+      case 20:
+        //console.log("str_target: " + "203, 86, 50");    
+        int_valueHue=0;        
+        int_valueSaturate=4;
+        int_valueLight=9;        
+      break;
+      default:
+        int_valueHue=0;
+        int_valueSaturate=0;
+        int_valueLight=0;
+    }
+
+    str_shade=str_hsl;
+    str_shade=obj_shared.fn_setHueHSL(str_shade, int_valueHue, false);    
+    str_shade=obj_shared.fn_setSaturateHSL(str_shade, int_valueSaturate, true);    
+    str_shade=obj_shared.fn_setLightHSL(str_shade, int_valueLight, bln_linear);        
+
+    str_shade=obj_shared.fn_formatHSL(str_shade);
+
+    //console.log("str_shade: " + str_shade);        
+    //console.log("----------");
+    return str_shade;
+  }    
+  fn_setHueHSL(str_hsl, int_value, bln_value){
+    return this.fn_setHSL(str_hsl, 0, int_value, bln_value);
+  }  
+  fn_setSaturateHSL(str_hsl, int_percent, bln_value){
+    return this.fn_setHSL(str_hsl, 1, int_percent, bln_value);
+  }  
+  fn_setLightHSL(str_hsl, int_percent, bln_value){
+    return this.fn_setHSL(str_hsl, 2, int_percent, bln_value);
+  }    
+  fn_setHSL(str_hsl, int_count, int_percent, bln_direction) {             
+    let int_value=this.fn_getGradientValue(str_hsl, int_count);    
+    if(bln_direction){
+      int_value=int_value + int_percent;
+      if(int_value>100){int_value=100;}
+    }
+    else{
+      int_value=int_value - int_percent;
+      if(int_value<0){int_value=0;}
+    }   
+    
+    let str_value=this.fn_setGradientValue(str_hsl, int_count, int_value);            
+    str_value="HSL"+str_value;
+    return str_value;
+  }
+  fn_getGradientValue(str_value, int_count){
+    const arr_value=this.fn_splitGradient(str_value);          
+    return Number(arr_value[int_count]);    
+  }
+  fn_setGradientValue(str_value, int_count, int_value){
+    const arr_value=this.fn_splitGradient(str_value);          
+    arr_value[int_count]=int_value;     
+    return this.fn_getGradientString(arr_value);          
+  }  
+  fn_getGradientString(arr_value){    
+    let str_value="("+arr_value.join(',')+")";          
+    return str_value;
+  }
+  fn_splitGradient(str_value){          
+    str_value=this.fn_replace(str_value, "%", "");        
+    str_value=str_value.replace("°", "");
+    str_value=str_value.replace("(", "");
+    str_value=str_value.replace(")", "");
+    str_value=str_value.replace("hsl", "");
+    str_value=str_value.replace("HSL", "");    
+    let arr_value=str_value.split(",");  
+    return arr_value;  
+  }  
+  fn_formatHSL(str_value){      
+    const arr_value=this.fn_splitGradient(str_value);          
+    arr_value[1]+="%";
+    arr_value[2]+="%";
+    str_value="HSL("+arr_value.join(',')+")";      
+    return str_value;  
+  }
+  //HEX RGB HSL CONVERT   
+  //START THEME HANLDER
+  
+  
     
 }//END CLS
 
@@ -2472,7 +2613,7 @@ class BaseObject extends LevelObject{
             //this.obj_design.arr_item=[];
         }           
 
-        this.obj_themeStructure=new Object;
+        this.obj_holder.obj_themeStructure=new Object;
         
         //this.fn_setIsContainer(false);               
 
@@ -3019,11 +3160,8 @@ class BaseObject extends LevelObject{
         
         
         let dom_frameElement=window.frameElement;        
-        if(!dom_frameElement){
-            return;
-        }
-        let str_name=dom_frameElement.getAttribute("name");        
-        
+        if(!dom_frameElement){return;}
+        let str_name=dom_frameElement.getAttribute("name");                
         if(str_name==="xdesign-frame"){//ie a project that is being designed}        
             if(this.obj_design.int_modeExecute<10){
                 this.fn_initializePluginDesign();//can be overidden                
@@ -3623,6 +3761,7 @@ class BaseObject extends LevelObject{
     fn_setStyleOutline(str_colorBackground, str_colorBorder){        
         
         this.fn_setStyleProperty("backgroundColor", str_colorBackground);        
+        this.fn_setStyleProperty("borderColor", str_colorBorder);                      
     }    
 
     

@@ -68,7 +68,8 @@
             arr_old=obj_instance.obj_design.arr_item;        
             arr_new=[];
             for(let i=0;i<arr_old.length;i++){
-                obj_item=arr_old[i];
+                obj_item=arr_old[i];                
+                                
                 if(!obj_item.fn_preventSave()){
                     arr_new.push(obj_item); 
                 }
@@ -82,7 +83,7 @@
             bln_allSaved=true;
             arr=obj_instance.obj_design.arr_item;
             for(let i=0;i<arr.length;i++){
-                obj_item=arr[i];
+                obj_item=arr[i];                                
                 if(obj_item.fn_preventSave()){
                     console.log("ERROR obj_item.obj_design.fn_preventSave()is true");
                 }
@@ -408,7 +409,7 @@
                     if(obj_instance!==this.obj_myObject){//referes to the component that intiated the serializaiton ie the component
                         
                         //This allows Controls not be saved - e.g boot controls
-                        //also design control that is a special case, apparently.                        
+                        //also design control that is a special case, apparently.                                                                        
                         if(obj_instance.fn_preventSave()){
                             //console.log(obj_instance.obj_design.str_name + ": ERROR fn_preventSave() is true but has not been removed from parent arr_item");
                             return;

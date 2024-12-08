@@ -36,9 +36,7 @@
 
                   this.obj_field.fn_setStyleProperty("display", "flex");
                   this.fn_setStyleProperty("flex-wrap", "wrap");
-                  this.obj_field.fn_setAxis(this.obj_paramRS.bln_axisColumn);                  
-
-                  
+                  this.obj_field.fn_setAxis(this.obj_paramRS.bln_axisColumn);
                   
                   if(!this.obj_paramRS.bln_reportView){
                     //this.obj_field.fn_flipAxis(this.obj_paramRS.bln_axis);                  
@@ -297,7 +295,7 @@
                 } 
                 
                 fn_showLabelBorder(){    
-                    this.obj_label.fn_setStyleProperty("borderColor", obj_project.obj_themeForground.fn_getStyleProperty("backgroundColor"));                                    
+                    //this.obj_label.fn_setStyleProperty("borderColor", obj_project.obj_themeForground.fn_getStyleProperty("backgroundColor"));                                    
                 }        
                 fn_highlightLabelBorder(){    
                   //this.obj_label.fn_setStyleProperty("borderColor", obj_project.obj_themeForground.fn_getStyleProperty("backgroundColor"));                                    
@@ -305,7 +303,7 @@
               
                 fn_hideLabelBorder(){                                      
                   //this.obj_label.fn_setStyleProperty("borderColor", "transparent");                                                                      
-                  this.obj_label.fn_setStyleProperty("borderColor", obj_project.obj_themeBackground.fn_getStyleProperty("backgroundColor"));                                  
+                  //this.obj_label.fn_setStyleProperty("borderColor", obj_project.obj_themeBackground.fn_getStyleProperty("backgroundColor"));                                  
                 }
 
                 fn_onChildMouseUp(e){                         
@@ -403,9 +401,12 @@
                 fn_applyThemeEdit(){
 
                   
-                  this.obj_control.fn_applyThemeEdit(this.str_colorHighlight);                  
+                  //this.obj_control.fn_applyThemeEdit(this.str_colorHighlight);                  
                   //this.obj_control.fn_setStyleProperty("color", "#333333");                  
                   //this.obj_control.fn_setStyleProperty("color", "#444444");                  
+
+                  //this.obj_control.fn_setStyleProperty("backgroundColor", obj_project.obj_theme.str_highLightFill);        
+                  //this.obj_control.fn_setStyleProperty("borderColor", obj_project.obj_theme.str_forGround);                      
                     
                 }
 

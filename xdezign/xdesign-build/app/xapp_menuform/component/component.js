@@ -27,12 +27,10 @@
                 this.int_totalRowCount=0;
               }
 
-              fn_applyThemeStructure(){    
-                
-                this.obj_themeStructure=obj_project.obj_themeChildMenu;                
-                this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+              fn_applyThemeStructure(){                    
+                this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeRowzChild;                
+                this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
               }
-
               
               fn_setMenuPanel(){     
                 super.fn_setMenuPanel();                  

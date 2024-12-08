@@ -298,7 +298,7 @@
               }
               fn_onClose(){                      
                 
-                const str_value=this.obj_themeStructure.marginBottom;                
+                const str_value=this.obj_holder.obj_themeStructure.marginBottom;                
                 this.fn_setStyleProperty("marginBottom", str_value);                              
                   
                 if(this.bln_rebound){this.fn_open();}

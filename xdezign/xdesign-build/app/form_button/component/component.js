@@ -18,9 +18,8 @@
                   if(this.fn_hasContextHolderParent()){return;}                      
                 }   
                 fn_applyThemeStructure(){                                      
-
-                  this.obj_themeStructure=obj_project.obj_themeFormButton;                
-                  this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+                  this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeButton;                                  
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
                 }
 
                 fn_expand(){//called by base onload                  

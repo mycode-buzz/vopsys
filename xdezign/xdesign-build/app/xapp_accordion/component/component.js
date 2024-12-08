@@ -17,6 +17,11 @@
                 fn_onLoad(){    
                   super.fn_onLoad();                                    
                 }
+                fn_applyThemeStructure(){                        
+                  if(!obj_project.obj_theme){return;}
+                  this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeXappAccordion;                  
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                                            
+                }
 
                 fn_addItem(obj_ini=false){
                   let obj_item;        
