@@ -6,7 +6,7 @@
                 } 
                 fn_initialize(obj_ini){
                   super.fn_initialize(obj_ini);                
-                }
+                }                
               }//END CLS
               //END TAG
               //END component/form_button_search

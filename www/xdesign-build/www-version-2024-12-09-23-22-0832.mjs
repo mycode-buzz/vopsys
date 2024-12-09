@@ -667,6 +667,27 @@ class Shared{
     return bln_value;
   }  
 
+  fn_getContainerWidthAvailable(obj_my) {
+    let minusValue = 0;
+    let currentElement = obj_my.dom_obj.parentElement;
+    let int_returnValue=0;
+    let int_currentValue;
+    
+    while (currentElement) {                  
+      const computedStyle = window.getComputedStyle(currentElement);               
+      const int_paddingLeft=parseInt(computedStyle.paddingLeft);
+      const int_paddingRight=parseInt(computedStyle.paddingRight);
+      const int_borderLeft=parseInt(computedStyle.borderLeftWidth);
+      const int_borderRight=parseInt(computedStyle.borderRightWidth);
+      int_currentValue=int_paddingLeft+int_paddingRight+int_borderLeft+int_borderRight;
+      minusValue+=int_currentValue;
+      int_returnValue=currentElement.offsetWidth-minusValue;
+      currentElement = currentElement.parentElement;                  
+    }
+  
+    return int_returnValue;
+  }
+
   fn_formatDisplayValueFromColumn(obj_metaColumn, str_value){                                                                                                         
 
     str_value+="";                  
@@ -736,6 +757,21 @@ class Shared{
       return false;
     }
     return true;
+  }
+
+  fn_getRandomValueFromObject(obj_my) {
+  
+    const keys = Object.keys(obj_my);
+    const randomKey = keys[Math.floor(Math.random() * keys.length)];
+    return randomKey;
+  }
+  fn_flipVariable(str_value1, str_value2){    
+    return [str_value1, str_value2] = [str_value2, str_value1];  
+  }  
+  fn_getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
   fn_shallowCopy(obj_template){
@@ -2269,20 +2305,141 @@ fn_maintainList(obj_list){
     }
 
     return browserName;
-}
-
-fn_isMobile() {
-  return window.matchMedia("(max-width: 767px)").matches ? true : false;
-}       
-fn_parseList(str_json){                  
-  if(!str_json){
-    return {};
   }
-  return JSON.parse(str_json);
-}
 
-        
+  fn_isMobile() {
+    return window.matchMedia("(max-width: 767px)").matches ? true : false;
+  }       
+  fn_parseList(str_json){                  
+    if(!str_json){
+      return {};
+    }
+    return JSON.parse(str_json);
+  }
 
+  //START SHARED THEME HANLDER
+  fn_getShade(obj_shade){        
+    let str_hsl;
+    str_hsl=obj_shade.str_fill;            
+    let obj_gradient=this.fn_getGradienObjectFromHSL(str_hsl);
+    str_hsl=this.fn_setHueHSL(obj_gradient, obj_shade.int_percentHue, obj_shade.bln_value);        
+    str_hsl=this.fn_setSaturateHSL(obj_gradient, obj_shade.int_percentSaturation, obj_shade.bln_value);    
+    str_hsl=this.fn_setLightHSL(obj_gradient, obj_shade.int_percentLight, obj_shade.bln_value); 
+    str_hsl=this.fn_formatHSL(str_hsl);
+    return str_hsl;
+  }       
+  fn_getGradientObject(int_hue, int_saturation, int_light, str_hsl, str_label="MyColor"){
+    
+    let obj_gradient={          
+      int_hue:int_hue,
+      int_saturation:int_saturation,
+      int_light:int_light,
+    }
+    if(!str_hsl){
+      str_hsl=this.fn_getHSLString(obj_gradient);
+    }
+    obj_gradient.str_hsl=str_hsl;
+    obj_gradient.str_label=str_label;
+    obj_gradient.bln_face=false;
+    obj_gradient.bln_lighten=true;    
+    return obj_gradient;
+  }   
+  fn_getGradienObjectFromHSL(str_hsl){      
+  
+    let int_hue=this.fn_getGradientValue(str_hsl, 0);//hue  
+    let int_saturation=this.fn_getGradientValue(str_hsl, 1);//saturation
+    let int_light=this.fn_getGradientValue(str_hsl, 2);//light
+    let obj_gradient=this.fn_getGradientObject(int_hue, int_saturation, int_light, str_hsl);    
+    return obj_gradient;
+  }
+  
+  fn_setHueHSL(obj_gradient, int_amount, bln_value){
+    let int_position=0;    
+    let int_value=obj_gradient.int_hue;
+    int_value=this.fn_changeValue(int_value, int_amount, bln_value);    
+    int_value=this.fn_boundDegree(int_value);    
+    return this.fn_setHSL(obj_gradient.str_hsl, int_position, int_value);
+  }  
+  fn_setSaturateHSL(obj_gradient, int_amount, bln_value){
+
+    let int_position=1;    
+    let int_value=obj_gradient.int_saturation;
+    int_value=this.fn_changeValue(int_value, int_amount, bln_value);    
+    int_value=this.fn_boundPercentage(int_value);    
+    return this.fn_setHSL(obj_gradient.str_hsl, int_position, int_value);
+  }    
+  fn_setLightHSL(obj_gradient, int_amount, bln_value){
+
+    let int_position=2;    
+    let int_value=obj_gradient.int_light;
+    int_value=this.fn_changeValue(int_value, int_amount, bln_value);    
+    int_value=this.fn_boundPercentage(int_value);    
+    return this.fn_setHSL(obj_gradient.str_hsl, int_position, int_value);
+  }    
+  fn_setHSL(str_hsl, int_position, int_value) {                     
+    let str_value=this.fn_setGradientValue(str_hsl, int_position, int_value);            
+    str_value="HSL"+str_value;
+    return str_value;
+  }
+  fn_getGradientValue(str_value, int_position){
+    const arr_value=this.fn_splitGradient(str_value);          
+    return Number(arr_value[int_position]);    
+  }
+  fn_setGradientValue(str_value, int_position, int_value){
+    const arr_value=this.fn_splitGradient(str_value);          
+    arr_value[int_position]=int_value;     
+    return this.fn_getGradientString(arr_value);          
+  }  
+  fn_getGradientString(arr_value){    
+    let str_value="("+arr_value.join(',')+")";          
+    return str_value;
+  }
+  fn_splitGradient(str_value){          
+    str_value=this.fn_replace(str_value, "%", "");        
+    str_value=str_value.replace("°", "");
+    str_value=str_value.replace("(", "");
+    str_value=str_value.replace(")", "");
+    str_value=str_value.replace("hsl", "");
+    str_value=str_value.replace("HSL", "");    
+    let arr_value=str_value.split(",");  
+    return arr_value;  
+  }  
+  fn_formatHSL(str_value){      
+    const arr_value=this.fn_splitGradient(str_value);          
+    arr_value[1]+="%";
+    arr_value[2]+="%";
+    str_value="HSL("+arr_value.join(',')+")";      
+    return str_value;  
+  }
+  fn_changeValue(int_value, int_amount, bln_value){    
+    if(bln_value){int_value+=int_amount;}
+    else{int_value-=int_amount;}
+    return int_value;
+  }
+  
+  fn_boundPercentage(int_value){
+    return this.fn_boundValue(int_value, 0,100);   
+  }
+  fn_boundDegree(int_value){
+    return this.fn_boundValue(int_value, 0, 359);   
+  }  
+  fn_boundValue(int_value, int_min, int_max){    
+    if(int_value<int_min){int_value=int_min;}
+    if(int_value>int_max){int_value=int_max;}        
+    return int_value;
+  }
+  fn_filterValue(int_value, int_min, int_max){    
+    if(int_value<int_min){return false;}
+    if(int_value>int_max){return false;}        
+    return true;
+  }
+  fn_getHSLString(obj_gradient){  
+    let int_hue=obj_gradient.int_hue;
+    let int_saturation=obj_gradient.int_saturation;
+    let int_light=obj_gradient.int_light;
+    return `hsl(${int_hue}, ${int_saturation}%, ${int_light}%)`;
+  }  
+  //END SHARED THEME HANLDER
     
 }//END CLS
 
@@ -2456,7 +2613,7 @@ class BaseObject extends LevelObject{
             //this.obj_design.arr_item=[];
         }           
 
-        this.obj_themeStructure=new Object;
+        this.obj_holder.obj_themeStructure=new Object;
         
         //this.fn_setIsContainer(false);               
 
@@ -2553,8 +2710,8 @@ class BaseObject extends LevelObject{
             this.fn_initializeDynamic();
         }   
         
-        
-    }    
+        this.fn_holdEvent();                  
+    }        
 
     fn_initializeDynamic(){}//overidden        
 
@@ -3003,11 +3160,8 @@ class BaseObject extends LevelObject{
         
         
         let dom_frameElement=window.frameElement;        
-        if(!dom_frameElement){
-            return;
-        }
-        let str_name=dom_frameElement.getAttribute("name");        
-        
+        if(!dom_frameElement){return;}
+        let str_name=dom_frameElement.getAttribute("name");                
         if(str_name==="xdesign-frame"){//ie a project that is being designed}        
             if(this.obj_design.int_modeExecute<10){
                 this.fn_initializePluginDesign();//can be overidden                
@@ -3568,6 +3722,9 @@ class BaseObject extends LevelObject{
         this.fn_onApplyFeatures();
     }
 
+    fn_holdEvent(){}
+    fn_dropEvent(){}
+
     fn_applyThemeStructure(){                        
     }
 
@@ -3603,9 +3760,8 @@ class BaseObject extends LevelObject{
     }    
     fn_setStyleOutline(str_colorBackground, str_colorBorder){        
         
-        this.fn_setStyleProperty("backgroundColor", str_colorBackground);
-        this.fn_setStyleProperty("borderWidth", "3px");
-        this.fn_setStyleProperty("borderColor", str_colorBorder);
+        this.fn_setStyleProperty("backgroundColor", str_colorBackground);        
+        this.fn_setStyleProperty("borderColor", str_colorBorder);                      
     }    
 
     
@@ -4818,11 +4974,7 @@ class component extends BaseObject {
         }            
         return false;
     }
-
     
-
-    
-
     fn_call(str_method, foo_arg){    
         if(this[str_method]){
             return this[str_method](foo_arg);
@@ -6175,8 +6327,11 @@ document.addEventListener('DOMContentLoaded', (e) => {
                   super.fn_onLoad();                                          
 
                   if(this.fn_hasContextHolderParent()){return;}                      
-
                 }   
+                fn_applyThemeStructure(){                                      
+                  this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeButton;                                  
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+                }
 
                 fn_expand(){//called by base onload                  
                   this.fn_expandMultiple(1.5);
@@ -6217,19 +6372,39 @@ document.addEventListener('DOMContentLoaded', (e) => {
         } 
         fn_initialize(obj_ini){
           super.fn_initialize(obj_ini);                
+        }
+        fn_setText(str_value){          
+          
+          super.fn_setText(str_value);          
+          
+          if(this.obj_design.str_themeType==="form_button"){
+            if(obj_project.bln_isMobile){
+              
+              if(obj_shared.fn_isSmallScreen()){//less than 400              
+                if(this.obj_design.str_icon){
+                  this.fn_showIcon(this.obj_design.str_icon);                  
+                  //str_value="";
+                  
+                } 
+              }
+            }
+          }
 
-
+          let obj_anchor=this.fn_getComponent("form_button_anchor");          
+          if(obj_anchor){          
+            obj_anchor.fn_setText(str_value);          
+          }          
         }
         fn_onLoad(){          
           super.fn_onLoad();
           if(this.fn_hasContextHolderParent()){return;}              
           
           this.fn_showIcon(this.obj_design.str_icon);                    
-        }                
-        
-        fn_applyThemeStructure(){                    
-          this.obj_themeStructure=obj_project.obj_themeFormButton;                
-          this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+        }                        
+
+        fn_applyThemeStructure(){                                        
+          if(!obj_project.obj_theme){return;}
+          super.fn_applyThemeStructure();          
         }
         fn_setSubDomain(str_value){
           this.obj_design.str_subdomain=str_value;
@@ -6273,26 +6448,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
             obj_anchor.fn_showIcon(str_value);                          
           }  
         } 
-        fn_setText(str_value){          
-          
-          super.fn_setText(str_value);
-          
-          if(this.obj_design.str_themeType==="form_button"){
-            if(obj_project.bln_isMobile){
-              if(obj_shared.fn_isSmallScreen()){//less than 400              
-                if(this.obj_design.str_icon){
-                  this.fn_showIcon(this.obj_design.str_icon);                  
-                  str_value="";
-                } 
-              }
-            }
-          }
-
-          let obj_anchor=this.fn_getComponent("form_button_anchor");          
-          if(obj_anchor){          
-            obj_anchor.fn_setText(str_value);          
-          }          
-        }
+        
         fn_getText(){
 
           let str_text;
@@ -6398,6 +6554,136 @@ document.addEventListener('DOMContentLoaded', (e) => {
               //END TAG
               //END component/console_button
 /*type: xapp_console_button//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_input//*/
+
+            //XSTART component/form_input
+              class form_input extends component{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                
+
+                  this.fn_setIsContainer(false);                                                                       
+                  
+                }    
+                fn_holdEvent(){
+
+                  this.obj_holder.bln_listenFocus=true;        
+                  this.obj_holder.bln_listenBlur=true;        
+                  this.obj_holder.bln_listenChange=true;
+                  this.obj_holder.bln_listenKeyDown=true;
+                  this.obj_holder.bln_listenKeyUp=true;        
+                  this.obj_holder.bln_listenClick=true;
+                  this.obj_holder.bln_listenDblClick=true;
+                  this.obj_holder.bln_listenMouseDown=true;
+                  this.obj_holder.bln_listenInput=true;
+                  this.obj_holder.bln_listenSelectStart=true;
+                }
+                fn_dropEvent(){
+
+                  this.obj_holder.bln_listenFocus=false;        
+                  this.obj_holder.bln_listenBlur=false;        
+                  this.obj_holder.bln_listenChange=false;
+                  this.obj_holder.bln_listenKeyDown=false;
+                  this.obj_holder.bln_listenKeyUp=false;        
+                  this.obj_holder.bln_listenClick=false;
+                  this.obj_holder.bln_listenDblClick=false;                                    
+                  this.obj_holder.bln_listenMouseDown=false;                  
+                  this.obj_holder.bln_listenInput=false;
+                  this.obj_holder.bln_listenSelectStart=false;
+                }
+                fn_applyThemeStructure(){                                                        
+                  this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeFormInput;                
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+                }
+                fn_onSelectStart(e){
+                  //console.log("hit input");
+                  obj_project.eventCancelledByChild=false;
+                  e.stopPropagation();
+                  return true;
+                }                                    
+                fn_setControlType(str_value){
+                  this.fn_setDomProperty("type", str_value);
+
+                }
+                fn_onApplyDomSettings(){
+                  this.fn_parentEvent("Click", e);                                    
+
+                }
+                fn_onApplyFeatures(){                
+                  //console.log("fn_onApplyFeatures");
+                  //this.fn_notifyParent("fn_onApplyInputFeatures", this);                                    
+                }
+                fn_onLoad(){    
+                  super.fn_onLoad();                                          
+                  
+                  
+                }
+                fn_expand(){//called by base onload
+                  this.fn_expandMultiple(2);
+                }
+                
+                fn_setText(str_value){    
+                  //no need to set text as innerHTML is not supported on input
+                  this.fn_setValue(str_value);
+                }
+                fn_setPlaceholder(str_value){ 
+                  str_value+="";    
+                  this.fn_setDomProperty("placeholder", str_value);        
+                }  
+                fn_getPlaceholder(){       
+                  return this.fn_getDomProperty("placeholder");        
+                }
+
+                fn_onClick(e){             
+                  //obj_project.fn_forgetEvent(e);//this will cancel default actions , such as color control and checkbox from operating                       
+                  obj_project.fn_calmEvent(e);//stop event bubble, not required , but can help where event is required  on parant form elements                  
+                  this.fn_parentEvent("Click", e);
+                }
+                fn_onDblClick(e){             
+                  obj_project.fn_calmEvent(e);                  
+                  this.fn_parentEvent("DblClick", e);                  
+                }
+                fn_onInput(e){                    
+                  obj_project.fn_calmEvent(e);                
+                  this.fn_parentEvent("Input", e);                  
+                }                
+                fn_onChange(e){                  
+                  obj_project.fn_calmEvent(e);
+                  this.fn_setValue(this.dom_obj.value, e);                                                                  
+                  this.fn_parentEvent("Change");                  
+                }                
+                fn_onKeyDown(e){                     
+                  obj_project.fn_calmEvent(e);
+                  this.fn_parentEvent("KeyDown", e);                  
+                }
+                fn_onKeyUp(e){                                                                      
+                  obj_project.fn_calmEvent(e);
+                  this.fn_parentEvent("KeyUp", e);                  
+                }
+                fn_onMouseDown(e){                                  
+                  obj_project.fn_calmEvent(e);
+                  this.fn_parentEvent("MouseDown", e);                  
+                }
+                fn_onFocus(e){                       
+                  obj_project.fn_calmEvent(e);                  
+                  this.fn_parentEvent("Focus", e);                  
+                }
+                fn_onBlur(e){     
+                  obj_project.fn_calmEvent(e);                  
+                  this.fn_parentEvent("Blur", e);
+                }
+
+                
+              }//END CLS
+              //END TAG
+              //END component/form_input
+/*type: form_input//*/
 /*END COMPONENT//*/
 
 
@@ -7056,6 +7342,11 @@ class form_fieldset extends component{
     this.fn_setStyleProperty("overflow", "hidden");                      
     this.fn_setStyleProperty("margin", "0px");                      
   }
+  fn_applyThemeStructure(){                        
+    if(!obj_project.obj_theme){return;}
+    this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeFormFieldset;                
+    this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                          
+  }
   fn_onRowMember(obj_row){
 
     this.obj_row=obj_row;                  
@@ -7191,6 +7482,11 @@ class form_fieldset extends component{
         fn_initialize(obj_ini){
           super.fn_initialize(obj_ini);                
         }
+        fn_applyThemeStructure(){                              
+          if(!obj_project.obj_theme){return;}
+          this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeFormHardRule;                
+          this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                                
+        }
       }//END CLS
       //END TAG
       //END component/form_hardrule        
@@ -7202,13 +7498,17 @@ class form_fieldset extends component{
 /*type: form_label//*/
 
             //XSTART component/form_label
-              class form_label extends component{
+              class form_label extends form_input{
                 constructor(obj_ini) {      
                   super(obj_ini);        
                 } 
                 fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                
-                  
+                  super.fn_initialize(obj_ini);                                  
+                 
+                }
+                fn_holdEvent(){
+                  super.fn_dropEvent();
+  
                   this.obj_holder.bln_listenClick=true;
                   this.obj_holder.bln_listenMouseEnter=true;
                   this.obj_holder.bln_listenMouseLeave=true;
@@ -7216,18 +7516,16 @@ class form_fieldset extends component{
                   this.obj_holder.bln_listenMouseDown=true;                  
                 }
 
+                fn_setText(str_value){
+                  this.fn_setDomProperty("innerHTML", str_value);                                      
+                }
+
                 fn_onLoad(){
-                  super.fn_onLoad();                  
-                  
-                  /*
-                  this.fn_setStyleProperty('border', '1px solid rgba(255, 255, 255, 0.0)');                  
-                  this.fn_setStyleProperty('borderRadius', '3px');                  
-                  this.fn_setStyleProperty('margin', '3px');                  
-                  this.fn_setStyleProperty('alignSelf', 'flex-start');                  
-                  this.fn_setStyleProperty('cursor', 'pointer');                  
-                  //*/
-                  
-                  //console.log("flexBasis: " + this.fn_getStyleProperty('flexBasis'));                  
+                  super.fn_onLoad();                                                      
+                }
+                fn_applyThemeStructure(){                                                        
+                  this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeFormLabel;                
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
                 }
 
                 fn_setUnLocked(){
@@ -7294,6 +7592,12 @@ class form_fieldset extends component{
           this.fn_setDomProperty("tabIndex", "0");
           this.fn_setStyleProperty("userSelect", "none");
           this.fn_setStyleProperty("opacity", "1");          
+        }
+
+        fn_applyThemeStructure(){                              
+          if(!obj_project.obj_theme){return;}
+          this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeFormLegend;                
+          this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                      
         }
 
         
@@ -7417,13 +7721,21 @@ class form_fieldset extends component{
 /*START COMPONENT//*/
 /*type: form_text//*/
       //XSTART component/form_text
-      class form_text extends component{
+      class form_text extends form_input{
         constructor(obj_ini) {      
           super(obj_ini);        
         } 
         fn_initialize(obj_ini){
           super.fn_initialize(obj_ini);                
+          
+        }
+        fn_holdEvent(){
+          super.fn_dropEvent();
+
           this.obj_holder.bln_listenSelectStart=true;                                    
+        }
+        fn_applyThemeStructure(){                    
+          super.fn_applyThemeStructure();
         }
         fn_onSelectStart(e){                                    
           obj_project.fn_calmEvent(e);
@@ -7432,7 +7744,7 @@ class form_fieldset extends component{
           if(str_value===""){    
             str_value="&nbsp;";//if blank will cause display issue
           } 
-          super.fn_setText(str_value);       
+          this.fn_setDomProperty("innerHTML", str_value);                                      
       }
       }//END CLS
       //END TAG
@@ -7477,8 +7789,12 @@ class panel extends component {
                   if(this.obj_domStyle.display===undefined){this.obj_domStyle.display="block";}                                   
                 }
                 fn_onLoad(){    
-                  super.fn_onLoad();                  
-                  if(this.fn_getDebugPin()){this.fn_highlightBorder("white");}                  
+                  super.fn_onLoad();                                    
+                }
+                fn_applyThemeStructure(){                        
+                  if(!obj_project.obj_theme){return;}
+                  this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeXappAccordion;                  
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                                            
                 }
 
                 fn_addItem(obj_ini=false){
@@ -7638,7 +7954,7 @@ class panel extends component {
 //START COMPONENTMAP
 
 //START AUTO GENERATED COMPONENT MAP
-const obj_ComponentMap = new Map([['component', component],['form_button', form_button],['form_button_rich', form_button_rich],['xapp_button', xapp_button],['xapp_console_button', xapp_console_button],['eazygriditem', eazygriditem],['block', block],['eazygrid', eazygrid],['form_button_anchor', form_button_anchor],['form_button_icon', form_button_icon],['form_button_span', form_button_span],['form_field', form_field],['form_fieldset', form_fieldset],['form_form', form_form],['form_hardrule', form_hardrule],['form_label', form_label],['form_legend', form_legend],['form_menu_panel', form_menu_panel],['form_panel', form_panel],['form_span', form_span],['form_text', form_text],['panel', panel],['xapp_accordion', xapp_accordion],['xapp_button_navigate_rowz', xapp_button_navigate_rowz],['xapp_theme', xapp_theme]]);
+const obj_ComponentMap = new Map([['component', component],['form_button', form_button],['form_button_rich', form_button_rich],['xapp_button', xapp_button],['xapp_console_button', xapp_console_button],['form_input', form_input],['eazygriditem', eazygriditem],['block', block],['eazygrid', eazygrid],['form_button_anchor', form_button_anchor],['form_button_icon', form_button_icon],['form_button_span', form_button_span],['form_field', form_field],['form_fieldset', form_fieldset],['form_form', form_form],['form_hardrule', form_hardrule],['form_label', form_label],['form_legend', form_legend],['form_menu_panel', form_menu_panel],['form_panel', form_panel],['form_span', form_span],['form_text', form_text],['panel', panel],['xapp_accordion', xapp_accordion],['xapp_button_navigate_rowz', xapp_button_navigate_rowz],['xapp_theme', xapp_theme]]);
 //END AUTO GENERATED MAP
 
 
@@ -7663,227 +7979,774 @@ class Project extends component{
     fn_onLoad(){
         super.fn_onLoad();        
         //console.log("Project Loaded: " + this.obj_design.str_name);
-        //alert(obj_projectTarget)
-        
+        //alert(obj_projectTarget)        
     }    
 
-    fn_applyThemeStructure(){
-        let obj_theme, obj_themeItem;
-        obj_theme=this.obj_theme;
-        //some code requires themeobjects empty or not
+//START THEME HAMDLER  
+fn_calculateFontSizeIncrement(obj_theme, int_fontSize, int_increment=0){
+  obj_theme.int_fontSize1=int_fontSize;
+  obj_theme.int_fontSize2=obj_theme.int_fontSize1+int_increment;
+  obj_theme.int_fontSize3=obj_theme.int_fontSize2+int_increment;
+  obj_theme.int_fontSize4=obj_theme.int_fontSize3+int_increment;
+  obj_theme.int_fontSize5=obj_theme.int_fontSize4+int_increment;      
+}
 
-        if(!obj_theme){
-            return;
-        }
+fn_calculateFontSize(obj_theme){ 
+  
 
-        this.obj_themeBackground=this.fn_getThemeObject("form_blockbackground");
-        this.obj_themeMidground=this.fn_getThemeObject("form_blockmidground");
-        this.obj_themeForground=this.fn_getThemeObject("form_blockforground");
-        this.obj_themeHighlight=this.fn_getThemeObject("form_blockhighlight");          
+  switch(obj_theme.str_fontSize){        
+      case "small":
+        //if(this.bln_isMobile){this.fn_calculateFontSize("medium");return;}               
+          this.fn_calculateFontSizeIncrement(obj_theme, 10, 0);                            
+          obj_theme.int_fontSize4=obj_theme.int_fontSize3+1;
+          obj_theme.int_fontSize5=obj_theme.int_fontSize4+2;      
+          break;
+      case "medium":                            
+          this.fn_calculateFontSizeIncrement(obj_theme, 10, 1);                            
+          break;          
+      case "large":
+        //if(this.bln_isMobile){this.fn_calculateFontSize("medium");return;}               
+          this.fn_calculateFontSizeIncrement(obj_theme, 13, 1);                            
+          break;                      
+      default:
+        this.fn_calculateFontSize("medium");
+        return;
+  }
+
+  
+  obj_theme.int_fontSize1=obj_theme.int_fontSize1/10;
+  obj_theme.int_fontSize2=obj_theme.int_fontSize2/10;
+  obj_theme.int_fontSize3=obj_theme.int_fontSize3/10;
+  obj_theme.int_fontSize4=obj_theme.int_fontSize4/10;
+  obj_theme.int_fontSize5=obj_theme.int_fontSize5/10;
+}
+
+fn_setBorderDisplay(obj_theme){  
+let bln_value=obj_theme.bln_borderDisplay;
+obj_theme.bln_borderRowz=bln_value;
+obj_theme.bln_borderButton=bln_value;
+obj_theme.bln_borderFieldset=bln_value;
+obj_theme.bln_borderLegend=bln_value;    
+obj_theme.bln_borderLabel=bln_value;      
+obj_theme.bln_borderInput=bln_value;                
+obj_theme.bln_borderSearch=bln_value;                    
+}
+fn_setBorderRadiusDisplay(obj_theme){  
+let bln_value=obj_theme.bln_borderRadiusDisplay;
+obj_theme.bln_borderRadiusRowz=bln_value;
+obj_theme.bln_borderRadiusButton=bln_value;
+obj_theme.bln_borderRadiusFieldset=bln_value;
+obj_theme.bln_borderRadiusLegend=bln_value;    
+obj_theme.bln_borderRadiusLabel=bln_value;      
+obj_theme.bln_borderRadiusInput=bln_value;        
+obj_theme.bln_borderRadiusSearch=bln_value;        
+}
+
+fn_getTestThemeName(){
+
+  return obj_shared.fn_getRandomValueFromObject(this.obj_color);  
+
+}
 
 
-        obj_theme.str_backGround=this.obj_themeBackground.fn_getStyleProperty("background");
-        obj_theme.str_midGround=this.obj_themeMidground.fn_getStyleProperty("background");
-        obj_theme.str_forGround=this.obj_themeForground.fn_getStyleProperty("background");
-        obj_theme.str_highLight=this.obj_themeHighlight.fn_getStyleProperty("background");
 
-        /*        
-        //*/
-        
-        /*
-        //options reuqired for             
-        borderColor:relevant themecolor
-        color:relevant themecolor
-        backgroundColor:relevant themecolor        
+fn_setFillArea(obj_theme, obj_fill){
 
-        borderStyle:"solid",dotted,dashed etc
-        borderWidth:on,off
-        marginBottom:large/small or a em size, not zero        
-        //*/
-        
-        this.obj_themeProject={
-            //*//STRUCTURE                
-            display:"flex",                                    
-            fontSize:"1.0rem",
-            display:"flex",                                    
-            padding:"1.0em",                                    
-            gap:"1.0em",                                    
-            fontWeight:"normal",                                    
-            cusor:"pointer",                                                
-            justifyContent:"center",
-            alignItems:"center",                      
-            //STRUCTURE                              
-            //*/
-        
-            //*//OPTION
-            borderColor:"orange",                    
-            color:"white",            
-            backgroundColor:"rgb(65,65,65)",
+  let str_fillBase, str_fillForm, str_fillBorder;
+  const str_fill=obj_theme.str_fill;
+  
+  const str_fill_1=obj_fill.str_fill_1;
+  const str_fill_2=obj_fill.str_fill_2;
 
-            borderWidth:"0em",
-            borderRadius:"0em",            
-            borderStyle:"solid",           
-            marginBottom:"0em",            
-            //OPTION
-            //*/
-        }                               
-        
-        
-        /////////////////////////////////////////
-        /////////////////////////////////////////
-        //MENUBUTTON
-        obj_themeItem=obj_shared.fn_shallowCopy(this.obj_themeProject);                
-        //*//STRUCTURE           
-        obj_themeItem.fontSize="1.3rem";                
-        obj_themeItem.fontWeight="bold";                        
-        obj_themeItem.padding="1.0em";                                
-        obj_themeItem.width="100%";        
-        obj_themeItem.cursor="pointer";                               
-        //STRUCTURE   
-        //*/
+  const obj_gradient=obj_theme.obj_gradient;
+  
+  str_fillBase=str_fill;
+  str_fillForm=str_fill_1;
+  str_fillBorder=str_fill_2;    
+  
+  
+  if(obj_gradient.bln_face){    
+    str_fillForm=str_fill;
+    str_fillBase=str_fill_1;
+    str_fillBorder=str_fill_2;
+  }
+  
+  
+  obj_fill.str_fill=str_fill;
+  obj_fill.str_fillBase=str_fillBase;
+  obj_fill.str_fillForm=str_fillForm;
+  obj_fill.str_fillBorder=str_fillBorder;  
+}
 
-        //*//OPTION                
-        obj_themeItem.borderColor=obj_theme.str_forGround;
-        obj_themeItem.color=obj_theme.str_forGround;
-        obj_themeItem.backgroundColor=obj_theme.str_midGround;
-        obj_themeItem.borderStyle="solid";
-        obj_themeItem.bln_border=false;
-        obj_themeItem.int_borderWidth=0;
-        obj_themeItem.bln_margin=false;
-        obj_themeItem.int_marginEnd=0;
-        this.fn_applyThemeOption(obj_themeItem);        
-        //OPTION
-        //*/                
-        this.obj_themeMenuButton=obj_themeItem;        
-        //MENUBUTTON
-        /////////////////////////////////////////
-        /////////////////////////////////////////
+fn_filterGradientLight(obj_theme){        
+  
+  let int_value=obj_theme.obj_gradient.int_light;  
+  let bln_value=obj_shared.fn_filterValue(int_value, obj_theme.int_min,obj_theme.int_max);         
+  if(!bln_value){
+    console.log("failed int_value: " + int_value);
+    console.log("failed obj_theme.int_min: " + obj_theme.int_min);
+    console.log("failed obj_theme.int_max: " + obj_theme.int_max);
+  }
+  return bln_value;
+} 
 
-        /////////////////////////////////////////
-        /////////////////////////////////////////
-        //CHILDMENU
-        obj_themeItem=obj_shared.fn_shallowCopy(this.obj_themeMenuButton);                
-        //*//STRUCTURE           
-        obj_themeItem.fontSize="1.2rem";
-        obj_themeItem.padding="1.0em";                 
-        //STRUCTURE   
-        //*/
 
-        //*//OPTION        
-        obj_themeItem.bln_margin=false;
-        obj_themeItem.int_marginEnd=0.5;
-        this.fn_applyThemeOption(obj_themeItem);        
-        //OPTION
-        //*/                
-        this.obj_themeChildMenu=obj_themeItem;        
-        //CHILDMENU             
-        /////////////////////////////////////////
-        /////////////////////////////////////////
 
-        /////////////////////////////////////////
-        /////////////////////////////////////////
-        //DYNAMICMENU
-        obj_themeItem=obj_shared.fn_shallowCopy(this.obj_themeChildMenu);                
-        //*//STRUCTURE                   
-        //STRUCTURE   
-        //*/
+fn_setFillPalette(obj_theme, obj_fill){  
+  
+  let obj_shade, obj_contrast;
 
-        //*//OPTION        
-        this.fn_applyThemeOption(obj_themeItem);        
-        //OPTION
-        //*/                
-        this.obj_themeDynamicMenu=obj_themeItem;        
-        //DYNAMICMENU
-        /////////////////////////////////////////
-        /////////////////////////////////////////
+  const obj_gradient=obj_theme.obj_gradient;
 
-        /////////////////////////////////////////
-        /////////////////////////////////////////
-        //FORMBUTTON
-        obj_themeItem=obj_shared.fn_shallowCopy(this.obj_themeProject);                
-        //*//STRUCTURE           
-        obj_themeItem.fontSize="1.1rem";                        
-        obj_themeItem.fontWeight="bold";  
-        obj_themeItem.cursor="pointer";                              
-        //STRUCTURE   
-        //*/
+  obj_shade=new Object;    
+  obj_shade.str_fill=obj_theme.str_fill;  
+  obj_shade.bln_value=obj_gradient.bln_lighten;  
 
-        //*//OPTION
-        obj_themeItem.borderColor=obj_theme.str_midGround;
-        obj_themeItem.color=obj_theme.str_midGround;        
-        obj_themeItem.backgroundColor=obj_theme.str_forGround;        
-        obj_themeItem.borderStyle="solid";        
-        obj_themeItem.bln_border=false;
-        obj_themeItem.int_borderWidth=0.5;
-        this.fn_applyThemeOption(obj_themeItem);        
-        //OPTION
-        //*/                
-        this.obj_themeFormButton=obj_themeItem;        
-        //FORMBUTTON
-        /////////////////////////////////////////
-        /////////////////////////////////////////
+  let int_percentLight, int_percentContrast;
+  int_percentLight=10;
+  int_percentContrast=5;  
+  if(obj_gradient.bln_contrast){
+    int_percentLight=15;
+    int_percentContrast=10;  
+  }  
+  let int_totalLight=(int_percentLight+(int_percentLight+int_percentContrast));
+  obj_theme.int_percentLight=int_percentLight;
+  obj_theme.int_percentContrast=int_percentContrast;
+  obj_theme.int_totalLight=int_totalLight;
 
-        /////////////////////////////////////////
-        /////////////////////////////////////////
-        //FORMINPUT
-        obj_themeItem=obj_shared.fn_shallowCopy(this.obj_themeProject);                
-        //*//STRUCTURE           
-        obj_themeItem.fontSize="1.1rem";                        
-        obj_themeItem.fontWeight="normal";                        
-        //STRUCTURE   
-        //*/
+  obj_theme.int_min=0;
+  obj_theme.int_max=100;
+  if(obj_gradient.bln_lighten){//due to getting lighter    
+    obj_theme.int_min=0;
+    obj_theme.int_max=(100-int_totalLight);//due to getting darker
+  }
+  else{    
+    obj_theme.int_min=0+int_totalLight;
+    obj_theme.int_max=100;//due to getting darker
+  }
+  obj_theme.bln_filterPass=this.fn_filterGradientLight(obj_theme);        
+  if(!obj_theme.bln_filterPass){
+    return;
+  }
 
-        //*//OPTION
-        obj_themeItem.borderColor=obj_theme.str_midGround;
-        obj_themeItem.color="dark gray";        
-        obj_themeItem.backgroundColor=obj_theme.str_forGround;        
-        obj_themeItem.borderStyle="solid";
-        obj_themeItem.bln_border=false;
-        obj_themeItem.int_borderWidth=0.5;
-        this.fn_applyThemeOption(obj_themeItem);        
-        //OPTION
-        //*/                
-        this.obj_themeFormInput=obj_themeItem;        
-        //FORMINPUT
-        /////////////////////////////////////////
-        /////////////////////////////////////////
-        
-        
-    }
+  obj_contrast={    
+    int_percentHue:0,
+    int_percentSaturation:0,
+    int_percentLight:int_percentLight,
+  }
+  obj_shared.fn_assignProperty(obj_shade, obj_contrast);  
 
-    fn_applyThemeOption(obj_themeItem){
 
-        /*
-        obj_themeItem.borderColor;
-        obj_themeItem.color=;        
-        obj_themeItem.backgroundColor;        
-        obj_themeItem.borderStyle;
-        obj_themeItem.bln_border;
-        obj_themeItem.int_borderWidth;
-        obj_themeItem.bln_margin;
-        obj_themeItem.int_marginEnd;
-        //*/
-      
-      let int_borderWidth=0;            
-      if(obj_themeItem.bln_border){
-        int_borderWidth=0.5;            
-        if(obj_themeItem.int_borderWidth){          
-          int_borderWidth=obj_themeItem.int_borderWidth;                
-        }
-      }
-      const int_borderRadius=(2*int_borderWidth);
-      obj_themeItem.borderWidth=int_borderWidth + "em";      
-      obj_themeItem.borderRadius=int_borderRadius + "em";                    
+  obj_fill.str_fill_1=obj_shared.fn_getShade(obj_shade);              
+  //console.log(obj_fill.str_fill_1);
 
-      let int_marginEnd=0.1;              
-      if(obj_themeItem.bln_margin){
-        int_marginEnd=0.5;                
-        if(obj_themeItem.int_marginEnd){
-          int_marginEnd=obj_themeItem.int_marginEnd;          
-        }
-      }
-      obj_themeItem.marginBottom=int_marginEnd + "em";            
-    }
+
+  obj_contrast.int_percentLight=(int_percentLight+int_percentContrast);//10 percent more than fill 1    
+  obj_shade.str_fill=obj_theme.str_fill;//use fill1 as starting point
+  obj_shared.fn_assignProperty(obj_shade, obj_contrast);    
+  obj_fill.str_fill_2=obj_shared.fn_getShade(obj_shade);              
+  obj_fill.obj_shade=obj_shade;
+
+  obj_theme.bln_filterPass=true;  
+}
+
+fn_addColorItem(obj_current){  
+
+  this.arr_color.push(obj_current);    
+  
+  let int_hue, int_saturation, int_light;
+  let obj_hsl, str_label;  
+  int_hue=obj_current.int_hue;
+  int_saturation=obj_current.int_saturation;
+
+  int_hue=obj_current.int_hue;
+  int_saturation=obj_current.int_saturation;
+  int_light=60;  
+  str_label=obj_current.str_label + "-light"
+  obj_hsl=obj_shared.fn_getGradientObject(int_hue, int_saturation, int_light, "", str_label);    
+  this.arr_color.push(obj_hsl);
+
+  int_hue=obj_current.int_hue;
+  int_saturation=obj_current.int_saturation;
+  int_light=30;  
+  str_label=obj_current.str_label + "-dark"
+  obj_hsl=obj_shared.fn_getGradientObject(int_hue, int_saturation, int_light, "", str_label);    
+  this.arr_color.push(obj_hsl);
+  
+  if(obj_current.int_hue>=10){
+    int_hue=obj_current.int_hue-10;
+    int_saturation=obj_current.int_saturation;
+    int_light=30;      
+    str_label=obj_current.str_label + "-alt"
+    obj_hsl=obj_shared.fn_getGradientObject(int_hue, int_saturation, int_light, "", str_label);    
+    this.arr_color.push(obj_hsl);  
+  }
+  
+  
+  
+}
+
+fn_getColorMap(obj_theme){  
+
+  let obj_hsl;
+  let int_value;
+
+  let int_hue, int_saturation, int_light
+  int_saturation=100;
+  int_light=50;
+
+  this.arr_color = [];  
+  let arr_item = [];  
+  let arr_mod;    
+  
+  obj_hsl=obj_shared.fn_getGradientObject(0, 100, 50, "", "red");//red
+  this.fn_addColorItem(obj_hsl);
+  obj_hsl=obj_shared.fn_getGradientObject(30, 100, 50, "", "Orange");
+  this.fn_addColorItem(obj_hsl);
+  //obj_hsl=obj_shared.fn_getGradientObject(60, 100, 50, "", "Yellow");
+  //this.fn_addColorItem(obj_hsl);
+  //obj_hsl=obj_shared.fn_getGradientObject(120, 100, 50, "", "Green");
+  //this.fn_addColorItem(obj_hsl);
+  //obj_hsl=obj_shared.fn_getGradientObject(180, 100, 50, "", "Cyan");
+  //this.fn_addColorItem(obj_hsl);
+  obj_hsl=obj_shared.fn_getGradientObject(240, 100, 50, "", "Blue");
+  this.fn_addColorItem(obj_hsl);
+  obj_hsl=obj_shared.fn_getGradientObject(270, 100, 50, "", "Purple");
+  this.fn_addColorItem(obj_hsl);
+  obj_hsl=obj_shared.fn_getGradientObject(300, 100, 50, "", "Magenta");
+  this.fn_addColorItem(obj_hsl);
+  
+  arr_item=this.arr_color;
+  obj_hsl=obj_shared.fn_getGradientObject(0, 0, 100, "", "White");
+  arr_item.push(obj_hsl);  
+  obj_hsl=obj_shared.fn_getGradientObject(0, 0, 0, "", "Black");
+  arr_item.push(obj_hsl);  
+  obj_hsl=obj_shared.fn_getGradientObject(0, 0, 50, "", "Gray");
+  arr_item.push(obj_hsl); 
+  obj_hsl=obj_shared.fn_getGradientObject(0, 0, 60, "", "Gray-light");
+  arr_item.push(obj_hsl);   
+  obj_hsl=obj_shared.fn_getGradientObject(0, 0, 30, "", "Gray-dak");
+  arr_item.push(obj_hsl);     
+  
+  console.log(this.arr_color);
+
+  let int_max=this.arr_color.length-1;
+  int_value=obj_shared.fn_getRandomInt(0, int_max); // Generates a random integer between 1 and 8    
+  obj_hsl=this.arr_color[int_value];
+  
+  
+  //obj_hsl=obj_shared.fn_getGradientObject(230, 100, 30, "", "blue-mod");  
+  //obj_hsl=obj_shared.fn_getGradientObject(300, 100, 50, "", "magenta");    
+  //obj_hsl=obj_shared.fn_getGradientObject(0, 100, 50, "", "Red");  
+  //obj_hsl=obj_shared.fn_getGradientObject(230, 100, 30, "", "Blue-Alt-Test");    
+  //obj_hsl=obj_shared.fn_getGradientObject(300, 100, 60, "", "magenta-lighter-test");  
+  //obj_hsl=obj_shared.fn_getGradientObject(300, 100, 30, "", "magenta-darker-test");  
+  //obj_hsl=obj_shared.fn_getGradientObject(0, 0, 30, "", "dark-gray-test");  
+  //obj_hsl=obj_shared.fn_getGradientObject(0, 0, 60, "", "light-gray-test");  
+  //obj_hsl=obj_shared.fn_getGradientObject(0, 0, 100, "", "White");  
+  
+  obj_theme.str_fill=obj_hsl.str_hsl;  
+  obj_theme.obj_gradient=obj_hsl;
+}
+
+  
+
+
+fn_setUserTheme(obj_theme){    
+
+//https://convertingcolors.com/hex-color-A52A2A.html?search=brown
+//https://coolors.co/palettes/trending
+//https://imagecolorpicker.com/
+//coolors affiliate link https://coolors.co/?ref=6754517d5fa59e000b79f378   
+
+//Load Border and Radius Option
+obj_theme.bln_borderDisplay=false;
+obj_theme.bln_borderRadiusDisplay=false;      
+this.fn_setBorderDisplay(obj_theme);      
+this.fn_setBorderRadiusDisplay(obj_theme);
+obj_theme.bln_borderRowz=false;  
+obj_theme.bln_borderRadiusRowz=false;  
+obj_theme.bln_borderButton=true;
+obj_theme.bln_borderRadiusButton=true;
+obj_theme.bln_borderSearch=true;  
+obj_theme.bln_borderRadiusSearch=true;  
+obj_theme.bln_borderFieldset=true;
+obj_theme.bln_borderRadiusFieldset=true;
+obj_theme.bln_borderLegend=true;
+obj_theme.bln_borderRadiusLegend=true;
+obj_theme.bln_borderLabel=true;
+obj_theme.bln_borderRadiusLabel=true;
+obj_theme.bln_borderInput=true;
+obj_theme.bln_borderRadiusInput=true;
+//Load Border and Radius Option
+
+this.fn_getColorMap(obj_theme);//generate array of hsl colors    
+
+const obj_gradient=obj_theme.obj_gradient;
+if(obj_theme.obj_gradient.int_light>=60){
+  obj_gradient.bln_lighten = false;//true by default
+}
+obj_gradient.bln_contrast=true;
+obj_gradient.bln_face=obj_shared.fn_getRandomInt(0, 1);
+
+
+if(obj_gradient.int_light>80){
+  //let obj_hslText=obj_shared.fn_getGradientObject(183, 100, 75, "", "Textcolor");
+  let obj_hslText=obj_shared.fn_getGradientObject(0, 33, 36, "", "Dark Red Brown");
+  obj_theme.str_textColorUI=obj_hslText.str_hsl;        
+}
+
+
+obj_theme.bln_flipBorder=false;
+obj_theme.bln_flipForm=false;
+
+let obj_fill=new Object;
+this.fn_setFillPalette(obj_theme, obj_fill);//we can choose to lighten, or darken based on wether the main color is light or dark
+this.fn_setFillArea(obj_theme, obj_fill);//we can choose which areas are lighter or darker
+obj_theme.str_fillBase=obj_fill.str_fillBase;
+obj_theme.str_fillForm=obj_fill.str_fillForm;       
+obj_theme.str_fillBorder=obj_fill.str_fillBorder;  
+
+if(!obj_theme.bln_filterPass){
+  //obj_theme.str_name=this.fn_getTestThemeName();  
+  //obj_theme.str_name="yellow";
+  //return this.fn_setUserTheme(obj_theme);  
+  console.log("obj_theme.bln_filterPassxxxxx: " + obj_theme.bln_filterPass);
+  obj_theme.str_fillBase="hsl(180, 100%, 50%)";
+  obj_theme.str_fillForm="hsl(180, 100%, 65%)";
+  obj_theme.str_fillBorder="hsl(180, 100%, 85%)";
+  
+}
+
+
+
+
+
+
+//*
+//console.log("obj_theme.str_name: " + obj_theme.str_name);
+console.log("str_label: " + obj_theme.obj_gradient.str_label);
+console.log("obj_theme.str_fill:" + obj_theme.str_fill);
+console.log("obj_theme.bln_filterPass: " + obj_theme.bln_filterPass);
+console.log("obj_gradient.int_hue: " + obj_theme.obj_gradient.int_hue);
+console.log("obj_gradient.int_saturation: " + obj_theme.obj_gradient.int_saturation);
+console.log("obj_gradient.int_light: " + obj_theme.obj_gradient.int_light);
+
+
+console.log("obj_theme.int_min: " + obj_theme.int_min);
+console.log("obj_theme.int_max: " + obj_theme.int_max);
+console.log("obj_theme.int_totalLight: " + obj_theme.int_totalLight);    
+
+
+console.log("obj_gradient.bln_face: " + obj_gradient.bln_face);
+console.log("obj_gradient.bln_lighten: " + obj_gradient.bln_lighten);
+console.log("obj_gradient.bln_contrast: " + obj_gradient.bln_contrast);
+console.log("obj_theme.int_percentLight: " + obj_theme.int_percentLight);
+console.log("obj_theme.int_percentContrast: " + obj_theme.int_percentContrast);
+
+console.log("str_fill:" + obj_theme.str_fill);
+if(obj_gradient.bln_face){    
+  console.log("str_fillForm:" + obj_theme.str_fillForm);  
+  console.log("str_fillBase:" + obj_theme.str_fillBase);
+  console.log("str_fillBorder:" + obj_theme.str_fillBorder);
+}
+else{
+  console.log("str_fillBase:" + obj_theme.str_fillBase);
+  console.log("str_fillForm:" + obj_theme.str_fillForm);    
+  console.log("str_fillBorder:" + obj_theme.str_fillBorder);
+}
+//*/
+}
+
+fn_applyThemeStructure(){        
+  
+
+  //some code requires themeobjects empty or not
+  //const obj_theme=this.obj_theme;          
+  //if(!obj_theme){return;}
+
+  const obj_theme=new Object;          
+  if(!obj_theme){return;}  
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //THEME      
+  //STRUCTURE             
+  obj_theme.display="flex";        
+  obj_theme.padding="1em";        
+  obj_theme.gap="1em";    
+  //STRUCTURE    
+  
+  //OPTION                      
+  obj_theme.str_borderStyle="solid";//user session                        
+  obj_theme.str_borderSize="none";                 
+  obj_theme.str_borderRadiusSize="medium";//set to none for square
+  obj_theme.str_deviderSize="small";      
+  obj_theme.str_fontSize="medium";                            
+  //OPTION                  
+  //THEME
+  /////////////////////////////////////////
+  /////////////////////////////////////////     
+  
+  //default to be adjusted accoridng to light or dark theme                  
+  obj_theme.str_textColorUI="white";                              
+  obj_theme.str_fillInput="white";      
+  obj_theme.str_borderColorInput="gainsboro";            
+  obj_theme.str_textColorInput="black";                  
+  //defaults to be adjusted accoridng to light or dark theme          
+  
+  this.fn_setUserTheme(obj_theme);                                   
+  
+  this.fn_calculateFontSize(obj_theme);                    
+  obj_theme.str_highLightFill="orange"; 
+  
+  //document.body.style.backgroundColor=obj_theme.str_fillBase;        
+
+  let obj_holder=this.obj_holder;
+  let str_fillBorder, str_fillForm, str_fillBase;
+  
+
+  let obj_themeItem;        
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //XAPPACCORDION
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_theme);                
+  //STRUCTURE                             
+  obj_themeItem.padding="0em";
+  obj_themeItem.display="block";
+  //STRUCTURE     
+  //OPTION        
+  obj_themeItem.bln_border=false;         
+  obj_themeItem.backgroundColor=obj_theme.str_fillBase;        
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION            
+  obj_holder.obj_themeXappAccordion=obj_themeItem;                
+  //XAPPACCORDION
+  /////////////////////////////////////////
+  /////////////////////////////////////////        
+  
+  
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //MENUBUTTON
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_theme);                
+  //STRUCTURE                           
+  obj_themeItem.fontWeight="bold";                                
+  obj_themeItem.width="100%";        
+  obj_themeItem.cursor="pointer";                                       
+  obj_themeItem.justifyContent="center";
+  obj_themeItem.alignItems="center";        
+  //STRUCTURE
+  //OPTION       
+  obj_themeItem.str_fontLabel="form_rowz";                    
+  obj_themeItem.bln_border=obj_theme.bln_borderRowz;              
+  obj_themeItem.bln_borderRadius=obj_theme.bln_borderRadiusRowz;                          
+
+  str_fillBorder=obj_theme.str_fillBorder;
+  str_fillForm=obj_theme.str_fillForm;    
+  if(obj_theme.bln_flipBorder){[str_fillBorder, str_fillForm]=obj_shared.fn_flipVariable(str_fillBorder, str_fillForm);}    
+  obj_themeItem.borderColor=str_fillBorder;          
+  obj_themeItem.backgroundColor=str_fillForm;                
+  
+  obj_themeItem.color=obj_theme.str_textColorUI;
+  obj_project.fn_applyThemeOption(obj_themeItem);  
+  //OPTION                    
+  obj_holder.obj_themeRowz=obj_themeItem;        
+  //MENUBUTTON
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //CHILDMENU        
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_holder.obj_themeRowz);                
+  //STRUCTURE                                   
+  //STRUCTURE
+  //OPTION                
+  obj_themeItem.str_fontLabel="form_rowzchild";                        
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION                            
+  obj_holder.obj_themeRowzChild=obj_themeItem;        
+  //CHILDMENU             
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //DYNAMICMENU
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_holder.obj_themeRowzChild);                        
+  //STRUCTURE                                   
+  //STRUCTURE
+  //OPTION                
+  obj_themeItem.str_fontLabel="form_rowzdynamic";                        
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION                    
+  obj_holder.obj_themeRowzDynamic=obj_themeItem;        
+  //DYNAMICMENU
+  /////////////////////////////////////////
+  /////////////////////////////////////////          
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //FORMBUTTON        
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_theme);                
+  //STRUCTURE                           
+  //STRUCTURE           
+  //OPTION                                  
+  obj_themeItem.str_fontLabel="form_button";                                
+  obj_themeItem.bln_border=obj_theme.bln_borderButton;    
+  obj_themeItem.bln_borderRadius=obj_theme.bln_borderRadiusButton;              
+  
+  str_fillBorder=obj_theme.str_fillBorder;
+  str_fillForm=obj_theme.str_fillForm;    
+  if(obj_theme.bln_flipBorder){[str_fillBorder, str_fillForm]=obj_shared.fn_flipVariable(str_fillBorder, str_fillForm);}    
+  obj_themeItem.borderColor=str_fillBorder;          
+  obj_themeItem.backgroundColor=str_fillForm;                
+  obj_themeItem.color=obj_theme.str_textColorUI;        
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION            
+  obj_holder.obj_themeButton=obj_themeItem;        
+  //FORMBUTTON
+  /////////////////////////////////////////
+  ///////////////////////////////////////// 
+  
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //FORMFIELDSET        
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_theme);                
+  //STRUCTURE                             
+  //STRUCTURE   
+  //OPTION                     
+  obj_themeItem.str_fontLabel="form_fieldset";              
+  obj_themeItem.bln_border=obj_theme.bln_borderFieldset;      
+  obj_themeItem.bln_borderRadius=obj_theme.bln_borderRadiusFieldset;        
+  
+  str_fillBorder=obj_theme.str_fillBorder;
+  str_fillForm=obj_theme.str_fillForm;    
+  if(obj_theme.bln_flipBorder){[str_fillBorder, str_fillForm]=obj_shared.fn_flipVariable(str_fillBorder, str_fillForm);}    
+  if(obj_theme.bln_flipForm){[str_fillBorder, str_fillForm]=obj_shared.fn_flipVariable(str_fillBorder, str_fillForm);}      
+  obj_themeItem.borderColor=str_fillBorder;          
+  obj_themeItem.backgroundColor=str_fillForm;                
+obj_themeItem.color=obj_theme.str_textColorUI;
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION
+  obj_holder.obj_themeFormFieldset=obj_themeItem;                
+  //FORMFIELDSET        
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //FORMLEGEND
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_holder.obj_themeFormFieldset);                
+  //STRUCTURE                             
+  //STRUCTURE   
+  //OPTION                          
+  obj_themeItem.str_fontLabel="form_legend";                                
+  obj_themeItem.bln_border=obj_theme.bln_borderLegend;      
+  obj_themeItem.bln_borderRadius=obj_theme.bln_borderRadiusLegend;        
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION
+  obj_holder.obj_themeFormLegend=obj_themeItem;        
+  //FORMLEGEND
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //FORMLABEL
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_holder.obj_themeFormLegend);                
+  //STRUCTURE                             
+  //STRUCTURE   
+  //OPTION                
+  obj_themeItem.str_fontLabel="form_label";                                
+  obj_themeItem.bln_border=obj_theme.bln_borderLabel;      
+  obj_themeItem.bln_borderRadius=obj_theme.bln_borderRadiusLabel;              
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION      
+  obj_holder.obj_themeFormLabel=obj_themeItem;              
+  //FORMLABEL
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //FORMINPUT        
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_holder.obj_themeFormLabel);
+  //STRUCTURE                                           
+  obj_themeItem.fontWeight="normal";                        
+  obj_themeItem.maxHeight="500px";                                          
+  obj_themeItem.overflow="Auto";                                          
+  obj_themeItem.wordBreak="normal";                      
+  //STRUCTURE
+  //OPTION                      
+  obj_themeItem.str_fontLabel="form_input";                                
+  obj_themeItem.bln_border=obj_theme.bln_borderInput;
+  obj_themeItem.bln_borderRadius=obj_theme.bln_borderRadiusInput;        
+  obj_themeItem.borderColor=obj_theme.str_borderColorInput;
+  obj_themeItem.backgroundColor=obj_theme.str_fillInput;                                                                       
+  obj_themeItem.color=obj_theme.str_textColorInput;      
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION            
+  obj_holder.obj_themeFormInput=obj_themeItem;        
+  //FORMINPUT
+  /////////////////////////////////////////
+  /////////////////////////////////////////      
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //FORMINPUT        
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_holder.obj_themeFormInput);
+  //STRUCTURE                                                             
+  obj_themeItem.fontWeight="bold";
+  //STRUCTURE
+  //OPTION                      
+  obj_themeItem.str_fontLabel="rowz_search";                                      
+  obj_themeItem.bln_border=obj_theme.bln_borderSearch;  
+  obj_themeItem.bln_borderRadius=obj_theme.bln_borderRadiusSearch;  
+  obj_themeItem.borderColor=obj_holder.obj_themeButton.borderColor;  
+  obj_themeItem.backgroundColor=obj_theme.str_fillInput;                                                                       
+  
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION            
+  obj_holder.obj_themeRowzSearch=obj_themeItem;              
+  //FORMINPUT
+  /////////////////////////////////////////
+  /////////////////////////////////////////  
+  
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //FORMHARDRULE
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_theme);                
+  //STRUCTURE                             
+  obj_themeItem.padding="0.5em";                  
+  //STRUCTURE           
+  //OPTION                
+  obj_themeItem.str_fontLabel="form_hardrule";                                      
+  obj_themeItem.bln_border=obj_holder.obj_themeRowz.bln_border;  
+  obj_themeItem.bln_borderRadius=obj_holder.obj_themeRowz.bln_borderRadius;  
+  obj_themeItem.borderColor=obj_holder.obj_themeRowz.borderColor;       
+  obj_themeItem.backgroundColor=obj_holder.obj_themeRowz.backgroundColor;
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION        
+  obj_holder.obj_themeFormHardRule=obj_themeItem;        
+  //FORMHARDRULE
+  /////////////////////////////////////////
+  /////////////////////////////////////////        
+  
+}
+
+fn_applyThemeOption(obj_themeItem){
+this.fn_applyThemeFont(obj_themeItem);
+this.fn_applyThemeBorder(obj_themeItem);
+this.fn_applyThemeDevider(obj_themeItem);
+}
+
+fn_applyThemeFont(obj_themeItem){      
+
+//FONTSIZE
+let int_fontSize;  
+switch(obj_themeItem.str_fontLabel){                    
+  case "form_rowz":
+    int_fontSize=obj_themeItem.int_fontSize5;            
+    break;          
+  case "form_rowzchild":
+    int_fontSize=obj_themeItem.int_fontSize4;            
+    break;                                
+  case "form_rowzdynamic":
+    int_fontSize=obj_themeItem.int_fontSize3;
+    break;                  
+  case "form_button":
+    int_fontSize=obj_themeItem.int_fontSize2;
+    break;
+  case "form_input":
+    int_fontSize=obj_themeItem.int_fontSize1;
+    break;
+  case "standard":
+    int_fontSize=obj_themeItem.int_fontSize1;
+    break;
+  default:
+    int_fontSize=obj_themeItem.int_fontSize1;
+}         
+obj_themeItem.fontSize=int_fontSize + "rem";                     
+//FONTSIZE
+}
+
+fn_applyThemeBorder(obj_themeItem){  
+
+//BORDER            
+let str_borderSize="none";      
+if(obj_themeItem.bln_border)      {
+  str_borderSize=obj_themeItem.str_borderSize;        
+  if(str_borderSize==="none"){
+    str_borderSize="medium";
+  }        
+}
+let int_borderSize;                                 
+switch(str_borderSize){                    
+  case "small":
+    int_borderSize=0.3;                    
+    break;
+  case "medium":
+    int_borderSize=0.5;                    
+    break;
+  case "large":
+    int_borderSize=1.0;                    
+    break;
+  default:
+    int_borderSize=0;                    
+}                
+obj_themeItem.borderWidth=int_borderSize + "em";
+//BORDER
+
+//BORDERRADIUS
+let str_borderRadiusSize="none"      
+if(obj_themeItem.bln_borderRadius){
+  str_borderRadiusSize=obj_themeItem.str_borderRadiusSize;
+  if(!int_borderSize){int_borderSize=0.5;}        
+}            
+let int_borderRadiusSize;
+switch(str_borderRadiusSize){                          
+  case "small":
+    int_borderRadiusSize=1;                    
+    break;
+  case "medium":
+    int_borderRadiusSize=1.5;                    
+    break;
+  case "large":
+    int_borderRadiusSize=2;                    
+    break;
+  default:
+    int_borderRadiusSize=0;                    
+}                         
+obj_themeItem.borderRadius=(int_borderRadiusSize*int_borderSize) + "em";                                            
+//BORDERRADIUS       
+}
+
+fn_applyThemeDevider(obj_themeItem){ 
+
+//DEVIDER
+let int_deviderSize;                        
+switch(obj_themeItem.str_deviderSize){                                    
+  case "small":
+    int_deviderSize=0.1;                        
+    break;
+  case "medium":
+    int_deviderSize=0.5;                        
+    break;
+  case "large":
+    int_deviderSize=1;                        
+    break;
+  default:
+    int_deviderSize=0;                        
+}        
+obj_themeItem.marginBottom=int_deviderSize + "em";                  
+//DEVIDER  
+}
+//END THEME HAMDLER
+
 
     fn_setEvent(e, obj_itemEvent){                        
         if(!this.obj_itemEvent){                  
@@ -8034,47 +8897,47 @@ obj_boot.obj_design.int_idRecord=77264;
 
 /*START INSTANCE JSON MAP//*/
 var obj_InstanceJSONMap = new Map([
-[77262, {"obj_design":{"str_type":"eazygriditem","str_idXDesign":"myId_40797111","str_idProject":"myId_54166875","str_name":"My eazygriditem","str_nameShort":"myeazygriditem","str_tag":"eazygriditem","int_idRecord":"77262","str_createdDate":"2022-02-21 18:51:32","str_modifiedDate":"2022-02-21 18:51:32","str_minDim":"100px","gridTemplate":"minmax(100px, 1fr)","str_themeType":"eazygriditem","bln_editPin":true,"bln_palettePinRelease":true,"bln_palettePin":true,"arr_item":[{"obj_design":{"int_idRecord":"77274","str_type":"eazygrid"}}],"bln_classController":"false","str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_40797111"},"obj_domStyle":{"background-color":"#414141"},"dom_objContentContainer":{"Id":"myId_40797111"}}],
-[77263, {"obj_design":{"int_idRecord":"77263","str_idXDesign":"myId_10717310","str_name":"eazygrid","str_nameShort":"eazygrid","str_type":"eazygrid","str_tag":"eazygrid","str_createdDate":"2022-01-31 21:08:50","str_modifiedDate":"2022-01-31 21:08:50","bln_eazyGrid":true,"str_minDim":"100px","str_gridTemplateDefault":"minmax(100px, 1fr)","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"str_classList":"eazygriditem","arr_item":[{"obj_design":{"int_idRecord":"77262","str_type":"eazygriditem"}},{"obj_design":{"int_idRecord":"77270","str_type":"eazygriditem"}}],"str_idProject":"myId_01221712","str_themeType":"eazygrid","int_axis":1,"bln_editPin":true,"bln_classController":"false","str_nameRegistrator":"notset","str_content":"","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_10717310"},"obj_domStyle":{"display":"grid","height":"100%","width":"100%","padding":"0px","overflow":"hidden","background-color":"#2b2c34","grid-gap":"1.0em","grid-auto-rows":"minmax(100px, 1fr)","grid-auto-columns":"minmax(100px, 1fr)","grid-template-columns":"minmax(100px, 1fr)","grid-template-rows":"minmax(100px, 1fr) minmax(100px, 1fr)"},"dom_objContentContainer":{"Id":"myId_10717310"}}],
-[77264, {"obj_design":{"arr_item":[{"obj_design":{"int_idRecord":77570,"str_type":"xapp_theme"}},{"obj_design":{"int_idRecord":"77263","str_type":"eazygrid"}}],"int_idRecord":77264,"str_idXDesign":"myId_01221712","str_name":"www","str_nameShort":"www","str_type":"component","str_themeType":"component","str_tag":"component","bln_classController":"false","str_createdDate":"2024-08-16 11:31:56","str_modifiedDate":"2024-08-16 11:31:56","bln_editPin":true,"str_categoryName":"www","str_nameRegistrator":"notset","str_idProject":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_01221712"},"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_01221712"},"obj_theme":{"obj_design":{"int_idRecord":77570,"str_type":"xapp_theme"}},"obj_themeBackground":{"obj_design":{"int_idRecord":"77774","str_type":"form_span"}},"obj_themeMidground":{"obj_design":{"int_idRecord":"77775","str_type":"form_span"}},"obj_themeForground":{"obj_design":{"int_idRecord":"77776","str_type":"form_span"}},"obj_themeHighlight":{"obj_design":{"int_idRecord":"77777","str_type":"form_span"}},"obj_themeProject":{"display":"flex","fontSize":"1.0rem","padding":"1.0em","gap":"1.0em","fontWeight":"normal","cusor":"pointer","justifyContent":"center","alignItems":"center","borderColor":"orange","color":"white","backgroundColor":"rgb(65,65,65)","borderWidth":"0em","borderRadius":"0em","borderStyle":"solid","marginBottom":"0em"},"obj_themeMenuButton":{"display":"flex","fontSize":"1.3rem","padding":"1.0em","gap":"1.0em","fontWeight":"bold","cusor":"pointer","justifyContent":"center","alignItems":"center","borderColor":"white","color":"white","backgroundColor":"rgb(64, 169, 236)","borderWidth":"0em","borderRadius":"0em","borderStyle":"solid","marginBottom":"0.1em","width":"100%","cursor":"pointer","int_borderWidth":0,"int_marginEnd":0},"obj_themeChildMenu":{"display":"flex","fontSize":"1.2rem","padding":"1.0em","gap":"1.0em","fontWeight":"bold","cusor":"pointer","justifyContent":"center","alignItems":"center","borderColor":"white","color":"white","backgroundColor":"rgb(64, 169, 236)","borderWidth":"0em","borderRadius":"0em","borderStyle":"solid","marginBottom":"0.1em","width":"100%","cursor":"pointer","int_borderWidth":0,"int_marginEnd":0.5},"obj_themeDynamicMenu":{"display":"flex","fontSize":"1.2rem","padding":"1.0em","gap":"1.0em","fontWeight":"bold","cusor":"pointer","justifyContent":"center","alignItems":"center","borderColor":"white","color":"white","backgroundColor":"rgb(64, 169, 236)","borderWidth":"0em","borderRadius":"0em","borderStyle":"solid","marginBottom":"0.1em","width":"100%","cursor":"pointer","int_borderWidth":0,"int_marginEnd":0.5},"obj_themeFormButton":{"display":"flex","fontSize":"1.1rem","padding":"1.0em","gap":"1.0em","fontWeight":"bold","cusor":"pointer","justifyContent":"center","alignItems":"center","borderColor":"rgb(64, 169, 236)","color":"rgb(64, 169, 236)","backgroundColor":"white","borderWidth":"0em","borderRadius":"0em","borderStyle":"solid","marginBottom":"0.1em","cursor":"pointer","int_borderWidth":0.5},"obj_themeFormInput":{"display":"flex","fontSize":"1.1rem","padding":"1.0em","gap":"1.0em","fontWeight":"normal","cusor":"pointer","justifyContent":"center","alignItems":"center","borderColor":"rgb(64, 169, 236)","color":"dark gray","backgroundColor":"white","borderWidth":"0em","borderRadius":"0em","borderStyle":"solid","marginBottom":"0.1em","int_borderWidth":0.5}}],
-[77270, {"obj_design":{"int_idRecord":"77270","str_idXDesign":"myId_32337313","str_name":"eazygriditem","str_nameShort":"eazygriditem","str_type":"eazygriditem","str_tag":"eazygriditem","str_createdDate":"2022-01-31 21:09:35","str_modifiedDate":"2022-01-31 21:09:35","str_minDim":"100px","gridTemplate":"minmax(100px, 1fr)","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"str_idProject":"myId_01221712","str_themeType":"eazygriditem","bln_editPin":true,"bln_classController":"false","arr_item":[{"obj_design":{"int_idRecord":"77432","str_type":"panel"}}],"str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_32337313"},"obj_domStyle":{"background-color":"#414141"},"dom_objContentContainer":{"Id":"myId_32337313"}}],
-[77272, {"obj_design":{"str_type":"eazygriditem","str_idXDesign":"myId_48434440","str_idProject":"myId_54166875","str_name":"My eazygriditem","str_nameShort":"myeazygriditem","str_tag":"eazygriditem","int_idRecord":"77272","str_createdDate":"2022-02-21 18:51:32","str_modifiedDate":"2022-02-21 18:51:32","str_minDim":"100px","gridTemplate":"minmax(100px, 1fr)","str_themeType":"eazygriditem","bln_editPin":true,"bln_palettePinRelease":true,"bln_palettePin":true,"arr_item":[{"obj_design":{"int_idRecord":"77278","str_type":"panel"}}],"bln_classController":"false","str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_48434440"},"obj_domStyle":{"background-color":"#414141"},"dom_objContentContainer":{"Id":"myId_48434440"}}],
-[77274, {"obj_design":{"int_idRecord":"77274","str_idXDesign":"myId_34050020","str_name":"eazygrid","str_nameShort":"eazygrid","str_type":"eazygrid","str_tag":"eazygrid","str_createdDate":"2022-01-31 21:08:50","str_modifiedDate":"2022-01-31 21:08:50","bln_eazyGrid":true,"str_minDim":"100px","str_gridTemplateDefault":"minmax(100px, 1fr)","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"str_classList":"eazygriditem","arr_item":[{"obj_design":{"int_idRecord":"77272","str_type":"eazygriditem"}},{"obj_design":{"int_idRecord":"77286","str_type":"eazygriditem"}}],"str_idProject":"myId_01221712","str_themeType":"eazygrid","int_axis":2,"bln_editPin":true,"bln_classController":"false","str_nameRegistrator":"notset","str_content":"","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_34050020"},"obj_domStyle":{"display":"grid","height":"100%","width":"100%","padding":"0px","overflow":"hidden","grid-gap":"1.0em","grid-auto-rows":"minmax(100px, 1fr)","grid-auto-columns":"minmax(100px, 1fr)","grid-template-rows":"minmax(100px, 1fr)","grid-template-columns":"minmax(100px, 1fr) minmax(100px, 1fr)","background-color":"#2b2c34"},"dom_objContentContainer":{"Id":"myId_34050020"}}],
-[77277, {"obj_design":{"int_idRecord":"77277","str_idXDesign":"myId_31713903","str_name":"block","str_nameShort":"block","str_type":"block","str_tag":"block","str_createdDate":"2022-01-31 21:10:58","str_modifiedDate":"2022-01-31 21:10:58","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_classController":"false","str_themeType":"block","bln_editPin":true,"str_idProject":"myId_01221712","str_text":"Welcome.","str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"innerHTML":"Welcome."},"obj_domStyle":{"height":"100%","background-color":"white","width":"100%","display":"flex","font-weight":"bold","padding":"1.0em","font-style":"italic","font-family":"helvetica"}}],
-[77278, {"obj_design":{"int_idRecord":"77278","str_idXDesign":"myId_82328711","str_name":"flexpanel","str_nameShort":"flexpanel","str_type":"panel","str_tag":"panel","str_createdDate":"2022-02-02 20:10:52","str_modifiedDate":"2022-02-02 20:10:52","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_classController":"false","str_themeType":"","bln_editPin":true,"arr_item":[{"obj_design":{"int_idRecord":"77277","str_type":"block"}}],"str_idProject":"myId_01221712","str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_82328711"},"obj_domStyle":{"maxheight":"175","background":"rgb(64, 169, 236)","border":"","border-radius":"","color":"","font-family":"","max-height":"","overflow":"","padding":"","word-break":"","display":"flex","height":"100%"},"dom_objContentContainer":{"Id":"myId_82328711"}}],
-[77286, {"obj_design":{"int_idRecord":"77286","str_idXDesign":"myId_00703001","str_name":"eazygriditem","str_nameShort":"eazygriditem","str_type":"eazygriditem","str_tag":"eazygriditem","str_createdDate":"2022-01-31 21:09:35","str_modifiedDate":"2022-01-31 21:09:35","str_minDim":"100px","gridTemplate":"minmax(100px, 1fr)","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"str_idProject":"myId_01221712","str_themeType":"eazygriditem","bln_editPin":true,"arr_item":[{"obj_design":{"int_idRecord":"77287","str_type":"panel"}}],"bln_classController":"false","str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_00703001"},"obj_domStyle":{"background-color":"#414141"},"dom_objContentContainer":{"Id":"myId_00703001"}}],
-[77287, {"obj_design":{"int_idRecord":"77287","str_idXDesign":"myId_18815515","str_name":"flexpanel","str_nameShort":"flexpanel","str_type":"panel","str_tag":"panel","str_createdDate":"2022-02-02 20:10:52","str_modifiedDate":"2022-02-02 20:10:52","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"","bln_editPin":true,"arr_item":[{"obj_design":{"int_idRecord":77486,"str_type":"xapp_button_navigate_rowz"}}],"str_idProject":"myId_01221712","bln_classController":"false","str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_18815515"},"obj_domStyle":{"maxheight":"175","background":"rgb(64, 169, 236)","border":"","border-radius":"","color":"","font-family":"","max-height":"","overflow":"","word-break":"","display":"flex","height":"100%","padding":"1.0em"},"dom_objContentContainer":{"Id":"myId_18815515"}}],
-[77386, {"obj_design":{"str_tag":"span","str_type":"form_button_span","str_idXDesign":"myId_57242915","str_name":"form_button_span","str_nameShort":"form_button_span","str_themeType":"form_button_span","int_idRecord":77386,"str_createdDate":"2022-11-18 16:02:10","str_modifiedDate":"2022-11-18 16:02:10","blnIsTag":true,"bln_editPin":true,"bln_typeable":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_idProject":"myId_11190110","bln_classController":true,"str_text":"form_button_span","str_categoryName":"Form","bln_lockComponent":true},"obj_domProperty":{"Id":"myId_57242915","innerHTML":"form_button_span"},"obj_domStyle":{"maxheight":"175"},"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_57242915"}}],
-[77387, {"obj_design":{"int_idRecord":77387,"str_idXDesign":"myId_24281989","str_name":"form_button_icon","str_nameShort":"form_button_icon","str_type":"form_button_icon","str_tag":"i","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_button_icon","bln_editPin":true,"bln_registerAtContainer":true,"str_idProject":"myId_79120090","bln_classController":true,"str_categoryName":"Form","bln_lockComponent":true},"obj_domProperty":{"Id":"myId_24281989"},"obj_domStyle":{"color":"rgb(64, 169, 236)"},"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_24281989"}}],
-[77393, {"obj_design":{"int_idRecord":77393,"str_idXDesign":"myId_66119667","str_name":"form_button_anchor","str_nameShort":"form_button_anchor","str_type":"form_button_anchor","str_tag":"a","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_button_anchor","bln_editPin":true,"bln_registerAtContainer":true,"str_idProject":"myId_77377077","arr_item":[{"obj_design":{"int_idRecord":77386,"str_type":"form_button_span"}},{"obj_design":{"int_idRecord":77387,"str_type":"form_button_icon"}}],"bln_classController":true,"str_categoryName":"Form","bln_lockComponent":true,"str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"target":"_blank","Id":"myId_66119667"},"obj_domStyle":{"justify-content":"center","align-items":"center","text-decoration":"none","font-size":"1rem","display":"flex","gap":"1.0em","text":"de","border":"0px solid black","color":"white"},"dom_objContentContainer":{"Id":"myId_66119667"},"obj_icon":{"obj_design":{"int_idRecord":77387,"str_type":"form_button_icon"}},"obj_span":{"obj_design":{"int_idRecord":77386,"str_type":"form_button_span"}}}],
-[77432, {"obj_design":{"int_idRecord":"77432","str_idXDesign":"myId_64023910","str_name":"flexpanel","str_nameShort":"flexpanel","str_type":"panel","str_tag":"panel","str_createdDate":"2022-02-02 20:10:52","str_modifiedDate":"2022-02-02 20:10:52","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_classController":"false","str_themeType":"","bln_editPin":true,"str_idProject":"myId_01221712","str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset","str_categoryName":"","arr_item":[{"obj_design":{"int_idRecord":"77450","str_type":"block"}}]},"obj_domProperty":{"Id":"myId_64023910"},"obj_domStyle":{"maxheight":"175","background":"rgb(64, 169, 236)","border":"","border-radius":"","color":"","font-family":"","max-height":"","overflow":"","padding":"","word-break":"","display":"flex","height":"100%"},"dom_objContentContainer":{"Id":"myId_64023910"}}],
-[77450, {"obj_design":{"int_idRecord":"77450","str_idXDesign":"myId_22406430","str_name":"block","str_nameShort":"block","str_type":"block","str_tag":"block","str_createdDate":"2022-01-31 21:10:58","str_modifiedDate":"2022-01-31 21:10:58","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_classController":"false","str_themeType":"block","bln_editPin":true,"str_idProject":"myId_01221712","str_text":"mycode.buzz @ gmail.com","str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_lastVersionDate":"notset","str_categoryName":""},"obj_domProperty":{"innerHTML":"mycode.buzz @ gmail.com"},"obj_domStyle":{"background-color":"white","width":"100%","display":"flex","font-weight":"bold","padding":"1.0em","font-style":"italic","font-family":"helvetica","height":""}}],
-[77486, {"obj_design":{"int_idRecord":77486,"str_idXDesign":"myId_36003113","str_name":"xapp_button_navigate_rowz","str_nameShort":"xapp_button_navigate_rowz","str_type":"xapp_button_navigate_rowz","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"xapp_console_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_classController":true,"bln_lockComponent":true,"str_categoryName":"www","str_idProject":"myId_36985869","arr_item":[{"obj_design":{"int_idRecord":77393,"str_type":"form_button_anchor"}}],"str_icon":"rowz_hashtag","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"notset","str_text":"Rowz","str_lastVersionDate":"notset"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_36003113"},
-"obj_domStyle":{"background":"rgb(65, 65, 65)","border":"0.5em solid orange","color":"orange","display":"flex","fontSize":"1rem","padding":"1em"},"bln_enabled":true,"dom_objContentContainer":{"Id":"myId_36003113","str_name":"xapp_button_navigate_desktop"}}],
-[77570, {"obj_design":{"int_idRecord":77570,"str_idXDesign":"myId_29727565","str_name":"theme_ocean","str_nameRegistrator":"notset","str_nameShort":"theme_ocean","str_idProject":"myId_01221712","str_type":"xapp_theme","str_themeType":"xapp_theme","str_tag":"theme_ocean","str_content":"","bln_registerAtProject":true,"bln_registerAtContainer":true,"bln_classController":true,"str_classList":"notset","str_classExtend":"notset","str_createdDate":"2024-11-30 12:02:09","str_modifiedDate":"2024-11-30 12:02:09","bln_editPin":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_releaseLabel":"notset","str_text":"notset","str_lastVersionDate":"notset","str_categoryName":"Anchor","bln_isThemeItem":true,"bln_lockComponent":true,"arr_item":[{"obj_design":{"int_idRecord":"77773","str_type":"xapp_accordion"}},{"obj_design":{"int_idRecord":"77774","str_type":"form_span"}},{"obj_design":{"int_idRecord":"77775","str_type":"form_span"}},{"obj_design":{"int_idRecord":"77776","str_type":"form_span"}},{"obj_design":{"int_idRecord":"77777","str_type":"form_span"}}]},"obj_domProperty":{"Id":"myId_29727565"},"obj_domStyle":{"font-family":"","font-size":"","display":"block"},"user_agent":"Firefox","dom_objContentContainer":{"Id":"myId_29727565"}}],
-[77771, {"obj_design":{"int_idRecord":"77771","str_idXDesign":"myId_99777780","str_name":"form_menu_panel","str_nameShort":"form_menu_panel","str_type":"form_menu_panel","str_themeType":"form_menu_panel","str_tag":"form_menu_panel","bln_registerAtContainer":true,"str_createdDate":"2022-11-15 08:47:57","str_modifiedDate":"2022-11-15 08:47:57","bln_editPin":true,"bln_palettePinRelease":true,"bln_palettePin":true,"bln_isThemeItem":true,"str_nameRegistrator":"notset","str_idProject":"myId_29727565","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset","str_categoryName":"","arr_item":[{"obj_design":{"int_idRecord":77821,"str_type":"block"}}],"bln_classController":"false"},"obj_domProperty":{"Id":"myId_99777780"},"obj_domStyle":{"flexdirection":"column","display":"flex","flex-direction":"column","flex flow":"column wrap","padding":"1em","gap":"1em","border":"0px solid white"},"dom_objContentContainer":{"Id":"myId_99777780"}}],
-[77772, {"obj_design":{"int_idRecord":"77772","str_idXDesign":"myId_04703888","str_name":"form_form","str_nameShort":"form_form","str_type":"form_form","str_tag":"form","bln_registerAtContainer":true,"str_classExtend":"component","str_createdDate":"2022-11-01 21:47:45","str_modifiedDate":"2022-11-01 21:47:45","bln_editPin":true,"str_themeType":"form_form","bln_isLocalHome":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_nameRegistrator":"notset","str_idProject":"myId_29727565","str_content":"","str_classList":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset","arr_item":[{"obj_design":{"int_idRecord":"77771","str_type":"form_menu_panel"}}],"bln_isThemeItem":true,"bln_classController":"false"},"obj_domProperty":{"Id":"myId_04703888"},"obj_domStyle":{"flex-wrap":"wrap","display":"flex"," background-color":"coral","flex-direction":"column","gap":"1.0em"},"dom_objContentContainer":{"0":{"Id":"myId_62839939"},"1":{"Id":"myId_48263332","str_name":"xapp_button_navigate_desktop"},"Id":"myId_04703888"}}],
-[77773, {"obj_design":{"int_idRecord":"77773","str_idXDesign":"myId_38394983","str_name":"xapp_accordion","str_nameShort":"xapp_accordion","str_type":"xapp_accordion","str_tag":"xapp_accordion","bln_registerAtContainer":true,"str_createdDate":"2022-11-01 21:51:10","str_modifiedDate":"2022-11-01 21:51:10","bln_editPin":true,"str_themeType":"xapp_accordion","bln_isLocalHome":true,"blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_nameRegistrator":"notset","str_idProject":"myId_29727565","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset","bln_isThemeItem":true,"arr_item":[{"obj_design":{"int_idRecord":77816,"str_type":"form_button_rich"}},{"obj_design":{"int_idRecord":"77772","str_type":"form_form"}}],"bln_classController":"false"},"obj_domProperty":{"Id":"myId_38394983"},"obj_domStyle":{"width":"100%","flex":"wrap","justify-content":"","display":"block","background-color":"rgb(37, 150, 190)"},"dom_objContentContainer":{"Id":"myId_38394983"}}],
-[77774, {"obj_design":{"str_tag":"form_blockbackground","str_type":"form_span","str_idXDesign":"myId_58870858","str_name":"form_blockbackground","str_nameShort":"form_blockbackground","str_themeType":"form_blockbackground","int_idRecord":"77774","str_createdDate":"2022-11-18 16:02:10","str_modifiedDate":"2022-11-18 16:02:10","blnIsTag":true,"bln_editPin":true,"bln_typeable":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_nameRegistrator":"notset","str_idProject":"myId_29727565","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset","bln_isThemeItem":true,"bln_classController":"false"},"obj_domProperty":{"Id":"myId_58870858"},"obj_domStyle":{"padding":"1.0em","maxheight":"175","border-radius":"4px","background":"rgb(37, 150, 190)","word-break":"","overflow":"","max-height":"","font-family":"","color":"","border":""},"dom_objContentContainer":{"Id":"myId_58870858"}}],
-[77775, {"obj_design":{"str_tag":"form_blockmidground","str_type":"form_span","str_idXDesign":"myId_37817050","str_name":"form_blockmidground","str_nameShort":"form_blockmidground","str_themeType":"form_blockmidground","int_idRecord":"77775","str_createdDate":"2022-11-18 16:02:10","str_modifiedDate":"2022-11-18 16:02:10","blnIsTag":true,"bln_editPin":true,"bln_typeable":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_nameRegistrator":"notset","str_idProject":"myId_29727565","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"","str_lastVersionDate":"notset","bln_isThemeItem":true,"bln_classController":"false"},"obj_domProperty":{"innerHTML":"","Id":"myId_37817050"},"obj_domStyle":{"maxheight":"175","background":"rgb(64, 169, 236)","border":"","color":"","font-family":"","max-height":"","overflow":"","word-break":"","padding":"1.0em","border-radius":"4px"},"dom_objContentContainer":{"Id":"myId_37817050"}}],
-[77776, {"obj_design":{"str_tag":"form_blockforground","str_type":"form_span","str_idXDesign":"myId_18017798","str_name":"form_blockforground","str_nameShort":"form_blockforground","str_themeType":"form_blockforground","int_idRecord":"77776","str_createdDate":"2022-11-18 16:02:10","str_modifiedDate":"2022-11-18 16:02:10","blnIsTag":true,"bln_editPin":true,"bln_typeable":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_nameRegistrator":"notset","str_idProject":"myId_29727565","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset","bln_isThemeItem":true,"bln_classController":"false"},"obj_domProperty":{"Id":"myId_18017798"},"obj_domStyle":{"padding":"1.0em","background":"white","maxheight":"175","border-radius":"4px","border":"","color":"","font-family":"","max-height":"","overflow":"","word-break":""},"dom_objContentContainer":{"Id":"myId_18017798"}}],
-[77777, {"obj_design":{"str_tag":"form_blockhighlight","str_type":"form_span","str_idXDesign":"myId_89738359","str_name":"form_blockhighlight","str_nameShort":"form_blockhighlight","str_themeType":"form_blockhighlight","int_idRecord":"77777","str_createdDate":"2022-11-18 16:02:10","str_modifiedDate":"2022-11-18 16:02:10","blnIsTag":true,"bln_editPin":true,"bln_typeable":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_nameRegistrator":"notset","str_idProject":"myId_29727565","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset","bln_isThemeItem":true,"bln_classController":"false"},"obj_domProperty":{"Id":"myId_89738359"},"obj_domStyle":{"padding":"1.0em","maxheight":"175","border-radius":"4px","background":"orange","border":"","color":"","font-family":"","max-height":"","overflow":"","word-break":""},"dom_objContentContainer":{"Id":"myId_89738359"}}],
-[77813, {"obj_design":{"str_tag":"span","str_type":"form_button_span","str_idXDesign":"myId_67672923","str_name":"form_button_span","str_nameShort":"form_button_span","str_themeType":"form_button_span","int_idRecord":"77813","str_createdDate":"2022-11-18 16:02:10","str_modifiedDate":"2022-11-18 16:02:10","blnIsTag":true,"bln_editPin":true,"bln_typeable":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_idProject":"myId_11190110","str_text":"My Button","str_categoryName":"","str_nameRegistrator":"notset","bln_isThemeItem":true,"str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_67672923","innerHTML":"My Button"},"obj_domStyle":{"maxheight":"175","font-size":"1.2rem","font-weight":"bold","color":"white","display":"block"},"dom_objContentContainer":{"Id":"myId_67672923"}}],
-[77814, {"obj_design":{"int_idRecord":"77814","str_idXDesign":"myId_67661363","str_name":"form_button_icon","str_nameShort":"form_button_icon","str_type":"form_button_icon","str_tag":"i","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_button_icon","bln_editPin":true,"bln_registerAtContainer":true,"str_idProject":"myId_79120090","str_categoryName":"","str_nameRegistrator":"notset","bln_isThemeItem":true,"str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"star","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_67661363","innerHTML":"star"},"obj_domStyle":{"font-size":"1.5em","font-weight":"bold","color":"white","display":"block"},"dom_objContentContainer":{"Id":"myId_67661363"}}],
-[77815, {"obj_design":{"int_idRecord":77815,"str_idXDesign":"myId_37371641","str_name":"form_button_anchor","str_nameShort":"form_button_anchor","str_type":"form_button_anchor","str_tag":"a","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_button_anchor","bln_editPin":true,"bln_registerAtContainer":true,"str_idProject":"myId_77377077","arr_item":[{"obj_design":{"int_idRecord":"77813","str_type":"form_button_span"}},{"obj_design":{"int_idRecord":"77814","str_type":"form_button_icon"}}],"str_categoryName":"","str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset","bln_isThemeItem":true,"bln_classController":"false"},"obj_domProperty":{"target":"_blank","Id":"myId_37371641"},"obj_domStyle":{"justify-content":"center","align-items":"center","text-decoration":"none","font-size":"1.2rem","font-weight":"bold","display":"flex","text":"de","border":"0px solid black","gap":"0.5em","color":"white"},"dom_objContentContainer":{"Id":"myId_37371641"},"obj_icon":{"obj_design":{"int_idRecord":"77814","str_type":"form_button_icon"}},"obj_span":{"obj_design":{"int_idRecord":"77813","str_type":"form_button_span"}}}],
-[77816, {"obj_design":{"int_idRecord":77816,"str_idXDesign":"myId_14263737","str_name":"menu_button","str_nameShort":"menu_button","str_type":"form_button_rich","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"menu_buttonx","bln_registerAtContainer":true,"str_classExtend":"form_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_idProject":"myId_29727565","arr_item":[{"obj_design":{"int_idRecord":77815,"str_type":"form_button_anchor"}}],"str_icon":"xapp_star","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"","str_text":"My Button","str_lastVersionDate":"notset","bln_isThemeItem":true,"bln_classController":"false"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_14263737"},"obj_domStyle":{"font-size":"1.2rem","font-weight":"bold","margin-bottom":"1px","justify-content":"center","align-items":"center","cursor":"pointer","color":"white","width":"100%","display":"flex","padding":"1em","gap":"1em","background":"green","border":"1.0em solid orange"},"bln_enabled":true,"dom_objContentContainer":{"Id":"myId_14263737","str_name":"xapp_button_navigate_desktop"}}],
-[77821, {"obj_design":{"int_idRecord":77821,"str_idXDesign":"myId_29752282","str_name":"form_container","str_nameShort":"form_container","str_type":"block","str_tag":"form_container","str_createdDate":"2022-01-31 21:10:58","str_modifiedDate":"2022-01-31 21:10:58","bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","bln_createRelease":"false","bln_isLocalHome":true,"bln_classController":"false","str_themeType":"form_container","bln_editPin":true,"arr_item":[{"obj_design":{"int_idRecord":"77835","str_type":"form_panel"}},{"obj_design":{"int_idRecord":"77836","str_type":"form_hardrule"}}],"str_nameRegistrator":"notset","str_idProject":"myId_29727565","bln_isThemeItem":true,"str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset"},"obj_domProperty":{"Id":"myId_29752282"},"obj_domStyle":{"display":"flex","gap":"1em","flex-flow":"wrap","padding":"0em","background":"transparent"},"dom_objContentContainer":{"Id":"myId_29752282"}}],
-[77826, {"obj_design":{"int_idRecord":"77826","str_idXDesign":"myId_75931362","str_name":"form_legend","str_nameShort":"form_legend","str_type":"form_legend","str_tag":"legend","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_legend","bln_editPin":true,"bln_registerAtContainer":true,"str_classExtend":"form_button","str_nameRegistrator":"notset","str_idProject":"myId_29727565","str_content":"","str_classList":"notset","str_releaseLabel":"","str_text":"MyText","str_lastVersionDate":"notset","str_categoryName":"","bln_isThemeItem":true,"bln_classController":"false"},"obj_domProperty":{"href":"https:\/\/www.mycode.buzz","target":"_blank","innerHTML":"MyText","Id":"myId_37333474","tabIndex":"0"},"obj_domStyle":{"display":"block","text-decoration":"none","color":"white","user-select":"none","background":"rgb(64, 169, 236)","gap":"1em","padding":"1em","border-radius":"0.5em","border":"3px solid rgb(37, 150, 190)","opacity":"1"},"bln_enabled":true,"dom_objContentContainer":{"href":"https:\/\/www.mycode.buzz","target":"_blank","Id":"myId_37333474"}}],
-[77827, {"obj_design":{"int_idRecord":"77827","str_idXDesign":"myId_15775917","str_name":"form_label","str_nameShort":"form_label","str_type":"form_label","str_themeType":"form_label","str_tag":"label","str_createdDate":"2022-11-13 21:59:51","str_modifiedDate":"2022-11-13 21:59:51","bln_editPin":true,"bln_typeable":true,"str_text":"My Label","bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_nameRegistrator":"notset","str_idProject":"myId_13000276","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_lastVersionDate":"notset","bln_isThemeItem":true,"bln_classController":"false"},"obj_domProperty":{"innerText":"My Label","Id":"myId_35320233"},"obj_domStyle":{"align-self":"flex-start","cursor":"pointer","color":"white","margin":"","max-height":"","max-width":"","min-width":"","overflow":"","word-break":"","padding":"1em","gap":"1em","border-radius":"0.5em","background":"","border":"3px solid rgb(37, 150, 190)"},"dom_objContentContainer":{"Id":"myId_35320233"}}],
-[77828, {"obj_design":{"str_tag":"text","str_type":"form_text","str_idXDesign":"myId_11977716","str_name":"form_text","str_nameShort":"form_text","str_themeType":"form_input","int_idRecord":"77828","str_createdDate":"2022-11-18 16:02:10","str_modifiedDate":"2022-11-18 16:02:10","blnIsTag":true,"bln_editPin":true,"bln_typeable":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_nameRegistrator":"notset","str_idProject":"myId_13000276","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"-","str_lastVersionDate":"notset","bln_isThemeItem":true,"bln_classController":"false"},"obj_domProperty":{"innerHTML":"-","Id":"myId_07195217"},"obj_domStyle":{"word-break":"normal","background":"white","maxheight":"175","overflow":"auto","color":"black","max-height":"500px","min-width":"","padding":"1em","gap":"1em","border-radius":"0.5em","border":"3px solid rgb(37, 150, 190)","font-size":"1.1rem"},"dom_objContentContainer":{"Id":"myId_07195217"}}],
-[77829, {"obj_design":{"int_idRecord":"77829","str_idXDesign":"myId_21663177","str_name":"form_field","str_nameShort":"form_field","str_type":"form_field","str_tag":"field","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_field","bln_editPin":true,"bln_registerAtContainer":true,"arr_item":[{"obj_design":{"int_idRecord":"77827","str_type":"form_label"}},{"obj_design":{"int_idRecord":"77828","str_type":"form_text"}}],"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_nameRegistrator":"notset","str_idProject":"myId_29727565","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset","bln_isThemeItem":true,"bln_classController":"false"},"obj_domProperty":{"Id":"myId_21663177"},"obj_domStyle":{"flex-wrap":"wrap"," justify-content":"center","align-items":"","justify-content":"","border":"","flex-flow":"","display":"flex","gap":"1em","padding":"0em"},"dom_objContentContainer":{"Id":"myId_21663177"}}],
-[77834, {"obj_design":{"int_idRecord":"77834","str_idXDesign":"myId_62839939","str_name":"form_fieldset","str_nameShort":"form_fieldset","str_type":"form_fieldset","str_tag":"fieldset","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_section","bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_nameRegistrator":"notset","str_idProject":"myId_29727565","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset","arr_item":[{"obj_design":{"int_idRecord":"77826","str_type":"form_legend"}},{"obj_design":{"int_idRecord":"77829","str_type":"form_field"}},{"obj_design":{"int_idRecord":77848,"str_type":"form_button_rich"}}],"bln_isThemeItem":true,"lockOpen":true,"bln_classController":"false"},"obj_domProperty":{"Id":"myId_62839939"},"obj_domStyle":{"display":"flex","flex-direction":"column","flex-wrap":"wrap","flex-flow":"wrap","align-self":"flex-start","padding-top":"0px","padding-bottom":"0px","background-color":"transparent","box-shadow":"","padding":"1em","gap":"1em","border":"0px outset rgb(64, 169, 236)","background":"rgb(64, 169, 236)","border-radius":"0.5em","overflow":"hidden","margin":"0px"},"dom_objContentContainer":{"Id":"myId_62839939"},"bln_toggleState":true}],
-[77835, {"obj_design":{"int_idRecord":"77835","str_idXDesign":"myId_81978191","str_name":"form_panel","str_nameShort":"form_panel","str_type":"form_panel","str_tag":"form_panel","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_panel","bln_editPin":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_nameRegistrator":"notset","str_idProject":"myId_29727565","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset","str_categoryName":"","arr_item":[{"obj_design":{"int_idRecord":"77834","str_type":"form_fieldset"}}],"bln_isThemeItem":true,"bln_classController":"false"},"obj_domProperty":{"Id":"myId_81978191"},"obj_domStyle":{"display":"flex","flex-wrap":"column wrap","flex-flow":"","gap":"1em","background":"","border":"0px solid red","padding":"1em"},"dom_objContentContainer":{"Id":"myId_81978191"}}],
-[77836, {"obj_design":{"int_idRecord":"77836","str_idXDesign":"myId_33710013","str_name":"form_hardrule","str_nameShort":"form_hardrule","str_type":"form_hardrule","str_themeType":"form_hardrule","str_tag":"hr","bln_registerAtContainer":true,"str_createdDate":"2023-09-28 17:30:59","str_modifiedDate":"2023-09-28 17:30:59","bln_editPin":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_nameRegistrator":"notset","str_idProject":"myId_29727565","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset","bln_isThemeItem":true,"bln_classController":"false"},"obj_domProperty":{"Id":"myId_78947874"},"obj_domStyle":{"height":"1.0em","width":"100%","border":"0px","background":"rgb(64, 169, 236)"},"dom_objContentContainer":{"Id":"myId_78947874"}}],
-[77845, {"obj_design":{"str_tag":"span","str_type":"form_button_span","str_idXDesign":"myId_83303612","str_name":"form_button_span","str_nameShort":"form_button_span","str_themeType":"form_button_span","int_idRecord":"77845","str_createdDate":"2022-11-18 16:02:10","str_modifiedDate":"2022-11-18 16:02:10","blnIsTag":true,"bln_editPin":true,"bln_typeable":true,"bln_registerAtContainer":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_idProject":"myId_11190110","str_text":"My Button","str_categoryName":"","str_nameRegistrator":"notset","bln_isThemeItem":true,"str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_lastVersionDate":"notset","bln_classController":"false"},"obj_domProperty":{"Id":"myId_87111743","innerHTML":"My Button"},"obj_domStyle":{"maxheight":"175","font-wiegth":"bold","font-weight":"bold","font-size":"1.1rem","color":"rgb(64, 169, 236)","display":"block"},"dom_objContentContainer":{"Id":"myId_87111743"}}],
-[77846, {"obj_design":{"int_idRecord":"77846","str_idXDesign":"myId_40873233","str_name":"form_button_icon","str_nameShort":"form_button_icon","str_type":"form_button_icon","str_tag":"i","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_button_icon","bln_editPin":true,"bln_registerAtContainer":true,"str_idProject":"myId_79120090","str_categoryName":"","str_nameRegistrator":"notset","bln_isThemeItem":true,"str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"star","str_lastVersionDate":"notset","str_class":"star","bln":"expand","bln_expand":true,"bln_classController":"false"},"obj_domProperty":{"Id":"myId_17078909","innerHTML":"star"},"obj_domStyle":{"font-weight":"bold","font-size":"1.5em","color":"rgb(64, 169, 236)","display":"block"},"dom_objContentContainer":{"Id":"myId_17078909"}}],
-[77847, {"obj_design":{"int_idRecord":77847,"str_idXDesign":"myId_37442227","str_name":"form_button_anchor","str_nameShort":"form_button_anchor","str_type":"form_button_anchor","str_tag":"a","str_createdDate":"2022-01-31 21:05:11","str_modifiedDate":"2022-01-31 21:05:11","bln_palettePinRelease":true,"bln_palettePin":true,"bln_createRelease":"false","bln_isLocalHome":true,"str_themeType":"form_button_anchor","bln_editPin":true,"bln_registerAtContainer":true,"str_idProject":"myId_11190110","arr_item":[{"obj_design":{"int_idRecord":"77845","str_type":"form_button_span"}},{"obj_design":{"int_idRecord":"77846","str_type":"form_button_icon"}}],"str_categoryName":"","str_nameRegistrator":"notset","str_content":"","str_classList":"notset","str_classExtend":"notset","str_releaseLabel":"","str_text":"notset","str_lastVersionDate":"notset","bln_isThemeItem":true,"bln_classController":"false"},"obj_domProperty":{"target":"_blank","Id":"myId_37442227"},"obj_domStyle":{"justify-content":"center","align-items":"center","text-decoration":"none","font-size":"1.1rem","font-weight":"bold","display":"flex","text":"de","border":"0px solid black","gap":"0.5em","color":"rgb(64, 169, 236)"},"dom_objContentContainer":{"Id":"myId_37442227"},"obj_icon":{"obj_design":{"int_idRecord":"77846","str_type":"form_button_icon"}},"obj_span":{"obj_design":{"int_idRecord":"77845","str_type":"form_button_span"}}}],
-[77848, {"obj_design":{"int_idRecord":77848,"str_idXDesign":"myId_48263332","str_name":"form_button_rich","str_nameShort":"form_button_rich","str_type":"form_button_rich","str_tag":"button","str_content":"My component","str_createdDate":"2022-02-02 19:54:40","str_modifiedDate":"2022-02-02 19:54:40","bln_typeable":true,"bln_createRelease":"false","bln_isLocalHome":true,"bln_editPin":true,"str_themeType":"form_button","bln_registerAtContainer":true,"str_classExtend":"form_button","blnIsTag":true,"bln_palettePinRelease":true,"bln_palettePin":true,"str_categoryName":"","str_idProject":"myId_29727565","arr_item":[{"obj_design":{"int_idRecord":77847,"str_type":"form_button_anchor"}}],"str_icon":"xapp_star","str_nameRegistrator":"notset","str_classList":"notset","str_releaseLabel":"","str_text":"My Button","str_lastVersionDate":"notset","bln_isThemeItem":true,"bln_classController":"false"},"obj_domProperty":{"innerText":"Desktop","innerHTML":"Office","str_name":"xapp_button_navigate_desktop","Id":"myId_48263332"},"obj_domStyle":{"border-radius":"0.5em","align-items":"center","font-size":"1.1rem","font-weight":"bold","cursor":"pointer","color":"rgb(64, 169, 236)","display":"flex","padding":"1em","gap":"1em","background":"white","border":"3px solid rgb(37, 150, 190)"},"bln_enabled":true,"dom_objContentContainer":{"Id":"myId_48263332","str_name":"xapp_button_navigate_desktop"}}]
+[77262, {"obj_design": {"str_tag": "eazygriditem", "arr_item": [{"obj_design": {"str_type": "eazygrid", "int_idRecord": "77274"}}], "str_name": "My eazygriditem", "str_text": "notset", "str_type": "eazygriditem", "str_minDim": "100px", "bln_editPin": true, "str_content": "", "gridTemplate": "minmax(100px, 1fr)", "int_idRecord": "77262", "str_classList": "notset", "str_idProject": "myId_54166875", "str_idXDesign": "myId_40797111", "str_nameShort": "myeazygriditem", "str_themeType": "eazygriditem", "bln_palettePin": true, "str_classExtend": "notset", "str_createdDate": "2022-02-21 18:51:32", "str_modifiedDate": "2022-02-21 18:51:32", "str_releaseLabel": "notset", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true}, "obj_domStyle": {"background-color": "#414141"}, "obj_domProperty": {"Id": "myId_40797111"}, "dom_objContentContainer": {"Id": "myId_40797111"}}],
+[77263, {"obj_design": {"str_tag": "eazygrid", "arr_item": [{"obj_design": {"str_type": "eazygriditem", "int_idRecord": "77262"}}, {"obj_design": {"str_type": "eazygriditem", "int_idRecord": "77270"}}], "int_axis": 1, "str_name": "eazygrid", "str_text": "notset", "str_type": "eazygrid", "str_minDim": "100px", "bln_editPin": true, "str_content": "", "bln_eazyGrid": true, "int_idRecord": "77263", "str_classList": "eazygriditem", "str_idProject": "myId_01221712", "str_idXDesign": "myId_10717310", "str_nameShort": "eazygrid", "str_themeType": "eazygrid", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:08:50", "str_modifiedDate": "2022-01-31 21:08:50", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "str_gridTemplateDefault": "minmax(100px, 1fr)"}, "obj_domStyle": {"width": "100%", "height": "100%", "display": "grid", "padding": "0px", "grid-gap": "1.0em", "overflow": "hidden", "grid-auto-rows": "minmax(100px, 1fr)", "background-color": "#2b2c34", "grid-auto-columns": "minmax(100px, 1fr)", "grid-template-rows": "minmax(100px, 1fr) minmax(100px, 1fr)", "grid-template-columns": "minmax(100px, 1fr)"}, "obj_domProperty": {"Id": "myId_10717310"}, "dom_objContentContainer": {"Id": "myId_10717310"}}],
+[77264, {"arr_color": [{"int_hue": 0, "str_hsl": "hsl(0, 100%, 50%)", "int_light": 50, "str_label": "red", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 0, "str_hsl": "hsl(0, 100%, 60%)", "int_light": 60, "str_label": "red-light", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 0, "str_hsl": "hsl(0, 100%, 30%)", "int_light": 30, "str_label": "red-dark", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 30, "str_hsl": "hsl(30, 100%, 50%)", "int_light": 50, "str_label": "Orange", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 30, "str_hsl": "hsl(30, 100%, 60%)", "int_light": 60, "str_label": "Orange-light", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 30, "str_hsl": "hsl(30, 100%, 30%)", "int_light": 30, "str_label": "Orange-dark", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 20, "str_hsl": "hsl(20, 100%, 30%)", "int_light": 30, "str_label": "Orange-alt", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 240, "str_hsl": "hsl(240, 100%, 50%)", "int_light": 50, "str_label": "Blue", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 240, "str_hsl": "hsl(240, 100%, 60%)", "int_light": 60, "str_label": "Blue-light", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 240, "str_hsl": "hsl(240, 100%, 30%)", "int_light": 30, "str_label": "Blue-dark", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 230, "str_hsl": "hsl(230, 100%, 30%)", "int_light": 30, "str_label": "Blue-alt", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 270, "str_hsl": "hsl(270, 100%, 50%)", "int_light": 50, "str_label": "Purple", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 270, "str_hsl": "hsl(270, 100%, 60%)", "int_light": 60, "str_label": "Purple-light", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 270, "str_hsl": "hsl(270, 100%, 30%)", "int_light": 30, "str_label": "Purple-dark", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 260, "str_hsl": "hsl(260, 100%, 30%)", "int_light": 30, "str_label": "Purple-alt", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 300, "str_hsl": "hsl(300, 100%, 50%)", "int_light": 50, "str_label": "Magenta", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 300, "str_hsl": "hsl(300, 100%, 60%)", "int_light": 60, "str_label": "Magenta-light", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 300, "str_hsl": "hsl(300, 100%, 30%)", "int_light": 30, "str_label": "Magenta-dark", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 290, "str_hsl": "hsl(290, 100%, 30%)", "int_light": 30, "str_label": "Magenta-alt", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 0, "str_hsl": "hsl(0, 0%, 100%)", "int_light": 100, "str_label": "White", "bln_lighten": true, "int_saturation": 0}, {"int_hue": 0, "str_hsl": "hsl(0, 0%, 0%)", "bln_face": 0, "int_light": 0, "str_label": "Black", "bln_lighten": true, "bln_contrast": true, "int_saturation": 0}, {"int_hue": 0, "str_hsl": "hsl(0, 0%, 50%)", "int_light": 50, "str_label": "Gray", "bln_lighten": true, "int_saturation": 0}, {"int_hue": 0, "str_hsl": "hsl(0, 0%, 60%)", "int_light": 60, "str_label": "Gray-light", "bln_lighten": true, "int_saturation": 0}, {"int_hue": 0, "str_hsl": "hsl(0, 0%, 30%)", "int_light": 30, "str_label": "Gray-dak", "bln_lighten": true, "int_saturation": 0}], "obj_theme": {"obj_design": {"str_type": "xapp_theme", "int_idRecord": 77570}}, "obj_design": {"str_tag": "component", "arr_item": [{"obj_design": {"str_type": "xapp_theme", "int_idRecord": 77570}}, {"obj_design": {"str_type": "eazygrid", "int_idRecord": "77263"}}], "str_name": "www", "str_text": "notset", "str_type": "component", "bln_editPin": true, "str_content": "", "int_idRecord": 77264, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_01221712", "str_nameShort": "www", "str_themeType": "component", "str_classExtend": "notset", "str_createdDate": "2024-08-16 11:31:56", "str_categoryName": "www", "str_modifiedDate": "2024-08-16 11:31:56", "str_releaseLabel": "notset", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset"}, "user_agent": "Firefox", "obj_domProperty": {"Id": "myId_01221712"}, "dom_objContentContainer": {"Id": "myId_01221712"}}],
+[77270, {"obj_design": {"str_tag": "eazygriditem", "arr_item": [{"obj_design": {"str_type": "panel", "int_idRecord": "77432"}}], "str_name": "eazygriditem", "str_text": "notset", "str_type": "eazygriditem", "str_minDim": "100px", "bln_editPin": true, "str_content": "", "gridTemplate": "minmax(100px, 1fr)", "int_idRecord": "77270", "str_classList": "notset", "str_idProject": "myId_01221712", "str_idXDesign": "myId_32337313", "str_nameShort": "eazygriditem", "str_themeType": "eazygriditem", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:09:35", "str_modifiedDate": "2022-01-31 21:09:35", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true}, "obj_domStyle": {"background-color": "#414141"}, "obj_domProperty": {"Id": "myId_32337313"}, "dom_objContentContainer": {"Id": "myId_32337313"}}],
+[77272, {"obj_design": {"str_tag": "eazygriditem", "arr_item": [{"obj_design": {"str_type": "panel", "int_idRecord": "77278"}}], "str_name": "My eazygriditem", "str_text": "notset", "str_type": "eazygriditem", "str_minDim": "100px", "bln_editPin": true, "str_content": "", "gridTemplate": "minmax(100px, 1fr)", "int_idRecord": "77272", "str_classList": "notset", "str_idProject": "myId_54166875", "str_idXDesign": "myId_48434440", "str_nameShort": "myeazygriditem", "str_themeType": "eazygriditem", "bln_palettePin": true, "str_classExtend": "notset", "str_createdDate": "2022-02-21 18:51:32", "str_modifiedDate": "2022-02-21 18:51:32", "str_releaseLabel": "notset", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true}, "obj_domStyle": {"background-color": "#414141"}, "obj_domProperty": {"Id": "myId_48434440"}, "dom_objContentContainer": {"Id": "myId_48434440"}}],
+[77274, {"obj_design": {"str_tag": "eazygrid", "arr_item": [{"obj_design": {"str_type": "eazygriditem", "int_idRecord": "77272"}}, {"obj_design": {"str_type": "eazygriditem", "int_idRecord": "77286"}}], "int_axis": 2, "str_name": "eazygrid", "str_text": "notset", "str_type": "eazygrid", "str_minDim": "100px", "bln_editPin": true, "str_content": "", "bln_eazyGrid": true, "int_idRecord": "77274", "str_classList": "eazygriditem", "str_idProject": "myId_01221712", "str_idXDesign": "myId_34050020", "str_nameShort": "eazygrid", "str_themeType": "eazygrid", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:08:50", "str_modifiedDate": "2022-01-31 21:08:50", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "str_gridTemplateDefault": "minmax(100px, 1fr)"}, "obj_domStyle": {"width": "100%", "height": "100%", "display": "grid", "padding": "0px", "grid-gap": "1.0em", "overflow": "hidden", "grid-auto-rows": "minmax(100px, 1fr)", "background-color": "#2b2c34", "grid-auto-columns": "minmax(100px, 1fr)", "grid-template-rows": "minmax(100px, 1fr)", "grid-template-columns": "minmax(100px, 1fr) minmax(100px, 1fr)"}, "obj_domProperty": {"Id": "myId_34050020"}, "dom_objContentContainer": {"Id": "myId_34050020"}}],
+[77277, {"obj_design": {"str_tag": "block", "str_name": "block", "str_text": "Welcome.", "str_type": "block", "bln_editPin": true, "str_content": "", "int_idRecord": "77277", "str_classList": "notset", "str_idProject": "myId_01221712", "str_idXDesign": "myId_31713903", "str_nameShort": "block", "str_themeType": "block", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:10:58", "str_modifiedDate": "2022-01-31 21:10:58", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true}, "obj_domStyle": {"width": "100%", "height": "100%", "display": "flex", "padding": "1.0em", "font-style": "italic", "font-family": "helvetica", "font-weight": "bold", "background-color": "white"}, "obj_domProperty": {"innerHTML": "Welcome."}}],
+[77278, {"obj_design": {"str_tag": "panel", "arr_item": [{"obj_design": {"str_type": "block", "int_idRecord": "77277"}}], "str_name": "flexpanel", "str_text": "notset", "str_type": "panel", "bln_editPin": true, "str_content": "", "int_idRecord": "77278", "str_classList": "notset", "str_idProject": "myId_01221712", "str_idXDesign": "myId_82328711", "str_nameShort": "flexpanel", "str_themeType": "", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-02-02 20:10:52", "str_modifiedDate": "2022-02-02 20:10:52", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true}, "obj_domStyle": {"color": "", "border": "", "height": "100%", "display": "flex", "padding": "", "overflow": "", "maxheight": "175", "background": "rgb(64, 169, 236)", "max-height": "", "word-break": "", "font-family": "", "border-radius": ""}, "obj_domProperty": {"Id": "myId_82328711"}, "dom_objContentContainer": {"Id": "myId_82328711"}}],
+[77286, {"obj_design": {"str_tag": "eazygriditem", "arr_item": [{"obj_design": {"str_type": "panel", "int_idRecord": "77287"}}], "str_name": "eazygriditem", "str_text": "notset", "str_type": "eazygriditem", "str_minDim": "100px", "bln_editPin": true, "str_content": "", "gridTemplate": "minmax(100px, 1fr)", "int_idRecord": "77286", "str_classList": "notset", "str_idProject": "myId_01221712", "str_idXDesign": "myId_00703001", "str_nameShort": "eazygriditem", "str_themeType": "eazygriditem", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:09:35", "str_modifiedDate": "2022-01-31 21:09:35", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true}, "obj_domStyle": {"background-color": "#414141"}, "obj_domProperty": {"Id": "myId_00703001"}, "dom_objContentContainer": {"Id": "myId_00703001"}}],
+[77287, {"obj_design": {"str_tag": "panel", "arr_item": [{"obj_design": {"str_type": "xapp_button_navigate_rowz", "int_idRecord": 77486}}], "str_name": "flexpanel", "str_text": "notset", "str_type": "panel", "bln_editPin": true, "str_content": "", "int_idRecord": "77287", "str_classList": "notset", "str_idProject": "myId_01221712", "str_idXDesign": "myId_18815515", "str_nameShort": "flexpanel", "str_themeType": "", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-02-02 20:10:52", "str_modifiedDate": "2022-02-02 20:10:52", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true}, "obj_domStyle": {"color": "", "border": "", "height": "100%", "display": "flex", "padding": "1.0em", "overflow": "", "maxheight": "175", "background": "rgb(64, 169, 236)", "max-height": "", "word-break": "", "font-family": "", "border-radius": ""}, "obj_domProperty": {"Id": "myId_18815515"}, "dom_objContentContainer": {"Id": "myId_18815515"}}],
+[77386, {"obj_design": {"str_tag": "span", "blnIsTag": true, "str_name": "form_button_span", "str_text": "form_button_span", "str_type": "form_button_span", "bln_editPin": true, "bln_typeable": true, "int_idRecord": 77386, "str_idProject": "myId_11190110", "str_idXDesign": "myId_57242915", "str_nameShort": "form_button_span", "str_themeType": "form_button_span", "bln_palettePin": true, "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "Form", "str_modifiedDate": "2022-11-18 16:02:10", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"maxheight": "175"}, "obj_domProperty": {"Id": "myId_57242915", "innerHTML": "form_button_span"}, "dom_objContentContainer": {"Id": "myId_57242915"}}],
+[77387, {"obj_design": {"str_tag": "i", "str_name": "form_button_icon", "str_type": "form_button_icon", "bln_editPin": true, "int_idRecord": 77387, "str_idProject": "myId_79120090", "str_idXDesign": "myId_24281989", "str_nameShort": "form_button_icon", "str_themeType": "form_button_icon", "bln_palettePin": true, "bln_isLocalHome": true, "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Form", "str_modifiedDate": "2022-01-31 21:05:11", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"color": "rgb(64, 169, 236)"}, "obj_domProperty": {"Id": "myId_24281989"}, "dom_objContentContainer": {"Id": "myId_24281989"}}],
+[77393, {"obj_icon": {"obj_design": {"str_type": "form_button_icon", "int_idRecord": 77387}}, "obj_span": {"obj_design": {"str_type": "form_button_span", "int_idRecord": 77386}}, "obj_design": {"str_tag": "a", "arr_item": [{"obj_design": {"str_type": "form_button_span", "int_idRecord": 77386}}, {"obj_design": {"str_type": "form_button_icon", "int_idRecord": 77387}}], "str_name": "form_button_anchor", "str_text": "notset", "str_type": "form_button_anchor", "bln_editPin": true, "str_content": "", "int_idRecord": 77393, "str_classList": "notset", "str_idProject": "myId_77377077", "str_idXDesign": "myId_66119667", "str_nameShort": "form_button_anchor", "str_themeType": "form_button_anchor", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Form", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "text": "de", "color": "white", "border": "0px solid black", "display": "flex", "font-size": "1rem", "align-items": "center", "justify-content": "center", "text-decoration": "none"}, "obj_domProperty": {"Id": "myId_66119667", "target": "_blank"}, "dom_objContentContainer": {"Id": "myId_66119667"}}],
+[77432, {"obj_design": {"str_tag": "panel", "arr_item": [{"obj_design": {"str_type": "block", "int_idRecord": "77450"}}], "str_name": "flexpanel", "str_text": "notset", "str_type": "panel", "bln_editPin": true, "str_content": "", "int_idRecord": "77432", "str_classList": "notset", "str_idProject": "myId_01221712", "str_idXDesign": "myId_64023910", "str_nameShort": "flexpanel", "str_themeType": "", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-02-02 20:10:52", "str_categoryName": "", "str_modifiedDate": "2022-02-02 20:10:52", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true}, "obj_domStyle": {"color": "", "border": "", "height": "100%", "display": "flex", "padding": "", "overflow": "", "maxheight": "175", "background": "rgb(64, 169, 236)", "max-height": "", "word-break": "", "font-family": "", "border-radius": ""}, "obj_domProperty": {"Id": "myId_64023910"}, "dom_objContentContainer": {"Id": "myId_64023910"}}],
+[77450, {"obj_design": {"str_tag": "block", "str_name": "block", "str_text": "mycode.buzz @ gmail.com", "str_type": "block", "bln_editPin": true, "str_content": "", "int_idRecord": "77450", "str_classList": "notset", "str_idProject": "myId_01221712", "str_idXDesign": "myId_22406430", "str_nameShort": "block", "str_themeType": "block", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:10:58", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:10:58", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true}, "obj_domStyle": {"width": "100%", "height": "", "display": "flex", "padding": "1.0em", "font-style": "italic", "font-family": "helvetica", "font-weight": "bold", "background-color": "white"}, "obj_domProperty": {"innerHTML": "mycode.buzz @ gmail.com"}}],
+[77486, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "rowz_hashtag", "str_name": "xapp_button_navigate_rowz", "str_text": "Rowz", "str_type": "xapp_button_navigate_rowz", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77486, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_36003113", "str_nameShort": "xapp_button_navigate_rowz", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "www", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_36003113", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_36003113", "str_name": "xapp_button_navigate_desktop"}}],
+[77570, {"obj_design": {"str_tag": "theme_ocean", "arr_item": [{"obj_design": {"str_type": "xapp_accordion", "int_idRecord": "77880"}}, {"obj_design": {"str_type": "form_span", "int_idRecord": "77881"}}, {"obj_design": {"str_type": "form_span", "int_idRecord": "77882"}}, {"obj_design": {"str_type": "form_span", "int_idRecord": "77883"}}, {"obj_design": {"str_type": "form_span", "int_idRecord": "77884"}}], "str_name": "theme_ocean", "str_text": "notset", "str_type": "xapp_theme", "bln_editPin": true, "str_content": "", "int_idRecord": 77570, "str_classList": "notset", "str_idProject": "myId_01221712", "str_idXDesign": "myId_29727565", "str_nameShort": "theme_ocean", "str_themeType": "xapp_theme", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2024-11-30 12:02:09", "str_categoryName": "Anchor", "str_modifiedDate": "2024-11-30 12:02:09", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtProject": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"display": "block", "font-size": "", "font-family": ""}, "obj_domProperty": {"Id": "myId_29727565"}, "dom_objContentContainer": {"Id": "myId_29727565"}}],
+[77861, {"obj_design": {"str_tag": "span", "blnIsTag": true, "str_name": "form_button_span", "str_text": "My Button", "str_type": "form_button_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77861", "str_classList": "notset", "str_idProject": "myId_11190110", "str_idXDesign": "myId_10076366", "str_nameShort": "form_button_span", "str_themeType": "form_button_span", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "white", "display": "block", "font-size": "1.2rem", "maxheight": "175", "font-weight": "bold"}, "obj_domProperty": {"Id": "myId_10076366", "innerHTML": "My Button"}, "dom_objContentContainer": {"Id": "myId_10076366"}}],
+[77862, {"obj_design": {"str_tag": "i", "str_name": "form_button_icon", "str_text": "star", "str_type": "form_button_icon", "bln_editPin": true, "str_content": "", "int_idRecord": "77862", "str_classList": "notset", "str_idProject": "myId_79120090", "str_idXDesign": "myId_48131142", "str_nameShort": "form_button_icon", "str_themeType": "form_button_icon", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "white", "display": "block", "font-size": "1.5em", "font-weight": "bold"}, "obj_domProperty": {"Id": "myId_48131142", "innerHTML": "star"}, "dom_objContentContainer": {"Id": "myId_48131142"}}],
+[77863, {"obj_icon": {"obj_design": {"str_type": "form_button_icon", "int_idRecord": 77862}}, "obj_span": {"obj_design": {"str_type": "form_button_span", "int_idRecord": 77861}}, "obj_design": {"str_tag": "a", "arr_item": [{"obj_design": {"str_type": "form_button_span", "int_idRecord": 77861}}, {"obj_design": {"str_type": "form_button_icon", "int_idRecord": 77862}}], "str_name": "form_button_anchor", "str_text": "notset", "str_type": "form_button_anchor", "bln_editPin": true, "str_content": "", "int_idRecord": "77863", "str_classList": "notset", "str_idProject": "myId_77377077", "str_idXDesign": "myId_62440730", "str_nameShort": "form_button_anchor", "str_themeType": "form_button_anchor", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "0.5em", "text": "de", "color": "white", "border": "0px solid black", "display": "flex", "font-size": "1.2rem", "align-items": "center", "font-weight": "bold", "justify-content": "center", "text-decoration": "none"}, "obj_domProperty": {"Id": "myId_62440730", "target": "_blank"}, "dom_objContentContainer": {"Id": "myId_62440730"}}],
+[77864, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77863}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "menu_button", "str_text": "My Button", "str_type": "form_button_rich", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": "77864", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_10880106", "str_nameShort": "menu_button", "str_themeType": "menu_button", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "form_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"gap": "1em", "color": "white", "width": "100%", "border": "1em solid orange", "cursor": "pointer", "display": "flex", "padding": "1em", "font-size": "1.2rem", "background": "green", "align-items": "center", "font-weight": "bold", "margin-bottom": "", "justify-content": "center"}, "obj_domProperty": {"Id": "myId_10880106", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_10880106", "str_name": "xapp_button_navigate_desktop"}}],
+[77865, {"obj_design": {"str_tag": "legend", "str_name": "form_legend", "str_text": "MyText", "str_type": "form_legend", "bln_editPin": true, "str_content": "", "int_idRecord": "77865", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_14016036", "str_nameShort": "form_legend", "str_themeType": "form_legend", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "form_button", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"gap": "1em", "color": "white", "border": "0.5em solid orange", "display": "flex", "opacity": "1", "padding": "1em", "background": "green", "user-select": "none", "border-radius": "0.5em", "text-decoration": ""}, "obj_domProperty": {"Id": "myId_14016036", "href": "https://www.mycode.buzz", "target": "_blank", "tabIndex": "0", "innerHTML": "MyText"}, "dom_objContentContainer": {"Id": "myId_14016036", "href": "https://www.mycode.buzz", "target": "_blank"}}],
+[77866, {"obj_design": {"str_tag": "label", "str_name": "form_label", "str_text": "My Label", "str_type": "form_label", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77866", "str_classList": "notset", "str_idProject": "myId_13000276", "str_idXDesign": "myId_40316030", "str_nameShort": "form_label", "str_themeType": "form_label", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-13 21:59:51", "str_categoryName": "", "str_modifiedDate": "2022-11-13 21:59:51", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "color": "white", "border": "0.5em solid orange", "cursor": "pointer", "margin": "", "padding": "1em", "overflow": "", "font-size": "1.1rem", "max-width": "", "min-width": "", "align-self": "flex-start", "background": "green", "max-height": "", "word-break": "", "border-radius": "1em"}, "obj_domProperty": {"Id": "myId_40316030", "innerText": "My Label"}, "dom_objContentContainer": {"Id": "myId_40316030"}}],
+[77867, {"obj_design": {"str_tag": "text", "blnIsTag": true, "str_name": "form_text", "str_text": "-", "str_type": "form_text", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77867", "str_classList": "notset", "str_idProject": "myId_13000276", "str_idXDesign": "myId_30380630", "str_nameShort": "form_text", "str_themeType": "form_input", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "color": "white", "border": "0.5em solid orange", "padding": "1em", "overflow": "auto", "font-size": "1rem", "maxheight": "175", "min-width": "", "background": "green", "max-height": "500px", "word-break": "normal", "border-radius": "0.5em"}, "obj_domProperty": {"Id": "myId_30380630", "innerHTML": "-"}, "dom_objContentContainer": {"Id": "myId_30380630"}}],
+[77868, {"obj_design": {"str_tag": "field", "arr_item": [{"obj_design": {"str_type": "form_label", "int_idRecord": 77866}}, {"obj_design": {"str_type": "form_text", "int_idRecord": 77867}}], "str_name": "form_field", "str_text": "notset", "str_type": "form_field", "bln_editPin": true, "str_content": "", "int_idRecord": "77868", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_04461374", "str_nameShort": "form_field", "str_themeType": "form_field", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "border": "", "display": "flex", "padding": "0em", "flex-flow": "", "flex-wrap": "column wrap", "align-items": "", "justify-content": "", " justify-content": "center"}, "obj_domProperty": {"Id": "myId_04461374"}, "dom_objContentContainer": {"Id": "myId_04461374"}}],
+[77869, {"obj_design": {"str_tag": "span", "blnIsTag": true, "str_name": "form_button_span", "str_text": "My Button", "str_type": "form_button_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77869", "str_classList": "notset", "str_idProject": "myId_11190110", "str_idXDesign": "myId_70130314", "str_nameShort": "form_button_span", "str_themeType": "form_button_span", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "white", "display": "block", "font-size": "1.1rem", "maxheight": "175", "font-weight": "bold", "font-wiegth": "bold"}, "obj_domProperty": {"Id": "myId_70130314", "innerHTML": "My Button"}, "dom_objContentContainer": {"Id": "myId_70130314"}}],
+[77870, {"obj_design": {"bln": "expand", "str_tag": "i", "str_name": "form_button_icon", "str_text": "star", "str_type": "form_button_icon", "str_class": "star", "bln_expand": true, "bln_editPin": true, "str_content": "", "int_idRecord": "77870", "str_classList": "notset", "str_idProject": "myId_79120090", "str_idXDesign": "myId_71730443", "str_nameShort": "form_button_icon", "str_themeType": "form_button_icon", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "white", "display": "block", "font-size": "1.5em", "font-weight": "bold"}, "obj_domProperty": {"Id": "myId_71730443", "innerHTML": "star"}, "dom_objContentContainer": {"Id": "myId_71730443"}}],
+[77871, {"obj_icon": {"obj_design": {"str_type": "form_button_icon", "int_idRecord": 77870}}, "obj_span": {"obj_design": {"str_type": "form_button_span", "int_idRecord": 77869}}, "obj_design": {"str_tag": "a", "arr_item": [{"obj_design": {"str_type": "form_button_span", "int_idRecord": 77869}}, {"obj_design": {"str_type": "form_button_icon", "int_idRecord": 77870}}], "str_name": "form_button_anchor", "str_text": "notset", "str_type": "form_button_anchor", "bln_editPin": true, "str_content": "", "int_idRecord": "77871", "str_classList": "notset", "str_idProject": "myId_11190110", "str_idXDesign": "myId_41070040", "str_nameShort": "form_button_anchor", "str_themeType": "form_button_anchor", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "0.5em", "text": "de", "color": "white", "border": "0px solid black", "display": "flex", "font-size": "1.1rem", "align-items": "center", "font-weight": "bold", "justify-content": "center", "text-decoration": "none"}, "obj_domProperty": {"Id": "myId_41070040", "target": "_blank"}, "dom_objContentContainer": {"Id": "myId_41070040"}}],
+[77872, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77871}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "form_button_rich", "str_text": "My Button", "str_type": "form_button_rich", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": "77872", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_83414743", "str_nameShort": "form_button_rich", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "form_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"gap": "1em", "color": "white", "border": "0.5em solid orange", "cursor": "pointer", "display": "flex", "padding": "1em", "font-size": "1.1rem", "background": "green", "align-items": "center", "font-weight": "bold", "border-radius": "0.5em"}, "obj_domProperty": {"Id": "myId_83414743", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_83414743", "str_name": "xapp_button_navigate_desktop"}}],
+[77873, {"obj_design": {"str_tag": "legend", "str_name": "form_legend", "str_text": "MyText", "str_type": "form_legend", "bln_editPin": true, "str_content": "", "int_idRecord": "77873", "str_classList": "notset", "str_idProject": "myId_63641161", "str_idXDesign": "myId_37487013", "str_nameShort": "form_legend", "str_themeType": "form_legend", "bln_dynamicPin": true, "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_button", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"gap": "1em", "color": "white", "border": "0.5em solid orange", "display": "flex", "opacity": "1", "padding": "1em", "background": "green", "user-select": "none", "border-radius": "0.5em", "text-decoration": ""}, "obj_domProperty": {"Id": "myId_37487013", "href": "https://www.mycode.buzz", "target": "_blank", "tabIndex": "0", "innerHTML": "MyText"}, "dom_objContentContainer": {"Id": "myId_37487013", "href": "https://www.mycode.buzz", "target": "_blank"}}],
+[77874, {"obj_design": {"str_tag": "fieldset", "arr_item": [{"obj_design": {"str_type": "form_legend", "int_idRecord": "77865"}}, {"obj_design": {"str_type": "form_field", "int_idRecord": "77868"}}, {"obj_design": {"str_type": "form_button_rich", "int_idRecord": "77872"}}, {"obj_design": {"str_type": "form_legend", "int_idRecord": "77873"}}], "lockOpen": true, "str_name": "form_fieldset", "str_text": "notset", "str_type": "form_fieldset", "bln_editPin": true, "str_content": "", "int_idRecord": "77874", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_28040276", "str_nameShort": "form_fieldset", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "border": "1em solid orange", "margin": "0px", "display": "flex", "padding": "1em", "overflow": "hidden", "flex-flow": "row wrap", "flex-wrap": "wrap", "align-self": "", "background": "green", "align-items": "start", "border-radius": "0.5em", "flex-direction": "row"}, "bln_toggleState": true, "obj_domProperty": {"Id": "myId_28040276"}, "dom_objContentContainer": {"Id": "myId_28040276"}}],
+[77875, {"obj_design": {"str_tag": "form_panel", "arr_item": [{"obj_design": {"str_type": "form_fieldset", "int_idRecord": "77874"}}], "str_name": "form_panel", "str_text": "notset", "str_type": "form_panel", "bln_editPin": true, "str_content": "", "int_idRecord": "77875", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_33706461", "str_nameShort": "form_panel", "str_themeType": "form_panel", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "border": "0px solid red", "display": "flex", "padding": "1em", "flex-flow": "", "flex-wrap": "column wrap", "background": "", "align-items": "end"}, "obj_domProperty": {"Id": "myId_33706461"}, "dom_objContentContainer": {"Id": "myId_33706461"}}],
+[77876, {"obj_design": {"str_tag": "hr", "str_name": "form_hardrule", "str_text": "notset", "str_type": "form_hardrule", "bln_editPin": true, "str_content": "", "int_idRecord": "77876", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_41368203", "str_nameShort": "form_hardrule", "str_themeType": "form_hardrule", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2023-09-28 17:30:59", "str_categoryName": "", "str_modifiedDate": "2023-09-28 17:30:59", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "white", "width": "100%", "border": "1em solid orange", "height": "1.0em", "padding": "1em", "background": "green", "border-radius": "0em"}, "obj_domProperty": {"Id": "myId_41368203"}, "dom_objContentContainer": {"Id": "myId_41368203"}}],
+[77877, {"obj_design": {"str_tag": "form_container", "arr_item": [{"obj_design": {"str_type": "form_panel", "int_idRecord": "77875"}}, {"obj_design": {"str_type": "form_hardrule", "int_idRecord": "77876"}}], "str_name": "form_container", "str_text": "notset", "str_type": "block", "bln_editPin": true, "str_content": "", "int_idRecord": "77877", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_43031101", "str_nameShort": "form_container", "str_themeType": "form_container", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:10:58", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:10:58", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true}, "obj_domStyle": {"gap": "1em", "display": "flex", "padding": "0em", "flex-flow": "wrap", "background": "transparent", "align-items": ""}, "obj_domProperty": {"Id": "myId_43031101"}, "dom_objContentContainer": {"Id": "myId_43031101"}}],
+[77878, {"obj_design": {"str_tag": "form_menu_panel", "arr_item": [{"obj_design": {"str_type": "block", "int_idRecord": "77877"}}], "str_name": "form_menu_panel", "str_text": "notset", "str_type": "form_menu_panel", "bln_editPin": true, "str_content": "", "int_idRecord": "77878", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_64003014", "str_nameShort": "form_menu_panel", "str_themeType": "form_menu_panel", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-15 08:47:57", "str_categoryName": "", "str_modifiedDate": "2022-11-15 08:47:57", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "border": "0px solid white", "display": "flex", "padding": "1em", "flex flow": "column wrap", "flexdirection": "column", "flex-direction": "column"}, "obj_domProperty": {"Id": "myId_64003014"}, "dom_objContentContainer": {"Id": "myId_64003014"}}],
+[77879, {"obj_design": {"str_tag": "form", "arr_item": [{"obj_design": {"str_type": "form_menu_panel", "int_idRecord": "77878"}}], "str_name": "form_form", "str_text": "notset", "str_type": "form_form", "bln_editPin": true, "str_content": "", "int_idRecord": "77879", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_27017070", "str_nameShort": "form_form", "str_themeType": "form_form", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "component", "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-wrap": "wrap", "flex-direction": "column", " background-color": "coral"}, "obj_domProperty": {"Id": "myId_27017070"}, "dom_objContentContainer": {"0": {"Id": "myId_28040276"}, "1": {"Id": "myId_83414743", "str_name": "xapp_button_navigate_desktop"}, "Id": "myId_27017070"}}],
+[77880, {"obj_design": {"str_tag": "xapp_accordion", "arr_item": [{"obj_design": {"str_type": "form_button_rich", "int_idRecord": "77864"}}, {"obj_design": {"str_type": "form_form", "int_idRecord": "77879"}}], "blnIsTag": true, "str_name": "xapp_accordion", "str_text": "notset", "str_type": "xapp_accordion", "bln_editPin": true, "str_content": "", "int_idRecord": "77880", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_72400131", "str_nameShort": "xapp_accordion", "str_themeType": "xapp_accordion", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-01 21:51:10", "str_categoryName": "", "str_modifiedDate": "2022-11-01 21:51:10", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"flex": "wrap", "width": "100%", "border": "0em solid orange", "display": "block", "padding": "0em", "justify-content": "", "background-color": "green"}, "obj_domProperty": {"Id": "myId_72400131"}, "dom_objContentContainer": {"Id": "myId_72400131"}}],
+[77881, {"obj_design": {"str_tag": "form_blockbackground", "blnIsTag": true, "str_name": "form_blockbackground", "str_text": "notset", "str_type": "form_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77881", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_10184107", "str_nameShort": "form_blockbackground", "str_themeType": "form_blockbackground", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "", "border": "", "padding": "1.0em", "overflow": "", "maxheight": "175", "background": "rgb(37, 150, 190)", "max-height": "", "word-break": "", "font-family": "", "border-radius": "4px"}, "obj_domProperty": {"Id": "myId_10184107"}, "dom_objContentContainer": {"Id": "myId_10184107"}}],
+[77882, {"obj_design": {"str_tag": "form_blockmidground", "blnIsTag": true, "str_name": "form_blockmidground", "str_text": "", "str_type": "form_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77882", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_04706324", "str_nameShort": "form_blockmidground", "str_themeType": "form_blockmidground", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "", "border": "", "padding": "1.0em", "overflow": "", "maxheight": "175", "background": "rgb(64, 169, 236)", "max-height": "", "word-break": "", "font-family": "", "border-radius": "4px"}, "obj_domProperty": {"Id": "myId_04706324", "innerHTML": ""}, "dom_objContentContainer": {"Id": "myId_04706324"}}],
+[77883, {"obj_design": {"str_tag": "form_blockforground", "blnIsTag": true, "str_name": "form_blockforground", "str_text": "notset", "str_type": "form_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77883", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_38024034", "str_nameShort": "form_blockforground", "str_themeType": "form_blockforground", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "", "border": "", "padding": "1.0em", "overflow": "", "maxheight": "175", "background": "white", "max-height": "", "word-break": "", "font-family": "", "border-radius": "4px"}, "obj_domProperty": {"Id": "myId_38024034"}, "dom_objContentContainer": {"Id": "myId_38024034"}}],
+[77884, {"obj_design": {"str_tag": "form_blockhighlight", "blnIsTag": true, "str_name": "form_blockhighlight", "str_text": "notset", "str_type": "form_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77884", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_83720170", "str_nameShort": "form_blockhighlight", "str_themeType": "form_blockhighlight", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "", "border": "", "padding": "1.0em", "overflow": "", "maxheight": "175", "background": "orange", "max-height": "", "word-break": "", "font-family": "", "border-radius": "4px"}, "obj_domProperty": {"Id": "myId_83720170"}, "dom_objContentContainer": {"Id": "myId_83720170"}}]
 ]);
 /*END INSTANCE JSON MAP//*/
 

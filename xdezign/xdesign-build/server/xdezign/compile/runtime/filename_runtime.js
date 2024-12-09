@@ -763,6 +763,11 @@ class Shared{
   fn_flipVariable(str_value1, str_value2){    
     return [str_value1, str_value2] = [str_value2, str_value1];  
   }  
+  fn_getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
 
   fn_shallowCopy(obj_template){
     return { ...obj_template };            
@@ -2307,112 +2312,77 @@ fn_maintainList(obj_list){
     return JSON.parse(str_json);
   }
 
-  //START THEME HANLDER
-  fn_getDarkShade(str_hsl, int_value, bln_linear=false){
-
-    //console.log("fn_getDarkShade");
-    //console.log("str_hsl: " + str_hsl);    
+  //START SHARED THEME HANLDER
+  fn_getShade(obj_shade){        
+    let str_hsl;
+    str_hsl=obj_shade.str_fill;            
+    let obj_gradient=this.fn_getGradienObjectFromHSL(str_hsl);
+    str_hsl=this.fn_setHueHSL(obj_gradient, obj_shade.int_percentHue, obj_shade.bln_value);        
+    str_hsl=this.fn_setSaturateHSL(obj_gradient, obj_shade.int_percentSaturation, obj_shade.bln_value);    
+    str_hsl=this.fn_setLightHSL(obj_gradient, obj_shade.int_percentLight, obj_shade.bln_value); 
+    str_hsl=this.fn_formatHSL(str_hsl);
+    return str_hsl;
+  }       
+  fn_getGradientObject(int_hue, int_saturation, int_light, str_hsl, str_label="MyColor"){
     
-    let str_shade, int_valueLight, int_valueSaturate, int_valueHue;
-    
-    switch(int_value){
-      case 10:
-        //console.log("str_target: " + "199, 98, 41");    
-        int_valueHue=4;        
-        int_valueSaturate=16;        
-        int_valueLight=18;
-      break;
-      case 20:
-        //console.log("str_target: " + "200, 100, 35");    
-        int_valueHue=3;
-        int_valueSaturate=18;        
-        int_valueLight=24;        
-      break;
-      default:
-        int_valueHue=0;
-        int_valueSaturate=0;
-        int_valueLight=0;
+    let obj_gradient={          
+      int_hue:int_hue,
+      int_saturation:int_saturation,
+      int_light:int_light,
     }
-
-    str_shade=str_hsl;
-    str_shade=obj_shared.fn_setHueHSL(str_shade, int_valueHue, false);    
-    str_shade=obj_shared.fn_setSaturateHSL(str_shade, int_valueSaturate, true);    
-    str_shade=obj_shared.fn_setLightHSL(str_shade, int_valueLight, bln_linear);        
-
-    str_shade=obj_shared.fn_formatHSL(str_shade);
-
-    //console.log("str_shade: " + str_shade);        
-    //console.log("----------");
-    return str_shade;
+    if(!str_hsl){
+      str_hsl=this.fn_getHSLString(obj_gradient);
+    }
+    obj_gradient.str_hsl=str_hsl;
+    obj_gradient.str_label=str_label;
+    obj_gradient.bln_face=false;
+    obj_gradient.bln_lighten=true;    
+    return obj_gradient;
+  }   
+  fn_getGradienObjectFromHSL(str_hsl){      
+  
+    let int_hue=this.fn_getGradientValue(str_hsl, 0);//hue  
+    let int_saturation=this.fn_getGradientValue(str_hsl, 1);//saturation
+    let int_light=this.fn_getGradientValue(str_hsl, 2);//light
+    let obj_gradient=this.fn_getGradientObject(int_hue, int_saturation, int_light, str_hsl);    
+    return obj_gradient;
+  }
+  
+  fn_setHueHSL(obj_gradient, int_amount, bln_value){
+    let int_position=0;    
+    let int_value=obj_gradient.int_hue;
+    int_value=this.fn_changeValue(int_value, int_amount, bln_value);    
+    int_value=this.fn_boundDegree(int_value);    
+    return this.fn_setHSL(obj_gradient.str_hsl, int_position, int_value);
   }  
-  fn_getLightShade(str_hsl, int_value, bln_linear=false){
+  fn_setSaturateHSL(obj_gradient, int_amount, bln_value){
 
-    //console.log("fn_getLightShade");
-    //console.log("str_hsl: " + str_hsl);    
-    
-    let str_shade, int_valueLight, int_valueSaturate, int_valueHue;
-    
-    switch(int_value){
-      case 10:
-        //console.log("str_target: " + "203, 84, 54");    
-        int_valueHue=0;        
-        int_valueSaturate=2;
-        int_valueLight=5;        
-      break;
-      case 20:
-        //console.log("str_target: " + "203, 86, 50");    
-        int_valueHue=0;        
-        int_valueSaturate=4;
-        int_valueLight=9;        
-      break;
-      default:
-        int_valueHue=0;
-        int_valueSaturate=0;
-        int_valueLight=0;
-    }
-
-    str_shade=str_hsl;
-    str_shade=obj_shared.fn_setHueHSL(str_shade, int_valueHue, false);    
-    str_shade=obj_shared.fn_setSaturateHSL(str_shade, int_valueSaturate, true);    
-    str_shade=obj_shared.fn_setLightHSL(str_shade, int_valueLight, bln_linear);        
-
-    str_shade=obj_shared.fn_formatHSL(str_shade);
-
-    //console.log("str_shade: " + str_shade);        
-    //console.log("----------");
-    return str_shade;
+    let int_position=1;    
+    let int_value=obj_gradient.int_saturation;
+    int_value=this.fn_changeValue(int_value, int_amount, bln_value);    
+    int_value=this.fn_boundPercentage(int_value);    
+    return this.fn_setHSL(obj_gradient.str_hsl, int_position, int_value);
   }    
-  fn_setHueHSL(str_hsl, int_value, bln_value){
-    return this.fn_setHSL(str_hsl, 0, int_value, bln_value);
-  }  
-  fn_setSaturateHSL(str_hsl, int_percent, bln_value){
-    return this.fn_setHSL(str_hsl, 1, int_percent, bln_value);
-  }  
-  fn_setLightHSL(str_hsl, int_percent, bln_value){
-    return this.fn_setHSL(str_hsl, 2, int_percent, bln_value);
+  fn_setLightHSL(obj_gradient, int_amount, bln_value){
+
+    let int_position=2;    
+    let int_value=obj_gradient.int_light;
+    int_value=this.fn_changeValue(int_value, int_amount, bln_value);    
+    int_value=this.fn_boundPercentage(int_value);    
+    return this.fn_setHSL(obj_gradient.str_hsl, int_position, int_value);
   }    
-  fn_setHSL(str_hsl, int_count, int_percent, bln_direction) {             
-    let int_value=this.fn_getGradientValue(str_hsl, int_count);    
-    if(bln_direction){
-      int_value=int_value + int_percent;
-      if(int_value>100){int_value=100;}
-    }
-    else{
-      int_value=int_value - int_percent;
-      if(int_value<0){int_value=0;}
-    }   
-    
-    let str_value=this.fn_setGradientValue(str_hsl, int_count, int_value);            
+  fn_setHSL(str_hsl, int_position, int_value) {                     
+    let str_value=this.fn_setGradientValue(str_hsl, int_position, int_value);            
     str_value="HSL"+str_value;
     return str_value;
   }
-  fn_getGradientValue(str_value, int_count){
+  fn_getGradientValue(str_value, int_position){
     const arr_value=this.fn_splitGradient(str_value);          
-    return Number(arr_value[int_count]);    
+    return Number(arr_value[int_position]);    
   }
-  fn_setGradientValue(str_value, int_count, int_value){
+  fn_setGradientValue(str_value, int_position, int_value){
     const arr_value=this.fn_splitGradient(str_value);          
-    arr_value[int_count]=int_value;     
+    arr_value[int_position]=int_value;     
     return this.fn_getGradientString(arr_value);          
   }  
   fn_getGradientString(arr_value){    
@@ -2436,10 +2406,35 @@ fn_maintainList(obj_list){
     str_value="HSL("+arr_value.join(',')+")";      
     return str_value;  
   }
-  //HEX RGB HSL CONVERT   
-  //START THEME HANLDER
+  fn_changeValue(int_value, int_amount, bln_value){    
+    if(bln_value){int_value+=int_amount;}
+    else{int_value-=int_amount;}
+    return int_value;
+  }
   
-  
+  fn_boundPercentage(int_value){
+    return this.fn_boundValue(int_value, 0,100);   
+  }
+  fn_boundDegree(int_value){
+    return this.fn_boundValue(int_value, 0, 359);   
+  }  
+  fn_boundValue(int_value, int_min, int_max){    
+    if(int_value<int_min){int_value=int_min;}
+    if(int_value>int_max){int_value=int_max;}        
+    return int_value;
+  }
+  fn_filterValue(int_value, int_min, int_max){    
+    if(int_value<int_min){return false;}
+    if(int_value>int_max){return false;}        
+    return true;
+  }
+  fn_getHSLString(obj_gradient){  
+    let int_hue=obj_gradient.int_hue;
+    let int_saturation=obj_gradient.int_saturation;
+    let int_light=obj_gradient.int_light;
+    return `hsl(${int_hue}, ${int_saturation}%, ${int_light}%)`;
+  }  
+  //END SHARED THEME HANLDER
     
 }//END CLS
 

@@ -759,6 +759,21 @@ class Shared{
     return true;
   }
 
+  fn_getRandomValueFromObject(obj_my) {
+  
+    const keys = Object.keys(obj_my);
+    const randomKey = keys[Math.floor(Math.random() * keys.length)];
+    return randomKey;
+  }
+  fn_flipVariable(str_value1, str_value2){    
+    return [str_value1, str_value2] = [str_value2, str_value1];  
+  }  
+  fn_getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
   fn_shallowCopy(obj_template){
     return { ...obj_template };            
   }
@@ -2290,20 +2305,141 @@ fn_maintainList(obj_list){
     }
 
     return browserName;
-}
-
-fn_isMobile() {
-  return window.matchMedia("(max-width: 767px)").matches ? true : false;
-}       
-fn_parseList(str_json){                  
-  if(!str_json){
-    return {};
   }
-  return JSON.parse(str_json);
-}
 
-        
+  fn_isMobile() {
+    return window.matchMedia("(max-width: 767px)").matches ? true : false;
+  }       
+  fn_parseList(str_json){                  
+    if(!str_json){
+      return {};
+    }
+    return JSON.parse(str_json);
+  }
 
+  //START SHARED THEME HANLDER
+  fn_getShade(obj_shade){        
+    let str_hsl;
+    str_hsl=obj_shade.str_fill;            
+    let obj_gradient=this.fn_getGradienObjectFromHSL(str_hsl);
+    str_hsl=this.fn_setHueHSL(obj_gradient, obj_shade.int_percentHue, obj_shade.bln_value);        
+    str_hsl=this.fn_setSaturateHSL(obj_gradient, obj_shade.int_percentSaturation, obj_shade.bln_value);    
+    str_hsl=this.fn_setLightHSL(obj_gradient, obj_shade.int_percentLight, obj_shade.bln_value); 
+    str_hsl=this.fn_formatHSL(str_hsl);
+    return str_hsl;
+  }       
+  fn_getGradientObject(int_hue, int_saturation, int_light, str_hsl, str_label="MyColor"){
+    
+    let obj_gradient={          
+      int_hue:int_hue,
+      int_saturation:int_saturation,
+      int_light:int_light,
+    }
+    if(!str_hsl){
+      str_hsl=this.fn_getHSLString(obj_gradient);
+    }
+    obj_gradient.str_hsl=str_hsl;
+    obj_gradient.str_label=str_label;
+    obj_gradient.bln_face=false;
+    obj_gradient.bln_lighten=true;    
+    return obj_gradient;
+  }   
+  fn_getGradienObjectFromHSL(str_hsl){      
+  
+    let int_hue=this.fn_getGradientValue(str_hsl, 0);//hue  
+    let int_saturation=this.fn_getGradientValue(str_hsl, 1);//saturation
+    let int_light=this.fn_getGradientValue(str_hsl, 2);//light
+    let obj_gradient=this.fn_getGradientObject(int_hue, int_saturation, int_light, str_hsl);    
+    return obj_gradient;
+  }
+  
+  fn_setHueHSL(obj_gradient, int_amount, bln_value){
+    let int_position=0;    
+    let int_value=obj_gradient.int_hue;
+    int_value=this.fn_changeValue(int_value, int_amount, bln_value);    
+    int_value=this.fn_boundDegree(int_value);    
+    return this.fn_setHSL(obj_gradient.str_hsl, int_position, int_value);
+  }  
+  fn_setSaturateHSL(obj_gradient, int_amount, bln_value){
+
+    let int_position=1;    
+    let int_value=obj_gradient.int_saturation;
+    int_value=this.fn_changeValue(int_value, int_amount, bln_value);    
+    int_value=this.fn_boundPercentage(int_value);    
+    return this.fn_setHSL(obj_gradient.str_hsl, int_position, int_value);
+  }    
+  fn_setLightHSL(obj_gradient, int_amount, bln_value){
+
+    let int_position=2;    
+    let int_value=obj_gradient.int_light;
+    int_value=this.fn_changeValue(int_value, int_amount, bln_value);    
+    int_value=this.fn_boundPercentage(int_value);    
+    return this.fn_setHSL(obj_gradient.str_hsl, int_position, int_value);
+  }    
+  fn_setHSL(str_hsl, int_position, int_value) {                     
+    let str_value=this.fn_setGradientValue(str_hsl, int_position, int_value);            
+    str_value="HSL"+str_value;
+    return str_value;
+  }
+  fn_getGradientValue(str_value, int_position){
+    const arr_value=this.fn_splitGradient(str_value);          
+    return Number(arr_value[int_position]);    
+  }
+  fn_setGradientValue(str_value, int_position, int_value){
+    const arr_value=this.fn_splitGradient(str_value);          
+    arr_value[int_position]=int_value;     
+    return this.fn_getGradientString(arr_value);          
+  }  
+  fn_getGradientString(arr_value){    
+    let str_value="("+arr_value.join(',')+")";          
+    return str_value;
+  }
+  fn_splitGradient(str_value){          
+    str_value=this.fn_replace(str_value, "%", "");        
+    str_value=str_value.replace("°", "");
+    str_value=str_value.replace("(", "");
+    str_value=str_value.replace(")", "");
+    str_value=str_value.replace("hsl", "");
+    str_value=str_value.replace("HSL", "");    
+    let arr_value=str_value.split(",");  
+    return arr_value;  
+  }  
+  fn_formatHSL(str_value){      
+    const arr_value=this.fn_splitGradient(str_value);          
+    arr_value[1]+="%";
+    arr_value[2]+="%";
+    str_value="HSL("+arr_value.join(',')+")";      
+    return str_value;  
+  }
+  fn_changeValue(int_value, int_amount, bln_value){    
+    if(bln_value){int_value+=int_amount;}
+    else{int_value-=int_amount;}
+    return int_value;
+  }
+  
+  fn_boundPercentage(int_value){
+    return this.fn_boundValue(int_value, 0,100);   
+  }
+  fn_boundDegree(int_value){
+    return this.fn_boundValue(int_value, 0, 359);   
+  }  
+  fn_boundValue(int_value, int_min, int_max){    
+    if(int_value<int_min){int_value=int_min;}
+    if(int_value>int_max){int_value=int_max;}        
+    return int_value;
+  }
+  fn_filterValue(int_value, int_min, int_max){    
+    if(int_value<int_min){return false;}
+    if(int_value>int_max){return false;}        
+    return true;
+  }
+  fn_getHSLString(obj_gradient){  
+    let int_hue=obj_gradient.int_hue;
+    let int_saturation=obj_gradient.int_saturation;
+    let int_light=obj_gradient.int_light;
+    return `hsl(${int_hue}, ${int_saturation}%, ${int_light}%)`;
+  }  
+  //END SHARED THEME HANLDER
     
 }//END CLS
 
@@ -2477,7 +2613,7 @@ class BaseObject extends LevelObject{
             //this.obj_design.arr_item=[];
         }           
 
-        this.obj_themeStructure=new Object;
+        this.obj_holder.obj_themeStructure=new Object;
         
         //this.fn_setIsContainer(false);               
 
@@ -3024,11 +3160,8 @@ class BaseObject extends LevelObject{
         
         
         let dom_frameElement=window.frameElement;        
-        if(!dom_frameElement){
-            return;
-        }
-        let str_name=dom_frameElement.getAttribute("name");        
-        
+        if(!dom_frameElement){return;}
+        let str_name=dom_frameElement.getAttribute("name");                
         if(str_name==="xdesign-frame"){//ie a project that is being designed}        
             if(this.obj_design.int_modeExecute<10){
                 this.fn_initializePluginDesign();//can be overidden                
@@ -3628,6 +3761,7 @@ class BaseObject extends LevelObject{
     fn_setStyleOutline(str_colorBackground, str_colorBorder){        
         
         this.fn_setStyleProperty("backgroundColor", str_colorBackground);        
+        this.fn_setStyleProperty("borderColor", str_colorBorder);                      
     }    
 
     
@@ -6266,6 +6400,1651 @@ document.addEventListener('DOMContentLoaded', (e) => {
 
 
 /*START COMPONENT//*/
+/*type: xapp_row//*/
+
+            //XSTART component/xapp_row
+              class xapp_row extends component{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                
+                }
+                fn_initializeRow(obj_paramRS){                  
+                  
+                  this.obj_paramRS=obj_paramRS;                                                                                          
+                  
+
+                  this.obj_paramRow={};                  
+                  this.obj_paramRow.int_countColumn=0;                  
+                  this.obj_paramRow.int_countSection=0;                                    
+                  this.obj_paramRow.int_sectionColumnCount=0;   
+                  
+                  this.obj_paramRow.int_ordinalPosition=this.obj_paramRS.int_ordinalPosition;                                    
+                  this.obj_paramRow.obj_paramRS=this.obj_paramRS;  
+                  
+                  this.obj_holder.obj_fieldset=this;//"menu" columns will be added to this row
+                  
+
+                  this.fn_computeMetaColumn();                                  
+                  
+                  this.fn_removeChildren();                                       
+                }    
+                  
+                fn_preComputeColumn(){
+                }
+
+                fn_postComputeColumn(){}
+
+                fn_computeMetaColumn(){ 
+                  
+                  let arr_item=this.obj_paramRow.arr_metaColumn=[];
+                  let obj_recordset=this.obj_paramRS.obj_recordset;
+                  let int_totalColumn=this.obj_paramRS.int_totalColumn;                  
+                  let obj_metaData=this.obj_paramRow.obj_metaData={};                                   
+                  
+                  for (let i = 0; i < int_totalColumn;i++) {                                                                
+                    let obj_metaColumn=obj_recordset.fn_getMetaColumn(i);                                                                                                    
+                    arr_item.push(obj_metaColumn);                    
+                    if(obj_metaColumn.IsMetaData){                                            
+                      obj_metaData.bln_hasData=true;                                                                                        
+                      obj_metaData[obj_metaColumn.MetaColumnName]=obj_metaColumn.str_value;                                            
+                    }                    
+                  }
+                }
+
+                fn_settingsColumnInterfaceLockedPin(str_exempt){
+                
+                  this.obj_paramRow.CustomPin=false;
+                  let arr_column=this.obj_paramRow.arr_column;                                    
+                  this.obj_paramRow.bln_interfaceLockedPin=true;
+                  for(let i=0;i<arr_column.length;i++){
+
+                    let obj_column=arr_column[i];                                        
+                    let obj_metaColumn=obj_column.obj_metaColumn;                                        
+                    if(obj_metaColumn.MetaColumnName.toLowerCase()!=='metacolumnname' && obj_metaColumn.MetaColumnName.toLowerCase()!=='metarowzname'){
+                      continue;
+                    }
+                    
+                    let bln_value=obj_shared.fn_inString(str_exempt, obj_metaColumn.str_value);                    
+                    if(bln_value){                    
+                      this.obj_paramRow.bln_interfaceLockedPin=false;
+                      break;
+                    }
+                    
+                  }                                     
+
+                  
+                  if(this.obj_paramRow.bln_interfaceLockedPin){
+
+                    for(let i=0;i<arr_column.length;i++){
+
+                      let obj_column=arr_column[i];                                        
+                      obj_column.fn_settingsColumnInterfaceLockedPin();                      
+                    }                                      
+
+                  }
+                }
+
+
+                
+                fn_computeColumns(){                  
+
+                  this.obj_paramRow.arr_column=[];
+
+                  let int_totalColumn=this.obj_paramRS.int_totalColumn;
+                  let obj_recordset=this.obj_paramRS.obj_recordset;
+                  
+                  for (let i = 0; i < int_totalColumn; i++) {                                            
+                    
+                    this.fn_preComputeColumn();                    
+
+                    let obj_metaColumn=obj_recordset.fn_getMetaColumn(i);                                                            
+                    //console.log(obj_metaColumn);
+                    this.obj_paramRow.obj_metaColumn=obj_metaColumn;                                        
+                    //to do : check the column type
+                    
+                    this.fn_computeColumn(i);                    
+                    
+                    
+                    this.obj_paramRow.int_countColumn++;                    
+                    
+                    this.fn_postComputeColumn();                                        
+                  }
+
+                  this.fn_postComputeColumns();                                       
+                  
+                } 
+                
+                fn_postComputeColumns(){                  
+                  this.fn_parseColumns();
+                }                
+
+                fn_parseColumns(){
+
+                  const arr_nameSummary=[];
+                  const arr_valueSummary=[];
+                  
+                  let arr, i, obj_column;
+                  arr=this.obj_paramRow.arr_column;                  
+                  let obj_columnMarked;
+                  for (i=0;i<arr.length;i++){                    
+                    obj_column=arr[i];
+                    if(obj_column.bln_isMarked){
+                      obj_column.fn_onMarkColumn();
+                    }
+                    //console.log(obj_column);
+                    //if(obj_column.obj_metaColumn.SectionTitle==="Meta"){
+                    if(obj_column.obj_metaColumn.MetaColumnAPIName==="metadataid"){                      
+                      obj_columnMarked=obj_column;
+                    }
+                    
+                    let bln_addRecordSummary=obj_column.obj_metaColumn.RecordSummaryPin;
+                    if(obj_column.obj_metaColumn.MetaPermissionTag.toLowerCase()==="#interface"){
+                      if(!obj_userHome.Interface){
+                        bln_addRecordSummary=false;                        
+                      }
+                      
+                    }
+                    
+                    if(bln_addRecordSummary){
+                      //console.log(obj_column);
+                      //console.log(obj_column.obj_metaColumn);
+                      //obj_column.fn_setHiddenPin(true);
+                      let str_name=obj_column.obj_metaColumn.MetaLabel;
+                      let str_value=obj_shared.fn_replace(obj_column.str_valueDisplay, "&nbsp;", "");                      
+                      if(str_value){
+                        //console.log("[" + str_value + "]");                        
+                        arr_nameSummary.push(str_name);
+                        arr_valueSummary.push(str_value);
+                      }
+                    }
+                  }
+                  
+                  if(obj_columnMarked){//position Meta at End
+                    let obj_parent=obj_columnMarked.fn_getParentComponent();                    
+                    const childElement = obj_parent.dom_obj;
+                    const parentElement = childElement.parentNode;                  
+                    parentElement.removeChild(childElement);                        
+                    parentElement.appendChild(childElement);
+                    
+                    let str_html=obj_shared.fn_getHTMLTable(arr_nameSummary, arr_valueSummary );                    
+                    if(str_html){
+                      let obj_control=obj_parent.fn_addContextItem("form_span");   
+                      obj_control.fn_setText(str_html);
+                      //obj_control.fn_setDisabled(true);
+                    }
+                  } 
+                }
+
+
+
+                
+                fn_describeRow(){
+
+                  let arr_item=this.obj_paramRow.arr_metaColumn;                  
+                  console.log("arr_metaColumn.length: " + arr_item.length);                    
+                  for (let i = 0; i < arr_item.length; i++) {                        
+                    let obj_metaColumn=arr_item[i];
+                    console.log("obj_metaColumn.str_name: " + obj_metaColumn.str_name);                    
+                    console.log("obj_metaColumn.str_value: " + obj_metaColumn.str_value);
+                    console.log(obj_metaColumn);                    
+                    console.log("-----------------");                    
+                  }
+                  return false;
+                }
+
+                fn_getColumnViaName(str_name){
+                  let str_lname=str_name.toLowerCase();                 
+                  let arr_item=this.obj_paramRow.arr_column;                                    
+                  for (let i = 0; i < arr_item.length; i++) {                        
+                    let obj_column=arr_item[i];
+                    let obj_metaColumn=obj_column.obj_metaColumn;                    
+                 
+                    if(obj_metaColumn.str_name.toLowerCase()===str_lname){                 
+                      return obj_column;
+                    }
+                  }
+                  
+                  return false;
+                }
+
+                
+                fn_getColumnViaNameSpecial(str_name){
+                  let str_lname=str_name.toLowerCase();
+                  //console.log("fn_getColumnViaName: " + str_lname);
+                  //console.log("str_lname: " + str_lname);
+                  let arr_item=this.obj_paramRow.arr_column;                  
+                  
+                  for (let i = 0; i < arr_item.length; i++) {                        
+                    let obj_column=arr_item[i];
+                    let obj_metaColumn=obj_column.obj_metaColumn;                    
+                    //console.log("obj_metaColumn: " + obj_metaColumn.str_name.toLowerCase());
+                    if(obj_metaColumn.str_name.toLowerCase()===str_lname){
+                      //console.log("FOUND SEARCH FOR: " + str_lname);
+                      return obj_column;
+                    }
+                  }
+                  //console.log("NOT FOUND SEARCH FOR: " + str_lname);
+                  return false;
+                }
+                
+                fn_getColumnViaPosition(int_ordinalPosition){
+                  return this.obj_paramRow.arr_column[int_ordinalPosition];                  
+                }
+                
+                fn_computeColumn(int_countColumn){ 
+
+                  let str_type, obj_column;
+                  
+                  str_type=this.obj_paramRS.str_typeColumn;                    
+                  if(this.obj_paramRow.obj_metaColumn.MetaClassType){                                        
+                    str_type=this.obj_paramRow.obj_metaColumn.MetaClassType;                    
+                  }
+
+                  obj_column=this.obj_holder.obj_fieldset.fn_addContextItem(str_type);   
+                  
+                  //console.log("str_type:" + str_type);
+                  
+                  if(obj_column){
+                    this.obj_paramRow.arr_column.push(obj_column);                    
+                    obj_column.fn_initializeColumn(this);//after value will now in place.                                        
+                    obj_column.fn_computeField();                  
+                  
+                    this.fn_onComputecolumn(obj_column);                  
+                  
+                  }
+
+                //obj_column.fn_debug();
+
+                  
+                }                                
+                
+                fn_onComputecolumn(obj_column){
+                  this.obj_paramRS.obj_recordset.fn_onComputeColumn(obj_column);
+                }
+
+                fn_getColumnKey(obj_column=false){                                  
+                }
+                fn_getColumnDataId(){                  
+                }
+                fn_getColumnArchiveDate(){                
+                }
+                
+
+                
+                
+              }//END CLS
+              //END TAG
+              //END component/xapp_row
+/*type: xapp_row//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_data//*/
+
+            //XSTART component/xapp_data
+            class xapp_data extends xapp_ajax{
+              constructor(obj_ini) {      
+                super(obj_ini);        
+              } 
+              fn_initialize(obj_ini){
+                super.fn_initialize(obj_ini);                          
+
+                this.obj_holder.bln_debugServer=true;                  
+
+                this.str_defaultTypeRow="xapp_row";
+                this.str_defaultTypeColumn="xapp_column";
+                this.fn_initialize_var();
+              }
+              fn_onLoad(){    
+                super.fn_onLoad();                  
+                if(this.fn_getDebugPin()){this.fn_highlightBorder("blue");}                  
+              }
+              fn_initialize_var(obj_ini){
+                
+                this.obj_holder.str_typeColumn=this.str_defaultTypeColumn;
+                this.obj_holder.bln_reportView=false;
+                this.obj_holder.bln_editable=false;
+                this.obj_holder.obj_query={};      
+                this.obj_holder.obj_query.str_querySearch="";
+                this.obj_holder.obj_query.str_queryList="";
+                this.obj_holder.obj_query.str_queryListParent="";
+                this.obj_holder.obj_query.str_queryListDisabled="";
+                this.obj_holder.obj_query.str_queryListParentDisabled="";
+                this.obj_holder.obj_query.bln_loadReportInterface=false;
+                this.fn_setComputeRows(true);      
+                this.fn_setLimitRowPerPage(10);                        
+                this.fn_resetDataView();
+               
+              }                  
+              fn_resetDataView(){
+                this.fn_setLimitRowStart(0);
+              }
+              fn_setLimitRowPerPage(int_limitRowPerPage){                  
+                this.obj_holder.obj_query.int_limitRowPerPage=int_limitRowPerPage;                          
+              }
+              fn_setLimitRowStart(int_limitRowStart){                  
+                this.obj_holder.obj_query.int_limitRowStart=int_limitRowStart;                                                  
+              }
+              fn_getLimitRowPerPage(){                  
+                return this.obj_holder.obj_query.int_limitRowPerPage;                          
+              }
+              fn_getLimitRowStart(){                  
+                return this.obj_holder.obj_query.int_limitRowStart;                                
+              }
+              fn_setComputeRows(bln_value){
+                this.obj_holder.bln_computeRows=bln_value;
+              }
+              fn_getComputeRows(){
+                return this.obj_holder.bln_computeRows;
+              }
+              fn_initializeRS(obj_menuButton){                                  
+                
+                this.obj_paramRS={};                                  
+                this.obj_paramRS.obj_recordset=this;                                    
+                this.obj_paramRS.int_totalRowReturned=0;
+                this.obj_paramRS.str_typeColumn=this.obj_holder.str_typeColumn;//can choose which class will the column be eg reporrtcolumn
+                this.obj_paramRS.bln_reportView=this.obj_holder.bln_reportView;                  
+
+                this.obj_paramRS.obj_menuButton=obj_menuButton;                                   
+
+                if(obj_path.str_urlMetaRowzNameArchive){
+                  this.obj_holder.obj_query.int_idMetaView=obj_menuButton.obj_meta.int_idMetaView;                    
+                  this.obj_holder.obj_query.int_idMetaRowz=obj_menuButton.obj_meta.int_idMetaRowz;                                        
+                  this.obj_holder.obj_query.str_metaRowzName=obj_menuButton.obj_meta.str_metaRowzName;
+                  this.obj_holder.obj_query.str_urlMetaRowzNameArchive=obj_path.str_urlMetaRowzNameArchive;
+                  this.obj_holder.obj_query.str_urlMetaRecordIdArchive=obj_path.str_urlMetaRecordIdArchive;
+                }
+                
+
+                /*
+                console.log("this.obj_meta.int_idMetaRowz: " + this.obj_meta.int_idMetaRowz);
+                console.log("this.obj_meta.str_metaRowzName: " + this.obj_meta.str_metaRowzName);
+                console.log("obj_path.str_urlMetaRowzNameArchive: " + obj_path.str_urlMetaRowzNameArchive);
+                console.log("obj_path.str_urlMetaRecordIdArchive: " + obj_path.str_urlMetaRecordIdArchive);
+                //*/                
+
+                const int_horizontal=false, int_vertical=true;
+                
+                /*
+                // Horizontal-tb: English, French, Spanish, etc. 
+                p {
+                  writing-mode: horizontal-tb;
+                }
+
+                //* Vertical-lr: Chinese, Japanese, Korean 
+                p.vertical-lr {
+                  writing-mode: vertical-lr;
+                  text-orientation: upright;
+                }
+
+                // Vertical-rl: Arabic, Hebrew 
+                p.vertical-rl {
+                  writing-mode: vertical-rl;
+                  text-orientation: upright;
+                }
+
+                // Horizontal-bt: A less common direction, but could be used for artistic effects or specific languages 
+                p.horizontal-bt {
+                  writing-mode: horizontal-bt;
+                  text-orientation: mixed;
+                }
+                //*/
+                
+                /*
+                //HORIZONTAL, HORIZONTAL, HORIZONTAL OK
+                this.obj_paramRS.bln_axisPanel=int_horizontal;
+                this.obj_paramRS.bln_axisFieldset=int_horizontal;
+                this.obj_paramRS.bln_axisColumn=int_horizontal;                
+                //*/
+
+                //STANDARD
+                /*
+                //HORIZONTAL, HORIZONTAL, VERTICAL OK
+                this.obj_paramRS.bln_axisPanel=int_horizontal;
+                this.obj_paramRS.bln_axisFieldset=int_horizontal;
+                this.obj_paramRS.bln_axisColumn=int_vertical;                
+                //*/
+
+                /*
+                //HORIZONTAL, VERTICAL, VERTICAL OK FOR VERTICAL WRITING SYSTEMS
+                //writing-mode: vertical-lr;
+                this.obj_paramRS.bln_axisPanel=int_horizontal;
+                this.obj_paramRS.bln_axisFieldset=int_vertical;
+                this.obj_paramRS.bln_axisColumn=int_vertical;                
+                //*/
+                
+                /*
+                //HORIZONTAL, VERTICAL, HORIZONTAL OK FOR VERTICAL WRITING SYSTEMS
+                this.obj_paramRS.bln_axisPanel=int_horizontal;
+                this.obj_paramRS.bln_axisFieldset=int_vertical;
+                this.obj_paramRS.bln_axisColumn=int_horizontal;                
+                //*/
+
+                /*
+                //VERTICAL, VERTICAL, VERTICAL - no good, only 1 column down the page
+                this.obj_paramRS.bln_axisPanel=int_vertical;
+                this.obj_paramRS.bln_axisFieldset=int_vertical;
+                this.obj_paramRS.bln_axisColumn=int_vertical;                
+                //*/
+
+                /*
+                //VERTICAL, VERTICAL, HORIZONTA - no good, only 1 column down the page
+                this.obj_paramRS.bln_axisPanel=int_vertical;
+                this.obj_paramRS.bln_axisFieldset=int_vertical;
+                this.obj_paramRS.bln_axisColumn=int_horizontal;                
+                //*/
+                
+
+                /* 
+                //VERTICAL, HORIZONTAL, HORIZONTAL - OK
+                this.obj_paramRS.bln_axisPanel=int_vertical;
+                this.obj_paramRS.bln_axisFieldset=int_horizontal;
+                this.obj_paramRS.bln_axisColumn=int_horizontal;                
+                //*/
+
+                /*
+                //VERTICAL, HORIZONTAL, VERTICAL OK
+                this.obj_paramRS.bln_axisPanel=int_vertical;
+                this.obj_paramRS.bln_axisFieldset=int_horizontal;
+                this.obj_paramRS.bln_axisColumn=int_vertical;                
+                //*/
+                
+                
+                //STANDARD
+                //*
+                //HORIZONTAL, HORIZONTAL, VERTICAL OK
+                this.obj_paramRS.bln_axisPanel=int_horizontal;
+                this.obj_paramRS.bln_axisFieldset=int_horizontal;
+                this.obj_paramRS.bln_axisColumn=int_vertical;                
+                if(obj_project.bln_isMobile){
+                  this.obj_paramRS.bln_axisColumn=int_vertical;
+                }
+                //*/
+
+                this.obj_paramRS.bln_axis=false;//row              
+                //this.fn_setAxis(this.obj_paramRS.bln_axis);
+                this.obj_paramRS.int_separator=10;                                  
+                this.obj_paramRS.bln_showFieldHeading=true;
+                this.obj_paramRS.bln_autoSection=false;//1 row many sections                                                       
+                this.obj_paramRS.bln_hasMultipleRow=false;
+                this.obj_paramRS.bln_NoRowFound=false;
+                this.obj_paramRS.bln_singleRowFound=false;                                    
+                this.obj_paramRS.int_countRow=0;                                  
+                this.obj_paramRS.bln_lastRow=false;
+
+                this.bln_debug=obj_menuButton.bln_debug;                                                
+              }                                 
+              
+                              
+              fn_setMetaRowzId(int_value){           
+                this.obj_holder.obj_query.int_idMetaRowz=int_value;
+              }              
+              fn_setMetaRowzTitle(int_value){           
+                this.obj_holder.obj_query.str_metaRowzTitle=int_value;
+              }              
+              fn_setMetaRowzName(int_value){           
+                this.obj_holder.obj_query.str_metaRowzName=int_value;
+              }              
+              
+              fn_setMetaViewId(int_value){           
+                this.obj_holder.obj_query.int_idMetaView=int_value;
+              }
+              fn_getMetaViewId(int_value){           
+                return this.obj_holder.obj_query.int_idMetaView;
+              }            
+              
+              
+              fn_getQueryExpression(){                                  
+                return this.obj_holder.obj_query.str_queryExpression;
+              }                                
+              
+              fn_setQueryExpression(str_value){                                      
+                /*
+                let str_expr;                  
+                str_expr="(";        
+                str_expr+=str_value;        
+                str_expr+="TRUE ";                
+                str_expr+=")";
+                this.obj_holder.obj_query.str_queryExpression=str_expr;
+                //*/
+
+                this.obj_holder.obj_query.str_queryExpression=str_value;
+              }                                 
+            
+              fn_setMetaKey(obj_columnKey){
+
+                //this.fn_debugText("fn_setMetaKey");
+
+                
+                this.obj_holder.obj_query.str_metaKeySchemaName="";
+                this.obj_holder.obj_query.str_metaKeyTableName="";
+                this.obj_holder.obj_query.str_metaKeyColumnName="";
+                this.obj_holder.obj_query.str_metaKeyColumnValue="";
+
+                if(!obj_columnKey){
+                  return;
+                }
+                
+                let obj_metaColumn=obj_columnKey.obj_metaColumn;                                                                
+                this.obj_holder.obj_query.str_metaKeySchemaName=obj_metaColumn.MetaSchemaName;
+                this.obj_holder.obj_query.str_metaKeyTableName=obj_metaColumn.MetaTableName;
+                this.obj_holder.obj_query.str_metaKeyColumnName=obj_metaColumn.MetaColumnName;
+                this.obj_holder.obj_query.str_metaKeyColumnShortName=obj_metaColumn.MetaColumnAPIName;
+                this.obj_holder.obj_query.str_metaKeyColumnValue=obj_columnKey.str_value;                
+              }
+
+              
+              fn_setModeExecuteViewRecord(){                  
+                this.int_modeExecute=obj_holder.int_modeReadOnly;                  
+                return false;
+              }
+              fn_getModeExecuteViewRecord(){
+                if(this.int_modeExecute===obj_holder.int_modeReadOnly){return true;}
+                return false;
+              }
+
+              fn_setSubdomain(str_value){                                  
+                this.obj_holder.obj_query.str_subdomain=str_value;                  
+              }
+
+              fn_setDataQuerySearch(str_querySearch, bln_resetDataView=true){ 
+                if(bln_resetDataView){
+                  this.fn_resetDataView();                                 
+                }
+                
+                this.obj_holder.obj_query.str_querySearch=str_querySearch;
+              }                                                
+              fn_getDataQuerySearch(){                                                  
+                return this.obj_holder.obj_query.str_querySearch;
+              }                                                
+              
+              fn_setDataQueryList(str_queryList){                                  
+                //this.fn_resetDataView();                
+                this.obj_holder.obj_query.str_queryList=str_queryList;
+              }                                                
+              fn_getDataQueryList(){                                  
+                return this.obj_holder.obj_query.str_queryList;
+              } 
+              fn_setDataQueryListParent(str_queryList){          
+                this.obj_holder.obj_query.str_queryListParent=str_queryList;
+              } 
+              fn_getDataQueryListParent(){
+                return this.obj_holder.obj_query.str_queryListParent;
+              } 
+              fn_setDataQueryListDisabled(str_queryList){                                  
+                //this.fn_resetDataView();                
+                this.obj_holder.obj_query.str_queryListDisabled=str_queryList;
+              }                                                
+              fn_getDataQueryListDisabled(){                                  
+                return this.obj_holder.obj_query.str_queryListDisabled;                  
+              } 
+              fn_setDataQueryListParentDisabled(str_queryList){                           
+                this.obj_holder.obj_query.str_queryListParentDisabled=str_queryList;
+              } 
+              fn_getDataQueryListParentDisabled(){
+                return this.obj_holder.obj_query.str_queryListParentDisabled;
+              }               
+
+              fn_setPublishPin(bln_value){                                                    
+                this.obj_holder.obj_query.bln_publishPin=bln_value;                  
+              }                                                
+              fn_getPublishPin(){                                  
+                return this.obj_holder.obj_query.bln_publishPin;
+              }                               
+              fn_setMarkedParentSchemaName(str_value){
+                this.obj_holder.obj_query.str_markedParentSchemaName=str_value;                                    
+            }
+              fn_setMarkedParentTableName(str_value){
+                  this.obj_holder.obj_query.str_markedParentTableName=str_value;                                    
+              }
+              fn_setMarkedParentRowzId(int_value){
+                this.obj_holder.obj_query.str_markedParentRowzId=int_value;                                    
+              }              
+              fn_setMarkedParentViewId(int_value){
+                this.obj_holder.obj_query.str_markedParentViewId=int_value;                                    
+              }                
+              fn_setSelectMinimalFieldPin(bln_value){                                                    
+                this.obj_holder.obj_query.bln_selectMinimalFieldPin=bln_value;                  
+              }                                                
+              fn_getSelectMinimalFieldPin(){                                  
+                return this.obj_holder.obj_query.bln_selectMinimalFieldPin;
+              }                 
+              //----------------------------------------
+              //SIGNPOST 8. obj_dataView fn_getDataQuery
+              //----------------------------------------
+              fn_getDataCountQuery(bln_runSearch=false){
+
+                /*
+                let str_queryList=this.fn_getDataQueryList();                                    
+                let str_queryListDisabled=this.fn_getDataQueryListDisabled();
+                let str_queryListParent=this.fn_getDataQueryListParent();                  
+                let str_queryListParentDisabled=this.fn_getDataQueryListParentDisabled();
+                this.fn_debugText("fn_runCountQuery str_queryList: " + str_queryList);
+                this.fn_debugText("fn_runCountQuery str_queryListDisabled: " + str_queryListDisabled);
+                this.fn_debugText("fn_runCountQuery str_queryListParent: " + str_queryListParent);
+                this.fn_debugText("fn_runCountQuery str_queryListParentDisabled: " + str_queryListParentDisabled);
+                //*/
+                
+                let obj_menuButton=this.obj_paramRS.obj_menuButton;
+
+                let obj_ini=this.obj_holder.obj_query;                                          
+                obj_ini.str_action="getDataCountQuery";                                                   
+                obj_ini.bln_runSearch=bln_runSearch;
+                obj_ini.bln_simpleSearch=obj_menuButton.bln_simpleSearch;
+                obj_ini.bln_advancedSearch=obj_menuButton.bln_advancedSearch;
+                this.fn_runServerAction(obj_ini);                                                      
+              }                
+              getDataCountQuery(obj_post){                    
+                
+                this.obj_post=obj_post;                            
+                //console.log(this.obj_post);
+                let obj_menuButton=this.obj_paramRS.obj_menuButton;                  
+                obj_menuButton.fn_onCountStart(this.obj_post);
+              }  
+              
+              fn_getChildRowz(bln_runSearch=false){
+
+                let obj_menuButton=this.obj_paramRS.obj_menuButton;  
+                this.fn_setDebugPin(obj_menuButton.fn_getDebugPin()); 
+                this.fn_setPublishPin(obj_menuButton.fn_getPublishPin());                  
+                this.fn_setMarkedParentSchemaName(obj_menuButton.fn_getMarkedParentSchemaName());                  
+                this.fn_setMarkedParentTableName(obj_menuButton.fn_getMarkedParentTableName());                  
+                this.fn_setMarkedParentRowzId(obj_menuButton.fn_getMarkedParentRowzId());                                  
+                this.fn_setMarkedParentViewId(obj_menuButton.fn_getMarkedParentViewId());   
+                
+                
+
+                /*
+                let str_queryList, str_queryListDisabled, str_queryListParent, str_queryListParentDisabled;                  
+                str_queryList=this.fn_getDataQueryList();                                    
+                str_queryListDisabled=this.fn_getDataQueryListDisabled();
+                str_queryListParent=this.fn_getDataQueryListParent();                  
+                str_queryListParentDisabled=this.fn_getDataQueryListParentDisabled();
+                this.fn_debugText("str_queryList: " + str_queryList);
+                this.fn_debugText("str_queryListDisabled: " + str_queryListDisabled);
+                this.fn_debugText("str_queryListParent: " + str_queryListParent);
+                this.fn_debugText("str_queryListParentDisabled: " + str_queryListParentDisabled);
+                //*/
+
+                
+                
+                let obj_ini=this.obj_holder.obj_query;                                          
+                obj_ini.str_action="getChildRowz";
+                obj_ini.bln_runSearch=bln_runSearch;
+                obj_ini.bln_simpleSearch=obj_menuButton.bln_simpleSearch;
+                obj_ini.bln_advancedSearch=obj_menuButton.bln_advancedSearch;
+                this.fn_runServerAction(obj_ini);
+              }
+
+              getChildRowz(obj_post){                    
+                
+                this.obj_post=obj_post;                            
+                //console.log(this.obj_post);
+                this.fn_onDataStart();                                                                  
+                this.fn_computeRows();
+                this.fn_onDataEnd(obj_post);                       
+              }
+
+
+              fn_getDataQuery(bln_runSearch=false){                                                       
+
+                let obj_menuButton=this.obj_paramRS.obj_menuButton;  
+                this.fn_setDebugPin(obj_menuButton.fn_getDebugPin());
+                this.fn_setPublishPin(obj_menuButton.fn_getPublishPin());
+                this.fn_setMarkedParentSchemaName(obj_menuButton.fn_getMarkedParentSchemaName());                  
+                this.fn_setMarkedParentTableName(obj_menuButton.fn_getMarkedParentTableName());                  
+                this.fn_setMarkedParentRowzId(obj_menuButton.fn_getMarkedParentRowzId());                                  
+                this.fn_setMarkedParentViewId(obj_menuButton.fn_getMarkedParentViewId());   
+                
+
+                                                
+
+                let obj_ini=this.obj_holder.obj_query;                                          
+                obj_ini.str_action="getDataQuery";
+                obj_ini.bln_runSearch=bln_runSearch;
+                obj_ini.bln_simpleSearch=obj_menuButton.bln_simpleSearch;
+                obj_ini.bln_advancedSearch=obj_menuButton.bln_advancedSearch;
+                this.fn_runServerAction(obj_ini);                                                                        
+              } 
+              
+              getDataQuery(obj_post){                    
+                
+                this.obj_post=obj_post;                            
+                //console.log(this.obj_post);
+                this.fn_onDataStart();                                                                  
+                this.fn_computeRows();
+                this.fn_onDataEnd(obj_post);                       
+              }                  
+
+              fn_onDataStart(){
+                
+                
+                this.obj_paramRS.arr_metaColumn=this.obj_post.MetaColumn;                                                      
+                
+                this.fn_getMenuPinColumn();                  
+                
+                let obj_menuButton=this.obj_paramRS.obj_menuButton;                  
+                
+                
+                obj_menuButton.fn_resetContent();                                                    
+                
+                obj_menuButton.fn_onDataStart(this.obj_post);
+                
+                
+              }                          
+              fn_onDataEnd(obj_post){ 
+                
+                //this.fn_iniTotalRow(true);//post process - not operaitonal
+
+                let obj_menuButton=this.obj_paramRS.obj_menuButton;                  
+                obj_menuButton.fn_onDataEnd(obj_post);
+              }                                     
+
+              fn_onRecordSetDataView(){                                  
+                this.obj_paramRS.arr_rows=[];                      
+                if(!this.obj_paramRS.arr_metaColumn){return;}
+                if(!this.obj_paramRS.arr_metaColumn.length){return false;}
+                
+                //this.fn_describeMetaColumns();
+
+
+                this.fn_iniDataView();
+
+                this.fn_iniTotalRow();
+              }
+              
+              fn_iniDataView(){}//overidden, but called                
+
+        
+              
+              //*
+              fn_iniTotalRow(){ //overidden, but called
+                
+                let int_totalRowCount=this.obj_post.RowCount;                  
+                if(!int_totalRowCount){int_totalRowCount=0;}
+                this.obj_paramRS.int_totalRowCount=int_totalRowCount;                  
+
+                let int_totalRowReturned=this.obj_post.RowData.length;
+                if(!int_totalRowReturned){int_totalRowReturned=0;}
+                this.obj_paramRS.int_totalRowReturned=int_totalRowReturned;                                                
+                
+                let arr_metaColumn=this.obj_paramRS.arr_metaColumn;
+                if(obj_shared.fn_isObjectEmpty(arr_metaColumn[0])){arr_metaColumn=[];}                                    
+                this.obj_paramRS.arr_metaColumn=arr_metaColumn;                
+                this.obj_paramRS.int_totalColumn=arr_metaColumn.length;
+
+                switch(this.obj_paramRS.int_totalRowReturned){
+                  case (0)://no row found
+                    this.obj_paramRS.bln_NoRowFound=true;                                                          
+                  break;
+                  case (1)://single row found
+                    this.obj_paramRS.bln_singleRowFound=true;                                                      
+                  break;                    
+                  default:
+                    if(this.obj_paramRS.int_totalRowReturned>1){//many rows                  
+                      this.obj_paramRS.bln_hasMultipleRow=true;                                        
+                    }
+                }                                    
+              } 
+              //*/               
+
+              
+              fn_computeRows(){ 
+
+                if(!this.fn_getComputeRows()){return;}    
+                
+                this.fn_removeChildren();                                                                      
+                this.fn_onRecordSetDataView();
+                
+                if(this.obj_paramRS.bln_NoRowFound){                                    
+                  return;
+                }
+
+                //should align with this.obj_paramRS.int_totalRowReturned
+
+                let arr_row=this.obj_post.RowData;
+                //console.log(arr_row)
+                const int_rowLength=arr_row.length;                  
+                for(var i=0;i<arr_row.length;i++){                            
+                  //cannot add any properties to obj_ROW as they will be considered part of the record set name/value pairs
+                  this.obj_paramRS.obj_ROW=this.obj_post.RowData[i];
+                  //console.log(this.obj_paramRS.obj_ROW);
+                  
+                  this.obj_paramRS.int_ordinalPosition=i;                  
+                  if(i===int_rowLength-1){
+                    this.obj_paramRS.bln_lastRow=true;
+                  }                    
+
+                  this.fn_onComputeRowStart();                    
+
+                  
+                  this.fn_computeRow();      
+                  
+                  this.fn_onComputeRowEnd();              
+                  this.obj_paramRS.int_countRow++;
+                }
+
+                
+              }                                
+              
+              fn_computeRow(){//overidden, not called
+                
+                //RowData Can contain a single empty object                                  
+                if(obj_shared.fn_isObjectEmpty(this.obj_paramRS.obj_ROW)){ return;}                
+                
+                let bln_addRow=this.fn_addRow();
+                
+                if(bln_addRow){
+                  this.fn_onComputeRow();                  
+                }
+                
+                
+              }
+
+              fn_getRow(int_num){                  
+                return this.obj_paramRS.arr_rows[int_num];
+              }
+
+              fn_getPermissionAddRow(obj_row){
+                
+                const obj_metaDataRow=obj_row.obj_paramRow.obj_metaData;
+
+                if(obj_shared.fn_isEmptyObject(obj_metaDataRow)){
+                  return true;
+                }          
+                
+                const obj_permit=obj_permitManger.fn_compare(obj_metaDataRow, obj_userHome);
+                if(!obj_permit){
+                  return true;
+                }
+                let bln_hiddenPin=obj_permitManger.fn_getHiddenPin(obj_permit);                                         
+                if(bln_hiddenPin){                    
+                  return false;
+                }                  
+                return true;                
+              }
+
+              fn_addRow(){                  
+                let obj_row=this.obj_paramRS.obj_row=this.fn_addContextItem(this.str_defaultTypeRow);                  
+                if(!obj_row){                    
+                  return false;
+                }                                 
+                
+                
+                obj_row.fn_initializeRow(this.obj_paramRS);                       
+                let bln_addRow=this.fn_getPermissionAddRow(obj_row);                                
+                if(bln_addRow){
+                  this.obj_paramRS.arr_rows.push(obj_row);                  
+                  obj_row.fn_computeColumns();                                                                              
+                  
+                  if(this.obj_post.MetaKeySchemaName==="meta_column" && this.obj_post.MetaKeyTableName==="meta_column"){                  
+                      obj_row.fn_settingsColumnInterfaceLockedPin("mycol_");                                                               
+                  }
+                  
+                  if(this.obj_post.MetaKeySchemaName==="meta_rowz" && this.obj_post.MetaKeyTableName==="meta_rowz"){                  
+                    //console.log(this.obj_post);
+                    obj_row.fn_settingsColumnInterfaceLockedPin("mybox_");                                                               
+                  }
+                  
+                  
+                }
+                
+                return bln_addRow;                                  
+              }
+              
+              fn_onComputeRow(){}                              
+              fn_onComputeRowStart(){}                              
+              fn_onComputeRowEnd(){} 
+
+              fn_onComputeRow(){                                                   
+              }                  
+              
+              fn_setModeExecuteView(){
+                
+                super.fn_setModeExecuteView();
+                
+                if(!this.obj_paramRS){return;}
+                if(!this.obj_paramRS.arr_rows){return;}
+                let arr_rows=this.obj_paramRS.arr_rows;
+              
+                const int_rowLength=arr_rows.length;                  
+                for(var i=0;i<int_rowLength;i++){                                          
+                  let obj_row=arr_rows[i];                                                     
+                  obj_row.obj_selectedColumn=false;
+                  obj_row.fn_setModeExecuteView();
+                  
+                }
+
+              }
+
+
+              
+              
+              //START Meta Column Function
+              /////////////////////////
+              /////////////////////////
+              /////////////////////////  
+              fn_getMetaView(){
+                return this.obj_paramRS.obj_metaView;
+              }
+              fn_setMetaColumnValue(int_num, str_value){
+                let obj_metaColumn=this.fn_getMetaColumnViaOrdinalPosition(int_num);//the column meta is used as a base for the ui column                                    
+                if(!obj_metaColumn){return;}
+                obj_metaColumn.str_value=str_value;
+                this.obj_paramRS.obj_ROW[obj_metaColumn.str_name]=str_value;                                      
+                return obj_metaColumn;
+              }
+              
+              fn_getMetaColumn(int_num){
+                
+                let obj_metaColumn=this.fn_getMetaColumnViaOrdinalPosition(int_num);//the column meta is used as a base for the ui column                                                                             
+                obj_metaColumn.str_name=this.fn_getPDOMetaValue(obj_metaColumn, "name");
+                if(this.obj_paramRS.obj_ROW){
+                  obj_metaColumn.str_value=this.obj_paramRS.obj_ROW[obj_metaColumn.str_name];                    
+                }                  
+                obj_metaColumn.int_ordinalPosition=int_num;                  
+                obj_metaColumn.PrimaryPin=obj_shared.fn_parseBool(obj_metaColumn.PrimaryPin);
+                return obj_metaColumn;
+              }                
+
+              xfn_describeMetaColumns(){                  
+                let int_totalColumn=this.obj_paramRS.int_totalColumn;
+                for (let i = 0; i < int_totalColumn;i++) {                        
+                  let obj_metaColumn=this.fn_getMetaColumn(i);                                        
+                  console.log("["+ i + "]: " + obj_metaColumn.str_name.toLowerCase());                    
+                }
+              }
+
+              fn_describeMetaColumns(){                  
+                if(!this.obj_paramRS){return;}
+                let arr=this.obj_paramRS.arr_metaColumn;
+                for (let i = 0; i < arr.length; i++) {                        
+                  let obj_metaColumn=arr[i];
+                  console.log("["+ i + "]: " + obj_metaColumn.str_name + " MenuPin: " + obj_metaColumn.MenuPin);                    
+                }
+              }
+
+              fn_getMenuPinColumn(){                  
+                let arr=this.obj_paramRS.arr_metaColumn;                  
+                this.obj_paramRS.arr_menuPinColumn=[];
+                this.obj_paramRS.arr_infoPinColumn=[];
+                for (let i = 0; i < arr.length; i++) {                        
+                  let obj_metaColumn=arr[i];
+                  
+                  if(obj_metaColumn.MenuPin){                      
+                    this.obj_paramRS.arr_menuPinColumn.push(obj_metaColumn);
+                  }
+                  if(obj_metaColumn.InfoPin){
+                    this.obj_paramRS.arr_infoPinColumn.push(obj_metaColumn);
+                  }                    
+                }                  
+              }
+
+              
+              
+              fn_getMetaColumnViaName(str_name){
+
+
+                
+                let str_lname=str_name.toLowerCase();
+                let int_totalColumn=this.obj_paramRS.int_totalColumn;                  
+                
+                for (let i = 0; i < int_totalColumn; i++) {                        
+                  let obj_metaColumn=this.fn_getMetaColumn(i);                                        
+                  if(obj_metaColumn.str_name.toLowerCase()===str_lname){
+                    return obj_metaColumn;
+                  }
+                }
+              }
+              fn_getMetaColumnViaOrdinalPosition(int_num){
+                if(!this.obj_paramRS.arr_metaColumn){return;}
+                return this.obj_paramRS.arr_metaColumn[int_num];
+              }                
+              fn_getPDOMetaValue(obj_metaColumn, str_search){                  
+                let arr=obj_metaColumn.arr_metaColumnPDO;
+                if(!arr){//can be empty object meta column, need to trap before this
+                  return;
+                }
+                return arr[str_search];        
+              }
+              fn_getMetaFlag(obj_metaColumn, str_search){                  
+                //console.log(obj_metaColumn);                  
+                let arr=obj_metaColumn.arr_metaColumnPDO;                  
+                //console.log("obj_metaColumn.arr_metaColumnPDO follows");                  
+                //console.log(arr);                  
+                let arrFlag=arr["flags"];                                    
+                return obj_shared.fn_inArray(str_search, arrFlag);
+              }
+              fn_getMetaColumnViaMetaName(MetaSchemaName, MetaTableName, MetaColumnName){
+                
+                let int_totalColumn=this.obj_paramRS.int_totalColumn;
+                for (let i = 0; i < int_totalColumn; i++) {                        
+                  let obj_metaColumn=this.fn_getMetaColumn(i);                                      
+                  if(obj_metaColumn.MetaSchemaName!==MetaSchemaName){continue;}
+                  if(obj_metaColumn.MetaTableName!==MetaTableName){continue;}
+                  if(obj_metaColumn.MetaColumnName!==MetaColumnName){continue;}
+                  return obj_metaColumn;
+                }
+                return false;
+              }    
+              fn_getMetaColumnViaMetaShortName(MetaSchemaName, MetaTableName, MetaColumnAPIName){
+                
+                let int_totalColumn=this.obj_paramRS.int_totalColumn;
+                for (let i = 0; i < int_totalColumn; i++) {                        
+                  let obj_metaColumn=this.fn_getMetaColumn(i);                    
+                  if(obj_metaColumn.MetaSchemaName!==MetaSchemaName){continue;}
+                  if(obj_metaColumn.MetaTableName!==MetaTableName){continue;}
+                  if(obj_metaColumn.MetaColumnAPIName!==MetaColumnAPIName){continue;}
+                  return obj_metaColumn;
+                }
+                return false;
+              }    
+              
+              
+              fn_getMetaColumnViaFieldName(str_name){//should be deprecated in favour of fn_getMetaColumnViaMetaName, which includes schemaane                  
+
+                let str_lname=str_name.toLowerCase();
+                let int_totalColumn=this.obj_paramRS.int_totalColumn;
+                for (let i = 0; i < int_totalColumn; i++) {                        
+                  let obj_metaColumn=this.fn_getMetaColumn(i);                    
+                  let str_lnameField=obj_metaColumn.MetaColumnName.toLowerCase();                                        
+                  if(str_lnameField===str_lname){
+                    return obj_metaColumn;
+                  }
+                }
+              }    
+              fn_getMetaColumnViaFieldShortName(str_shortname){//should be deprecated in favour of fn_getMetaColumnViaMetaName, which includes schemaane                  
+
+                let str_lshortname=str_shortname.toLowerCase();
+                let int_totalColumn=this.obj_paramRS.int_totalColumn;
+                for (let i = 0; i < int_totalColumn; i++) {                        
+                  let obj_metaColumn=this.fn_getMetaColumn(i);                    
+                  let str_lshortnameField=obj_metaColumn.MetaColumnAPIName.toLowerCase();                                        
+                  if(str_lshortnameField===str_lshortname){
+                    return obj_metaColumn;
+                  }
+                }
+              }    
+              
+              fn_onComputeColumn(){}
+
+              fn_getMetaColumnPrimaryKey(obj_metaColumnTemplate){                  
+
+                //console.log("obj_metaColumnTemplate follows");
+                //console.log(obj_metaColumnTemplate);
+
+                let obj_metaColumn=obj_metaColumnTemplate;
+
+                if(obj_metaColumn.PrimaryPin){//MARKED IN DFATABASE, SET ON AUTOFORM                                                                               
+                  return obj_metaColumn;
+                }
+
+                //if(this.fn_getMetaFlag(obj_metaColumn, "primary_key")){//AUTO GENERATED NOT IDEAL AFFECTED BY ORDER BY                                                                                  
+                  //return obj_metaColumn;
+                //}
+                
+                let int_totalColumn=this.obj_paramRS.int_totalColumn;
+                for (let i = 0; i < int_totalColumn; i++) {
+                  let obj_metaColumn=this.fn_getMetaColumn(i);                                                            
+                  if(!obj_metaColumn){continue;}                                          
+
+                  if(obj_metaColumn.MetaSchemaName!==obj_metaColumnTemplate.MetaSchemaName){continue;}                      
+                  if(obj_metaColumn.MetaTableName!==obj_metaColumnTemplate.MetaTableName){continue;}                      
+
+                  if(obj_metaColumn===obj_metaColumnTemplate){                      
+                    continue;
+                  }                      
+                  if(obj_metaColumn.PrimaryPin){//MARKED IN DFATABASE, SET ON AUTOFORM
+                    return obj_metaColumn;
+                  }
+
+                  //if(this.fn_getMetaFlag(obj_metaColumn, "primary_key")){//AUTO GENERATED NOT IKDEAL AFFECTED BY ORDER BY                  
+                   // return obj_metaColumn;
+                  //}
+                }
+                return false;
+              }                
+              
+              
+
+
+              /////////////////////////
+              /////////////////////////
+              /////////////////////////
+              //END Meta Column Function
+              
+            }//END CLS
+            //END TAG
+            //END component/xapp_data
+/*type: xapp_data//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_dataform//*/
+
+            //XSTART component/xapp_dataform
+              class xapp_dataform extends xapp_data{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                          
+
+                  this.str_defaultTypeRow="xapp_rowform";
+                  this.str_defaultTypeColumn="xapp_columnform";                  
+                  this.fn_initialize_var();
+                }
+
+                fn_initializeRS(obj_menuButton){                                  
+
+                  super.fn_initializeRS(obj_menuButton);
+                  
+                  this.fn_setAutoJoin(false);                      
+                }
+
+                fn_onDataStart(){                  
+                  super.fn_onDataStart();
+                  let obj_menuButton=this.obj_paramRS.obj_menuButton;  
+                }
+
+                fn_iniDataView(){
+                  super.fn_iniDataView();
+
+                  let bln_value=this.fn_getQueryModeNewRecord();
+                  if(bln_value){                                    
+                    //1 row full of qualifiedname emptyvalue pairs                  
+
+                    this.obj_post.RowData=[];
+                    this.obj_post.RowData[0]={};
+                    let obj_ROW=this.obj_post.RowData[0];                                          
+                    let obj_meta;
+                    let arr_metaColumn=this.obj_paramRS.arr_metaColumn;
+                    for(var i=0;i<arr_metaColumn.length;i++){                            
+                      obj_meta=arr_metaColumn[i];                      
+                      obj_ROW[obj_meta.str_nameQualified]="";                      
+                    }
+                  }  
+                }
+
+                fn_iniTotalRow(bln_postProcess){ 
+                  super.fn_iniTotalRow(bln_postProcess);
+
+                  switch(this.obj_paramRS.int_totalRowReturned){
+                    case (0)://no row found
+                      this.fn_setDisplay(false);                  
+                    break;
+                    case (1)://single row found                                     
+                      this.obj_paramRS.bln_showFieldHeading=true;                               
+                      this.obj_paramRS.bln_autoSection=true;//one section                                    
+                      this.obj_paramRS.bln_axis=false;//flex column
+                      this.fn_setAxis(this.obj_paramRS.bln_axis);
+                    break;
+                    default:
+                      if(this.obj_paramRS.int_totalRowReturned>1){//many rows                                    
+                        this.obj_paramRS.bln_showFieldHeading=false;                               
+                        this.obj_paramRS.bln_autoSection=false;//one section                                    
+                        this.obj_paramRS.bln_axis=false;//flex row
+                        this.fn_setAxis(this.obj_paramRS.bln_axis);
+                      }
+                  }                                    
+                }
+
+                fn_getPermissionAddRow(obj_row){
+
+                  if(this.fn_getQueryModeNewRecord()){                    
+                    let obj_permitParam=obj_row.obj_paramRow.obj_metaData;                                                 
+                    obj_permitParam.MetaPermissionTag="100";                    
+                  }
+                  
+                  return super.fn_getPermissionAddRow(obj_row);
+                }
+                
+                fn_runPushColumn(obj_column){                     
+                  //console.log("fn_runPushColumn");                  
+
+                  let obj_ini=this.obj_holder.obj_query;                        
+                  obj_ini.str_action="runPushColumn";                  
+                  
+                  //console.log("send MetaKeyColumnValue: " + obj_ini.str_metaKeyColumnValue);
+
+                  obj_ini.str_nameFolderServer=this.obj_holder.obj_query.str_nameFolderServer;                     
+                  
+                  
+                  this.fn_runServerAction(obj_ini);
+                } 
+                fn_resetAutoJoin(){
+                  this.fn_debugText("fn_resetAutoJoin");
+                  this.fn_setAutoJoin(false);
+                  this.fn_setAutoJoinToSource("");                  
+                  this.fn_setAutoJoinToKeyValue("");                  
+                  this.fn_setAutoJoinToKeyName("");                  
+                  this.fn_setAutoJoinFromKeyValue("");                  
+                  this.fn_setAutoJoinFromKeyName("");                  
+                  this.fn_setLinkOffPin(false);
+                  this.fn_setLinkOnPin(false);                  
+                }
+                fn_setAutoJoin(bln_value){
+                  this.fn_setAutoJoinPin(bln_value);
+                  this.fn_setAutoJoinFilterPin(bln_value);                                    
+                }
+                fn_setAutoJoinPin(bln_value){                                  
+                  this.obj_holder.obj_query.bln_autoJoinPin=bln_value;                  
+                }     
+                fn_setAutoJoinFilterPin(bln_value){                              
+                  this.obj_holder.obj_query.bln_autoJoinFilterPin=bln_value;                  
+                }     
+                fn_setAutoJoinToSource(str_value){                                                    
+                  this.obj_holder.obj_query.str_autoJoinToSource=str_value;
+                }     
+                fn_setAutoJoinToKeyValue(str_value){                                                    
+                  this.obj_holder.obj_query.str_autoJoinToKeyValue=str_value;                  
+                }                                     
+                fn_setAutoJoinToKeyName(str_value){                  
+                  this.obj_holder.obj_query.str_autoJoinToKeyName=str_value;                  
+                }     
+                
+                fn_setAutoJoinFromKeyValue(str_value){
+                  this.obj_holder.obj_query.str_autoJoinFromKeyValue=str_value;
+                }
+                fn_setAutoJoinFromKeyName(str_value){                  
+                  this.obj_holder.obj_query.str_autoJoinFromKeyName=str_value;                  
+                }
+                fn_setLinkOffPin(bln_value){                                                    
+                  this.obj_holder.obj_query.bln_linkOffPin=bln_value;
+                }
+                fn_setLinkOnPin(bln_value){                                                    
+                  this.obj_holder.obj_query.bln_linkOnPin=bln_value;
+                }               
+                
+                
+                runPushColumn(obj_post){  
+                  this.obj_post=obj_post;
+                  this.fn_receiveColumn(obj_post);
+                }
+                
+                fn_receiveColumn(obj_post){      
+                  
+                  //reset to original id                
+                  this.obj_holder.obj_query.int_idMetaView=this.obj_paramRS.obj_menuButton.fn_getMetaViewId();                
+                  //reset to original id
+
+                  //to do check wether the form has not been altered by another user action in the meantime                  
+                  if(!this.obj_paramRS.arr_rows){return;}                  
+
+                  //currently not used , but remains as template for row-wide event handle
+                  //this.fn_setModeUnLocked();                    
+                  
+                  let obj_metaColumn=this.fn_setMetaColumnValue(this.obj_post.MetaColumnPosition, this.obj_post.MetaColumnValue);
+                  if(!obj_metaColumn){
+                    console.log("Error: DataForm- Column Not found. fn_receiveColumn.");
+                    return;
+                  } 
+
+                  //console.log("obj_metaColumn.str_name: " + obj_metaColumn.str_name);                 
+
+                  if(obj_post.ModeNewRecord){
+                    this.fn_setQueryModeNewRecord(false);//turn off new record mode
+                    this.fn_onNewRecordUpdateMetaKey(obj_post);
+                    this.fn_onNewRecordUpdateDataKey(obj_post);                    
+                  }                
+
+                  this.obj_paramRS.obj_row.fn_removeThemeError();                                    
+                  
+                  if(obj_post.Response && obj_post.Response.column_required){                                               
+                    let obj_columnRequired=this.obj_paramRS.obj_row.fn_getColumnViaName(obj_post.Response.column_required);                    
+                    obj_columnRequired.fn_applyThemeError();
+                  }                  
+
+                  let obj_column=this.obj_paramRS.obj_row.fn_getColumnViaName(obj_metaColumn.str_name);                                      
+                  obj_column.fn_receiveColumn();
+                  
+                  this.obj_paramRS.obj_menuButton.fn_receiveColumn(this, obj_column, obj_post);
+                  /*
+                  if(this.obj_paramRS.obj_menuButton.bln_dynamicMenu){//menuButton is generated from dataset
+                    if(obj_metaColumn.MenuPin){
+                      this.obj_paramRS.obj_menuButton.fn_updateButtonText(this);                    
+                    }
+                  } 
+                    //*/            
+                }
+
+                fn_onNewRecordUpdateMetaKey(obj_post){
+
+                  let obj_metaColumnKey
+                  obj_metaColumnKey=this.fn_getMetaColumnViaMetaName(obj_post.MetaKeySchemaName, obj_post.MetaKeyTableName, obj_post.MetaKeyColumnName);
+                  if(!obj_metaColumnKey){
+                    alert("1 fn_onNewRecordUpdateMetaKey obj_metaColumnKey is false");
+                    return;};
+                  obj_metaColumnKey.str_value=obj_post.MetaKeyColumnValue;  
+
+                  let obj_columnKey=this.obj_paramRS.obj_row.fn_getColumnViaPosition(obj_metaColumnKey.int_ordinalPosition);                                                                                                            
+                  obj_columnKey.fn_setValue(obj_metaColumnKey.str_value);                                    
+                  obj_columnKey.fn_setText(obj_metaColumnKey.str_value);                                    
+                  
+
+                  //console.log(obj_columnKey);                  
+                  //obj_columnKey.fn_debug();
+                  
+                  
+
+                  this.fn_onNewRecordPushDefaultValueColumns();
+
+                  let obj_menuButton=this.obj_paramRS.obj_menuButton;
+                  obj_menuButton.fn_onNewRecordUpdateMetaKey(obj_columnKey);
+
+                }
+                fn_onNewRecordUpdateDataKey(obj_post){
+
+                  let obj_metaColumnKey;
+                  obj_metaColumnKey=this.fn_getMetaColumnViaMetaName("meta_data", "meta_data", "MetaDataId");
+                  if(!obj_metaColumnKey){
+                    alert("2 fn_onNewRecordUpdateDataKey obj_metaColumnKey is false");
+                    return;};
+                  obj_metaColumnKey.str_value=obj_post.DataKeyColumnValue;                                      
+
+                  let obj_columnKey=this.obj_paramRS.obj_row.fn_getColumnViaPosition(obj_metaColumnKey.int_ordinalPosition);
+                  obj_columnKey.fn_setValue(obj_metaColumnKey.str_value);                                    
+                  obj_columnKey.fn_setText(obj_metaColumnKey.str_value);                                    
+                  
+                  this.fn_onNewRecordPushDefaultValueColumns(true);
+                }
+
+                
+                fn_onNewRecordPushDefaultValueColumns(bln_isData=false){
+
+                  let obj_row, obj_column;
+                  obj_row=this.obj_paramRS.arr_rows[0];
+                  if(obj_row){
+                    obj_row.fn_onNewRecordPushDefaultValueColumns(bln_isData);                                    
+                  }
+                  return false;
+                }
+
+                fn_setMetaColumnKey(obj_column){                  
+                  
+                  if(!obj_column.fn_getMetaColumnKey() || this.fn_getQueryModeNewRecord()){
+                    let obj_metaColumnTemplate=obj_column.obj_metaColumn;
+                    let obj_metaColumnKey=this.fn_getMetaColumnPrimaryKey(obj_metaColumnTemplate);                                                                          
+                    obj_column.fn_setMetaColumnKey(obj_metaColumnKey);
+                  }
+                }
+
+                
+                fn_getColumnViaRowColumnPosition(int_rowPosition, int_columnPosition){
+
+                  let obj_row, obj_column;
+                  obj_row=this.obj_paramRS.arr_rows[int_rowPosition];
+                  if(obj_row){
+                    obj_column=obj_row.fn_getColumnViaPosition(int_columnPosition);                  
+                    if(obj_column){
+                      return obj_column;
+                    }
+                  }
+                  return false;
+                }                
+
+                fn_archiveRecord(obj_columnKey){   
+
+                  let int_columnKey=obj_columnKey.fn_getColumnValue();
+                  this.obj_holder.obj_query.str_metaKeyColumnValue=int_columnKey;
+                  this.fn_runArchiveRecord();
+                }
+
+                fn_runArchiveRecord(){                                       
+                  let obj_ini=this.obj_holder.obj_query;                        
+                  obj_ini.str_action="runArchiveRecord";                                                              
+                  this.fn_runServerAction(obj_ini);
+                }
+                runDeleteRow(){                                      
+                  this.obj_paramRS.obj_menuButton.fn_onDeleteDynamicRow();//should be a dynamic menu                                    
+                } 
+                runArchiveRecord(){
+                  //console.log("runArchiveRecord");
+                  this.obj_paramRS.obj_menuButton.fn_onArchiveRecord();//should be a dynamic menu                                    
+                } 
+                
+
+                
+                fn_pushColumn(obj_column){                             
+                  //console.log("data fn_pushColumn");
+
+                  //currently not used , but remains as template for row-wide event handle
+                  //this.fn_setModeLocked();                  
+                  
+                  //used to update or insert or delete record                                    
+                  let bln_value=this.fn_formatColumnQuery(obj_column);                  
+                  if(!bln_value){return;}
+                  
+                  this.fn_runPushColumn(obj_column);
+                } 
+
+                fn_formatColumnQuery(obj_column){
+
+                  let obj_row, obj_columnKey, obj_metaColumn, obj_metaColumnKey;
+
+                  let bln_formNewRecord=this.obj_holder.obj_query.bln_modeNewRecord;                                    
+
+                  obj_metaColumn=obj_column.obj_metaColumn;
+
+                  this.fn_setMetaColumnKey(obj_column);                  
+                  obj_metaColumnKey=obj_column.fn_getMetaColumnKey();//we dont have akey for this field, so no update , (but can insert ?)                                    
+                  if(!obj_metaColumnKey && !bln_formNewRecord){                    
+                    //alert("!obj_metaColumnKey && !bln_formNewRecord");
+                    return false;//no update
+                  }             
+
+                  obj_row=obj_column.obj_row;
+                  obj_columnKey=obj_row.fn_getColumnKey(obj_column);//either the record id or  metadata id                                                            
+                  if(!obj_columnKey){
+                    //alert("fn_formatColumnQuery: column key is false");
+                    return false;
+                  }
+                  
+                  //console.log("obj_columnKey.str_value: " + obj_columnKey.str_value);
+                  //We have potentially just changed the view from the main menu view                                    
+                  this.obj_holder.obj_query.int_idMetaView=obj_metaColumn.MetaViewId;
+                  //We have potentially just changed the view from the main menu view
+                  //we will reset on return
+
+                  this.obj_holder.obj_query.str_metaSchemaName=obj_metaColumn.MetaSchemaName;
+                  this.obj_holder.obj_query.str_metaTableName=obj_metaColumn.MetaTableName;
+                  this.obj_holder.obj_query.str_metaColumnName=obj_metaColumn.MetaColumnName;
+                  this.obj_holder.obj_query.str_metaColumnAPIName=obj_metaColumn.MetaColumnAPIName;
+                  this.obj_holder.obj_query.str_metaColumnValue=obj_column.fn_getColumnValue();
+                  this.obj_holder.obj_query.str_metaList=obj_metaColumn.MetaList;
+                  this.obj_holder.obj_query.str_metaListIdValue=obj_column.str_metaListIdValue;
+                  this.obj_holder.obj_query.str_metaOption=obj_metaColumn.MetaOption;
+                  
+                  
+                  this.obj_holder.obj_query.str_metaColumnPosition=obj_column.obj_metaColumn.int_ordinalPosition;
+                  this.obj_holder.obj_query.str_metaRowPosition=obj_row.obj_paramRow.int_ordinalPosition;                  
+                  this.obj_holder.obj_query.str_metaColumnId=obj_column.obj_metaColumn.MetaColumnId;
+
+                  this.obj_holder.obj_query.str_metaKeySchemaName=obj_metaColumnKey.MetaSchemaName;
+                  this.obj_holder.obj_query.str_metaKeyTableName=obj_metaColumnKey.MetaTableName;
+                  this.obj_holder.obj_query.str_metaKeyColumnName=obj_metaColumnKey.MetaColumnName;
+                  this.obj_holder.obj_query.str_metaKeyColumnValue=obj_columnKey.str_value;
+
+                  //USED TO CHANGE BETWEEN SYSTEMS IN OFFICE
+                  let obj_metaColumnMetaSystemId=this.fn_getMetaColumnViaMetaName("meta_data", "meta_data", "MetaDataSystemId");                                    
+                  if(obj_metaColumnMetaSystemId){
+                    let obj_columnDataSystemId=obj_row.fn_getColumnViaPosition(obj_metaColumnMetaSystemId.int_ordinalPosition);                                                        
+                    if(obj_columnDataSystemId){
+                      this.obj_holder.obj_query.str_metaDataSystemId=obj_columnDataSystemId.fn_getValue();                    
+                    }
+                  };                                     
+                  //USED TO CHANGE BETWEEN SYSTEMS IN OFFICE
+
+                  return true;
+                }                               
+
+                //UPDATE LIST
+                fn_updateListSelect(obj_column){                     
+
+                  let bln_value=this.fn_formatColumnQuery(obj_column);                  
+                  if(!bln_value){return;}
+
+                  this.fn_runUpdateListSelect(obj_column);
+                }                
+
+                fn_runUpdateListSelect(obj_column){                                       
+
+                  let obj_ini=this.obj_holder.obj_query;                        
+                  obj_ini.str_action="updateDropdownList";
+                  obj_ini.str_nameFolderServer=this.obj_holder.obj_query.str_nameFolderServer;                  
+                  this.fn_runServerAction(obj_ini);
+                }
+
+                updateDropdownList(obj_post){  
+                  this.obj_post=obj_post;                                   
+                  
+                } 
+                //UPDATE LIST
+
+                //GET LIST
+                fn_getListSelectFromServer(obj_column){                                       
+
+                  let bln_value=this.fn_formatColumnQuery(obj_column);                  
+                  if(!bln_value){return;}
+                  
+                  let obj_ini=this.obj_holder.obj_query;                        
+                  obj_ini.str_action="getDropdownList";
+                  obj_ini.str_nameFolderServer=this.obj_holder.obj_query.str_nameFolderServer;                  
+                  this.fn_runServerAction(obj_ini);
+                }
+                getDropdownList(obj_post){  
+                  this.obj_post=obj_post;                                   
+                  this.fn_receiveDropdownList(obj_post);
+                }                 
+                fn_receiveDropdownList(obj_post){   
+                  //locate column and update list
+                  let obj_column=this.fn_getColumnViaRowColumnPosition(obj_post.MetaRowPosition, obj_post.MetaColumnPosition);                                                                        
+                  if(!obj_column){return;}                                    
+                  obj_column.fn_receiveDropdownList(obj_post);
+                }
+                //GET LIST
+
+                fn_setModeExecuteNew(){
+                  this.int_modeExecute=obj_holder.int_modeNew;                  
+                  return false;
+                }
+                fn_getModeExecuteNew(){
+                  if(this.int_modeExecute===obj_holder.int_modeNew){return true;}
+                  return false;
+                }
+                fn_setModeExecuteEdit(){                                                      
+                  super.fn_setModeExecuteEdit();                                 
+
+                  let i, arr_rows, obj_row;
+                  arr_rows=this.obj_paramRS.arr_rows;
+                  if(!arr_rows){return;}
+                  for(i=0;i<arr_rows.length;i++){
+                    obj_row=arr_rows[i];
+                    obj_row.fn_setModeExecuteEdit();
+                  }
+                }                
+                
+                fn_setQueryModeNewRecord(bln_value){
+                  this.obj_holder.obj_query.bln_modeNewRecord=bln_value;                                                     
+                  
+                }                
+                fn_getQueryModeNewRecord(){
+                  return this.obj_holder.obj_query.bln_modeNewRecord;                  
+                }                
+                                 
+                                               
+                fn_setModeLocked(){                                    
+                  //currently not used , but remains as template for row-wide event handle
+                  let i, arr_rows, obj_row;
+                  arr_rows=this.obj_paramRS.arr_rows;
+                  for(i=0;i<arr_rows.length;i++){
+                    obj_row=arr_rows[i];
+                    obj_row.fn_onDataSetModeLocked();                                      
+                  }                  
+                }
+                fn_setModeUnLocked(){  
+                  //currently not used , but remains as template for row-wide event handle
+                  let i, arr_rows, obj_row;
+                  arr_rows=this.obj_paramRS.arr_rows;
+                  if(!arr_rows){                    
+                    return;
+                  }
+                  for(i=0;i<arr_rows.length;i++){
+                    obj_row=arr_rows[i];
+                    obj_row.fn_onDataSetModeUnLocked();                                      
+                  }
+                }
+                fn_getModeLocked(){                  
+                  if(this.int_modeExecute===obj_holder.int_modeLocked){
+                    return true;
+                  }             
+                  return false;                       
+                }
+
+                xfn_cascadeFlipHeading(){        
+                  this.obj_paramRS.bln_showFieldHeading=obj_shared.fn_flipBool(this.obj_paramRS.bln_showFieldHeading);
+                  super.xfn_cascadeFlipHeading(this.obj_paramRS.bln_showFieldHeading);                
+                }                 
+                
+                fn_onComputeColumn(obj_column){}
+              }//END CLS
+              //END TAG
+              //END component/xapp_dataform
+/*type: xapp_dataform//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_dataform_view//*/
+
+            //XSTART component/xapp_dataform_view
+              class xapp_dataform_view extends xapp_dataform{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);
+                }
+                fn_onDataStart(){                
+                  super.fn_onDataStart();
+                  let obj_parent=this.obj_paramRS.obj_menuButton;                                                                  
+                  if(!obj_parent){return;}                                    
+                  obj_parent.fn_onDataStartView();                                    
+                }
+                fn_onDataEnd(obj_post){
+                  super.fn_onDataEnd(obj_post);
+                  let obj_menuButton=this.obj_paramRS.obj_menuButton;                                                
+                  if(!obj_menuButton){return;}                                    
+                  obj_menuButton.fn_onDataEndView(obj_post);                                    
+                }                
+                
+                //----------------------------------------
+                //SIGNPOST 10. obj_dataView fn_runComputeRow
+                //----------------------------------------
+                fn_onComputeRow(){                
+
+                  let obj_row=this.obj_paramRS.obj_row;                                  
+                  if(!obj_row){return;}
+                  let obj_parentMenu=this.obj_paramRS.obj_menuButton;                                                                  
+                  if(!obj_parentMenu){return;}                  
+                  obj_parentMenu.fn_onComputeRowView(obj_row);                   
+                }     
+                fn_getWidgetView(){
+                  let obj_parent=this.obj_paramRS.obj_menuButton;                                                
+                  if(obj_parent){return obj_parent.fn_getWidgetView();}                
+                }
+              }//END CLS
+              //END TAG
+              //END component/xapp_dataform_view
+/*type: xapp_dataform_view//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
 /*type: form_fieldset//*/
 //XSTART component/form_fieldset
 class form_fieldset extends component{
@@ -6285,6 +8064,11 @@ class form_fieldset extends component{
     this.obj_themeItemSection=this.fn_getThemeObject("form_section");    
     this.fn_setStyleProperty("overflow", "hidden");                      
     this.fn_setStyleProperty("margin", "0px");                      
+  }
+  fn_applyThemeStructure(){                        
+    if(!obj_project.obj_theme){return;}
+    this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeFormFieldset;                
+    this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                          
   }
   fn_onRowMember(obj_row){
 
@@ -6423,10 +8207,9 @@ class form_fieldset extends component{
                   this.obj_holder.bln_listenInput=false;
                   this.obj_holder.bln_listenSelectStart=false;
                 }
-                fn_applyThemeStructure(){                                      
-                  
-                  this.obj_themeStructure=obj_project.obj_themeFormInput;                
-                  this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+                fn_applyThemeStructure(){                                                        
+                  this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeFormInput;                
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
                 }
                 fn_onSelectStart(e){
                   //console.log("hit input");
@@ -6715,9 +8498,8 @@ class table extends component {
                   if(this.fn_hasContextHolderParent()){return;}                      
                 }   
                 fn_applyThemeStructure(){                                      
-
-                  this.obj_themeStructure=obj_project.obj_themeFormButton;                
-                  this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+                  this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeButton;                                  
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
                 }
 
                 fn_expand(){//called by base onload                  
@@ -6759,8 +8541,28 @@ class table extends component {
         } 
         fn_initialize(obj_ini){
           super.fn_initialize(obj_ini);                
+        }
+        fn_setText(str_value){          
+          
+          super.fn_setText(str_value);          
+          
+          if(this.obj_design.str_themeType==="form_button"){
+            if(obj_project.bln_isMobile){
+              
+              if(obj_shared.fn_isSmallScreen()){//less than 400              
+                if(this.obj_design.str_icon){
+                  this.fn_showIcon(this.obj_design.str_icon);                  
+                  //str_value="";
+                  
+                } 
+              }
+            }
+          }
 
-
+          let obj_anchor=this.fn_getComponent("form_button_anchor");          
+          if(obj_anchor){          
+            obj_anchor.fn_setText(str_value);          
+          }          
         }
         fn_onLoad(){          
           super.fn_onLoad();
@@ -6769,9 +8571,8 @@ class table extends component {
           this.fn_showIcon(this.obj_design.str_icon);                    
         }                        
 
-        fn_applyThemeStructure(){                              
-          let obj_theme=obj_project.obj_theme;
-          if(!obj_theme){return;}
+        fn_applyThemeStructure(){                                        
+          if(!obj_project.obj_theme){return;}
           super.fn_applyThemeStructure();          
         }
         fn_setSubDomain(str_value){
@@ -6816,26 +8617,7 @@ class table extends component {
             obj_anchor.fn_showIcon(str_value);                          
           }  
         } 
-        fn_setText(str_value){          
-          
-          super.fn_setText(str_value);
-          
-          if(this.obj_design.str_themeType==="form_button"){
-            if(obj_project.bln_isMobile){
-              if(obj_shared.fn_isSmallScreen()){//less than 400              
-                if(this.obj_design.str_icon){
-                  this.fn_showIcon(this.obj_design.str_icon);                  
-                  str_value="";
-                } 
-              }
-            }
-          }
-
-          let obj_anchor=this.fn_getComponent("form_button_anchor");          
-          if(obj_anchor){          
-            obj_anchor.fn_setText(str_value);          
-          }          
-        }
+        
         fn_getText(){
 
           let str_text;
@@ -7197,7 +8979,7 @@ class table extends component {
               }
               fn_onClose(){                      
                 
-                const str_value=this.obj_themeStructure.marginBottom;                
+                const str_value=this.obj_holder.obj_themeStructure.marginBottom;                
                 this.fn_setStyleProperty("marginBottom", str_value);                              
                   
                 if(this.bln_rebound){this.fn_open();}
@@ -7702,9 +9484,12 @@ class table extends component {
           }   
 
           fn_applyThemeStructure(){                    
-            
-            this.obj_themeStructure=obj_project.obj_themeMenuButton;                
-            this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy                        
+          
+            this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeRowz;                
+            if(this.fn_getIsDynamicMenu()){
+              this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeRowzDynamic;                
+            }            
+            this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                        
           }
           
           fn_runSearch(){//overridden by Menuform
@@ -10619,6 +12404,7 @@ class table extends component {
           
           obj_item.fn_configureDynamicMenuFromRow(obj_row);                                                      
           
+
           
           
           return obj_item;
@@ -10654,9 +12440,9 @@ class table extends component {
             this.obj_columnArchiveDate=obj_rowMenu.fn_getColumnArchiveDate();//required to toggle archive / restore button text in menupane            
             this.fn_setMenuRecordId(this.obj_columnKey.str_value);            
           }
-          //END Configure Dynamic Menu Key
+          //END Configure Dynamic Menu Key         
+          
         }
-
         
         fn_updateButtonText(obj_recordset){
           let str_value=this.fn_formatButtonText(obj_recordset);        
@@ -11396,1445 +13182,6 @@ class table extends component {
 
 
 /*START COMPONENT//*/
-/*type: xapp_data//*/
-
-            //XSTART component/xapp_data
-            class xapp_data extends xapp_ajax{
-              constructor(obj_ini) {      
-                super(obj_ini);        
-              } 
-              fn_initialize(obj_ini){
-                super.fn_initialize(obj_ini);                          
-
-                this.obj_holder.bln_debugServer=true;                  
-
-                this.str_defaultTypeRow="xapp_row";
-                this.str_defaultTypeColumn="xapp_column";
-                this.fn_initialize_var();
-              }
-              fn_onLoad(){    
-                super.fn_onLoad();                  
-                if(this.fn_getDebugPin()){this.fn_highlightBorder("blue");}                  
-              }
-              fn_initialize_var(obj_ini){
-                
-                this.obj_holder.str_typeColumn=this.str_defaultTypeColumn;
-                this.obj_holder.bln_reportView=false;
-                this.obj_holder.bln_editable=false;
-                this.obj_holder.obj_query={};      
-                this.obj_holder.obj_query.str_querySearch="";
-                this.obj_holder.obj_query.str_queryList="";
-                this.obj_holder.obj_query.str_queryListParent="";
-                this.obj_holder.obj_query.str_queryListDisabled="";
-                this.obj_holder.obj_query.str_queryListParentDisabled="";
-                this.obj_holder.obj_query.bln_loadReportInterface=false;
-                this.fn_setComputeRows(true);      
-                this.fn_setLimitRowPerPage(10);                        
-                this.fn_resetDataView();
-               
-              }                  
-              fn_resetDataView(){
-                this.fn_setLimitRowStart(0);
-              }
-              fn_setLimitRowPerPage(int_limitRowPerPage){                  
-                this.obj_holder.obj_query.int_limitRowPerPage=int_limitRowPerPage;                          
-              }
-              fn_setLimitRowStart(int_limitRowStart){                  
-                this.obj_holder.obj_query.int_limitRowStart=int_limitRowStart;                                                  
-              }
-              fn_getLimitRowPerPage(){                  
-                return this.obj_holder.obj_query.int_limitRowPerPage;                          
-              }
-              fn_getLimitRowStart(){                  
-                return this.obj_holder.obj_query.int_limitRowStart;                                
-              }
-              fn_setComputeRows(bln_value){
-                this.obj_holder.bln_computeRows=bln_value;
-              }
-              fn_getComputeRows(){
-                return this.obj_holder.bln_computeRows;
-              }
-              fn_initializeRS(obj_menuButton){                                  
-                
-                this.obj_paramRS={};                                  
-                this.obj_paramRS.obj_recordset=this;                                    
-                this.obj_paramRS.int_totalRowReturned=0;
-                this.obj_paramRS.str_typeColumn=this.obj_holder.str_typeColumn;//can choose which class will the column be eg reporrtcolumn
-                this.obj_paramRS.bln_reportView=this.obj_holder.bln_reportView;                  
-
-                this.obj_paramRS.obj_menuButton=obj_menuButton;                                   
-
-                if(obj_path.str_urlMetaRowzNameArchive){
-                  this.obj_holder.obj_query.int_idMetaView=obj_menuButton.obj_meta.int_idMetaView;                    
-                  this.obj_holder.obj_query.int_idMetaRowz=obj_menuButton.obj_meta.int_idMetaRowz;                                        
-                  this.obj_holder.obj_query.str_metaRowzName=obj_menuButton.obj_meta.str_metaRowzName;
-                  this.obj_holder.obj_query.str_urlMetaRowzNameArchive=obj_path.str_urlMetaRowzNameArchive;
-                  this.obj_holder.obj_query.str_urlMetaRecordIdArchive=obj_path.str_urlMetaRecordIdArchive;
-                }
-                
-
-                /*
-                console.log("this.obj_meta.int_idMetaRowz: " + this.obj_meta.int_idMetaRowz);
-                console.log("this.obj_meta.str_metaRowzName: " + this.obj_meta.str_metaRowzName);
-                console.log("obj_path.str_urlMetaRowzNameArchive: " + obj_path.str_urlMetaRowzNameArchive);
-                console.log("obj_path.str_urlMetaRecordIdArchive: " + obj_path.str_urlMetaRecordIdArchive);
-                //*/                
-
-                const int_horizontal=false, int_vertical=true;
-                
-                /*
-                // Horizontal-tb: English, French, Spanish, etc. 
-                p {
-                  writing-mode: horizontal-tb;
-                }
-
-                //* Vertical-lr: Chinese, Japanese, Korean 
-                p.vertical-lr {
-                  writing-mode: vertical-lr;
-                  text-orientation: upright;
-                }
-
-                // Vertical-rl: Arabic, Hebrew 
-                p.vertical-rl {
-                  writing-mode: vertical-rl;
-                  text-orientation: upright;
-                }
-
-                // Horizontal-bt: A less common direction, but could be used for artistic effects or specific languages 
-                p.horizontal-bt {
-                  writing-mode: horizontal-bt;
-                  text-orientation: mixed;
-                }
-                //*/
-                
-                /*
-                //HORIZONTAL, HORIZONTAL, HORIZONTAL OK
-                this.obj_paramRS.bln_axisPanel=int_horizontal;
-                this.obj_paramRS.bln_axisFieldset=int_horizontal;
-                this.obj_paramRS.bln_axisColumn=int_horizontal;                
-                //*/
-
-                //STANDARD
-                /*
-                //HORIZONTAL, HORIZONTAL, VERTICAL OK
-                this.obj_paramRS.bln_axisPanel=int_horizontal;
-                this.obj_paramRS.bln_axisFieldset=int_horizontal;
-                this.obj_paramRS.bln_axisColumn=int_vertical;                
-                //*/
-
-                /*
-                //HORIZONTAL, VERTICAL, VERTICAL OK FOR VERTICAL WRITING SYSTEMS
-                //writing-mode: vertical-lr;
-                this.obj_paramRS.bln_axisPanel=int_horizontal;
-                this.obj_paramRS.bln_axisFieldset=int_vertical;
-                this.obj_paramRS.bln_axisColumn=int_vertical;                
-                //*/
-                
-                /*
-                //HORIZONTAL, VERTICAL, HORIZONTAL OK FOR VERTICAL WRITING SYSTEMS
-                this.obj_paramRS.bln_axisPanel=int_horizontal;
-                this.obj_paramRS.bln_axisFieldset=int_vertical;
-                this.obj_paramRS.bln_axisColumn=int_horizontal;                
-                //*/
-
-                /*
-                //VERTICAL, VERTICAL, VERTICAL - no good, only 1 column down the page
-                this.obj_paramRS.bln_axisPanel=int_vertical;
-                this.obj_paramRS.bln_axisFieldset=int_vertical;
-                this.obj_paramRS.bln_axisColumn=int_vertical;                
-                //*/
-
-                /*
-                //VERTICAL, VERTICAL, HORIZONTA - no good, only 1 column down the page
-                this.obj_paramRS.bln_axisPanel=int_vertical;
-                this.obj_paramRS.bln_axisFieldset=int_vertical;
-                this.obj_paramRS.bln_axisColumn=int_horizontal;                
-                //*/
-                
-
-                /* 
-                //VERTICAL, HORIZONTAL, HORIZONTAL - OK
-                this.obj_paramRS.bln_axisPanel=int_vertical;
-                this.obj_paramRS.bln_axisFieldset=int_horizontal;
-                this.obj_paramRS.bln_axisColumn=int_horizontal;                
-                //*/
-
-                /*
-                //VERTICAL, HORIZONTAL, VERTICAL OK
-                this.obj_paramRS.bln_axisPanel=int_vertical;
-                this.obj_paramRS.bln_axisFieldset=int_horizontal;
-                this.obj_paramRS.bln_axisColumn=int_vertical;                
-                //*/
-                
-                
-                //STANDARD
-                //*
-                //HORIZONTAL, HORIZONTAL, VERTICAL OK
-                this.obj_paramRS.bln_axisPanel=int_horizontal;
-                this.obj_paramRS.bln_axisFieldset=int_horizontal;
-                this.obj_paramRS.bln_axisColumn=int_vertical;                
-                if(obj_project.bln_isMobile){
-                  this.obj_paramRS.bln_axisColumn=int_vertical;
-                }
-                //*/
-
-                this.obj_paramRS.bln_axis=false;//row              
-                //this.fn_setAxis(this.obj_paramRS.bln_axis);
-                this.obj_paramRS.int_separator=10;                                  
-                this.obj_paramRS.bln_showFieldHeading=true;
-                this.obj_paramRS.bln_autoSection=false;//1 row many sections                                                       
-                this.obj_paramRS.bln_hasMultipleRow=false;
-                this.obj_paramRS.bln_NoRowFound=false;
-                this.obj_paramRS.bln_singleRowFound=false;                                    
-                this.obj_paramRS.int_countRow=0;                                  
-                this.obj_paramRS.bln_lastRow=false;
-
-                this.bln_debug=obj_menuButton.bln_debug;                                                
-              }                                 
-              
-                              
-              fn_setMetaRowzId(int_value){           
-                this.obj_holder.obj_query.int_idMetaRowz=int_value;
-              }              
-              fn_setMetaRowzTitle(int_value){           
-                this.obj_holder.obj_query.str_metaRowzTitle=int_value;
-              }              
-              fn_setMetaRowzName(int_value){           
-                this.obj_holder.obj_query.str_metaRowzName=int_value;
-              }              
-              
-              fn_setMetaViewId(int_value){           
-                this.obj_holder.obj_query.int_idMetaView=int_value;
-              }
-              fn_getMetaViewId(int_value){           
-                return this.obj_holder.obj_query.int_idMetaView;
-              }            
-              
-              
-              fn_getQueryExpression(){                                  
-                return this.obj_holder.obj_query.str_queryExpression;
-              }                                
-              
-              fn_setQueryExpression(str_value){                                      
-                /*
-                let str_expr;                  
-                str_expr="(";        
-                str_expr+=str_value;        
-                str_expr+="TRUE ";                
-                str_expr+=")";
-                this.obj_holder.obj_query.str_queryExpression=str_expr;
-                //*/
-
-                this.obj_holder.obj_query.str_queryExpression=str_value;
-              }                                 
-            
-              fn_setMetaKey(obj_columnKey){
-
-                //this.fn_debugText("fn_setMetaKey");
-
-                
-                this.obj_holder.obj_query.str_metaKeySchemaName="";
-                this.obj_holder.obj_query.str_metaKeyTableName="";
-                this.obj_holder.obj_query.str_metaKeyColumnName="";
-                this.obj_holder.obj_query.str_metaKeyColumnValue="";
-
-                if(!obj_columnKey){
-                  return;
-                }
-                
-                let obj_metaColumn=obj_columnKey.obj_metaColumn;                                                                
-                this.obj_holder.obj_query.str_metaKeySchemaName=obj_metaColumn.MetaSchemaName;
-                this.obj_holder.obj_query.str_metaKeyTableName=obj_metaColumn.MetaTableName;
-                this.obj_holder.obj_query.str_metaKeyColumnName=obj_metaColumn.MetaColumnName;
-                this.obj_holder.obj_query.str_metaKeyColumnShortName=obj_metaColumn.MetaColumnAPIName;
-                this.obj_holder.obj_query.str_metaKeyColumnValue=obj_columnKey.str_value;                
-              }
-
-              
-              fn_setModeExecuteViewRecord(){                  
-                this.int_modeExecute=obj_holder.int_modeReadOnly;                  
-                return false;
-              }
-              fn_getModeExecuteViewRecord(){
-                if(this.int_modeExecute===obj_holder.int_modeReadOnly){return true;}
-                return false;
-              }
-
-              fn_setSubdomain(str_value){                                  
-                this.obj_holder.obj_query.str_subdomain=str_value;                  
-              }
-
-              fn_setDataQuerySearch(str_querySearch, bln_resetDataView=true){ 
-                if(bln_resetDataView){
-                  this.fn_resetDataView();                                 
-                }
-                
-                this.obj_holder.obj_query.str_querySearch=str_querySearch;
-              }                                                
-              fn_getDataQuerySearch(){                                                  
-                return this.obj_holder.obj_query.str_querySearch;
-              }                                                
-              
-              fn_setDataQueryList(str_queryList){                                  
-                //this.fn_resetDataView();                
-                this.obj_holder.obj_query.str_queryList=str_queryList;
-              }                                                
-              fn_getDataQueryList(){                                  
-                return this.obj_holder.obj_query.str_queryList;
-              } 
-              fn_setDataQueryListParent(str_queryList){          
-                this.obj_holder.obj_query.str_queryListParent=str_queryList;
-              } 
-              fn_getDataQueryListParent(){
-                return this.obj_holder.obj_query.str_queryListParent;
-              } 
-              fn_setDataQueryListDisabled(str_queryList){                                  
-                //this.fn_resetDataView();                
-                this.obj_holder.obj_query.str_queryListDisabled=str_queryList;
-              }                                                
-              fn_getDataQueryListDisabled(){                                  
-                return this.obj_holder.obj_query.str_queryListDisabled;                  
-              } 
-              fn_setDataQueryListParentDisabled(str_queryList){                           
-                this.obj_holder.obj_query.str_queryListParentDisabled=str_queryList;
-              } 
-              fn_getDataQueryListParentDisabled(){
-                return this.obj_holder.obj_query.str_queryListParentDisabled;
-              }               
-
-              fn_setPublishPin(bln_value){                                                    
-                this.obj_holder.obj_query.bln_publishPin=bln_value;                  
-              }                                                
-              fn_getPublishPin(){                                  
-                return this.obj_holder.obj_query.bln_publishPin;
-              }                               
-              fn_setMarkedParentSchemaName(str_value){
-                this.obj_holder.obj_query.str_markedParentSchemaName=str_value;                                    
-            }
-              fn_setMarkedParentTableName(str_value){
-                  this.obj_holder.obj_query.str_markedParentTableName=str_value;                                    
-              }
-              fn_setMarkedParentRowzId(int_value){
-                this.obj_holder.obj_query.str_markedParentRowzId=int_value;                                    
-              }              
-              fn_setMarkedParentViewId(int_value){
-                this.obj_holder.obj_query.str_markedParentViewId=int_value;                                    
-              }                
-              fn_setSelectMinimalFieldPin(bln_value){                                                    
-                this.obj_holder.obj_query.bln_selectMinimalFieldPin=bln_value;                  
-              }                                                
-              fn_getSelectMinimalFieldPin(){                                  
-                return this.obj_holder.obj_query.bln_selectMinimalFieldPin;
-              }                 
-              //----------------------------------------
-              //SIGNPOST 8. obj_dataView fn_getDataQuery
-              //----------------------------------------
-              fn_getDataCountQuery(bln_runSearch=false){
-
-                /*
-                let str_queryList=this.fn_getDataQueryList();                                    
-                let str_queryListDisabled=this.fn_getDataQueryListDisabled();
-                let str_queryListParent=this.fn_getDataQueryListParent();                  
-                let str_queryListParentDisabled=this.fn_getDataQueryListParentDisabled();
-                this.fn_debugText("fn_runCountQuery str_queryList: " + str_queryList);
-                this.fn_debugText("fn_runCountQuery str_queryListDisabled: " + str_queryListDisabled);
-                this.fn_debugText("fn_runCountQuery str_queryListParent: " + str_queryListParent);
-                this.fn_debugText("fn_runCountQuery str_queryListParentDisabled: " + str_queryListParentDisabled);
-                //*/
-                
-                let obj_menuButton=this.obj_paramRS.obj_menuButton;
-
-                let obj_ini=this.obj_holder.obj_query;                                          
-                obj_ini.str_action="getDataCountQuery";                                                   
-                obj_ini.bln_runSearch=bln_runSearch;
-                obj_ini.bln_simpleSearch=obj_menuButton.bln_simpleSearch;
-                obj_ini.bln_advancedSearch=obj_menuButton.bln_advancedSearch;
-                this.fn_runServerAction(obj_ini);                                                      
-              }                
-              getDataCountQuery(obj_post){                    
-                
-                this.obj_post=obj_post;                            
-                //console.log(this.obj_post);
-                let obj_menuButton=this.obj_paramRS.obj_menuButton;                  
-                obj_menuButton.fn_onCountStart(this.obj_post);
-              }  
-              
-              fn_getChildRowz(bln_runSearch=false){
-
-                let obj_menuButton=this.obj_paramRS.obj_menuButton;  
-                this.fn_setDebugPin(obj_menuButton.fn_getDebugPin()); 
-                this.fn_setPublishPin(obj_menuButton.fn_getPublishPin());                  
-                this.fn_setMarkedParentSchemaName(obj_menuButton.fn_getMarkedParentSchemaName());                  
-                this.fn_setMarkedParentTableName(obj_menuButton.fn_getMarkedParentTableName());                  
-                this.fn_setMarkedParentRowzId(obj_menuButton.fn_getMarkedParentRowzId());                                  
-                this.fn_setMarkedParentViewId(obj_menuButton.fn_getMarkedParentViewId());   
-                
-                
-
-                /*
-                let str_queryList, str_queryListDisabled, str_queryListParent, str_queryListParentDisabled;                  
-                str_queryList=this.fn_getDataQueryList();                                    
-                str_queryListDisabled=this.fn_getDataQueryListDisabled();
-                str_queryListParent=this.fn_getDataQueryListParent();                  
-                str_queryListParentDisabled=this.fn_getDataQueryListParentDisabled();
-                this.fn_debugText("str_queryList: " + str_queryList);
-                this.fn_debugText("str_queryListDisabled: " + str_queryListDisabled);
-                this.fn_debugText("str_queryListParent: " + str_queryListParent);
-                this.fn_debugText("str_queryListParentDisabled: " + str_queryListParentDisabled);
-                //*/
-
-                
-                
-                let obj_ini=this.obj_holder.obj_query;                                          
-                obj_ini.str_action="getChildRowz";
-                obj_ini.bln_runSearch=bln_runSearch;
-                obj_ini.bln_simpleSearch=obj_menuButton.bln_simpleSearch;
-                obj_ini.bln_advancedSearch=obj_menuButton.bln_advancedSearch;
-                this.fn_runServerAction(obj_ini);
-              }
-
-              getChildRowz(obj_post){                    
-                
-                this.obj_post=obj_post;                            
-                //console.log(this.obj_post);
-                this.fn_onDataStart();                                                                  
-                this.fn_computeRows();
-                this.fn_onDataEnd(obj_post);                       
-              }
-
-
-              fn_getDataQuery(bln_runSearch=false){                                                       
-
-                let obj_menuButton=this.obj_paramRS.obj_menuButton;  
-                this.fn_setDebugPin(obj_menuButton.fn_getDebugPin());
-                this.fn_setPublishPin(obj_menuButton.fn_getPublishPin());
-                this.fn_setMarkedParentSchemaName(obj_menuButton.fn_getMarkedParentSchemaName());                  
-                this.fn_setMarkedParentTableName(obj_menuButton.fn_getMarkedParentTableName());                  
-                this.fn_setMarkedParentRowzId(obj_menuButton.fn_getMarkedParentRowzId());                                  
-                this.fn_setMarkedParentViewId(obj_menuButton.fn_getMarkedParentViewId());   
-                
-
-                                                
-
-                let obj_ini=this.obj_holder.obj_query;                                          
-                obj_ini.str_action="getDataQuery";
-                obj_ini.bln_runSearch=bln_runSearch;
-                obj_ini.bln_simpleSearch=obj_menuButton.bln_simpleSearch;
-                obj_ini.bln_advancedSearch=obj_menuButton.bln_advancedSearch;
-                this.fn_runServerAction(obj_ini);                                                                        
-              } 
-              
-              getDataQuery(obj_post){                    
-                
-                this.obj_post=obj_post;                            
-                //console.log(this.obj_post);
-                this.fn_onDataStart();                                                                  
-                this.fn_computeRows();
-                this.fn_onDataEnd(obj_post);                       
-              }                  
-
-              fn_onDataStart(){
-                
-                
-                this.obj_paramRS.arr_metaColumn=this.obj_post.MetaColumn;                                                      
-                
-                this.fn_getMenuPinColumn();                  
-                
-                let obj_menuButton=this.obj_paramRS.obj_menuButton;                  
-                
-                
-                obj_menuButton.fn_resetContent();                                                    
-                
-                obj_menuButton.fn_onDataStart(this.obj_post);
-                
-                
-              }                          
-              fn_onDataEnd(obj_post){ 
-                
-                //this.fn_iniTotalRow(true);//post process - not operaitonal
-
-                let obj_menuButton=this.obj_paramRS.obj_menuButton;                  
-                obj_menuButton.fn_onDataEnd(obj_post);
-              }                                     
-
-              fn_onRecordSetDataView(){                                  
-                this.obj_paramRS.arr_rows=[];                      
-                if(!this.obj_paramRS.arr_metaColumn){return;}
-                if(!this.obj_paramRS.arr_metaColumn.length){return false;}
-                
-                //this.fn_describeMetaColumns();
-
-
-                this.fn_iniDataView();
-
-                this.fn_iniTotalRow();
-              }
-              
-              fn_iniDataView(){}//overidden, but called                
-
-        
-              
-              //*
-              fn_iniTotalRow(){ //overidden, but called
-                
-                let int_totalRowCount=this.obj_post.RowCount;                  
-                if(!int_totalRowCount){int_totalRowCount=0;}
-                this.obj_paramRS.int_totalRowCount=int_totalRowCount;                  
-
-                let int_totalRowReturned=this.obj_post.RowData.length;
-                if(!int_totalRowReturned){int_totalRowReturned=0;}
-                this.obj_paramRS.int_totalRowReturned=int_totalRowReturned;                                                
-                
-                let arr_metaColumn=this.obj_paramRS.arr_metaColumn;
-                if(obj_shared.fn_isObjectEmpty(arr_metaColumn[0])){arr_metaColumn=[];}                                    
-                this.obj_paramRS.arr_metaColumn=arr_metaColumn;                
-                this.obj_paramRS.int_totalColumn=arr_metaColumn.length;
-
-                switch(this.obj_paramRS.int_totalRowReturned){
-                  case (0)://no row found
-                    this.obj_paramRS.bln_NoRowFound=true;                                                          
-                  break;
-                  case (1)://single row found
-                    this.obj_paramRS.bln_singleRowFound=true;                                                      
-                  break;                    
-                  default:
-                    if(this.obj_paramRS.int_totalRowReturned>1){//many rows                  
-                      this.obj_paramRS.bln_hasMultipleRow=true;                                        
-                    }
-                }                                    
-              } 
-              //*/               
-
-              
-              fn_computeRows(){ 
-
-                if(!this.fn_getComputeRows()){return;}    
-                
-                this.fn_removeChildren();                                                                      
-                this.fn_onRecordSetDataView();
-                
-                if(this.obj_paramRS.bln_NoRowFound){                                    
-                  return;
-                }
-
-                //should align with this.obj_paramRS.int_totalRowReturned
-
-                let arr_row=this.obj_post.RowData;
-                //console.log(arr_row)
-                const int_rowLength=arr_row.length;                  
-                for(var i=0;i<arr_row.length;i++){                            
-                  //cannot add any properties to obj_ROW as they will be considered part of the record set name/value pairs
-                  this.obj_paramRS.obj_ROW=this.obj_post.RowData[i];
-                  //console.log(this.obj_paramRS.obj_ROW);
-                  
-                  this.obj_paramRS.int_ordinalPosition=i;                  
-                  if(i===int_rowLength-1){
-                    this.obj_paramRS.bln_lastRow=true;
-                  }                    
-
-                  this.fn_onComputeRowStart();                    
-
-                  
-                  this.fn_computeRow();      
-                  
-                  this.fn_onComputeRowEnd();              
-                  this.obj_paramRS.int_countRow++;
-                }
-
-                
-              }                                
-              
-              fn_computeRow(){//overidden, not called
-                
-                //RowData Can contain a single empty object                                  
-                if(obj_shared.fn_isObjectEmpty(this.obj_paramRS.obj_ROW)){ return;}                
-                
-                let bln_addRow=this.fn_addRow();
-                
-                if(bln_addRow){
-                  this.fn_onComputeRow();                  
-                }
-                
-                
-              }
-
-              fn_getRow(int_num){                  
-                return this.obj_paramRS.arr_rows[int_num];
-              }
-
-              fn_getPermissionAddRow(obj_row){
-                
-                const obj_metaDataRow=obj_row.obj_paramRow.obj_metaData;
-
-                if(obj_shared.fn_isEmptyObject(obj_metaDataRow)){
-                  return true;
-                }          
-                
-                const obj_permit=obj_permitManger.fn_compare(obj_metaDataRow, obj_userHome);
-                if(!obj_permit){
-                  return true;
-                }
-                let bln_hiddenPin=obj_permitManger.fn_getHiddenPin(obj_permit);                                         
-                if(bln_hiddenPin){                    
-                  return false;
-                }                  
-                return true;                
-              }
-
-              fn_addRow(){                  
-                let obj_row=this.obj_paramRS.obj_row=this.fn_addContextItem(this.str_defaultTypeRow);                  
-                if(!obj_row){                    
-                  return false;
-                }                                 
-                
-                
-                obj_row.fn_initializeRow(this.obj_paramRS);                       
-                let bln_addRow=this.fn_getPermissionAddRow(obj_row);                                
-                if(bln_addRow){
-                  this.obj_paramRS.arr_rows.push(obj_row);                  
-                  obj_row.fn_computeColumns();                                                                              
-                  
-                  if(this.obj_post.MetaKeySchemaName==="meta_column" && this.obj_post.MetaKeyTableName==="meta_column"){                  
-                      obj_row.fn_settingsColumnInterfaceLockedPin("mycol_");                                                               
-                  }
-                  
-                  if(this.obj_post.MetaKeySchemaName==="meta_rowz" && this.obj_post.MetaKeyTableName==="meta_rowz"){                  
-                    //console.log(this.obj_post);
-                    obj_row.fn_settingsColumnInterfaceLockedPin("mybox_");                                                               
-                  }
-                  
-                  
-                }
-                
-                return bln_addRow;                                  
-              }
-              
-              fn_onComputeRow(){}                              
-              fn_onComputeRowStart(){}                              
-              fn_onComputeRowEnd(){} 
-
-              fn_onComputeRow(){                                                   
-              }                  
-              
-              fn_setModeExecuteView(){
-                
-                super.fn_setModeExecuteView();
-                
-                if(!this.obj_paramRS){return;}
-                if(!this.obj_paramRS.arr_rows){return;}
-                let arr_rows=this.obj_paramRS.arr_rows;
-              
-                const int_rowLength=arr_rows.length;                  
-                for(var i=0;i<int_rowLength;i++){                                          
-                  let obj_row=arr_rows[i];                                                     
-                  obj_row.obj_selectedColumn=false;
-                  obj_row.fn_setModeExecuteView();
-                  
-                }
-
-              }
-
-
-              
-              
-              //START Meta Column Function
-              /////////////////////////
-              /////////////////////////
-              /////////////////////////  
-              fn_getMetaView(){
-                return this.obj_paramRS.obj_metaView;
-              }
-              fn_setMetaColumnValue(int_num, str_value){
-                let obj_metaColumn=this.fn_getMetaColumnViaOrdinalPosition(int_num);//the column meta is used as a base for the ui column                                    
-                if(!obj_metaColumn){return;}
-                obj_metaColumn.str_value=str_value;
-                this.obj_paramRS.obj_ROW[obj_metaColumn.str_name]=str_value;                                      
-                return obj_metaColumn;
-              }
-              
-              fn_getMetaColumn(int_num){
-                
-                let obj_metaColumn=this.fn_getMetaColumnViaOrdinalPosition(int_num);//the column meta is used as a base for the ui column                                                                             
-                obj_metaColumn.str_name=this.fn_getPDOMetaValue(obj_metaColumn, "name");
-                if(this.obj_paramRS.obj_ROW){
-                  obj_metaColumn.str_value=this.obj_paramRS.obj_ROW[obj_metaColumn.str_name];                    
-                }                  
-                obj_metaColumn.int_ordinalPosition=int_num;                  
-                obj_metaColumn.PrimaryPin=obj_shared.fn_parseBool(obj_metaColumn.PrimaryPin);
-                return obj_metaColumn;
-              }                
-
-              xfn_describeMetaColumns(){                  
-                let int_totalColumn=this.obj_paramRS.int_totalColumn;
-                for (let i = 0; i < int_totalColumn;i++) {                        
-                  let obj_metaColumn=this.fn_getMetaColumn(i);                                        
-                  console.log("["+ i + "]: " + obj_metaColumn.str_name.toLowerCase());                    
-                }
-              }
-
-              fn_describeMetaColumns(){                  
-                if(!this.obj_paramRS){return;}
-                let arr=this.obj_paramRS.arr_metaColumn;
-                for (let i = 0; i < arr.length; i++) {                        
-                  let obj_metaColumn=arr[i];
-                  console.log("["+ i + "]: " + obj_metaColumn.str_name + " MenuPin: " + obj_metaColumn.MenuPin);                    
-                }
-              }
-
-              fn_getMenuPinColumn(){                  
-                let arr=this.obj_paramRS.arr_metaColumn;                  
-                this.obj_paramRS.arr_menuPinColumn=[];
-                this.obj_paramRS.arr_infoPinColumn=[];
-                for (let i = 0; i < arr.length; i++) {                        
-                  let obj_metaColumn=arr[i];
-                  
-                  if(obj_metaColumn.MenuPin){                      
-                    this.obj_paramRS.arr_menuPinColumn.push(obj_metaColumn);
-                  }
-                  if(obj_metaColumn.InfoPin){
-                    this.obj_paramRS.arr_infoPinColumn.push(obj_metaColumn);
-                  }                    
-                }                  
-              }
-
-              
-              
-              fn_getMetaColumnViaName(str_name){
-
-
-                
-                let str_lname=str_name.toLowerCase();
-                let int_totalColumn=this.obj_paramRS.int_totalColumn;                  
-                
-                for (let i = 0; i < int_totalColumn; i++) {                        
-                  let obj_metaColumn=this.fn_getMetaColumn(i);                                        
-                  if(obj_metaColumn.str_name.toLowerCase()===str_lname){
-                    return obj_metaColumn;
-                  }
-                }
-              }
-              fn_getMetaColumnViaOrdinalPosition(int_num){
-                if(!this.obj_paramRS.arr_metaColumn){return;}
-                return this.obj_paramRS.arr_metaColumn[int_num];
-              }                
-              fn_getPDOMetaValue(obj_metaColumn, str_search){                  
-                let arr=obj_metaColumn.arr_metaColumnPDO;
-                if(!arr){//can be empty object meta column, need to trap before this
-                  return;
-                }
-                return arr[str_search];        
-              }
-              fn_getMetaFlag(obj_metaColumn, str_search){                  
-                //console.log(obj_metaColumn);                  
-                let arr=obj_metaColumn.arr_metaColumnPDO;                  
-                //console.log("obj_metaColumn.arr_metaColumnPDO follows");                  
-                //console.log(arr);                  
-                let arrFlag=arr["flags"];                                    
-                return obj_shared.fn_inArray(str_search, arrFlag);
-              }
-              fn_getMetaColumnViaMetaName(MetaSchemaName, MetaTableName, MetaColumnName){
-                
-                let int_totalColumn=this.obj_paramRS.int_totalColumn;
-                for (let i = 0; i < int_totalColumn; i++) {                        
-                  let obj_metaColumn=this.fn_getMetaColumn(i);                                      
-                  if(obj_metaColumn.MetaSchemaName!==MetaSchemaName){continue;}
-                  if(obj_metaColumn.MetaTableName!==MetaTableName){continue;}
-                  if(obj_metaColumn.MetaColumnName!==MetaColumnName){continue;}
-                  return obj_metaColumn;
-                }
-                return false;
-              }    
-              fn_getMetaColumnViaMetaShortName(MetaSchemaName, MetaTableName, MetaColumnAPIName){
-                
-                let int_totalColumn=this.obj_paramRS.int_totalColumn;
-                for (let i = 0; i < int_totalColumn; i++) {                        
-                  let obj_metaColumn=this.fn_getMetaColumn(i);                    
-                  if(obj_metaColumn.MetaSchemaName!==MetaSchemaName){continue;}
-                  if(obj_metaColumn.MetaTableName!==MetaTableName){continue;}
-                  if(obj_metaColumn.MetaColumnAPIName!==MetaColumnAPIName){continue;}
-                  return obj_metaColumn;
-                }
-                return false;
-              }    
-              
-              
-              fn_getMetaColumnViaFieldName(str_name){//should be deprecated in favour of fn_getMetaColumnViaMetaName, which includes schemaane                  
-
-                let str_lname=str_name.toLowerCase();
-                let int_totalColumn=this.obj_paramRS.int_totalColumn;
-                for (let i = 0; i < int_totalColumn; i++) {                        
-                  let obj_metaColumn=this.fn_getMetaColumn(i);                    
-                  let str_lnameField=obj_metaColumn.MetaColumnName.toLowerCase();                                        
-                  if(str_lnameField===str_lname){
-                    return obj_metaColumn;
-                  }
-                }
-              }    
-              fn_getMetaColumnViaFieldShortName(str_shortname){//should be deprecated in favour of fn_getMetaColumnViaMetaName, which includes schemaane                  
-
-                let str_lshortname=str_shortname.toLowerCase();
-                let int_totalColumn=this.obj_paramRS.int_totalColumn;
-                for (let i = 0; i < int_totalColumn; i++) {                        
-                  let obj_metaColumn=this.fn_getMetaColumn(i);                    
-                  let str_lshortnameField=obj_metaColumn.MetaColumnAPIName.toLowerCase();                                        
-                  if(str_lshortnameField===str_lshortname){
-                    return obj_metaColumn;
-                  }
-                }
-              }    
-              
-              fn_onComputeColumn(){}
-
-              fn_getMetaColumnPrimaryKey(obj_metaColumnTemplate){                  
-
-                //console.log("obj_metaColumnTemplate follows");
-                //console.log(obj_metaColumnTemplate);
-
-                let obj_metaColumn=obj_metaColumnTemplate;
-
-                if(obj_metaColumn.PrimaryPin){//MARKED IN DFATABASE, SET ON AUTOFORM                                                                               
-                  return obj_metaColumn;
-                }
-
-                //if(this.fn_getMetaFlag(obj_metaColumn, "primary_key")){//AUTO GENERATED NOT IDEAL AFFECTED BY ORDER BY                                                                                  
-                  //return obj_metaColumn;
-                //}
-                
-                let int_totalColumn=this.obj_paramRS.int_totalColumn;
-                for (let i = 0; i < int_totalColumn; i++) {
-                  let obj_metaColumn=this.fn_getMetaColumn(i);                                                            
-                  if(!obj_metaColumn){continue;}                                          
-
-                  if(obj_metaColumn.MetaSchemaName!==obj_metaColumnTemplate.MetaSchemaName){continue;}                      
-                  if(obj_metaColumn.MetaTableName!==obj_metaColumnTemplate.MetaTableName){continue;}                      
-
-                  if(obj_metaColumn===obj_metaColumnTemplate){                      
-                    continue;
-                  }                      
-                  if(obj_metaColumn.PrimaryPin){//MARKED IN DFATABASE, SET ON AUTOFORM
-                    return obj_metaColumn;
-                  }
-
-                  //if(this.fn_getMetaFlag(obj_metaColumn, "primary_key")){//AUTO GENERATED NOT IKDEAL AFFECTED BY ORDER BY                  
-                   // return obj_metaColumn;
-                  //}
-                }
-                return false;
-              }                
-              
-              
-
-
-              /////////////////////////
-              /////////////////////////
-              /////////////////////////
-              //END Meta Column Function
-              
-            }//END CLS
-            //END TAG
-            //END component/xapp_data
-/*type: xapp_data//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_dataform//*/
-
-            //XSTART component/xapp_dataform
-              class xapp_dataform extends xapp_data{
-                constructor(obj_ini) {      
-                  super(obj_ini);        
-                } 
-                fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                          
-
-                  this.str_defaultTypeRow="xapp_rowform";
-                  this.str_defaultTypeColumn="xapp_columnform";                  
-                  this.fn_initialize_var();
-                }
-
-                fn_initializeRS(obj_menuButton){                                  
-
-                  super.fn_initializeRS(obj_menuButton);
-                  
-                  this.fn_setAutoJoin(false);                      
-                }
-
-                fn_onDataStart(){                  
-                  super.fn_onDataStart();
-                  let obj_menuButton=this.obj_paramRS.obj_menuButton;  
-                }
-
-                fn_iniDataView(){
-                  super.fn_iniDataView();
-
-                  let bln_value=this.fn_getQueryModeNewRecord();
-                  if(bln_value){                                    
-                    //1 row full of qualifiedname emptyvalue pairs                  
-
-                    this.obj_post.RowData=[];
-                    this.obj_post.RowData[0]={};
-                    let obj_ROW=this.obj_post.RowData[0];                                          
-                    let obj_meta;
-                    let arr_metaColumn=this.obj_paramRS.arr_metaColumn;
-                    for(var i=0;i<arr_metaColumn.length;i++){                            
-                      obj_meta=arr_metaColumn[i];                      
-                      obj_ROW[obj_meta.str_nameQualified]="";                      
-                    }
-                  }  
-                }
-
-                fn_iniTotalRow(bln_postProcess){ 
-                  super.fn_iniTotalRow(bln_postProcess);
-
-                  switch(this.obj_paramRS.int_totalRowReturned){
-                    case (0)://no row found
-                      this.fn_setDisplay(false);                  
-                    break;
-                    case (1)://single row found                                     
-                      this.obj_paramRS.bln_showFieldHeading=true;                               
-                      this.obj_paramRS.bln_autoSection=true;//one section                                    
-                      this.obj_paramRS.bln_axis=false;//flex column
-                      this.fn_setAxis(this.obj_paramRS.bln_axis);
-                    break;
-                    default:
-                      if(this.obj_paramRS.int_totalRowReturned>1){//many rows                                    
-                        this.obj_paramRS.bln_showFieldHeading=false;                               
-                        this.obj_paramRS.bln_autoSection=false;//one section                                    
-                        this.obj_paramRS.bln_axis=false;//flex row
-                        this.fn_setAxis(this.obj_paramRS.bln_axis);
-                      }
-                  }                                    
-                }
-
-                fn_getPermissionAddRow(obj_row){
-
-                  if(this.fn_getQueryModeNewRecord()){                    
-                    let obj_permitParam=obj_row.obj_paramRow.obj_metaData;                                                 
-                    obj_permitParam.MetaPermissionTag="100";                    
-                  }
-                  
-                  return super.fn_getPermissionAddRow(obj_row);
-                }
-                
-                fn_runPushColumn(obj_column){                     
-                  //console.log("fn_runPushColumn");                  
-
-                  let obj_ini=this.obj_holder.obj_query;                        
-                  obj_ini.str_action="runPushColumn";                  
-                  
-                  //console.log("send MetaKeyColumnValue: " + obj_ini.str_metaKeyColumnValue);
-
-                  obj_ini.str_nameFolderServer=this.obj_holder.obj_query.str_nameFolderServer;                     
-                  
-                  
-                  this.fn_runServerAction(obj_ini);
-                } 
-                fn_resetAutoJoin(){
-                  this.fn_debugText("fn_resetAutoJoin");
-                  this.fn_setAutoJoin(false);
-                  this.fn_setAutoJoinToSource("");                  
-                  this.fn_setAutoJoinToKeyValue("");                  
-                  this.fn_setAutoJoinToKeyName("");                  
-                  this.fn_setAutoJoinFromKeyValue("");                  
-                  this.fn_setAutoJoinFromKeyName("");                  
-                  this.fn_setLinkOffPin(false);
-                  this.fn_setLinkOnPin(false);                  
-                }
-                fn_setAutoJoin(bln_value){
-                  this.fn_setAutoJoinPin(bln_value);
-                  this.fn_setAutoJoinFilterPin(bln_value);                                    
-                }
-                fn_setAutoJoinPin(bln_value){                                  
-                  this.obj_holder.obj_query.bln_autoJoinPin=bln_value;                  
-                }     
-                fn_setAutoJoinFilterPin(bln_value){                              
-                  this.obj_holder.obj_query.bln_autoJoinFilterPin=bln_value;                  
-                }     
-                fn_setAutoJoinToSource(str_value){                                                    
-                  this.obj_holder.obj_query.str_autoJoinToSource=str_value;
-                }     
-                fn_setAutoJoinToKeyValue(str_value){                                                    
-                  this.obj_holder.obj_query.str_autoJoinToKeyValue=str_value;                  
-                }                                     
-                fn_setAutoJoinToKeyName(str_value){                  
-                  this.obj_holder.obj_query.str_autoJoinToKeyName=str_value;                  
-                }     
-                
-                fn_setAutoJoinFromKeyValue(str_value){
-                  this.obj_holder.obj_query.str_autoJoinFromKeyValue=str_value;
-                }
-                fn_setAutoJoinFromKeyName(str_value){                  
-                  this.obj_holder.obj_query.str_autoJoinFromKeyName=str_value;                  
-                }
-                fn_setLinkOffPin(bln_value){                                                    
-                  this.obj_holder.obj_query.bln_linkOffPin=bln_value;
-                }
-                fn_setLinkOnPin(bln_value){                                                    
-                  this.obj_holder.obj_query.bln_linkOnPin=bln_value;
-                }               
-                
-                
-                runPushColumn(obj_post){  
-                  this.obj_post=obj_post;
-                  this.fn_receiveColumn(obj_post);
-                }
-                
-                fn_receiveColumn(obj_post){      
-                  
-                  //reset to original id                
-                  this.obj_holder.obj_query.int_idMetaView=this.obj_paramRS.obj_menuButton.fn_getMetaViewId();                
-                  //reset to original id
-
-                  //to do check wether the form has not been altered by another user action in the meantime                  
-                  if(!this.obj_paramRS.arr_rows){return;}                  
-
-                  //currently not used , but remains as template for row-wide event handle
-                  //this.fn_setModeUnLocked();                    
-                  
-                  let obj_metaColumn=this.fn_setMetaColumnValue(this.obj_post.MetaColumnPosition, this.obj_post.MetaColumnValue);
-                  if(!obj_metaColumn){
-                    console.log("Error: DataForm- Column Not found. fn_receiveColumn.");
-                    return;
-                  } 
-
-                  //console.log("obj_metaColumn.str_name: " + obj_metaColumn.str_name);                 
-
-                  if(obj_post.ModeNewRecord){
-                    this.fn_setQueryModeNewRecord(false);//turn off new record mode
-                    this.fn_onNewRecordUpdateMetaKey(obj_post);
-                    this.fn_onNewRecordUpdateDataKey(obj_post);                    
-                  }                
-
-                  this.obj_paramRS.obj_row.fn_removeThemeError();                                    
-                  
-                  if(obj_post.Response && obj_post.Response.column_required){                                               
-                    let obj_columnRequired=this.obj_paramRS.obj_row.fn_getColumnViaName(obj_post.Response.column_required);                    
-                    obj_columnRequired.fn_applyThemeError();
-                  }                  
-
-                  let obj_column=this.obj_paramRS.obj_row.fn_getColumnViaName(obj_metaColumn.str_name);                                      
-                  obj_column.fn_receiveColumn();
-                  
-                  this.obj_paramRS.obj_menuButton.fn_receiveColumn(this, obj_column, obj_post);
-                  /*
-                  if(this.obj_paramRS.obj_menuButton.bln_dynamicMenu){//menuButton is generated from dataset
-                    if(obj_metaColumn.MenuPin){
-                      this.obj_paramRS.obj_menuButton.fn_updateButtonText(this);                    
-                    }
-                  } 
-                    //*/            
-                }
-
-                fn_onNewRecordUpdateMetaKey(obj_post){
-
-                  let obj_metaColumnKey
-                  obj_metaColumnKey=this.fn_getMetaColumnViaMetaName(obj_post.MetaKeySchemaName, obj_post.MetaKeyTableName, obj_post.MetaKeyColumnName);
-                  if(!obj_metaColumnKey){
-                    alert("1 fn_onNewRecordUpdateMetaKey obj_metaColumnKey is false");
-                    return;};
-                  obj_metaColumnKey.str_value=obj_post.MetaKeyColumnValue;  
-
-                  let obj_columnKey=this.obj_paramRS.obj_row.fn_getColumnViaPosition(obj_metaColumnKey.int_ordinalPosition);                                                                                                            
-                  obj_columnKey.fn_setValue(obj_metaColumnKey.str_value);                                    
-                  obj_columnKey.fn_setText(obj_metaColumnKey.str_value);                                    
-                  
-
-                  //console.log(obj_columnKey);                  
-                  //obj_columnKey.fn_debug();
-                  
-                  
-
-                  this.fn_onNewRecordPushDefaultValueColumns();
-
-                  let obj_menuButton=this.obj_paramRS.obj_menuButton;
-                  obj_menuButton.fn_onNewRecordUpdateMetaKey(obj_columnKey);
-
-                }
-                fn_onNewRecordUpdateDataKey(obj_post){
-
-                  let obj_metaColumnKey;
-                  obj_metaColumnKey=this.fn_getMetaColumnViaMetaName("meta_data", "meta_data", "MetaDataId");
-                  if(!obj_metaColumnKey){
-                    alert("2 fn_onNewRecordUpdateDataKey obj_metaColumnKey is false");
-                    return;};
-                  obj_metaColumnKey.str_value=obj_post.DataKeyColumnValue;                                      
-
-                  let obj_columnKey=this.obj_paramRS.obj_row.fn_getColumnViaPosition(obj_metaColumnKey.int_ordinalPosition);
-                  obj_columnKey.fn_setValue(obj_metaColumnKey.str_value);                                    
-                  obj_columnKey.fn_setText(obj_metaColumnKey.str_value);                                    
-                  
-                  this.fn_onNewRecordPushDefaultValueColumns(true);
-                }
-
-                
-                fn_onNewRecordPushDefaultValueColumns(bln_isData=false){
-
-                  let obj_row, obj_column;
-                  obj_row=this.obj_paramRS.arr_rows[0];
-                  if(obj_row){
-                    obj_row.fn_onNewRecordPushDefaultValueColumns(bln_isData);                                    
-                  }
-                  return false;
-                }
-
-                fn_setMetaColumnKey(obj_column){                  
-                  
-                  if(!obj_column.fn_getMetaColumnKey() || this.fn_getQueryModeNewRecord()){
-                    let obj_metaColumnTemplate=obj_column.obj_metaColumn;
-                    let obj_metaColumnKey=this.fn_getMetaColumnPrimaryKey(obj_metaColumnTemplate);                                                                          
-                    obj_column.fn_setMetaColumnKey(obj_metaColumnKey);
-                  }
-                }
-
-                
-                fn_getColumnViaRowColumnPosition(int_rowPosition, int_columnPosition){
-
-                  let obj_row, obj_column;
-                  obj_row=this.obj_paramRS.arr_rows[int_rowPosition];
-                  if(obj_row){
-                    obj_column=obj_row.fn_getColumnViaPosition(int_columnPosition);                  
-                    if(obj_column){
-                      return obj_column;
-                    }
-                  }
-                  return false;
-                }                
-
-                fn_archiveRecord(obj_columnKey){   
-
-                  let int_columnKey=obj_columnKey.fn_getColumnValue();
-                  this.obj_holder.obj_query.str_metaKeyColumnValue=int_columnKey;
-                  this.fn_runArchiveRecord();
-                }
-
-                fn_runArchiveRecord(){                                       
-                  let obj_ini=this.obj_holder.obj_query;                        
-                  obj_ini.str_action="runArchiveRecord";                                                              
-                  this.fn_runServerAction(obj_ini);
-                }
-                runDeleteRow(){                                      
-                  this.obj_paramRS.obj_menuButton.fn_onDeleteDynamicRow();//should be a dynamic menu                                    
-                } 
-                runArchiveRecord(){
-                  //console.log("runArchiveRecord");
-                  this.obj_paramRS.obj_menuButton.fn_onArchiveRecord();//should be a dynamic menu                                    
-                } 
-                
-
-                
-                fn_pushColumn(obj_column){                             
-                  //console.log("data fn_pushColumn");
-
-                  //currently not used , but remains as template for row-wide event handle
-                  //this.fn_setModeLocked();                  
-                  
-                  //used to update or insert or delete record                                    
-                  let bln_value=this.fn_formatColumnQuery(obj_column);                  
-                  if(!bln_value){return;}
-                  
-                  this.fn_runPushColumn(obj_column);
-                } 
-
-                fn_formatColumnQuery(obj_column){
-
-                  let obj_row, obj_columnKey, obj_metaColumn, obj_metaColumnKey;
-
-                  let bln_formNewRecord=this.obj_holder.obj_query.bln_modeNewRecord;                                    
-
-                  obj_metaColumn=obj_column.obj_metaColumn;
-
-                  this.fn_setMetaColumnKey(obj_column);                  
-                  obj_metaColumnKey=obj_column.fn_getMetaColumnKey();//we dont have akey for this field, so no update , (but can insert ?)                                    
-                  if(!obj_metaColumnKey && !bln_formNewRecord){                    
-                    //alert("!obj_metaColumnKey && !bln_formNewRecord");
-                    return false;//no update
-                  }             
-
-                  obj_row=obj_column.obj_row;
-                  obj_columnKey=obj_row.fn_getColumnKey(obj_column);//either the record id or  metadata id                                                            
-                  if(!obj_columnKey){
-                    //alert("fn_formatColumnQuery: column key is false");
-                    return false;
-                  }
-                  
-                  //console.log("obj_columnKey.str_value: " + obj_columnKey.str_value);
-                  //We have potentially just changed the view from the main menu view                                    
-                  this.obj_holder.obj_query.int_idMetaView=obj_metaColumn.MetaViewId;
-                  //We have potentially just changed the view from the main menu view
-                  //we will reset on return
-
-                  this.obj_holder.obj_query.str_metaSchemaName=obj_metaColumn.MetaSchemaName;
-                  this.obj_holder.obj_query.str_metaTableName=obj_metaColumn.MetaTableName;
-                  this.obj_holder.obj_query.str_metaColumnName=obj_metaColumn.MetaColumnName;
-                  this.obj_holder.obj_query.str_metaColumnAPIName=obj_metaColumn.MetaColumnAPIName;
-                  this.obj_holder.obj_query.str_metaColumnValue=obj_column.fn_getColumnValue();
-                  this.obj_holder.obj_query.str_metaList=obj_metaColumn.MetaList;
-                  this.obj_holder.obj_query.str_metaListIdValue=obj_column.str_metaListIdValue;
-                  this.obj_holder.obj_query.str_metaOption=obj_metaColumn.MetaOption;
-                  
-                  
-                  this.obj_holder.obj_query.str_metaColumnPosition=obj_column.obj_metaColumn.int_ordinalPosition;
-                  this.obj_holder.obj_query.str_metaRowPosition=obj_row.obj_paramRow.int_ordinalPosition;                  
-                  this.obj_holder.obj_query.str_metaColumnId=obj_column.obj_metaColumn.MetaColumnId;
-
-                  this.obj_holder.obj_query.str_metaKeySchemaName=obj_metaColumnKey.MetaSchemaName;
-                  this.obj_holder.obj_query.str_metaKeyTableName=obj_metaColumnKey.MetaTableName;
-                  this.obj_holder.obj_query.str_metaKeyColumnName=obj_metaColumnKey.MetaColumnName;
-                  this.obj_holder.obj_query.str_metaKeyColumnValue=obj_columnKey.str_value;
-
-                  //USED TO CHANGE BETWEEN SYSTEMS IN OFFICE
-                  let obj_metaColumnMetaSystemId=this.fn_getMetaColumnViaMetaName("meta_data", "meta_data", "MetaDataSystemId");                                    
-                  if(obj_metaColumnMetaSystemId){
-                    let obj_columnDataSystemId=obj_row.fn_getColumnViaPosition(obj_metaColumnMetaSystemId.int_ordinalPosition);                                                        
-                    if(obj_columnDataSystemId){
-                      this.obj_holder.obj_query.str_metaDataSystemId=obj_columnDataSystemId.fn_getValue();                    
-                    }
-                  };                                     
-                  //USED TO CHANGE BETWEEN SYSTEMS IN OFFICE
-
-                  return true;
-                }                               
-
-                //UPDATE LIST
-                fn_updateListSelect(obj_column){                     
-
-                  let bln_value=this.fn_formatColumnQuery(obj_column);                  
-                  if(!bln_value){return;}
-
-                  this.fn_runUpdateListSelect(obj_column);
-                }                
-
-                fn_runUpdateListSelect(obj_column){                                       
-
-                  let obj_ini=this.obj_holder.obj_query;                        
-                  obj_ini.str_action="updateDropdownList";
-                  obj_ini.str_nameFolderServer=this.obj_holder.obj_query.str_nameFolderServer;                  
-                  this.fn_runServerAction(obj_ini);
-                }
-
-                updateDropdownList(obj_post){  
-                  this.obj_post=obj_post;                                   
-                  
-                } 
-                //UPDATE LIST
-
-                //GET LIST
-                fn_getListSelectFromServer(obj_column){                                       
-
-                  let bln_value=this.fn_formatColumnQuery(obj_column);                  
-                  if(!bln_value){return;}
-                  
-                  let obj_ini=this.obj_holder.obj_query;                        
-                  obj_ini.str_action="getDropdownList";
-                  obj_ini.str_nameFolderServer=this.obj_holder.obj_query.str_nameFolderServer;                  
-                  this.fn_runServerAction(obj_ini);
-                }
-                getDropdownList(obj_post){  
-                  this.obj_post=obj_post;                                   
-                  this.fn_receiveDropdownList(obj_post);
-                }                 
-                fn_receiveDropdownList(obj_post){   
-                  //locate column and update list
-                  let obj_column=this.fn_getColumnViaRowColumnPosition(obj_post.MetaRowPosition, obj_post.MetaColumnPosition);                                                                        
-                  if(!obj_column){return;}                                    
-                  obj_column.fn_receiveDropdownList(obj_post);
-                }
-                //GET LIST
-
-                fn_setModeExecuteNew(){
-                  this.int_modeExecute=obj_holder.int_modeNew;                  
-                  return false;
-                }
-                fn_getModeExecuteNew(){
-                  if(this.int_modeExecute===obj_holder.int_modeNew){return true;}
-                  return false;
-                }
-                fn_setModeExecuteEdit(){                                                      
-                  super.fn_setModeExecuteEdit();                                 
-
-                  let i, arr_rows, obj_row;
-                  arr_rows=this.obj_paramRS.arr_rows;
-                  if(!arr_rows){return;}
-                  for(i=0;i<arr_rows.length;i++){
-                    obj_row=arr_rows[i];
-                    obj_row.fn_setModeExecuteEdit();
-                  }
-                }                
-                
-                fn_setQueryModeNewRecord(bln_value){
-                  this.obj_holder.obj_query.bln_modeNewRecord=bln_value;                                                     
-                  
-                }                
-                fn_getQueryModeNewRecord(){
-                  return this.obj_holder.obj_query.bln_modeNewRecord;                  
-                }                
-                                 
-                                               
-                fn_setModeLocked(){                                    
-                  //currently not used , but remains as template for row-wide event handle
-                  let i, arr_rows, obj_row;
-                  arr_rows=this.obj_paramRS.arr_rows;
-                  for(i=0;i<arr_rows.length;i++){
-                    obj_row=arr_rows[i];
-                    obj_row.fn_onDataSetModeLocked();                                      
-                  }                  
-                }
-                fn_setModeUnLocked(){  
-                  //currently not used , but remains as template for row-wide event handle
-                  let i, arr_rows, obj_row;
-                  arr_rows=this.obj_paramRS.arr_rows;
-                  if(!arr_rows){                    
-                    return;
-                  }
-                  for(i=0;i<arr_rows.length;i++){
-                    obj_row=arr_rows[i];
-                    obj_row.fn_onDataSetModeUnLocked();                                      
-                  }
-                }
-                fn_getModeLocked(){                  
-                  if(this.int_modeExecute===obj_holder.int_modeLocked){
-                    return true;
-                  }             
-                  return false;                       
-                }
-
-                xfn_cascadeFlipHeading(){        
-                  this.obj_paramRS.bln_showFieldHeading=obj_shared.fn_flipBool(this.obj_paramRS.bln_showFieldHeading);
-                  super.xfn_cascadeFlipHeading(this.obj_paramRS.bln_showFieldHeading);                
-                }                 
-                
-                fn_onComputeColumn(obj_column){}
-              }//END CLS
-              //END TAG
-              //END component/xapp_dataform
-/*type: xapp_dataform//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_inputandbutton//*/
-
-            //XSTART component/form_inputandbutton
-            class form_inputandbutton extends component{
-              constructor(obj_ini) {      
-                super(obj_ini);        
-              } 
-              fn_initialize(obj_ini){
-                super.fn_initialize(obj_ini);                
-              }
-              fn_onLoad(){                  
-                super.fn_onLoad();
-                this.fn_resetInput();  
-              } 
-              fn_resetInput(){                
-                this.fn_setValue("");                  
-              } 
-              fn_onLinkButtonClick(e){                                       
-                return this.fn_getValue();                 
-              }
-              fn_getValue(){                     
-                let str_value=this.fn_notify(this.fn_getComponent("form_inputandbutton_input"), "fn_getValue");                  
-                //console.log("str_value: " + str_value);
-                return str_value;                  
-              }
-              fn_setValue(str_value){                     
-                this.fn_notify(this.fn_getComponent("form_inputandbutton_input"), "fn_setValue", str_value);                                    
-              }
-              
-              fn_onChildKeyDown(e){this.fn_onLinkInputKeyDown(e);}                
-              fn_onLinkInputKeyDown(e){}//overidden
-              
-              fn_onChildMouseDown(e){this.fn_onLinkInputMouseDown(e);}                
-              fn_onLinkInputMouseDown(e){}//overidden
-              
-              fn_onChildChange(){}                
-              
-            }//END CLS
-            //END TAG
-            //END component/form_inputandbutton
-/*type: form_inputandbutton//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button//*/
-      //XSTART component/xapp_button
-      class xapp_button extends form_button_rich{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        
-      }//END CLS
-      //END TAG
-      //END component/xapp_button        
-/*type: xapp_button//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_console_button//*/
-
-            //XSTART component/console_button
-              class xapp_console_button extends xapp_button{
-                constructor(obj_ini) {      
-                  super(obj_ini);        
-                } 
-                fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                                  
-                }                
-                fn_configureFromMeta(obj_row){
-    
-                  if(!obj_row){return;}//can be false at top level  
-                            
-                  console.log("xapp_console_button fn_configureFromMeta");
-                  let obj_metaColumn;        
-                  let obj_recordset=obj_row.obj_paramRS.obj_recordset;
-                  
-                  obj_metaColumn=obj_recordset.fn_getMetaColumnViaFieldName("MetaRowzTitle");
-                  if(obj_metaColumn){                              
-                    this.fn_setText(obj_metaColumn.str_value);                 
-                  } 
-                }                 
-              }//END CLS
-              //END TAG
-              //END component/console_button
-/*type: xapp_console_button//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_form//*/
-
-            //XSTART component/form_form
-              class form_form extends component{
-                constructor(obj_ini) {      
-                  super(obj_ini);        
-                }                
-
-                fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                      
-                  
-                  this.obj_holder.bln_listenSubmit=true;
-              }    
-
-              fn_onSubmit(e){                              
-
-                //alert("form fn_onSubmit: " + e.type);
-                obj_project.fn_forgetEvent(e);                
-                this.fn_parentEventBubble("Submit", e);//this causes things to happen                  
-              }
-              }//END CLS
-              //END TAG
-              //END component/form_form
-/*type: form_form//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
 /*type: xapp_dashboard//*/
 
             //XSTART component/xapp_dashboard
@@ -12911,2573 +13258,65 @@ class table extends component {
 
 
 /*START COMPONENT//*/
-/*type: xapp//*/
+/*type: form_inputandbutton//*/
 
-            //XSTART component/xapp
-              class xapp extends xapp_ajax{
-                constructor(obj_ini) {      
-                  super(obj_ini);        
-                } 
-                fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                                          
-                  
-                  this.obj_design.int_radioDisplayMode=3;//Menu function Option
-                  this.fn_setRadioDisplayMode();                                  
-                  this.obj_design.bln_allowDelete=false;
-                  this.obj_design.bln_autoFetch=false;
-
-                  this.obj_holder.bln_debugServer=false;
-
-                  
-                  this.MetaDataViewId=101426;//meta_data
-                  this.MetaDataViewName="meta_data";
-          
-                  this.MetaUserViewId=1;//meta_user
-                  this.MetaUserViewName="meta_user";
-          
-                  this.MetaLinkViewId=100475;//meta_link
-                  this.MetaLinkViewName="meta_link"; 
-
-                  this.obj_themeOptions={
-                    
-
-                  };
-                  
-                  
-                  //obj_path.fn_explainNavigateRecordURL();                  
-                }           
-                fn_getAllowDelete(){
-                  return this.obj_design.bln_allowDelete;
-                }
-                fn_endAuthorize(){                        
-                  obj_path.fn_navigateSubdomain("lock");
-                }
-                
-                fn_setRadioDisplayMode(){                  
-                  this.bln_togglePeersPin=false;
-                  this.bln_closePeersPin=false;
-                  this.bln_autoPin=false;
-          
-                  switch(this.obj_design.int_radioDisplayMode){                              
-                    case 1:                                  
-                    break;
-                    case 2:            
-                      this.bln_togglePeersPin=true;
-                    break;
-                    case 3:                     
-                      this.bln_togglePeersPin=true;                       
-                      this.bln_closePeersPin=true;
-                    break;
-                    case 10:
-                      this.bln_autoPin=true;                
-                    break;
-                    default:            
-                    break;
-                  }       
-                }     
-                fn_setAccordionChildMenu(){        
-                  let obj_container;                  
-                  obj_container=this.fn_getComponent("xapp_dynamic_content");
-                  if(!obj_container){
-                    console.log("ERROR A: XAPP fn_setAccordionChildMenu component not found xapp_dynamic_content");
-                    return;
-                  }             
-                  this.obj_holder.obj_accordionChildMenu=obj_container.fn_addContextItemOnce("xapp_accordion");
-                  if(!this.obj_holder.obj_accordionChildMenu){
-                              console.log("ERROR B: XAPP fn_setAccordionChildMenu context item not found xapp_accordion");
-                  }
-                  
-                }            
-                fn_getAccordionChildMenu(){        
-                  return this.obj_holder.obj_accordionChildMenu;
-                }
-                fn_onAuthorizeUserStatus(){//logged in 
-              
-                  if(this.fn_hasContextHolderParent()){return;}                                  
-                  
-                  this.fn_setAccordionChildMenu();                      
-                  
-                  let obj_container=this.fn_getAccordionChildMenu();                              
-                  
-                  if(!obj_container){
-                    console.log("ERROR C: fn_onAuthorizeUserStatus AccordionChildMenu is false");
-                    return;
-                  }                
-                  
-                  let obj_item=obj_container.fn_addContextItem("xapp_menu");                                  
-                  if(obj_item){          
-                    obj_item.obj_menuProject=this;
-                    obj_item.bln_isAppRoot=true;
-                    this.obj_menuButton=obj_item;
-                    obj_item.fn_setText("APP ROOT");                          
-
-
-                    //initial menu can be selected, either menuname or subdomain                    
-                    let str_subdomain=this.obj_design.str_releaseLabel;                    
-                    if(str_subdomain==="notset" ||!str_subdomain){
-                      str_subdomain=this.obj_design.str_nameShort;                      
-                    }
-                
-                    obj_item.fn_setSubdomain(str_subdomain);                                                            
-                    this.fn_displayMenu(obj_item);//Set to True to display as the first menu, and to debug the first menu
-                  } 
-                  else{
-                    console.log("ERROR: Unable to locate Context Item menu");
-                  }   
-                }      
-                fn_displayMenu(obj_item){                  
-                  
-                  let bln_debug=obj_path.fn_hasQueryStringValue(window.location.search, "mode", "debug");                                    
-                  obj_item.fn_setDisplay(bln_debug);    
-                  obj_item.fn_setDebugPin(bln_debug);                
-                  obj_item.fn_configureOptionChildMenu();                                                    
-                  obj_item.fn_open();          
-                } 
-                
-                fn_getStandardMenuByName(str_name){
-                  
-                  return this.obj_menuButton.fn_getMenuByName(str_name);
-                }    
-
-                
-          
-                
-              }//END CLS
-              //END TAG
-              //END component/xapp
-/*type: xapp//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_tablecell//*/
-
-            //XSTART component/form_tablecell
-              class form_tablecell extends component{
-                constructor(obj_ini) {      
-                  super(obj_ini);        
-                } 
-                fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);            
-                }         
-              fn_locateItem(str_idXDesign, str_type){
-                let arr, obj_item;
-                arr=this.obj_design.arr_item;
-                for(let i=0;i<arr.length;i++){
-                    obj_item=arr[i];     
-                    
-                    if(obj_item.fn_getType()===str_type){
-                      if(obj_item.obj_design.str_idXDesign==str_idXDesign){
-                        return obj_item;
-                      }
-                      if(obj_item.obj_design.str_linkId==str_idXDesign){
-                        return obj_item;
-                      }
-                    }
-                }
-                return false;
-              } 
-              }//END CLS
-              //END TAG
-              //END component/form_tablecell
-/*type: form_tablecell//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_inputandbutton_submit//*/
-
-            //XSTART component/form_inputandbutton_submit
-            class form_inputandbutton_submit extends form_button_rich{
+            //XSTART component/form_inputandbutton
+            class form_inputandbutton extends component{
               constructor(obj_ini) {      
                 super(obj_ini);        
               } 
               fn_initialize(obj_ini){
-                super.fn_initialize(obj_ini);           
-
-                this.obj_holder.bln_listenClick=true;
-                this.obj_holder.bln_listenDblClick=true;
-
-                
-                this.bln_enabled=true;
-              }                              
-              fn_onClick(e){                                                      
-                
-                this.fn_notifyParent("fn_onLinkButtonClick", e);                                    
-                obj_project.fn_unsetEvent();    
+                super.fn_initialize(obj_ini);                
               }
-              fn_onDblClick(e){                                                                    
-                //console.log("form_inputandbutton_submit fn_onDblClick");
-                
-                obj_project.fn_unsetEvent();    
+              fn_onLoad(){                  
+                super.fn_onLoad();
+                this.fn_resetInput();  
+              } 
+              fn_resetInput(){                
+                this.fn_setValue("");                  
+              } 
+              fn_onLinkButtonClick(e){                                       
+                return this.fn_getValue();                 
               }
+              fn_getValue(){                     
+                let str_value=this.fn_notify(this.fn_getComponent("form_inputandbutton_input"), "fn_getValue");                  
+                //console.log("str_value: " + str_value);
+                return str_value;                  
+              }
+              fn_setValue(str_value){                     
+                this.fn_notify(this.fn_getComponent("form_inputandbutton_input"), "fn_setValue", str_value);                                    
+              }
+              
+              fn_onChildKeyDown(e){this.fn_onLinkInputKeyDown(e);}                
+              fn_onLinkInputKeyDown(e){}//overidden
+              
+              fn_onChildMouseDown(e){this.fn_onLinkInputMouseDown(e);}                
+              fn_onLinkInputMouseDown(e){}//overidden
+              
+              fn_onChildChange(){}                
+              
             }//END CLS
             //END TAG
-            //END component/form_inputandbutton_submit
-/*type: form_inputandbutton_submit//*/
+            //END component/form_inputandbutton
+/*type: form_inputandbutton//*/
 /*END COMPONENT//*/
 
 
 /*START COMPONENT//*/
-/*type: authorise_end//*/
-      //XSTART component/authorise_end
-      class authorise_end extends xapp_ajax{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                      
-          this.obj_holder.bln_debugServer=false;
-        }
-        fn_onLoad(){ //base object should be called
-          super.fn_onLoad();     
-          
-          if(obj_project.fn_hasContextHolderParent()){return;}                          
-      
-          this.fn_endAuthorize();        
-        }  
-        fn_endAuthorize(){  
-      
-          let obj_ini=new Object;            
-          obj_ini.str_action="endAuthorize";                    
-          this.fn_runServerAction(obj_ini);                                          
-      }       
-      }//END CLS
-      //END TAG
-      //END component/authorise_end        
-/*type: authorise_end//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: block//*/
-
-      //XSTART component/block
-        class block extends component{
-          constructor(obj_ini) {      
-            super(obj_ini);        
-          } 
-          fn_initialize(obj_ini){
-            super.fn_initialize(obj_ini);                                        
-            
-          }
-        }//END CLS
-        //END TAG
-        //END component/block
-        
-/*type: block//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: block_structure//*/
-      //XSTART component/block_structure
-      class block_structure extends component{
+/*type: xapp_button//*/
+      //XSTART component/xapp_button
+      class xapp_button extends form_button_rich{
         constructor(obj_ini) {      
           super(obj_ini);        
         } 
         fn_initialize(obj_ini){
           super.fn_initialize(obj_ini);                
         }
-        fn_onLoad(){
-          super.fn_onLoad();                
-
-          this.fn_setStyleProperty("display", "flex");
-          this.fn_setStyleProperty("flex-wrap", "wrap");
-          this.fn_setStyleProperty("flex", "1 1 auto");         
-          
-          let str_position=this.obj_design.str_position;          
-          switch(str_position){
-            case "start":                        
-            case "end":              
-              this.fn_setStyleProperty("justifyContent", str_position);              
-              break;
-          }          
-        }
-      }//END CLS
-      //END TAG
-      //END component/block_structure        
-/*type: block_structure//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_anchor//*/
-      //XSTART component/form_anchor
-      class form_anchor extends component{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-
-          this.obj_holder.bln_listenClick=true;          
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-
-        fn_onClick(e){                  
-
-          obj_project.fn_forgetEvent(e);    
-          //foregetevent                
-
-          this.fn_parentEventBubble("Click", e);//this causes things to happen                  
-          
-        }         
-
-        fn_onLoad(){
-          super.fn_onLoad();
-          this.obj_icon=this.fn_getComponent("form_button_icon");                              
-          this.obj_span=this.fn_getComponent("form_button_span");          
-        }
-
-        fn_showIcon(str_value){
-          
-          if(str_value){                                                    
-            this.obj_icon.fn_setText(str_value);                                  
-            this.obj_icon.fn_setStyleProperty("fontWeight", "bold");                                  
-            this.obj_icon.fn_setDisplay(true);          
-            this.obj_icon.fn_setClassName("material-icons");                                              
-          }         
-          else{
-            this.obj_icon.fn_setDisplay(false);                        
-          }
-
-        }  
-        fn_hideIcon(){
-          this.obj_icon.fn_setDisplay(false);
-        }
-
-        fn_setText(str_value){
-          this.obj_span.fn_setText(str_value);
-      }
-      }//END CLS
-      //END TAG
-      //END component/form_anchor        
-/*type: form_anchor//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_button_anchor//*/
-      //XSTART component/form_button_anchor
-      class form_button_anchor extends component{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        fn_onClick(e){                  
-
-          obj_project.fn_forgetEvent(e);    
-          //foregetevent                
-
-          this.fn_parentEventBubble("Click", e);//this causes things to happen                            
-        }        
-        ///////////////////////
-        ///////////////////////
-        ///////////////////////
-        fn_onLoad(){
-          super.fn_onLoad();
-          this.obj_icon=this.fn_getComponent("form_button_icon");                              
-          this.obj_span=this.fn_getComponent("form_button_span");          
-        }                
-        fn_setNavigationURL(str_value){                    
-          this.fn_setDomProperty("href", str_value);
-        }        
-
-        
-        fn_showIcon(str_value){
-
-          let bln_debug=false;          
-          
-          switch(str_value){                        
-              case "":                         
-              case "rowz_icon_blank":                         
-              //str_value="blank";
-              str_value='<svg width="0px" height="24px"></svg>';
-              break;              
-              case "xapp_xdezign":
-              //brush
-              str_value="brush";
-              break;
-              case "xdezign_project":
-              //str_value="flowchart";
-              str_value='<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#5f6368"><path d="M600-160v-80H440v-200h-80v80H80v-240h280v80h80v-200h160v-80h280v240H600v-80h-80v320h80v-80h280v240H600Z"/></svg>';                            
-              break;              
-              case "xdezign_tag":
-              str_value="sell";
-              break;         
-              case "xdezign_map":
-              str_value="map";
-              break;         
-              case "xapp_desk":            
-              str_value="chair";
-              break;
-              case "xapp_lock":
-              str_value="lock";
-              break;                     
-              case "xapp_rowz":
-              str_value="tag";
-              break;        
-              case "xapp_office":
-              //str_value="trophy";
-              str_value='<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#5f6368"><path d="M280-120v-80h160v-124q-49-11-87.5-41.5T296-442q-75-9-125.5-65.5T120-640v-40q0-33 23.5-56.5T200-760h80v-80h400v80h80q33 0 56.5 23.5T840-680v40q0 76-50.5 132.5T664-442q-18 46-56.5 76.5T520-324v124h160v80H280Zm0-408v-152h-80v40q0 38 22 68.5t58 43.5Zm200 128q50 0 85-35t35-85v-240H360v240q0 50 35 85t85 35Zm200-128q36-13 58-43.5t22-68.5v-40h-80v152Zm-200-52Z"/></svg>';
-              break;
-              case "rowz_activity":
-              str_value="alternate_email";
-              break;
-              case "rowz_contact":
-              //str_value="contacts_product" //not correctly hosted
-              str_value='<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#5f6368"><path d="M185-80q-17 0-29.5-12.5T143-122v-105q0-90 56-159t144-88q-40 28-62 70.5T259-312v190q0 11 3 22t10 20h-87Zm147 0q-17 0-29.5-12.5T290-122v-190q0-70 49.5-119T459-480h189q70 0 119 49t49 119v64q0 70-49 119T648-80H332Zm148-484q-66 0-112-46t-46-112q0-66 46-112t112-46q66 0 112 46t46 112q0 66-46 112t-112 46Z"/></svg>';
-              break;
-              case "rowz_hashtag":
-              str_value="tag";
-              break;
-              case "rowz_tag":
-              str_value="sell";
-              break;
-              case "rowz_upload_file":
-              str_value="upload_file";
-              break;              
-              case "rowz_template":
-              str_value="star";
-              break;
-              case "rowz_account":
-              str_value="attach_money";
-              break;
-              case "rowz_opportunity":
-              str_value="trending_up";              
-              break;
-              case "rowz_task":              
-              str_value="attach_file";              
-              break;
-              case "xapp_linkon":  
-              str_value="link";   
-              break;            
-              case "xapp_linkoff":  
-              str_value="link_off";   
-              break;            
-              case "xapp_top":  
-              str_value="arrow_upward";   
-              break;   
-              case "xapp_chevron_left":  
-              str_value="chevron_left";   
-              break;                 
-              case "xapp_chevron_right":  
-              str_value="chevron_right";   
-              break;                 
-              case "xapp_refresh":  
-              str_value="refresh";   
-              break;              
-              case "xapp_settings":  
-              str_value="settings";   
-              break;     
-              case "xapp_star":  
-              str_value="star";   
-              break;
-              case "xapp_wrench":  
-              str_value="build";   
-              break;              
-              case "xapp_visibility_off":  
-              str_value="visibility_off";   
-              break;              
-              case "xapp_visibility_on":  
-              str_value="visibility";   
-              break;  
-              case "xapp_calendar_month":  
-              str_value="calendar_month";   
-              break;  
-              case "xapp_search":  
-              str_value="search";   
-              break;
-              case "xapp_circle_plus":  
-              str_value="circle_plus";   
-              break;              
-              case "xapp_send":  
-              str_value="send";   
-              break;              
-              case "xapp_key":  
-              str_value="key";   
-              break;            
-              case "xapp_add":  
-              str_value="add";   
-              break;            
-              
-              
-            default:
-              str_value=str_value;
-          }
-          
-          if(str_value){                                                    
-            
-            this.obj_icon.fn_setText(str_value);                                                
-            this.obj_icon.fn_setClassName("material-icons");                                                                      
-            this.obj_icon.fn_setDisplay(true); 
-            if(bln_debug){
-              this.obj_icon.fn_debug();
-            }                                 
-            
-            /*
-            this.obj_icon.fn_setDisplay(true);          
-            this.obj_icon.fn_setFontSize("100px");          
-            this.obj_icon.fn_setStylePropertxy("height", "200px");                                  
-            //*/
-            
-          }         
-          else{
-            this.fn_showIcon("rowz_icon_blank");                                    
-          }
-          if(bln_debug){
-            this.fn_debug();
-          }
-
-        }  
-        fn_setText(str_value){ 
-          
-          if(str_value=="notset"){
-            str_value="";
-          }          
-          
-          if(str_value){                                                    
-            this.obj_span.fn_setText(str_value);
-            this.obj_span.fn_setDisplay(true);          
-          }         
-          else{
-            this.obj_span.fn_setDisplay(false);
-          }
-        }
-        fn_getText(){
-          let str_text;          
-          str_text=this.obj_span.fn_getText();                    
-          return str_text;
-        }
-        
-        
-        fn_setStyleProperty(str_name, str_value){          
-
-          str_name=obj_shared.fn_hyphenToCamelCase(str_name);          
-          
-          switch(str_name){
-            case "fontSize":                                        
-              this.fn_setControlStyleProperty(this.obj_span, str_name, str_value);
-              this.fn_setControlStyleProperty(this.obj_icon, str_name, "1.5em");//note: 1.5em relative to parent container
-              break;
-            case "color":                            
-            case "fontWeight":                                                    
-              this.fn_setControlStyleProperty(this.obj_span, str_name, str_value);
-              this.fn_setControlStyleProperty(this.obj_icon, str_name, str_value);            
-              break;
-            default:              
-          }   
-          super.fn_setStyleProperty(str_name, str_value);              
-        }
-        fn_getStyleProperty(str_name){
-
-          str_name=obj_shared.fn_hyphenToCamelCase(str_name);
-        
-          switch(str_name){
-            case "fontWeight":                                          
-            case "color":                            
-            case "fontSize":                            
-              return this.fn_getControlStyleProperty(this.obj_span, str_name);
-            default:
-              return super.fn_getStyleProperty(str_name);                  
-          }
-        }
-        fn_getComputedStyleProperty(str_name){
-
-          str_name=obj_shared.fn_hyphenToCamelCase(str_name);
-          
-          switch(str_name){
-            case "fontWeight":                                          
-            case "color":                            
-            case "fontSize":                                     
-              return this.fn_getControlComputedStyleProperty(this.obj_span, str_name);              
-            default:
-              return super.fn_getComputedStyleProperty(str_name);                  
-          }
-        }
-        ///////////////////////
-        ///////////////////////
-        ///////////////////////
-      }//END CLS
-      //END TAG
-      //END component/form_button_anchor        
-/*type: form_button_anchor//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_button_icon//*/
-      //XSTART component/form_button_icon
-      class form_button_icon extends component{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                          
-        }        
-        ///////////////////////
-        ///////////////////////
-        ///////////////////////
-        fn_setStyleProperty(str_name, str_value){          
-          
-          super.fn_setStyleProperty(str_name, str_value);
-
-          const svgElement =this.dom_obj.querySelector('svg');
-          //font awesome will nest a new svg tag into the icon i element
-          //this is only seen in the HTML after program execution breaks , for eaxmampel after the first trip to the server.
-          if(svgElement){            
-            svgElement.style.setProperty(str_name, str_value);
-          }
-          else{
-            //this is generally the case, surprisingly
-            //console.log("no font awsome svg");            
-          }
-        }        
-        ///////////////////////
-        ///////////////////////
-        ///////////////////////          
-      }//END CLS
-      //END TAG
-      //END component/form_button_icon        
-/*type: form_button_icon//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_button_search//*/
-
-            //XSTART component/form_button_search
-              class form_button_search extends form_inputandbutton_submit{
-                constructor(obj_ini) {      
-                  super(obj_ini);        
-                } 
-                fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                
-                }
-              }//END CLS
-              //END TAG
-              //END component/form_button_search
-/*type: form_button_search//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_button_showhide//*/
-      //XSTART component/form_showhide
-      class form_button_showhide extends form_button_rich{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-
-          this.obj_holder.bln_listenClick=true;
-        }
-        fn_onClick(e){
-          
-          super.fn_onClick(e);                    
-          
-          let obj_control=this.obj_controlTarget;
-          if(obj_control){
-            this.fn_toggleControl();
-          }
-        }
-        fn_toggleControl(){
-
-          //console.log("fn_toggleOptions");
-
-          let obj_control=this.obj_controlTarget;         
-
-          //obj_control.fn_debugText(obj_control.bln_open);
-          
-          if(obj_control.bln_open){            
-            obj_control.bln_open=false;                        
-            obj_control.fn_setDisplay(false);
-            //obj_control.fn_debugText("closing");
-          }
-          else{
-            obj_control.bln_open=true;                        
-            obj_control.fn_setDisplay(true);
-            //obj_control.fn_debugText("opening");
-          }
-        }
-      }//END CLS
-      //END TAG
-      //END component/form_showhide        
-/*type: form_button_showhide//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_button_span//*/
-      //XSTART component/form_button_span
-      class form_button_span extends component{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        ///////////////////////
-        ///////////////////////
-        ///////////////////////
-        
-        ///////////////////////
-        ///////////////////////
-        ///////////////////////
-      }//END CLS
-      //END TAG
-      //END component/form_button_span        
-/*type: form_button_span//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_checkbox//*/
-      //XSTART component/form_checkbox
-      class form_checkbox extends form_input{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);   
-        }
-
-        fn_getValue(){                    
-          
-            let bln_value =this.fn_getDomProperty("checked");
-            bln_value=obj_shared.fn_parseBool(bln_value);                      
-            //console.log("checkbox fn_getValue: " + bln_value);
-            return bln_value;
-        }
-
-        fn_setValue(str_value="off"){                    
-          let bln_value=obj_shared.fn_parseBool(str_value);          
-          this.fn_setDomProperty("checked", bln_value);
-          //console.log("checkbox fn_setValue: " + bln_value);
-        }
-
-        fn_setText(){}
-
-        fn_onChange(e){                                        
-          let bln_value=obj_shared.fn_parseBool(this.fn_getDomProperty("checked"));                                        
-          //it seems we need to flip the bool , as we are getting the current value , not the new value
-          bln_value=obj_shared.fn_flipBool(bln_value);                              
-
-          if(bln_value){
-            this.dom_obj.value="on"
-            this.fn_setDomProperty("checked", true);
-          }
-          else{
-            this.dom_obj.value="off"
-            this.fn_setDomProperty("checked", false);          
-          }          
-          super.fn_onChange(e);
-        }        
-      }//END CLS
-      //END TAG
-      //END component/form_checkbox        
-/*type: form_checkbox//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_field//*/
-
-            //XSTART component/form_field
-              class form_field extends component{
-                constructor(obj_ini) {      
-                  super(obj_ini);        
-                } 
-                fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                                  
-                }  
-                fn_onLoad(){    
-                  super.fn_onLoad();                  
-                  if(this.fn_getDebugPin()){this.fn_highlightBorder("gray");}                                    
-                }                
-                fn_onChildClick(e){                                                      
-                  
-                  this.fn_parentEvent("Click", e);
-
-                                    
-                  this.fn_unsetEvent();
-                }  
-                fn_onChildDblClick(e){                                                      
-                  
-                  this.fn_parentEvent("DblClick", e);
-                  this.fn_unsetEvent();
-                }                                                 
-                fn_onChildMouseUp(e){
-                  this.fn_parentEvent("MouseUp", e);
-                  this.fn_unsetEvent();
-                } 
-                fn_onChildMouseDown(e){
-                  this.fn_parentEvent("MouseDown", e);
-                  this.fn_unsetEvent();
-                } 
-                fn_onChildMouseEnter(e){                                                                                          
-                  this.fn_parentEvent("MouseEnter", e);
-                  this.fn_unsetEvent();
-                } 
-                fn_onChildMouseLeave(e){                                                                                          
-                  this.fn_parentEvent("MouseLeave", e);
-                  this.fn_unsetEvent();
-                } 
-                fn_onChildFocus(e){                                                                                          
-                  this.fn_parentEvent("Focus", e);
-                  this.fn_unsetEvent();
-                } 
-                fn_onChildInput(e){                                                                                          
-                  this.fn_parentEvent("Input", e);
-                  this.fn_unsetEvent();
-                }                  
-                fn_onChildChange(e){                                   
-                  this.fn_parentEvent("Change", e);
-                  this.fn_unsetEvent();
-                }
-                fn_onChildKeyDown(e){     
-                  this.fn_parentEvent("KeyDown", e);
-                  this.fn_unsetEvent();
-                }
-                fn_onChildKeyUp(e){                                  
-                  //console.log("Form Field KeyUp keyCode: " + e.keyCode);                           
-
-                                    
-                  this.fn_parentEvent("KeyUp", e);
-
-                                    
-                  this.fn_unsetEvent();
-                }
-                fn_onChildBlur(e){                               
-                                    
-                  this.fn_parentEvent("Blur", e);
-
-                                    
-                  this.fn_unsetEvent();
-                }
-                
-              }//END CLS
-              //END TAG
-              //END component/form_field
-/*type: form_field//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_hardrule//*/
-      //XSTART component/form_hardrule
-      class form_hardrule extends component{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-      }//END CLS
-      //END TAG
-      //END component/form_hardrule        
-/*type: form_hardrule//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_icon//*/
-      //XSTART component/form_icon
-      class form_icon extends component{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }      
-        xfn_setDisabled(bln_value){          
-        }  
-      }//END CLS
-      //END TAG
-      //END component/form_icon        
-/*type: form_icon//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_iframe//*/
-
-            //XSTART component/form_iframe
-              class form_iframe extends component{
-                constructor(obj_ini) {      
-                  super(obj_ini);        
-                } 
-                fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                
-                }
-                fn_navigateURL(str_url){                              
-                  if(this.fn_hasContextHolderParent()){return;}
-                  let obj_glass;
-                  if(this["fn_getGlass"]){
-                    obj_glass=this.fn_getGlass();        
-                  }          
-                  if(!obj_glass){return;}              
-                  obj_glass.location.href=str_url;                        
-                }          
-                fn_getGlass(){
-                  return this.dom_obj.contentWindow;
-                }
-              }//END CLS
-              //END TAG
-              //END component/form_iframe
-/*type: form_iframe//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_input_login_email//*/
-      //XSTART component/form_input_login_email
-      class form_input_login_email extends form_input{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-      }//END CLS
-      //END TAG
-      //END component/form_input_login_email        
-/*type: form_input_login_email//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_input_login_pass//*/
-      //XSTART component/form_input_login_pass
-      class form_input_login_pass extends form_input{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-      }//END CLS
-      //END TAG
-      //END component/form_input_login_pass        
-/*type: form_input_login_pass//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_inputandbutton_input//*/
-      //XSTART component/form_inputandbutton_input
-      class form_inputandbutton_input extends form_input{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        fn_applyThemeStructure(){                              
-          
-          let obj_theme=obj_project.obj_theme;
-          if(!obj_theme){return;}
-          super.fn_applyThemeStructure();          
-
-          let obj_themeItem=this.obj_themeStructure;
-          //obj_themeItem.backgroundColor="green";                          
-          this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
-          
-          
-        }
-      }//END CLS
-      //END TAG
-      //END component/form_inputandbutton_input        
-/*type: form_inputandbutton_input//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_label//*/
-
-            //XSTART component/form_label
-              class form_label extends component{
-                constructor(obj_ini) {      
-                  super(obj_ini);        
-                } 
-                fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                                  
-                 
-                }
-                fn_holdEvent(){
-                  super.fn_dropEvent();
-  
-                  this.obj_holder.bln_listenClick=true;
-                  this.obj_holder.bln_listenMouseEnter=true;
-                  this.obj_holder.bln_listenMouseLeave=true;
-                  this.obj_holder.bln_listenMouseUp=true;
-                  this.obj_holder.bln_listenMouseDown=true;                  
-                }
-
-                fn_onLoad(){
-                  super.fn_onLoad();                                                      
-                }
-
-                fn_setUnLocked(){
-                  this.bln_locked=false;
-                  this.fn_setStyleProperty('cursor', 'pointer');                  
-                }
-                fn_setLocked(){
-                  if(this.bln_locked){return;}
-                  this.bln_locked=true;
-                  this.fn_setStyleProperty('cursor', 'default');                  
-                }
-                fn_getLocked(){
-                  return this.bln_locked;
-                }
-                fn_onClick(e){                  
-                  obj_project.fn_calmEvent(e);       
-                  if(this.fn_getLocked()){return;}                                    
-                  this.fn_parentEvent("Click", e);
-                }
-                fn_onMouseUp(e){        
-                  obj_project.fn_calmEvent(e);       
-                  if(this.fn_getLocked()){return;}                                    
-                  this.fn_parentEvent("MouseUp", e);
-                }
-                fn_onMouseDown(e){        
-                  obj_project.fn_calmEvent(e);       
-                  if(this.fn_getLocked()){return;}                                    
-                  this.fn_parentEvent("MouseDown", e);
-                }
-                fn_onMouseEnter(e){        
-                  obj_project.fn_calmEvent(e);       
-                  if(this.fn_getLocked()){return;}                                    
-                  this.fn_parentEvent("MouseEnter", e);
-                }
-                fn_onMouseLeave(e){         
-                  obj_project.fn_calmEvent(e);       
-                  if(this.fn_getLocked()){return;}                                    
-                  this.fn_parentEvent("MouseLeave", e);
-                }
-                
-              }//END CLS
-              //END TAG
-              //END component/form_label
-/*type: form_label//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_legend//*/
-      //XSTART component/form_legend
-      class form_legend extends form_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-          this.obj_holder.bln_listenClick=true;                  
-          this.obj_holder.bln_listenKeyUp=true;                  
-          
-        }
-
-        fn_onLoad(){          
-          super.fn_onLoad();
-          this.fn_setDomProperty("tabIndex", "0");
-          this.fn_setStyleProperty("userSelect", "none");
-          this.fn_setStyleProperty("opacity", "1");          
-        }
-
-        fn_applyThemeStructure(){                    
-          let obj_theme=obj_project.obj_theme;
-          if(!obj_theme){return;}
-          this.obj_themeStructure=obj_project.obj_themeFormLegend;                
-          this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
-        }
-
-        
-
-        fn_onClick(e){                            
-          this.fn_fireLegend(e);  
-        }
-        fn_onKeyUp(e){      
-          
-          if(e.key==="Enter"){
-            this.fn_fireLegend(e);  
-          }
-
-          
-        }
-        fn_fireLegend(e){
-          //console.log("xxxxRebbit");                                    
-          
-          
-          obj_project.fn_forgetEvent(e);    
-
-          let obj_parent=this.fn_getParentComponent();          
-          this.fn_notify(obj_parent, "fn_legendOnClick", this);                                  
-        }
-      }//END CLS
-      //END TAG
-      //END component/form_legend        
-/*type: form_legend//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_nonbreakingspace//*/
-      //XSTART component/form_nonbreakingspace
-      class form_nonbreakingspace extends component{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-      }//END CLS
-      //END TAG
-      //END component/form_nonbreakingspace        
-/*type: form_nonbreakingspace//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_panel//*/
-
-            //XSTART component/form_panel
-              class form_panel extends component{
-                constructor(obj_ini) {      
-                  super(obj_ini);        
-                } 
-                fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                
-                  if(this.fn_getDebugPin()){this.fn_highlightBorder("purple");}                  
-                }                       
-
-                fn_onRowMember(obj_row){                         
-
-                  this.obj_row=obj_row;                  
-                  this.obj_paramRow=this.obj_row.obj_paramRow;                                    
-                  this.obj_paramRS=this.obj_paramRow.obj_paramRS;                                                       
-                  
-                  this.fn_setStyleProperty("display", "flex");
-                  this.fn_setStyleProperty("flex-wrap", "wrap");
-                  this.fn_setAxis(this.obj_paramRS.bln_axisPanel);                                                                                          
-                }
-              }//END CLS
-              //END TAG
-              //END component/form_panel
-/*type: form_panel//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_panellist//*/
-      //XSTART component/form_panellist
-      class form_panellist extends component{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }        
-
-        fn_addPanel(obj_param){          
-          let obj_panel=this.fn_addContextItem(obj_param.str_type);                                                                        
-          obj_panel.obj_param=obj_param;          
-          //obj_panel.fn_setDisplayFlex(false);
-          return obj_panel;
-        }
-        fn_displayPanel(obj_panel){          
-
-          let i, arr_item, obj_item;
-          arr_item=this.obj_design.arr_item;
-          if(!obj_panel && arr_item.length){            
-            obj_panel=arr_item[0];
-          }
-          for(i=0;i<arr_item.length;i++){
-            obj_item=arr_item[i];            
-            if(obj_item===obj_panel){
-              obj_item.fn_openFlex();
-            }
-            else{
-              obj_item.fn_closeFlex();
-            }
-          }
-
-        }
-        fn_legendOnClick(obj_panel){                                
-
-          //console.log("form_panellist fn_legendOnClick");
-
-          let obj_parent=this.fn_getParentComponent();          
-          this.fn_notify(obj_parent, "fn_legendOnClick", obj_panel);                                  
-        }
-
         
       }//END CLS
       //END TAG
-      //END component/form_panellist        
-/*type: form_panellist//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_radio//*/
-      //XSTART component/form_radio
-      class form_radio extends component{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-      }//END CLS
-      //END TAG
-      //END component/form_radio        
-/*type: form_radio//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_section//*/
-
-            //XSTART component/form_section
-              class form_section extends component{
-                constructor(obj_ini) {      
-                  super(obj_ini);        
-                } 
-                fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                                                                     
-                }  
-                fn_onLoad(){    
-                  super.fn_onLoad();                  
-                  if(this.fn_getDebugPin()){this.fn_highlightBorder("red");}                  
-                }                
-              }//END CLS
-              //END TAG
-              //END component/form_section
-/*type: form_section//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_select//*/
-
-            //XSTART component/form_select
-              class form_select extends component{
-                constructor(obj_ini) {      
-                  super(obj_ini);        
-                } 
-                fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                
-                  this.obj_holder.bln_listenClick=true;                 
-                  this.obj_holder.bln_listenChange=true;                
-                  this.obj_holder.bln_listenBlur=true;                                            
-                }                
-                fn_onClick(e){             
-                  this.fn_parentEvent("Click", e);
-                }                
-                fn_onChange(e){                               
-                  this.fn_parentEvent("Change", e);
-                }
-                fn_onBlur(e){                                         
-                  this.fn_parentEvent("Blur", e);
-                }
-                fn_addOption(str_text, str_value){
-                  let option = document.createElement("option");
-                  option.text = str_text;
-                  option.value = str_value;                  
-                  this.dom_obj.add(option);                                                                     
-                  return option;
-                }                
-              }//END CLS
-              //END TAG
-              //END component/form_select
-/*type: form_select//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_span//*/
-
-            //XSTART component/form_span
-              class form_span extends component{
-                constructor(obj_ini) {      
-                  super(obj_ini);        
-                } 
-                fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                    
-                }                
-                fn_onClick(e){   
-                  obj_project.fn_forgetEvent(e);    
-                }                  
-                
-              }//END CLS
-              //END TAG
-              //END component/form_span
-/*type: form_span//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_tab//*/
-      //XSTART component/form_tab
-      class form_tab extends form_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-          this.obj_holder.bln_listenFocus=true;                  
-        }
-        fn_onClick(e){          
-          let obj_parent=this.fn_getParentComponent();
-          obj_parent.fn_tagOnClick(this, e);
-          
-          obj_project.fn_forgetEvent(e);    
-        }
-        fn_onFocus(e){          
-          let obj_parent=this.fn_getParentComponent();
-          obj_parent.fn_tagOnFocus(this, e);
-          
-          obj_project.fn_forgetEvent(e);    
-        }
-
-      }//END CLS
-      //END TAG
-      //END component/form_tab        
-/*type: form_tab//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_table//*/
-
-            //XSTART component/form_table
-              class form_table extends component{
-                constructor(obj_ini) {      
-                  super(obj_ini);        
-                } 
-                fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);  
-                }       
-                fn_addItem(obj_ini=false){
-                  let obj_item;        
-                  if(!obj_ini){
-                    obj_ini=new Holder;
-                    obj_ini.obj_design.str_type="tablerow";                   
-                  }      
-                  obj_item=super.fn_addItem(obj_ini);//CallSuper          
-                  return obj_item;
-                }
-                fn_setCellStyle(str_name, str_value){
-                  let arr, obj_item;
-                  arr=this.obj_design.arr_item;
-                  for(let i=0;i<arr.length;i++){
-                      obj_item=arr[i];              
-                      obj_item.fn_setCellStyle(str_name, str_value);            
-                  }
-                }
-                fn_locateItem(str_idXDesign, str_type){
-                  if(str_idXDesign===undefined){return;}
-                  if(str_idXDesign===""){return;}
-                  let arr, obj_item, obj_locate;
-                  arr=this.obj_design.arr_item;
-                  for(let i=0;i<arr.length;i++){
-                      obj_item=arr[i];              
-                      obj_locate=obj_item.fn_locateItem(str_idXDesign, str_type);            
-                      if(obj_locate){
-                        return obj_locate;
-                      }
-                  }
-                  return false;
-                }
-            
-            
-              }//END CLS
-              //END TAG
-              //END component/form_table
-/*type: form_table//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_tableheader//*/
-
-            //XSTART component/form_tableheader
-              class form_tableheader extends tablecell{
-                constructor(obj_ini) {      
-                  super(obj_ini);        
-                } 
-                fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                
-                }
-              }//END CLS
-              //END TAG
-              //END component/form_tableheader
-/*type: form_tableheader//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_tablerow//*/
-
-            //XSTART component/form_tablerow
-              class form_tablerow extends component{
-                constructor(obj_ini) {      
-                  super(obj_ini);        
-                } 
-                fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);
-                }       
-                fn_addItem(obj_ini){
-                  let obj_item;  
-            
-                  if(obj_ini.obj_design.str_type===undefined){
-                    obj_ini.obj_design.str_type="tablecell";                         
-                  }
-                  obj_item=super.fn_addItem(obj_ini);//CallSuper          
-                  return obj_item;
-                }
-                fn_setCellStyle(str_name, str_value){
-            
-                  let arr, obj_item;
-                  arr=this.obj_design.arr_item;
-                  for(let i=0;i<arr.length;i++){
-                      obj_item=arr[i];              
-                      obj_item.fn_setStyleProperty(str_name, str_value);            
-                  }
-                }
-                fn_locateItem(str_idXDesign, str_type){
-                  let arr, obj_item, obj_locate;
-                  arr=this.obj_design.arr_item;
-                  for(let i=0;i<arr.length;i++){
-                      obj_item=arr[i];              
-                      obj_locate=obj_item.fn_locateItem(str_idXDesign, str_type);            
-                      if(obj_locate){
-                        return obj_locate;
-                      }
-                  }
-                  return false;
-                }
-              }//END CLS
-              //END TAG
-              //END component/form_tablerow
-/*type: form_tablerow//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_tablist//*/
-      //XSTART component/form_tablist
-      class form_tablist extends component{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        fn_addTab(obj_param){
-          let obj_tab=this.fn_addContextItem("form_tab");                                                                                  
-          obj_tab.fn_setText(obj_param.str_name);
-          obj_tab.obj_param=obj_param;          
-          return obj_tab;
-        }
-        
-        fn_tagOnClick(obj_tab, e){
-          let obj_parent=this.fn_getParentComponent();
-          obj_parent.fn_tagOnClick(obj_tab, e);
-        }
-        fn_fireFocus(obj_tab=false){
-          let arr_item=this.obj_design.arr_item;          
-          if(!obj_tab && arr_item.length){            
-            obj_tab=arr_item[0];
-          }          
-          if(!obj_tab){
-            //strange as this is the whole point
-            return;
-          }
-          const e = new Event("focus");
-          obj_tab.dom_obj.dispatchEvent(e);
-        }
-        fn_tagOnFocus(obj_tab, e){          
-          let obj_parent=this.fn_getParentComponent();
-          obj_parent.fn_tagOnFocus(obj_tab, e);
-        }
-      }//END CLS
-      //END TAG
-      //END component/form_tablist        
-/*type: form_tablist//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_tabset//*/
-      //XSTART component/form_tabset
-      class form_tabset extends component{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-          this.obj_mapPanel=new Map();          
-          this.obj_mapTab=new Map();                   
-
-        }       
-        fn_onLoad(obj_ini){
-          super.fn_onLoad(obj_ini);                
-          this.obj_panellist=this.fn_getComponent("form_panellist");          
-          this.obj_tablist=this.fn_getComponent("form_tablist");          
-          this.fn_setDisplayFlex(false);         
-        }
-
-        fn_hideInterface(){
-          
-          this.fn_closeFlex();
-        } 
-        fn_showInterface(){          
-
-          if(!this.bln_opened){
-            this.bln_opened=true;                        
-            this.obj_tablist.fn_fireFocus();  
-          }
-          this.fn_openFlex();
-        } 
-        fn_toggleInterface(){
-
-          if(!this.bln_opened){
-            this.bln_opened=true;            
-            this.obj_panellist.fn_displayPanel();  
-          }
-
-          this.fn_toggleDisplayFlex();
-        }        
-
-        
-        fn_getTabPanel(obj_param){          
-          let obj_panel;
-          obj_panel=this.obj_mapPanel.get(obj_param.str_name);
-          if(!obj_panel){                                                                             
-            obj_panel=this.obj_panellist.fn_addPanel(obj_param);
-            this.obj_mapPanel.set(obj_param.str_name, obj_panel);                       
-            if(!this.bln_tabLegend){
-              let obj_tab=this.obj_tablist.fn_addTab(obj_param);
-              this.obj_mapTab.set(obj_param.str_name, obj_tab);                                   
-            }
-            
-          }                    
-          return obj_panel;
-        }    
-        fn_tagOnClick(obj_tab, e){                                
-          this.fn_showTab(obj_tab);            
-        }
-        fn_tagOnFocus(obj_tab, e){                                
-          this.fn_showTab(obj_tab);            
-        }
-        fn_showTab(obj_tab){
-          let obj_panel=this.fn_getTabPanel(obj_tab.obj_param);          
-          this.obj_panellist.fn_displayPanel(obj_panel);
-          return obj_panel;
-        }
-        fn_legendOnClick(obj_panel){                                         
-         
-         let obj_panelNext=obj_shared.fn_getNextMapItem(this.obj_mapPanel, obj_panel.obj_param.str_name)
-         this.obj_panellist.fn_displayPanel(obj_panelNext);
-         
-        }
-
-      }//END CLS
-      //END TAG
-      //END component/form_tabset        
-/*type: form_tabset//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_text//*/
-      //XSTART component/form_text
-      class form_text extends form_input{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-          
-        }
-        fn_holdEvent(){
-          super.fn_dropEvent();
-
-          this.obj_holder.bln_listenSelectStart=true;                                    
-        }
-        fn_applyThemeStructure(){                    
-          super.fn_applyThemeStructure();
-        }
-        fn_onSelectStart(e){                                    
-          obj_project.fn_calmEvent(e);
-        }                
-        fn_setText(str_value){
-          if(str_value===""){    
-            str_value="&nbsp;";//if blank will cause display issue
-          } 
-          this.fn_setDomProperty("innerHTML", str_value);                                      
-      }
-      }//END CLS
-      //END TAG
-      //END component/form_text        
-/*type: form_text//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: form_textarea//*/
-      //XSTART component/form_textarea
-      class form_textarea extends form_input{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                          
-        }                
-      }//END CLS
-      //END TAG
-      //END component/form_textarea        
-/*type: form_textarea//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: lock//*/
-      //XSTART component/lock
-      class lock extends xapp{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        fn_onLoad(){
-          super.fn_onLoad();
-          this.fn_onAuthorizeUserStatus();
-        }
-      }//END CLS
-      //END TAG
-      //END component/lock        
-/*type: lock//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: login_dashboard//*/
-//XSTART component/login_dashboard
-class login_dashboard extends xapp_dashboard{
-  constructor(obj_ini) {      
-    super(obj_ini);        
-  } 
-  fn_initialize(obj_ini){
-    super.fn_initialize(obj_ini);                
-
-    this.obj_holder.bln_debugServer=true;      
-
-    this.obj_holder.bln_listenSubmit=true;
-  }
-
-  fn_onLoad(){
-    super.fn_onLoad();
-    
-    let obj_item;
-    obj_item=obj_project.fn_getComponent("form_button_login_email");                
-    obj_item.fn_setDisplay(true);                 
-
-    obj_item=obj_project.fn_getComponent("form_button_login_pass");                
-    obj_item.fn_setDisplay(false);             
-  }
-
-  fn_onSubmit(e){      
-   alert(e);
-    return;
-    obj_project.fn_forgetEvent(e);                                    
-    let obj_dashboard=obj_project.fn_locateItem("login_dashboard");
-    if(obj_dashboard){                    
-      obj_dashboard.fn_startAuthorize();
-    }                                    
-  }
-
-  fn_formatPost(obj_ini){  
-
-    let obj_post;
-    
-    obj_post=super.fn_formatPost(obj_ini);   
-    
-    obj_post.MetaUserEmail=obj_ini.MetaUserEmail;        
-    obj_post.AuthorizeUserPass=obj_ini.AuthorizeUserPass;       
-        
-    return obj_post;
-}  
-
-
-  fn_loadDashboard(){
-    if(!super.fn_loadDashboard()){return;}         
-
-    if(obj_shared.fn_inStr("login.", location.hostname)){      
-      this.fn_XDesigner_endAuthorize();//logout                    
-      //console.log("login end auth");
-    }
-    else{
-      //console.log("no login subdomain so no end auth");
-    } 
-    //this.fn_addContextItem("login_panel");                                    
-  }   
-
-  
-  fn_XDesigner_endAuthorize(){    
-    let obj_ini=new Object;         
-    obj_ini.str_action="XDesigner_endAuthorize";                
-    this.fn_runServerAction(obj_ini);          
-  }
-  
-  XDesigner_endAuthorize(){    
-    //console.log("Session Authorisation Cookie Removed");  
-  }
-  fn_onUnAuthorizeUserStatus(obj_post){    
-    obj_project.fn_setVisible(true);
-  }
-  fn_onAuthorizeUserStatus(){    
-  }
-  fn_startAuthorize(){        
-
-    let obj_item, bln_valid;
-    let MetaUserEmail, AuthorizeUserPass;
-    MetaUserEmail="";
-    AuthorizeUserPass="";
-    
-    
-    obj_item=obj_project.fn_getComponent("form_input_login_email");
-    if(obj_item){
-      MetaUserEmail=obj_item.fn_getValue();                  
-      /*
-      obj_item.fn_setDomProperty("autocomplete", "email");        
-      obj_item.fn_setDomProperty("type", "email");    
-      //*/   
-    }                            
-    
-    obj_item=obj_project.fn_getComponent("form_input_login_pass");
-    if(obj_item){
-      AuthorizeUserPass=obj_item.fn_getValue();                                          
-      /*
-      obj_item.fn_setDomProperty("placeholder", "One Time Pass");        
-      obj_item.fn_setDomProperty("inputmode", "numeric");        
-      obj_item.fn_setDomProperty("pattern", "[0-9]*");        
-      obj_item.fn_setDomProperty("autocomplete", "one-time-code");        
-      obj_item.fn_setDomProperty("type", "text");     
-      //*/   
-    }                
-
-    bln_valid=obj_shared.fn_validEmail(MetaUserEmail);    
-    if(!bln_valid){      
-      return false;
-    }
-
-    let bln_validAuthorizeUserEmail=this.fn_getAuthorizeUserEmail()
-    if(bln_validAuthorizeUserEmail){
-      if(!AuthorizeUserPass){
-        return false;
-      }
-      if(AuthorizeUserPass.length<6){
-        return false;
-      }
-    }  
-
-    let obj_auth={        
-      MetaUserEmail:MetaUserEmail,
-      AuthorizeUserPass:AuthorizeUserPass
-    };
-
-    this.fn_setAuthorizeObject(obj_auth);    
-    this.fn_getAuthorizeObject(obj_auth);
-    return this.fn_XDesigner_startAuthorize(obj_auth);
-
-  }
-  fn_setAuthorizeObject(obj_post){
-      
-    let bln_valid;
-    bln_valid=obj_shared.fn_validEmail(obj_post.MetaUserEmail);
-    if(!bln_valid){obj_post.MetaUserEmail="";}
-    this.fn_setAuthorizeUserEmail(obj_post.MetaUserEmail);
-    
-    bln_valid=false;    
-    if(obj_post.AuthorizeUserPass){
-      bln_valid=true;
-    }
-    
-    
-    if(!bln_valid){obj_post.AuthorizeUserPass="";}
-    this.fn_setAuthorizeUserPass(obj_post.AuthorizeUserPass);    
-    
-    let bln_value=obj_shared.fn_parseBool(obj_post.AuthorizeUserStatus)
-    this.fn_setAuthorizeUserStatus(bln_value);        
-}    
-  /////////////////////            
-  fn_getAuthorizeUserEmail(){
-    return this.obj_holder.MetaUserEmail;    
-  }                
-  fn_setAuthorizeUserEmail(MetaUserEmail){
-    this.obj_holder.MetaUserEmail=MetaUserEmail;    
-  }                  
-  fn_setAuthorizeUserPass(AuthorizeUserPass){                          
-    this.obj_holder.AuthorizeUserPass=AuthorizeUserPass;
-  }              
-  fn_setAuthorizeUserStatus(AuthorizeUserStatus){                          
-    this.obj_holder.AuthorizeUserStatus=AuthorizeUserStatus;
-  }              
-  /////////////////////        
-  fn_getAuthorizeObject(){
-    return {        
-      AuthorizeSessionKey:obj_shared.fn_getCookie("AuthorizeSessionKey"),
-      MetaUserEmail:this.obj_holder.MetaUserEmail,
-      AuthorizeUserPass:this.obj_holder.AuthorizeUserPass,
-      AuthorizeUserStatus:this.obj_holder.AuthorizeUserStatus
-    };
-  }   
-  
-  fn_XDesigner_startAuthorize(obj_auth){       
-
-    obj_auth.str_action="XDesigner_startAuthorize";                
-    this.fn_runServerAction(obj_auth);          
-  }
-  XDesigner_startAuthorize(obj_post){    
-
-    let bln_value;          
-    let obj_item;
-    
-    this.fn_setAuthorizeObject(obj_post);//set values from server on client
-    let obj_auth=this.fn_getAuthorizeObject();//get client values      
-    
-    let bln_valid=obj_shared.fn_validEmail(obj_auth.MetaUserEmail);
-    if(!bln_valid){
-      bln_value=this.fn_requireAuthorizeUserEmail();        
-      if(!bln_value){return false;}
-    }              
-
-    obj_item=obj_project.fn_getComponent("form_input_login_email");                    
-    obj_item.fn_setDisplay(false);            
-
-    obj_item=obj_project.fn_getComponent("form_input_login_pass");                                
-    obj_item.fn_setDisplay(true);             
-
-    
-    obj_item=obj_project.fn_getComponent("form_button_login_email");                
-    obj_item.fn_setDisplay(false);                 
-
-    obj_item=obj_project.fn_getComponent("form_button_login_pass");                
-    obj_item.fn_setDisplay(true);             
-    
-    
-    if(!obj_auth.AuthorizeUserPass){
-      bln_value=this.fn_requireAuthorizeUserPass();        
-      if(!bln_value){return false;}             
-    }
-
-    //obj_auth.AuthorizeUserStatus=true;
-    console.log("obj_auth.AuthorizeUserStatus: " + obj_auth.AuthorizeUserStatus);
-    if(!obj_auth.AuthorizeUserStatus){      
-      return;
-    }
-    
-    let str_returnURL=obj_shared.fn_getURLParam("returnURL");    
-    if(str_returnURL){                  
-      window.location.href=str_returnURL;
-    }
-    else{      
-      obj_path.fn_navigateSubdomain("desk");
-    }
-
-    
-  }  
-  fn_requireAuthorizeUserEmail(){                                      
-    let obj_item=obj_project.fn_getComponent("form_input_login_email");                    
-    
-    let MetaUserEmail;
-    if(obj_item){      
-      MetaUserEmail=obj_item.fn_getValue();        
-    }
-    
-    let bln_valid=obj_shared.fn_validEmail(MetaUserEmail);      
-    if(!bln_valid){              
-      return false;
-    }
-
-    this.fn_setAuthorizeUserEmail(MetaUserEmail);      
-    return true;
-  }
-  
-  fn_requireAuthorizeUserPass(){
-    
-    let AuthorizeUserPass;                                
-    let obj_item=obj_project.fn_getComponent("form_input_login_pass");                                
-    if(obj_item){      
-      AuthorizeUserPass=obj_item.fn_getValue();
-    }
-    if(!AuthorizeUserPass){              
-      return false;
-    }
-    this.fn_setAuthorizeUserPass(AuthorizeUserPass);    
-    obj_item.fn_setText("");              
-    return true;
-  }
-}//END CLS
-//END TAG
-//END component/login_dashboard
-/*type: login_dashboard//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: loginpanelform//*/
-
-            //XSTART component/loginpanelform
-              class loginpanelform extends form_form{
-                constructor(obj_ini) {      
-                  super(obj_ini);        
-                } 
-                fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                                  
-                }
-                fn_onSubmit(e){      
-                  
-                  obj_project.fn_forgetEvent(e);                                    
-                  let obj_dashboard=obj_project.fn_locateItem("login_dashboard");
-                  if(obj_dashboard){                    
-                    obj_dashboard.fn_startAuthorize();
-                  }                                    
-                }
-              }//END CLS
-              //END TAG
-              //END component/loginpanelform
-/*type: loginpanelform//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_accordion//*/
-
-            //XSTART component/xapp_accordion
-              class xapp_accordion extends component{
-                constructor(obj_ini) {      
-                  super(obj_ini);        
-                } 
-                fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                                  
-                  
-                  // this.fn_extends("component");            
-
-                  //START INITIALIZE STYLE              
-                  if(this.obj_domStyle.width===undefined){this.obj_domStyle.width="100%";}            
-                  //if(this.obj_domStyle.padding===undefined){this.obj_domStyle.paddingBottom="0px";}
-                  if(this.obj_domStyle.display===undefined){this.obj_domStyle.display="block";}                                   
-                }
-                fn_onLoad(){    
-                  super.fn_onLoad();                                    
-                }
-
-                fn_addItem(obj_ini=false){
-                  let obj_item;        
-                  if(!obj_ini){
-                    obj_ini=new Holder;
-                    obj_ini.obj_design.str_type="menu_button";                                       
-                    obj_ini.obj_domStyle.flexDirection="row";           
-                      obj_ini.obj_domStyle.flexWrap="wrap";                  
-                  }      
-                  obj_item=super.fn_addItem(obj_ini);//CallSuper                                              
-                  return obj_item;
-                }
-              
-                //START COMPONENTEVENT HANDLING                
-                fn_open(){
-                    this.fn_openParent();
-                }
-                fn_close(){
-                    this.fn_closeLevel();
-                    this.fn_displayOnLevel();                    
-                }                                  
-                fn_openParent(){        
-                    let obj_container=this.fn_getParentComponent();        
-                    let str_method="fn_open";        
-                    if(obj_container && obj_container[str_method]){
-                        obj_container[str_method]();
-                    }              
-                }
-                fn_hasOpenChild(obj_exclude, bln_ignoreBefore){                  
-                  let bln_seen=false;                  
-                    for(var i=0;i<this.obj_design.arr_item.length;i++){
-                        let obj_item=this.obj_design.arr_item[i];
-                        if(bln_ignoreBefore){if(obj_item===obj_exclude){bln_seen=true;}if(!bln_seen){continue;}}
-                        if(obj_item && obj_item!==obj_exclude){                                                    
-                            if(obj_item.fn_getIsOpen()){                              
-                              return true;
-                            }
-                        }              
-                    }
-                    return false;
-
-                }             
-                fn_closeChildren(){
-                  
-                }
-                fn_closeLevel(obj_exclude, bln_ignoreBefore ){                  
-                  let str_method="fn_close";        
-                  let bln_seen=false;
-                    for(var i=0;i<this.obj_design.arr_item.length;i++){
-                        let obj_item=this.obj_design.arr_item[i];
-                        if(bln_ignoreBefore){if(obj_item===obj_exclude){bln_seen=true;}if(!bln_seen){continue;}}
-                        if(obj_item && obj_item!==obj_exclude && obj_item[str_method]){
-                            if(!obj_item.obj_design.bln_isPinned){                              
-                                obj_item[str_method]();
-                            }
-                        }              
-                    }
-                }                
-                fn_hideLevel(obj_exclude, bln_ignoreBefore){                                    
-                  this.fn_notifyChildren("fn_interfaceHide", obj_exclude, bln_ignoreBefore);                  
-                }
-                fn_showLevel(obj_exclude, bln_ignoreBefore){                                  
-                  this.fn_notifyChildren("fn_interfaceShow", obj_exclude, bln_ignoreBefore);                  
-                }
-                fn_displayOnLevel(obj_exclude, bln_ignoreBefore){                  
-                  this.fn_notifyChildren("fn_displayOn", obj_exclude, bln_ignoreBefore);                  
-                }                
-                fn_displayOffLevel(obj_exclude, bln_ignoreBefore){                  
-                  this.fn_notifyChildren("fn_displayOff", obj_exclude, bln_ignoreBefore);                  
-                }                                
-
-                fn_autoOpen(obj_exclude, bln_ignoreBefore){
-                  //let str_method="fn_open";
-                  let str_method="fn_toggle";                  
-                  let bln_seen=false;
-                  for(var i=0;i<this.obj_design.arr_item.length;i++){
-                    let obj_item=this.obj_design.arr_item[i];
-                    if(bln_ignoreBefore){if(obj_item===obj_exclude){bln_seen=true;}if(!bln_seen){continue;}}                             
-                    if(obj_item && obj_item!==obj_exclude && obj_item[str_method] && obj_item.fn_getAutoOpenPin()){                        
-                        obj_item[str_method]();                                            
-                    }                                      
-                  }
-                }
-                fn_notifyChildren(str_method, obj_exclude, bln_ignoreBefore){                  
-                  let bln_seen=false;
-                  let arr_item=this.obj_design.arr_item;
-                  for(var i=0;i<arr_item.length;i++){
-                    let obj_item=arr_item[i];
-                    if(bln_ignoreBefore){if(obj_item===obj_exclude){bln_seen=true;}if(!bln_seen){continue;}}                             
-                    if(obj_item && obj_item!==obj_exclude && obj_item[str_method]){                        
-                        obj_item[str_method]();                    
-                    }                                      
-                  }
-                }
-              }//END CLS
-              //END TAG
-              //END component/xapp_accordion
-/*type: xapp_accordion//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button_general_archive_hide//*/
-      //XSTART component/xapp_button_general_archive_hide
-      class xapp_button_general_archive_hide extends xapp_console_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        fn_onClick(e){                                    
-          let obj_menuButton=this.fn_getMenuButton();
-          if(!obj_menuButton){return;}  
-          
-          obj_menuButton.fn_formHideArchive();          
-          
-          obj_project.fn_forgetEvent(e);    
-        }
-      }//END CLS
-      //END TAG
-      //END component/xapp_button_general_archive_hide        
-/*type: xapp_button_general_archive_hide//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button_general_archive_show//*/
-      //XSTART component/xapp_button_general_archive_show
-      class xapp_button_general_archive_show extends xapp_console_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        fn_onClick(e){                                    
-          let obj_menuButton=this.fn_getMenuButton();
-          if(!obj_menuButton){return;}  
-          
-          obj_menuButton.fn_formShowArchive();          
-          
-          obj_project.fn_forgetEvent(e);    
-        }        
-      }//END CLS
-      //END TAG
-      //END component/xapp_button_general_archive_show        
-/*type: xapp_button_general_archive_show//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button_general_form_down//*/
-      //XSTART component/xapp_button_general_form_down
-      class xapp_button_general_form_down extends xapp_console_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        fn_onClick(e){                                    
-          let obj_menuButton=this.fn_getMenuButton();
-          if(!obj_menuButton){return;}  
-          
-          obj_menuButton.fn_formMoveDown();          
-          
-          obj_project.fn_forgetEvent(e);    
-        }                
-      }//END CLS
-      //END TAG
-      //END component/xapp_button_general_form_down        
-/*type: xapp_button_general_form_down//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button_general_form_gap//*/
-      //XSTART component/xapp_button_general_form_gap
-      class xapp_button_general_form_gap extends xapp_console_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        fn_onClick(e){                                    
-          let obj_menuButton=this.fn_getMenuButton();
-          if(!obj_menuButton){return;}  
-          
-          obj_menuButton.fn_formGap();          
-          
-          obj_project.fn_forgetEvent(e);    
-        }                
-      }//END CLS
-      //END TAG
-      //END component/xapp_button_general_form_gap        
-/*type: xapp_button_general_form_gap//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button_general_form_group//*/
-      //XSTART component/xapp_button_general_form_group
-      class xapp_button_general_form_group extends xapp_console_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        fn_onClick(e){                                    
-          let obj_menuButton=this.fn_getMenuButton();
-          if(!obj_menuButton){return;}  
-          
-          obj_menuButton.fn_formAddGroup();          
-          
-          obj_project.fn_forgetEvent(e);    
-        }                
-      }//END CLS
-      //END TAG
-      //END component/xapp_button_general_form_group        
-/*type: xapp_button_general_form_group//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button_general_form_up//*/
-      //XSTART component/xapp_button_general_form_up
-      class xapp_button_general_form_up extends xapp_console_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        fn_onClick(e){                                    
-          let obj_menuButton=this.fn_getMenuButton();
-          if(!obj_menuButton){return;}  
-          
-          obj_menuButton.fn_formMoveUp();          
-          
-          obj_project.fn_forgetEvent(e);    
-        }        
-      }//END CLS
-      //END TAG
-      //END component/xapp_button_general_form_up        
-/*type: xapp_button_general_form_up//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button_general_row_hide//*/
-      //XSTART component/xapp_button_general_row_hide
-      class xapp_button_general_row_hide extends xapp_console_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        fn_onClick(e){                                    
-          let obj_menuButton=this.fn_getMenuButton();
-          if(!obj_menuButton){return;}  
-          
-          obj_menuButton.fn_formHideRowz();          
-          
-          obj_project.fn_forgetEvent(e);    
-        }
-      }//END CLS
-      //END TAG
-      //END component/xapp_button_general_row_hide        
-/*type: xapp_button_general_row_hide//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button_general_row_show//*/
-      //XSTART component/xapp_button_general_row_show
-      class xapp_button_general_row_show extends xapp_console_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        fn_onClick(e){                                    
-          let obj_menuButton=this.fn_getMenuButton();
-          if(!obj_menuButton){return;}  
-          
-          obj_menuButton.fn_formShowRowz();          
-          
-          obj_project.fn_forgetEvent(e);    
-        }
-      }//END CLS
-      //END TAG
-      //END component/xapp_button_general_row_show        
-/*type: xapp_button_general_row_show//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button_general_use_task_date//*/
-      //XSTART component/xapp_button_general_use_task_date
-      class xapp_button_general_use_task_date extends xapp_console_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-      }//END CLS
-      //END TAG
-      //END component/xapp_button_general_use_task_date        
-/*type: xapp_button_general_use_task_date//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button_general_use_task_datetime//*/
-      //XSTART component/xapp_button_general_use_task_datetime
-      class xapp_button_general_use_task_datetime extends xapp_console_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-      }//END CLS
-      //END TAG
-      //END component/xapp_button_general_use_task_datetime        
-/*type: xapp_button_general_use_task_datetime//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button_navigate_desktop//*/
-
-            //XSTART component/xapp_button_navigate_desktop
-              class xapp_button_navigate_desktop extends xapp_console_button{
-                constructor(obj_ini) {      
-                  super(obj_ini);        
-                } 
-                fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                
-                  //this.obj_holder.bln_debugNavigate=true;                  
-                }                
-                fn_onClick(e){                                    
-                  obj_path.fn_navigateSubdomain("desk");
-                  obj_project.fn_forgetEvent(e);    
-                }
-              }//END CLS
-              //END TAG
-              //END component/xapp_button_navigate_desktop
-/*type: xapp_button_navigate_desktop//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button_navigate_lobby//*/
-      //XSTART component/xapp_button_navigate_lobby
-      class xapp_button_navigate_lobby extends xapp_console_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        fn_onClick(e){                                    
-          obj_path.fn_navigateSubdomain("www");
-          obj_project.fn_forgetEvent(e);    
-        }
-      }//END CLS
-      //END TAG
-      //END component/xapp_button_navigate_lobby        
-/*type: xapp_button_navigate_lobby//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button_navigate_login//*/
-
-            //XSTART component/xapp_button_navigate_login
-              class xapp_button_navigate_login extends xapp_console_button{
-                constructor(obj_ini) {      
-                  super(obj_ini);        
-                } 
-                fn_initialize(obj_ini){
-                  super.fn_initialize(obj_ini);                
-                }
-                fn_onClick(e){                                    
-                                 
-                  
-                  obj_path.fn_navigateSubdomain("lock");                                    
-                  
-                  
-                  obj_project.fn_forgetEvent(e);    
-                }
-              }//END CLS
-              //END TAG
-              //END component/xapp_button_navigate_login
-/*type: xapp_button_navigate_login//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button_navigate_mall//*/
-      //XSTART component/xapp_button_navigate_mall
-      class xapp_button_navigate_mall extends xapp_console_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        fn_onClick(e){                                    
-          let obj_menuButton=this.fn_getMenuButton();
-          if(!obj_menuButton){return;}  
-          
-          obj_menuButton.fn_formNavigateMall();
-          
-          
-          obj_project.fn_forgetEvent(e);    
-        }
-      }//END CLS
-      //END TAG
-      //END component/xapp_button_navigate_mall        
-/*type: xapp_button_navigate_mall//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button_navigate_newcolumn//*/
-      //XSTART component/xapp_button_navigate_newcolumn
-      class xapp_button_navigate_newcolumn extends xapp_console_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        fn_onClick(e){                                    
-          let obj_menuButton=this.fn_getMenuButton();
-          if(!obj_menuButton){return;}  
-          
-          obj_menuButton.fn_formNavigateNewColumn();
-          
-          
-          obj_project.fn_forgetEvent(e);    
-        }
-      }//END CLS
-      //END TAG
-      //END component/xapp_button_navigate_newcolumn        
-/*type: xapp_button_navigate_newcolumn//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button_navigate_newrow//*/
-      //XSTART component/xapp_button_navigate_newrow
-      class xapp_button_navigate_newrow extends xapp_console_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        fn_onClick(e){                                    
-          let obj_menuButton=this.fn_getMenuButton();
-          if(!obj_menuButton){return;}  
-          
-          obj_menuButton.fn_formNavigateNewRow();
-          
-          
-          obj_project.fn_forgetEvent(e);    
-        }
-      }//END CLS
-      //END TAG
-      //END component/xapp_button_navigate_newrow        
-/*type: xapp_button_navigate_newrow//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button_navigate_office//*/
-      //XSTART component/xapp_button_navigate_office
-      class xapp_button_navigate_office extends xapp_console_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }        
-        fn_onClick(e){                                    
-          let obj_menuButton=this.fn_getMenuButton();
-          if(!obj_menuButton){return;}  
-          
-          obj_menuButton.fn_formNavigateOffice();
-          
-          
-          obj_project.fn_forgetEvent(e);    
-        }
-      }//END CLS
-      //END TAG
-      //END component/xapp_button_navigate_office        
-/*type: xapp_button_navigate_office//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button_navigate_rowz//*/
-      //XSTART component/xapp_button_navigate_rowz
-      class xapp_button_navigate_rowz extends xapp_console_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        fn_onClick(e){    
-                                        
-          obj_path.fn_navigateSubdomain("desk");
-          obj_project.fn_forgetEvent(e);    
-        }
-      }//END CLS
-      //END TAG
-      //END component/xapp_button_navigate_rowz        
-/*type: xapp_button_navigate_rowz//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button_navigate_settings//*/
-      //XSTART component/xapp_button_navigate_settings
-      class xapp_button_navigate_settings extends xapp_console_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                          
-          //this.bln_debugButtonSettings=true;          
-        }        
-        fn_onClick(e){                                    
-          let obj_menuButton=this.fn_getMenuButton();
-          if(!obj_menuButton){return;}  
-          
-          obj_menuButton.fn_formNavigateSettings();
-          
-          
-          obj_project.fn_forgetEvent(e);    
-        }
-      }//END CLS
-      //END TAG
-      //END component/xapp_button_navigate_settings        
-/*type: xapp_button_navigate_settings//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
-/*type: xapp_button_queryterm//*/
-      //XSTART component/xapp_button_queryterm
-      class xapp_button_queryterm extends form_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-          this.bln_enabled=true;
-
-          this.obj_holder.bln_listenMouseDown=true;                  
-          this.obj_holder.bln_listenMouseUp=true;                  
-        }
-        fn_onMouseDown(e){                            
-
-          this.obj_parentInterface.fn_queryTermButtonOnMouseDown(this, e);          
-          
-          obj_project.fn_forgetEvent(e);    
-        }
-        fn_onMouseUp(e){                  
-          this.obj_parentInterface.fn_queryTermButtonOnMouseUp(this, e);          
-          
-          obj_project.fn_forgetEvent(e);    
-        }
-        fn_onClick(e){                  
-          this.obj_parentInterface.fn_queryTermButtonOnClick(this, e);
-          
-          
-          obj_project.fn_forgetEvent(e);    
-        }
-        fn_onDblClick(e){ 
-          
-          this.obj_parentInterface.fn_queryTermButtonOnDblClick(this, e);
-          
-          
-          obj_project.fn_forgetEvent(e);    
-        }
-      }//END CLS
-      //END TAG
-      //END component/xapp_button_queryterm        
-/*type: xapp_button_queryterm//*/
+      //END component/xapp_button        
+/*type: xapp_button//*/
 /*END COMPONENT//*/
 
 
@@ -16056,6 +13895,4068 @@ class login_dashboard extends xapp_dashboard{
 
 
 /*START COMPONENT//*/
+/*type: xapp_columnform//*/
+
+            //XSTART component/xapp_columnform
+              class xapp_columnform extends xapp_column{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                
+  
+                  //this.obj_holder.bln_listenDblClick=true;                                    
+                }                   
+                fn_onLoad(){    
+                  super.fn_onLoad();                  
+                  if(this.fn_getDebugPin()){this.fn_highlightBorder("blue");}                  
+                }
+  
+                fn_initializeColumn(obj_row){                                    
+
+                  super.fn_initializeColumn(obj_row);
+                  //NEW RECORD
+                  if(this.bln_modeNewRecord){
+                      
+                    //2. SET VALUE                                          
+                    this.fn_setValue(this.fn_formatColumnDefaultValue());
+                  }                    
+                  
+                }     
+                
+                fn_computeField(){                         
+                  
+                  let obj_metaColumn=this.obj_metaColumn;
+                  
+                  //We no longer use getComponent, as this can be subclassed e.g. reportcolumn                  
+                  this.obj_field=this.fn_addContextItem("form_field");                  
+                  if(!this.obj_field){return;}                                               
+
+                  this.obj_field.fn_setStyleProperty("display", "flex");
+                  this.fn_setStyleProperty("flex-wrap", "wrap");
+                  this.obj_field.fn_setAxis(this.obj_paramRS.bln_axisColumn);
+                  
+                  if(!this.obj_paramRS.bln_reportView){
+                    //this.obj_field.fn_flipAxis(this.obj_paramRS.bln_axis);                  
+                  }                    
+                  
+                  if(obj_metaColumn.HiddenPin){                    
+                    this.fn_setHiddenPin();                                        
+                  }
+  
+                  this.fn_formattMetaColumnLabel();                       
+                  this.fn_getControlLabel();
+
+                  
+
+                  let str_label=obj_metaColumn.MetaLabel;                  
+                  let str_currencySymbol=obj_userHome.MetaSystem.CurrencySymbol;
+                  if(!str_currencySymbol){
+                    str_currencySymbol="#";
+                  }
+                  switch(obj_metaColumn.MetaColumnType.toLowerCase()){
+                    case "currency":                      
+                      if(obj_metaColumn.MetaColumnName.toLowerCase()!=="regionalvalue"){
+                        str_label+=" ("+str_currencySymbol+") ";
+                      }
+                      
+                      break;                  
+                    case "percent":
+                      str_label+=" (%) ";
+                      break;                  
+                  }                  
+                  this.obj_label.fn_setText(str_label);                  
+          
+                  this.fn_getControlText(); 
+
+                  this.obj_label.fn_setDomProperty("for", this.obj_text.fn_getDomProperty("Id"));                                                                      
+                  
+                  this.fn_setControl(this.obj_text);                  
+                  this.fn_setModeExecuteView();                                    
+                  
+                  if(this.obj_paramRS.obj_recordset.fn_getModeExecuteEdit()){
+                    this.fn_setModeExecuteEdit();
+                  } 
+                }                  
+                fn_onChildChange(e){                                                                        
+                  
+                  //111111111111111111111111111
+                  if(this.bln_debugColumn){
+                    this.fn_debugLabel("1 fn_onChildChange");
+                  }
+
+                  this.fn_setUpdatePermission(true);                  
+                  
+                }                
+                fn_setUpdatePermission(bln_value=false){
+                  this.bln_allowUpdate=bln_value;
+                }                
+                fn_getUpdatePermission(){
+                  return this.bln_allowUpdate;
+                }               
+                
+                fn_onFormLabelClick(e){                    
+                                    
+                  this.obj_row.obj_selectedColumn=this;                  
+                  
+                  const bln_value=this.fn_getModeExecuteEdit();                                                                        
+                
+                  if(bln_value){             
+                    this.fn_transferEditToView();                
+                    //this.fn_hideLabelBorder();                                        
+                  }
+                  else{                      
+                      this.fn_transferViewToEdit();                      
+                      //this.fn_showLabelBorder();                                        
+                  }    
+
+                  //LABEL ACTION
+                  //this.fn_hideLabelBorder();                                        
+                  //LABEL ACTION
+                }  
+
+                fn_transferEditToView(){                  
+                  
+                  
+
+                  if(this.fn_getUpdatePermission()){
+                    this.fn_setUpdatePermission(false);                    
+                    this.fn_updateFieldValue();                                         
+                  }
+                  
+                  this.fn_setModeExecuteView();                     
+                }
+                fn_transferViewToEdit(){                                    
+                  this.fn_setModeExecuteEdit();                     
+                }
+
+                
+                
+                fn_setModeExecuteView(){                                                                          
+
+                  //this.fn_debugLabel("fn_setModeExecuteView");
+
+                  super.fn_setModeExecuteView();                  
+
+                  this.fn_removeThemeEdit();
+                  this.fn_hideLabelBorder();                                        
+
+                  
+                  let obj_control=this.obj_text;
+                  this.fn_setControl(obj_control);                                    
+                  this.fn_applyValueDisplay(); 
+                  
+                  
+                }   
+                
+                fn_setModeExecuteEdit(){                   
+
+                  this.obj_row.fn_setModeExecuteView();
+
+                  if(!this.fn_checkModeEditRecord()){                                      
+                    return;
+                  }   
+                  
+                  super.fn_setModeExecuteEdit();                                    
+                  
+                  let obj_control=this.fn_setControlInput();
+                  this.fn_setControl(obj_control);                                    
+                  this.obj_controlEdit=obj_control;
+                  
+                  this.fn_applyValueEdit();                                    
+
+                  this.obj_control.fn_setFocus(true);
+
+                  this.fn_showLabelBorder();
+                  this.fn_applyThemeEdit();
+
+                  
+                  /*
+                  if(obj_project.bln_isMobile){                                        
+                    this.fn_setFormExpand(obj_control);
+                  }
+                  else{
+                    let str_value=this.fn_getValue();                                                      
+                    let int_value=str_value.length;
+                    if(int_value<300){                  
+                      obj_control.fn_setStyleProperty("width", "300px");
+                    }                    
+                  }
+                  //*/
+                  
+                  
+
+                  if(this.bln_debugColumn){                    
+                    this.fn_debug("Column DebugPin");
+                  }
+                  
+                  return true;
+                }                
+
+                
+
+                fn_checkModeEditRecord(){  
+  
+                  let bln_debug=false;                                    
+                  if(this.bln_debugColumn){
+                    bln_debug=true;                  
+                  }                  
+                  
+  
+                  ////CHECK LOCKED
+                  if(this.fn_getLocked()){
+                    if(bln_debug){console.log("column column is locked, return false");}
+                    return false;
+                  } 
+                  ////CHECK LOCKED
+
+                  if(this.fn_getMetaColumnKey()){//do we already have the edit key
+                    if(bln_debug){console.log("column column already has previous key, return true");}                    
+                    return true;
+                  }
+                  
+                  let obj_recordset=this.obj_paramRS.obj_recordset;
+                  obj_recordset.fn_setMetaColumnKey(this);                  
+                  if(this.fn_getMetaColumnKey()){
+                    if(bln_debug){console.log("column column now has new key, return true");}                    
+                    return true;
+                  }
+                  if(bln_debug){
+                    console.log("End of Function: no key found for column - return false");                    
+                  }                                      
+                  
+                  return false;
+                }
+
+                fn_validateFieldValue(str_value){
+                  //this.fn_debugLabel("fn_validateFieldValue: " + str_value);
+
+                  let obj_metaColumn=this.obj_metaColumn;                                    
+                  if(str_value==="ROWZ_INVALID"){                    
+                    if(this.bln_debugColumn){
+                      this.fn_debugLabel("ROWZ_INVALID");
+                    }
+                    this.fn_debugLabel("ROWZ_INVALID return false");                    
+                    obj_metaColumn.ValidationError=true;                  
+                    this.fn_applyThemeError();
+                    return false;                    
+                  }        
+
+                  obj_metaColumn.ValidationError=false;                                                        
+                  this.fn_removeThemeError();
+                  return true;                    
+                }
+                
+                fn_updateFieldValue(){
+                  
+                  let str_value=this.fn_getEditControlValue();   
+                  str_value=String(str_value).trim();
+                  //console.log("fn_updateFieldValue: str_value: [" + str_value + "]");
+                  str_value=this.fn_formatColumnValueFromEdit(str_value);
+                  
+                  let bln_value=this.fn_validateFieldValue(str_value);
+                  //console.log("fn_updateFieldValue: bln_value: [" + bln_value + "]");
+                  if(!bln_value){
+                    return;
+                  }
+                  //console.log("PASSED fn_updateFieldValue: bln_value: [" + bln_value + "]");
+
+                  //3. SET VALUE                          
+                  this.fn_setValue(str_value);                                    
+                  
+                  this.fn_pushColumn();              
+
+                  obj_project.fn_unsetEvent();
+                }                       
+
+                fn_pushColumn(){                    
+                  
+                  ////LOCK COLUMN
+                  this.fn_setLocked();
+                  ////LOCK COLUMN
+
+                  if(this.bln_debugColumn){
+                    this.fn_debugLabel("fn_receiveColumn");
+                  }
+
+                  this.obj_row.fn_pushColumn(this);                                    
+                }               
+                fn_receiveColumn(){  
+
+                  if(this.bln_debugColumn){
+                    this.fn_debugLabel("fn_receiveColumn");
+                  }
+
+                  ////UNLOCK COLUMN
+                  this.fn_setUnLocked();
+                  ////UNLOCK COLUMN
+                } 
+                
+                fn_showLabelBorder(){    
+                    //this.obj_label.fn_setStyleProperty("borderColor", obj_project.obj_themeForground.fn_getStyleProperty("backgroundColor"));                                    
+                }        
+                fn_highlightLabelBorder(){    
+                  //this.obj_label.fn_setStyleProperty("borderColor", obj_project.obj_themeForground.fn_getStyleProperty("backgroundColor"));                                    
+                }        
+              
+                fn_hideLabelBorder(){                                      
+                  //this.obj_label.fn_setStyleProperty("borderColor", "transparent");                                                                      
+                  //this.obj_label.fn_setStyleProperty("borderColor", obj_project.obj_themeBackground.fn_getStyleProperty("backgroundColor"));                                  
+                }
+
+                fn_onChildMouseUp(e){                         
+                  if(obj_project.obj_itemEvent===this.obj_label){                    
+                    //do nothing                    
+                    //this.fn_hideLabelBorder();                  
+                  }
+                }
+                fn_onChildMouseDown(e){                                             
+                  if(obj_project.obj_itemEvent===this.obj_label){
+                    //LABEL ACTION
+                    this.fn_showLabelBorder();                  
+                    //LABEL ACTION
+                  }
+                } 
+                fn_onChildMouseEnter(e){                                             
+                  if(obj_project.obj_itemEvent===this.obj_label){
+                    //LABEL ACTION
+                    this.fn_highlightLabelBorder();                  
+                    //LABEL ACTION
+                  }
+                } 
+                fn_onChildMouseLeave(e){                
+                  if(obj_project.obj_itemEvent===this.obj_label){
+                    if(this!==this.obj_row.obj_selectedColumn){
+                      this.fn_hideLabelBorder();                  
+                    }
+                  }
+                } 
+                fn_onChildClick(e){                                                                                                            
+                  if(obj_project.obj_itemEvent===this.obj_label){                    
+                    this.fn_onFormLabelClick();
+                  }
+                } 
+                fn_onChildKeyDown(e){ 
+                  let obj_metaColumn=this.obj_metaColumn;                                                                                                                                               
+                  //console.log("e.key: " + e.key);
+                  if(obj_metaColumn.MetaColumnAPIName.toLowerCase()==="metacolumnapiname"){                    
+                    if (/\s/.test(event.key)) {
+                      e.preventDefault();
+                    }
+  
+                  }
+                } 
+                
+                fn_onChildBlur(e){                                                                        
+                  
+                  //occurs when control lose focus
+                  if(this.bln_debugColumn){
+                    this.fn_debugLabel("2 fn_onChildBlur");
+                  }                  
+                  
+                  //ROW BLUR, Exclude THIS
+                  this.obj_row.fn_setModeExecuteView();                 
+                  //ROW BLUR, Exclude THIS
+
+                  //this.fn_debugLabel("this.obj_metaColumn.ValidationError: " + this.obj_metaColumn.ValidationError)
+                  
+                  if(this.obj_metaColumn.ValidationError){                    
+                    this.fn_applyThemeError();
+                  }                  
+                }                
+                
+                fn_onChildInput(){                  
+                  
+                  /*
+                  let str_value=this.fn_getValue();                                                      
+                  str_value=this.fn_formatColumnValueFromEdit(str_value);                                                  
+                  let bln_value=this.fn_validateFieldValue(str_value);
+                  if(!bln_value){
+                    return;
+                  }
+                  //*/
+                  
+                }                                   
+                
+                fn_applyThemeError(){
+                  
+                  this.obj_metaColumn.ValidationError=true;                  
+                  this.obj_control.fn_applyThemeError(this.str_colorHighlight);                  
+                }
+
+                fn_removeThemeError(){                  
+                  
+                  if(this.obj_metaColumn.ValidationError){
+                    return;
+                  }                                            
+                  
+                  let str_value=this.fn_getValue();
+                  if(str_value){
+                    this.obj_control.fn_removeStyleOutline();                                                            
+                  }
+                }                            
+
+                fn_applyThemeEdit(){
+
+                  
+                  //this.obj_control.fn_applyThemeEdit(this.str_colorHighlight);                  
+                  //this.obj_control.fn_setStyleProperty("color", "#333333");                  
+                  //this.obj_control.fn_setStyleProperty("color", "#444444");                  
+
+                  //this.obj_control.fn_setStyleProperty("backgroundColor", obj_project.obj_theme.str_highLightFill);        
+                  //this.obj_control.fn_setStyleProperty("borderColor", obj_project.obj_theme.str_forGround);                      
+                    
+                }
+
+                fn_removeThemeEdit(){
+                  //this should not call remove style outline, as it will be reset from remove error                                            
+                  //this.obj_control.fn_removeStyleOutline();
+                }                            
+
+                fn_receiveDropdownList(obj_post){                  
+                  
+                  this.arr_rowsSelect=obj_post.RowData;
+                  this.obj_select.fn_loadList(this.arr_rowsSelect, this);                                    
+                  this.obj_select.fn_setValue(this.fn_getValue(), this);
+                }  
+                fn_receiveListMember(){                                    
+                  
+                  this.obj_select.fn_loadList(this.arr_listMember, this);                                    
+                  this.obj_select.fn_setValue(this.fn_getValue(), this);
+                }  
+                
+                
+                /////////////////////////
+                /////////////////////////
+                /////////////////////////
+                /////////////////////////
+                /////////////////////////  
+
+                fn_resize(){                  
+                }
+                
+                fn_getControlText(){                  
+                  
+                  if(this.obj_text){return;}
+
+                  let str_type;
+
+                  super.fn_getControlText();                                    
+
+                  /*
+                  let obj_control=this;
+                  already set in design process
+                  display flex
+                  flexflow column wrap
+                  obj_control.fn_setStyleProperty("border", "1.0em solid red");
+                  //*/
+                  
+                  switch(this.obj_metaColumn.MetaColumnType.toLowerCase()){
+                    case "xcheckbox":                                         
+                      this.obj_text.fn_setDisplay("none");
+                      this.obj_text=this.fn_getControlInput();
+                      break;                                                                        
+                      case "note":         
+                      case "json":         
+                        let obj_template, obj_target;
+                        
+                        obj_template=this.obj_text;                                                                        
+
+                        str_type="form_textarea";                      
+                        obj_target=this.obj_field.fn_addContextItem(str_type);
+
+                        this.fn_matchStyle(obj_target, obj_template);                        
+                        
+                        obj_target.fn_setDomProperty("readOnly", true);
+                        obj_template.fn_setDisplay("none");
+                        
+                        this.obj_text=obj_target;
+                        //this.fn_setFormExpand(this.obj_text);
+                        
+                        break;
+                    case "date":         
+                    case "datetime":                      
+                      if(obj_project.bln_isMobile){
+                        this.fn_setDateTimeSpanDimension();
+                      }                      
+                      break;                                            
+                  } 
+                  
+                }
+                fn_getContainerWidthAvailable() {
+                  const obj_parent=this.fn_getParentComponent();
+                  const parent = obj_parent.dom_obj;                     
+                  const computedStyle = window.getComputedStyle(parent);               
+
+                  const int_clientWidth=parseInt(parent.clientWidth);
+                  const int_paddingLeft=parseInt(computedStyle.paddingLeft);
+                  const int_paddingRight=parseInt(computedStyle.paddingRight);
+                  const int_widthAvailable=parseInt(int_clientWidth-int_paddingLeft-int_paddingRight, 10);                                         
+                  return int_widthAvailable;
+              }
+
+                fn_setDateTimeSpanDimension(){
+
+                  let int_width, str_width;
+                  let int_widthBase, int_widthDateTime, int_widthDateTimeSecond;
+                  if(this.bln_debugColumn){                      
+                    //this.fn_debugLabel("obj_project.user_agent: " + obj_project.user_agent) ;
+                    //Chrome: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36
+                    //Firefox: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:131.0) Gecko/20100101 Firefox/131.0                                                                        
+                  }
+                  
+                  int_widthBase=9//chrome, default
+                  int_widthDateTime=3;
+                  int_widthDateTimeSecond=2;                                                                
+                  if(obj_project.user_agent==="Firefox"){                                                
+                    int_widthBase=10;                        
+                  }
+                  
+                  
+                  int_width=int_widthBase;                      
+                  if(this.obj_metaColumn.DateTime){
+                    int_width+=int_widthDateTime;                                          
+                    if(this.obj_metaColumn.DateTimeSecond){                          
+                      int_width+=int_widthDateTimeSecond;                                          
+                    }                      
+                  }                              
+                  str_width=int_width+"em";                                                                                       
+                  if(this.bln_debugColumn){                      
+                    //this.fn_debugLabel("str_width: " + str_width);
+                  }                      
+                  this.obj_text.fn_setStyleProperty("width", str_width);                      
+                }
+
+                fn_getDisplayDimension(bln_display=true){
+                  
+                  let obj_control=this.obj_text;
+                  if(bln_display){obj_control.fn_setDisplay(true);}                  
+                  this.int_widthSpan=parseInt(obj_control.dom_obj.offsetWidth, 10);
+                  this.str_widthSpan=(this.int_widthSpan)+"px";
+                  this.int_heightSpan=parseInt(obj_control.dom_obj.offsetHeight, 10);
+                  this.str_heightSpan=(this.int_heightSpan)+"px";                                 
+                  //console.log("this.int_widthSpan: " + this.int_widthSpan);
+                  //console.log("this.str_widthSpan: " + this.str_widthSpan);                                      
+                }
+                fn_setEditDimension(){
+                  let obj_control=this.obj_input;
+                  obj_control.fn_setStyleProperty("width", this.str_widthSpan);                                              
+                  obj_control.fn_setStyleProperty("height", this.str_heightSpan);                                              
+                }
+                fn_setControlInput(){
+                  
+                  let obj_control;
+                  let obj_metaColumn=this.obj_metaColumn;                  
+                  if(obj_metaColumn.MetaList){                                    
+                    obj_control=this.obj_select;                         
+                    let bln_fetchList=false;
+                    if(!obj_control){
+                      obj_control=this.fn_getControlSelect();                                                                                                                  
+                      bln_fetchList=true;                      
+                    }                                        
+                    if(this.obj_select){this.obj_select.fn_setDisplay(true);}
+                    if(this.obj_text){this.obj_text.fn_setDisplay(false);}
+                    if(this.obj_input){this.obj_input.fn_setDisplay(false);}
+                    
+                    if(obj_metaColumn.obj_metaList.AutoFetchPin){bln_fetchList=true;}
+                    if(bln_fetchList){
+                      if(obj_metaColumn.obj_metaList.ListMember){
+                        this.arr_listMember=obj_metaColumn.obj_metaList.ListMember.split(",");
+                        this.fn_receiveListMember();
+                      }
+                      else{
+                        this.fn_getListSelectFromServer();
+                      }
+                      
+                    }
+                  }
+                  else{                    
+                    this.fn_getDisplayDimension(true);                    
+                   obj_control=this.obj_input;
+                    if(!obj_control){
+                      obj_control=this.fn_getControlInput();                                          
+                    }                                                                
+                    if(this.obj_select){this.obj_select.fn_setDisplay(false);}
+                    if(this.obj_text){this.obj_text.fn_setDisplay(false);}
+                    if(this.obj_input){this.obj_input.fn_setDisplay(true);}                    
+                    this.fn_setEditDimension();                                      
+                  }                                     
+                  
+                  let obj_template, obj_target;
+                  obj_template=this.obj_text;
+                  obj_target=obj_control;
+                  this.fn_matchStyle(obj_target, obj_template);
+
+                  
+                  return obj_control;
+                }                  
+
+                fn_matchStyle(obj_target, obj_template){
+
+                  const cssObj = window.getComputedStyle(obj_template.dom_obj, null);          
+                  let str_property, str_value;
+
+                  str_property="font-size";
+                  str_value = cssObj.getPropertyValue(str_property);                                        
+                  obj_target.fn_setStyleProperty(str_property, str_value);
+
+                  str_property="font-family";
+                  str_value = cssObj.getPropertyValue(str_property);                      
+                  obj_target.fn_setStyleProperty(str_property, str_value);
+                  
+                  str_property="color";
+                  str_value = cssObj.getPropertyValue(str_property);                                        
+                  obj_target.fn_setStyleProperty(str_property, str_value);
+
+                  obj_target.fn_setStyleProperty("outline", "none");                      
+
+                  /*
+                  str_property="background-color";
+                  str_value = cssObj.getPropertyValue(str_property);                      
+                  obj_target.fn_setStyleProperty(str_property, str_value);
+                  
+                  str_property="padding";
+                  str_value = cssObj.getPropertyValue(str_property);                      
+                  obj_target.fn_setStyleProperty(str_property, str_value);
+
+                  str_property="border";
+                  str_value = cssObj.getPropertyValue(str_property);                      
+                  obj_target.fn_setStyleProperty(str_property, str_value);
+                  //*/
+
+
+                }
+                
+                fn_getControlSelect(){                                                                                   
+                  
+                  let obj_control;
+                  let obj_metaColumn=this.obj_metaColumn;                  
+                  
+                  if(this.obj_input){
+                    this.obj_input.fn_setDisplay("none");
+                  }
+                  obj_control=this.obj_select;
+                  if(!obj_control){                       
+                    obj_control=this.obj_field.fn_addContextItem("xapp_form_select");                    
+                    if(obj_metaColumn.obj_metaList.AllowMultiple){
+                      obj_control.fn_setDomProperty("multiple", "multiple");
+                    }                    
+                    this.obj_select=obj_control;
+                  }   
+                  return obj_control;
+                }  
+                fn_getListSelectFromServer(){                                  
+                  
+                  this.obj_row.fn_getListSelectFromServer(this);                                      
+                }                                        
+                
+                fn_getControlInput(){
+                
+                  //Default will be text area 
+                  //Can specify in form definition if other
+                  
+                  let obj_metaColumn=this.obj_metaColumn;                      
+                  let str_type;      
+                  let obj_control;                       
+                
+                switch(obj_metaColumn.MetaColumnType.toLowerCase()){
+                  case "checkbox":
+                    str_type="form_checkbox";
+                    obj_control=this.obj_field.fn_addContextItem(str_type);                                      
+                    break;
+                  case "color":
+                    str_type="form_input";                                          
+                    obj_control=this.obj_field.fn_addContextItem(str_type);                                                            
+                    obj_control.fn_setDomProperty("type", "color");                    
+                    obj_control.fn_removeStyleProperty("padding");
+                    obj_control.fn_setStyleProperty("width", "auto");
+                    obj_control.fn_setStyleProperty("height", "50px");                                        
+
+                    /*/
+                    <option colorname="standard_white">#FFFFFF</option>                    
+                    <option colorname="colorwheel_1_main_red">#FF0000</option>                   
+                    <option colorname="colorwheel_4_main_brightgreen">#66FF00</option>                    
+                    <option colorname="colorwheel_7_main_aqua">#00FFFF</option>                                                            
+                    <option colorname="colorwheel_8_lightblue">#0080FF</option>                                        
+                    <option colorname="standard_black">#000000</option>
+                    <option colorname="colorwheel_11_fuchsia">#FF00FF</option>                                        
+                    <option colorname="colorwheel_2_orange">#FF7F00</option>
+                    <option colorname="standard_silver">#C0C0C0</option>  
+                    <option colorname="colorwheel_3_yellow">#FFFF00</option>                                                            
+                    //*/
+
+                    const str_listId=obj_shared.fn_getUniquePrefix ("presetColor_")
+                    const newElement = document.createElement('div');                    
+
+                    newElement.innerHTML = `
+                    <datalist id="` + str_listId + `">                 
+                    <option colorname="standard_black">#000000</option>                          
+                    <option colorname="colorwheel_2_orange">#FF7F00</option>
+                    <option colorname="standard_silver">#C0C0C0</option>  
+                    <option colorname="colorwheel_3_yellow">#FFFF00</option>                                                            
+                    
+                    </datalist>
+                    `;  
+                    this.obj_field.dom_obj.appendChild(newElement);                    
+                    obj_control.dom_obj.setAttribute("list", str_listId);                                                                               
+                    break;
+                  case "date":                      
+                  case "datetime":                                          
+                    str_type="form_input";                      
+                    obj_control=this.obj_field.fn_addContextItem(str_type);                                        
+                    obj_control.fn_setDomProperty("type", "date");                                                                                                          
+                    if(obj_metaColumn.DateTime){                      
+                      obj_control.fn_setDomProperty("type", "datetime-local");                      
+                      if(obj_metaColumn.DateTimeSecond){                                                  
+                        obj_control.fn_setDomProperty("step", "1");
+                      }                      
+                    }                                         
+                    break;
+                  case "email":                         
+                    str_type="form_input";  
+                    obj_control=this.obj_field.fn_addContextItem(str_type);                                        
+                    obj_control.fn_setDomProperty("type", "email");                                            
+                    break;
+                  case "phone":                         
+                    str_type="form_input";  
+                    obj_control=this.obj_field.fn_addContextItem(str_type);                                        
+                    obj_control.fn_setDomProperty("type", "tel");                      
+                    break;
+                  case "url":                         
+                    str_type="form_input";  
+                    obj_control=this.obj_field.fn_addContextItem(str_type);                                        
+                    obj_control.fn_setDomProperty("type", "url");                      
+                    break;
+                  case "currency":
+                  case "percent":
+                  case "number":                         
+                    str_type="form_input";  
+                    obj_control=this.obj_field.fn_addContextItem(str_type);                                        
+                    obj_control.fn_setDomProperty("type", "number");                      
+                    obj_control.fn_setDomProperty("inputmode", "numeric");                                            
+                    obj_control.fn_setDomProperty("placeholder", "Enter a number");
+                    
+                    let int_decimal=obj_metaColumn.Decimal;                      
+                    let str_decimal="1".padStart(String(int_decimal), "0");
+                    let str_step="1";                      
+                    if(int_decimal){                              
+                      str_step="0."+str_decimal;
+                    }
+                    obj_control.fn_setDomProperty("step", str_step);
+                    
+                    let max_decimal="9".padStart(String(int_decimal), "9");
+                    
+                    
+                    let str_min="-9,999,999,999" + "." + max_decimal;
+                    let str_max="9,999,999,999" + "." + max_decimal;                                                                  
+                    if(obj_metaColumn.UnSigned){str_min="0."+str_decimal;}                                            
+                    //obj_control.fn_setDomProperty("min", str_min);                                                                  
+                    //obj_control.fn_setDomProperty("max", str_max);                                                                  
+                    
+                    break;                      
+                  case "note":                  
+                  case "json":
+                    str_type="form_textarea";                      
+                    obj_control=this.obj_field.fn_addContextItem(str_type);                                                            
+                    //console.log("obj_control form_textarea ");
+                    break;                  
+                  default:
+                    str_type="form_input";
+                    obj_control=this.obj_field.fn_addContextItem(str_type);                  
+                    obj_control.fn_setDomProperty("type", "text");                                                                                      
+                    break;
+                }
+                
+                  this.obj_input=obj_control;
+                  
+                  let str_placeholder=obj_metaColumn.PlaceHolder;
+                  if(str_placeholder){
+                    obj_control.fn_setPlaceholder(str_placeholder);                                        
+                  }
+
+                  let int_maxlength=obj_metaColumn.MaxLength;                       
+                  if(!int_maxlength){
+                    int_maxlength=10000;
+                  }                  
+                  obj_control.fn_setDomProperty("maxlength", int_maxlength);                                        
+                  
+                  return obj_control;
+                }                   
+                
+                fn_formatColumnDefaultValue(){
+
+                  let obj_metaColumn=this.obj_metaColumn;                  
+
+                  if(!obj_metaColumn.MetaColumnType){
+                    return "";
+                  }
+
+                  
+                  let str_value, str_valueLower;
+
+                  str_value=obj_shared.fn_formatString(obj_metaColumn.DefaultValue);                  
+                  if(!str_value){
+                    return "";
+                  }
+
+                  str_value=obj_shared.fn_interfaceReplaceSessionCodes(str_value);                 
+                  str_valueLower=str_value.toLowerCase();                  
+                  
+                  switch(obj_metaColumn.MetaColumnType.toLowerCase()){
+                    case "checkbox":
+                      if(!str_value){
+                        str_value=0;
+                      }                      
+                      break;
+                    case "currency":
+                    case "percent":
+                    case "number":                  
+                        if(!str_value){
+                          str_value=0;
+                        }
+                      break;
+                    case "date":
+                    case "datetime":
+                      switch(str_valueLower) {
+                        case "now":                                                  
+                        str_value=obj_shared.fn_formatSystemDateString(new Date(), obj_metaColumn.DateTime, obj_metaColumn.DateTimeSecond);                                                                          
+                          break;                                  
+                      }
+                    break;                    
+                  }                                    
+
+                  return str_value;
+                }
+                fn_formatDisplayValueFromColumn(str_value){                                                                                       
+
+                  let obj_metaColumn=this.obj_metaColumn;                  
+                  str_value=obj_shared.fn_formatDisplayValueFromColumn(obj_metaColumn, str_value);
+                  
+                  switch(obj_metaColumn.MetaColumnType.toLowerCase()){                    
+                    case "date":                                            
+                    case "datetime":
+                      str_value+=this.fn_getNBSpace(5);
+                      break;
+                  }
+                  return str_value;
+                }
+
+                fn_getNBSpace(int_value){
+                  let str_value="";
+                  for(let i=0;i<=int_value;i++){
+                    str_value+="&nbsp;";                    
+                  }
+                  return str_value;
+                }
+                
+                fn_formatColumnValueFromEdit(str_value){                                   
+                  //this.fn_debugLabel("fn_formatColumnValueFromEdit: " + str_value); 
+
+                  str_value=String(str_value);              
+                  let bln_value;
+                  
+                  let obj_metaColumn=this.obj_metaColumn;                           
+                  //this.fn_debugLabel("obj_metaColumn.MetaColumnType.toLowerCase(): " + obj_metaColumn.MetaColumnType.toLowerCase());          
+                  switch(obj_metaColumn.MetaColumnType.toLowerCase()){
+                    case "checkbox":                      
+                      str_value=obj_shared.fn_parseBool(str_value);                               
+                      if(str_value){str_value="on";}
+                      else{str_value="off";}                                            
+                      break;                                          
+                    case "email":
+                      //this.fn_debugLabel("case email handle"); 
+                      if(!str_value){str_value="";return str_value;}
+                      bln_value=obj_shared.fn_validEmail(str_value);                      
+                      if(!bln_value){
+                        return "ROWZ_INVALID";  
+                      }                      
+                      break;                 
+                    case "phone":
+                      if(!str_value){str_value="";return str_value;}
+                      bln_value=obj_shared.fn_validPhone(str_value);                      
+                      if(!bln_value){
+                        return "ROWZ_INVALID";  
+                      }                      
+                      break;                 
+                    case "url":
+                      if(!str_value){str_value="";return str_value;}
+                      str_value=str_value.replace(/^https:\/\//, '');  
+                      let str_url="https://"+str_value;
+                      bln_value=obj_shared.fn_validURL(str_url);                      
+                      if(!bln_value){
+                        return "ROWZ_INVALID";  
+                      }                      
+                      break; 
+                    case "currency":              
+                    case "percent":              
+                    case "number":    
+                      str_value=obj_shared.fn_formatNumber(str_value, obj_metaColumn.Decimal);                                            
+                      bln_value=obj_shared.fn_validNumber(str_value, obj_metaColumn.UnSigned);                      
+                      if(!bln_value){
+                        return "ROWZ_INVALID";  
+                      }                      
+                      break;                
+                    case "date":                      
+                    case "datetime":                  
+                      if(!str_value){str_value="";return str_value;}                      
+                      let obj_date=new Date(str_value);                                            
+                      str_value=obj_shared.fn_formatSystemDateString(obj_date, obj_metaColumn.DateTime, obj_metaColumn.DateTimeSecond);                                                                
+                      break;  
+                    case "note":
+                    case "text":                  
+                    break;
+                    case "json":                  
+                    break;
+                    case "color":                  
+                    break;
+                    case "recordid":
+                      bln_value=obj_shared.fn_validNumber(str_value, false);                      
+                      if(!bln_value){
+                        return "ROWZ_INVALID";  
+                      }                      
+                    break;
+                    default:
+                      this.fn_debugLabel("ERROR Type not found: " + obj_metaColumn.MetaColumnType.toLowerCase());                                             
+                  }
+                  if(obj_metaColumn.MetaList){
+                    this.str_metaListIdValue=this.obj_select.fn_getListIdValue(str_value);
+                  }
+                  return str_value;
+                }                
+
+                fn_formatEditValueFromColumn(str_value){
+                  
+                  str_value+="";                                                      
+                  
+                  let obj_metaColumn=this.obj_metaColumn;                  
+                  switch(obj_metaColumn.MetaColumnType.toLowerCase()){                    
+                    case "checkbox":                                            
+                      str_value=obj_shared.fn_parseBool(str_value);                               
+                      if(str_value){str_value="on";}
+                      else{str_value="off";}                                            
+                      break;                              
+                    case "currency":              
+                    case "percent":              
+                    case "number":
+                      str_value=obj_shared.fn_formatNumber(str_value, obj_metaColumn.Decimal);                      
+                      break;
+                    case "date":
+                    case "datetime":       
+                    if(!str_value){str_value="";return str_value;}
+                      let obj_date=obj_shared.fn_getDateObjectFromSystemDate(str_value, obj_metaColumn.DateTime);                                              
+                      str_value=obj_shared.fn_formatISODateString(obj_date, obj_metaColumn.DateTime, obj_metaColumn.DateTimeSecond);                                                                                          
+                      break;                                        
+                  }
+                  return str_value;
+                }               
+
+                                  
+              }//END CLS
+              //END TAG
+              //END component/xapp_columnform
+/*type: xapp_columnform//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_console_button//*/
+
+            //XSTART component/console_button
+              class xapp_console_button extends xapp_button{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                                  
+                }                
+                fn_configureFromMeta(obj_row){
+    
+                  if(!obj_row){return;}//can be false at top level  
+                            
+                  console.log("xapp_console_button fn_configureFromMeta");
+                  let obj_metaColumn;        
+                  let obj_recordset=obj_row.obj_paramRS.obj_recordset;
+                  
+                  obj_metaColumn=obj_recordset.fn_getMetaColumnViaFieldName("MetaRowzTitle");
+                  if(obj_metaColumn){                              
+                    this.fn_setText(obj_metaColumn.str_value);                 
+                  } 
+                }                 
+              }//END CLS
+              //END TAG
+              //END component/console_button
+/*type: xapp_console_button//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_tablecell//*/
+
+            //XSTART component/form_tablecell
+              class form_tablecell extends component{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);            
+                }         
+              fn_locateItem(str_idXDesign, str_type){
+                let arr, obj_item;
+                arr=this.obj_design.arr_item;
+                for(let i=0;i<arr.length;i++){
+                    obj_item=arr[i];     
+                    
+                    if(obj_item.fn_getType()===str_type){
+                      if(obj_item.obj_design.str_idXDesign==str_idXDesign){
+                        return obj_item;
+                      }
+                      if(obj_item.obj_design.str_linkId==str_idXDesign){
+                        return obj_item;
+                      }
+                    }
+                }
+                return false;
+              } 
+              }//END CLS
+              //END TAG
+              //END component/form_tablecell
+/*type: form_tablecell//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_inputandbutton_submit//*/
+
+            //XSTART component/form_inputandbutton_submit
+            class form_inputandbutton_submit extends form_button_rich{
+              constructor(obj_ini) {      
+                super(obj_ini);        
+              } 
+              fn_initialize(obj_ini){
+                super.fn_initialize(obj_ini);           
+
+                this.obj_holder.bln_listenClick=true;
+                this.obj_holder.bln_listenDblClick=true;
+
+                
+                this.bln_enabled=true;
+              }                              
+              fn_onClick(e){                                                      
+                
+                this.fn_notifyParent("fn_onLinkButtonClick", e);                                    
+                obj_project.fn_unsetEvent();    
+              }
+              fn_onDblClick(e){                                                                    
+                //console.log("form_inputandbutton_submit fn_onDblClick");
+                
+                obj_project.fn_unsetEvent();    
+              }
+            }//END CLS
+            //END TAG
+            //END component/form_inputandbutton_submit
+/*type: form_inputandbutton_submit//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp//*/
+
+            //XSTART component/xapp
+              class xapp extends xapp_ajax{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                                          
+                  
+                  this.obj_design.int_radioDisplayMode=3;//Menu function Option
+                  this.fn_setRadioDisplayMode();                                  
+                  this.obj_design.bln_allowDelete=false;
+                  this.obj_design.bln_autoFetch=false;
+
+                  this.obj_holder.bln_debugServer=false;
+
+                  
+                  this.MetaDataViewId=101426;//meta_data
+                  this.MetaDataViewName="meta_data";
+          
+                  this.MetaUserViewId=1;//meta_user
+                  this.MetaUserViewName="meta_user";
+          
+                  this.MetaLinkViewId=100475;//meta_link
+                  this.MetaLinkViewName="meta_link"; 
+
+                  this.obj_themeOptions={
+                    
+
+                  };
+                  
+                  
+                  //obj_path.fn_explainNavigateRecordURL();                  
+                }           
+                fn_getAllowDelete(){
+                  return this.obj_design.bln_allowDelete;
+                }
+                fn_endAuthorize(){                        
+                  obj_path.fn_navigateSubdomain("lock");
+                }
+                
+                fn_setRadioDisplayMode(){                  
+                  this.bln_togglePeersPin=false;
+                  this.bln_closePeersPin=false;
+                  this.bln_autoPin=false;
+          
+                  switch(this.obj_design.int_radioDisplayMode){                              
+                    case 1:                                  
+                    break;
+                    case 2:            
+                      this.bln_togglePeersPin=true;
+                    break;
+                    case 3:                     
+                      this.bln_togglePeersPin=true;                       
+                      this.bln_closePeersPin=true;
+                    break;
+                    case 10:
+                      this.bln_autoPin=true;                
+                    break;
+                    default:            
+                    break;
+                  }       
+                }     
+                fn_setAccordionChildMenu(){        
+                  let obj_container;                  
+                  obj_container=this.fn_getComponent("xapp_dynamic_content");
+                  if(!obj_container){
+                    console.log("ERROR A: XAPP fn_setAccordionChildMenu component not found xapp_dynamic_content");
+                    return;
+                  }             
+                  this.obj_holder.obj_accordionChildMenu=obj_container.fn_addContextItemOnce("xapp_accordion");
+                  if(!this.obj_holder.obj_accordionChildMenu){
+                              console.log("ERROR B: XAPP fn_setAccordionChildMenu context item not found xapp_accordion");
+                  }
+                  
+                }            
+                fn_getAccordionChildMenu(){        
+                  return this.obj_holder.obj_accordionChildMenu;
+                }
+                fn_onAuthorizeUserStatus(){//logged in 
+              
+                  if(this.fn_hasContextHolderParent()){return;}                                  
+                  
+                  this.fn_setAccordionChildMenu();                      
+                  
+                  let obj_container=this.fn_getAccordionChildMenu();                              
+                  
+                  if(!obj_container){
+                    console.log("ERROR C: fn_onAuthorizeUserStatus AccordionChildMenu is false");
+                    return;
+                  }                
+                  
+                  let obj_item=obj_container.fn_addContextItem("xapp_menu");                                  
+                  if(obj_item){          
+                    obj_item.obj_menuProject=this;
+                    obj_item.bln_isAppRoot=true;
+                    this.obj_menuButton=obj_item;
+                    obj_item.fn_setText("APP ROOT");                          
+
+
+                    //initial menu can be selected, either menuname or subdomain                    
+                    let str_subdomain=this.obj_design.str_releaseLabel;                    
+                    if(str_subdomain==="notset" ||!str_subdomain){
+                      str_subdomain=this.obj_design.str_nameShort;                      
+                    }
+                
+                    obj_item.fn_setSubdomain(str_subdomain);                                                            
+                    this.fn_displayMenu(obj_item);//Set to True to display as the first menu, and to debug the first menu
+                  } 
+                  else{
+                    console.log("ERROR: Unable to locate Context Item menu");
+                  }   
+                }      
+                fn_displayMenu(obj_item){                  
+                  
+                  let bln_debug=obj_path.fn_hasQueryStringValue(window.location.search, "mode", "debug");                                    
+                  obj_item.fn_setDisplay(bln_debug);    
+                  obj_item.fn_setDebugPin(bln_debug);                
+                  obj_item.fn_configureOptionChildMenu();                                                    
+                  obj_item.fn_open();          
+                } 
+                
+                fn_getStandardMenuByName(str_name){
+                  
+                  return this.obj_menuButton.fn_getMenuByName(str_name);
+                }    
+
+                
+          
+                
+              }//END CLS
+              //END TAG
+              //END component/xapp
+/*type: xapp//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: app//*/
+      //XSTART component/app
+      class app extends xapp{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/app        
+/*type: app//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: authorise_gate//*/
+
+            //XSTART component/authorise_gate
+              class authorise_gate extends xapp_ajax{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                                                
+                }
+                fn_onLoad(){ //base object should be called
+                  super.fn_onLoad();     
+                  
+                  if(obj_project.fn_hasContextHolderParent()){return;}                          
+              
+                  this.fn_checkAuthorize();        
+                }  
+                fn_checkAuthorize(){  
+              
+                  let obj_ini=new Object;            
+                  obj_ini.str_action="checkAuthorize";                    
+                  this.fn_runServerAction(obj_ini);                                
+                  this.fn_createCurtain();
+              } 
+              
+              fn_removeCurtain(){//overidden    
+                const o=this.obj_holder.dom_objCurtain;
+                  if(o && o.parentNode){
+                    o.parentNode.removeChild(o);      
+                  }
+              }
+              
+              fn_createCurtain(){//overidden  
+                
+                this.fn_removeCurtain();
+                
+                const o= document.createElement("curtain");
+                const os=o.style;
+                this.obj_holder.dom_objCurtain=o;    
+                os.display="block";
+                os.width="100%";
+                os.height="100vh";
+                os.position="absolute";
+                os.left="0px";
+                os.top="0px";
+                os.backgroundColor="rgb(43, 44, 52)";  
+                os.zindex=1000;
+                document.body.appendChild(o);    
+              }
+              
+                fn_onAuthorizeUserStatus(obj_post){//overidden       
+                  this.fn_removeCurtain();
+                  super.fn_onAuthorizeUserStatus(obj_post);                
+                  
+                  this.fn_notify(obj_project, "fn_onAuthorizeUserStatus");    
+                }
+              
+                fn_onUnAuthorizeUserStatus(obj_post){                                                          
+                  obj_path.fn_navigateSubdomain("lock", true);        
+                }
+              }//END CLS
+              //END TAG
+              //END component/authorise_gate
+/*type: authorise_gate//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: block//*/
+
+      //XSTART component/block
+        class block extends component{
+          constructor(obj_ini) {      
+            super(obj_ini);        
+          } 
+          fn_initialize(obj_ini){
+            super.fn_initialize(obj_ini);                                        
+            
+          }
+        }//END CLS
+        //END TAG
+        //END component/block
+        
+/*type: block//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: block_structure//*/
+      //XSTART component/block_structure
+      class block_structure extends component{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onLoad(){
+          super.fn_onLoad();                
+
+          this.fn_setStyleProperty("display", "flex");
+          this.fn_setStyleProperty("flex-wrap", "wrap");
+          this.fn_setStyleProperty("flex", "1 1 auto");         
+          
+          let str_position=this.obj_design.str_position;          
+          switch(str_position){
+            case "start":                        
+            case "end":              
+              this.fn_setStyleProperty("justifyContent", str_position);              
+              break;
+          }          
+        }
+      }//END CLS
+      //END TAG
+      //END component/block_structure        
+/*type: block_structure//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_anchor//*/
+      //XSTART component/form_anchor
+      class form_anchor extends component{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+
+          this.obj_holder.bln_listenClick=true;          
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+
+        fn_onClick(e){                  
+
+          obj_project.fn_forgetEvent(e);    
+          //foregetevent                
+
+          this.fn_parentEventBubble("Click", e);//this causes things to happen                  
+          
+        }         
+
+        fn_onLoad(){
+          super.fn_onLoad();
+          this.obj_icon=this.fn_getComponent("form_button_icon");                              
+          this.obj_span=this.fn_getComponent("form_button_span");          
+        }
+
+        fn_showIcon(str_value){
+          
+          if(str_value){                                                    
+            this.obj_icon.fn_setText(str_value);                                  
+            this.obj_icon.fn_setStyleProperty("fontWeight", "bold");                                  
+            this.obj_icon.fn_setDisplay(true);          
+            this.obj_icon.fn_setClassName("material-icons");                                              
+          }         
+          else{
+            this.obj_icon.fn_setDisplay(false);                        
+          }
+
+        }  
+        fn_hideIcon(){
+          this.obj_icon.fn_setDisplay(false);
+        }
+
+        fn_setText(str_value){
+          this.obj_span.fn_setText(str_value);
+      }
+      }//END CLS
+      //END TAG
+      //END component/form_anchor        
+/*type: form_anchor//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_button_anchor//*/
+      //XSTART component/form_button_anchor
+      class form_button_anchor extends component{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                  
+
+          obj_project.fn_forgetEvent(e);    
+          //foregetevent                
+
+          this.fn_parentEventBubble("Click", e);//this causes things to happen                            
+        }        
+        ///////////////////////
+        ///////////////////////
+        ///////////////////////
+        fn_onLoad(){
+          super.fn_onLoad();
+          this.obj_icon=this.fn_getComponent("form_button_icon");                              
+          this.obj_span=this.fn_getComponent("form_button_span");          
+        }                
+        fn_setNavigationURL(str_value){                    
+          this.fn_setDomProperty("href", str_value);
+        }        
+
+        
+        fn_showIcon(str_value){
+
+          let bln_debug=false;          
+          
+          switch(str_value){                        
+              case "":                         
+              case "rowz_icon_blank":                         
+              //str_value="blank";
+              str_value='<svg width="0px" height="24px"></svg>';
+              break;              
+              case "xapp_xdezign":
+              //brush
+              str_value="brush";
+              break;
+              case "xdezign_project":
+              //str_value="flowchart";
+              str_value='<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#5f6368"><path d="M600-160v-80H440v-200h-80v80H80v-240h280v80h80v-200h160v-80h280v240H600v-80h-80v320h80v-80h280v240H600Z"/></svg>';                            
+              break;              
+              case "xdezign_tag":
+              str_value="sell";
+              break;         
+              case "xdezign_map":
+              str_value="map";
+              break;         
+              case "xapp_desk":            
+              str_value="chair";
+              break;
+              case "xapp_lock":
+              str_value="lock";
+              break;                     
+              case "xapp_rowz":
+              str_value="tag";
+              break;        
+              case "xapp_office":
+              //str_value="trophy";
+              str_value='<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#5f6368"><path d="M280-120v-80h160v-124q-49-11-87.5-41.5T296-442q-75-9-125.5-65.5T120-640v-40q0-33 23.5-56.5T200-760h80v-80h400v80h80q33 0 56.5 23.5T840-680v40q0 76-50.5 132.5T664-442q-18 46-56.5 76.5T520-324v124h160v80H280Zm0-408v-152h-80v40q0 38 22 68.5t58 43.5Zm200 128q50 0 85-35t35-85v-240H360v240q0 50 35 85t85 35Zm200-128q36-13 58-43.5t22-68.5v-40h-80v152Zm-200-52Z"/></svg>';
+              break;
+              case "rowz_activity":
+              str_value="alternate_email";
+              break;
+              case "rowz_contact":
+              //str_value="contacts_product" //not correctly hosted
+              str_value='<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#5f6368"><path d="M185-80q-17 0-29.5-12.5T143-122v-105q0-90 56-159t144-88q-40 28-62 70.5T259-312v190q0 11 3 22t10 20h-87Zm147 0q-17 0-29.5-12.5T290-122v-190q0-70 49.5-119T459-480h189q70 0 119 49t49 119v64q0 70-49 119T648-80H332Zm148-484q-66 0-112-46t-46-112q0-66 46-112t112-46q66 0 112 46t46 112q0 66-46 112t-112 46Z"/></svg>';
+              break;
+              case "rowz_hashtag":
+              str_value="tag";
+              break;
+              case "rowz_tag":
+              str_value="sell";
+              break;
+              case "rowz_upload_file":
+              str_value="upload_file";
+              break;              
+              case "rowz_template":
+              str_value="star";
+              break;
+              case "rowz_account":
+              str_value="attach_money";
+              break;
+              case "rowz_opportunity":
+              str_value="trending_up";              
+              break;
+              case "rowz_task":              
+              str_value="attach_file";              
+              break;
+              case "xapp_linkon":  
+              str_value="link";   
+              break;            
+              case "xapp_linkoff":  
+              str_value="link_off";   
+              break;            
+              case "xapp_top":  
+              str_value="arrow_upward";   
+              break;   
+              case "xapp_chevron_left":  
+              str_value="chevron_left";   
+              break;                 
+              case "xapp_chevron_right":  
+              str_value="chevron_right";   
+              break;                 
+              case "xapp_refresh":  
+              str_value="refresh";   
+              break;              
+              case "xapp_settings":  
+              str_value="settings";   
+              break;     
+              case "xapp_star":  
+              str_value="star";   
+              break;
+              case "xapp_wrench":  
+              str_value="build";   
+              break;              
+              case "xapp_visibility_off":  
+              str_value="visibility_off";   
+              break;              
+              case "xapp_visibility_on":  
+              str_value="visibility";   
+              break;  
+              case "xapp_calendar_month":  
+              str_value="calendar_month";   
+              break;  
+              case "xapp_search":  
+              str_value="search";   
+              break;
+              case "xapp_circle_plus":  
+              str_value="circle_plus";   
+              break;              
+              case "xapp_send":  
+              str_value="send";   
+              break;              
+              case "xapp_key":  
+              str_value="key";   
+              break;            
+              case "xapp_add":  
+              str_value="add";   
+              break;            
+              
+              
+            default:
+              str_value=str_value;
+          }
+          
+          if(str_value){                                                    
+            
+            this.obj_icon.fn_setText(str_value);                                                
+            this.obj_icon.fn_setClassName("material-icons");                                                                      
+            this.obj_icon.fn_setDisplay(true); 
+            if(bln_debug){
+              this.obj_icon.fn_debug();
+            }                                 
+            
+            /*
+            this.obj_icon.fn_setDisplay(true);          
+            this.obj_icon.fn_setFontSize("100px");          
+            this.obj_icon.fn_setStylePropertxy("height", "200px");                                  
+            //*/
+            
+          }         
+          else{
+            this.fn_showIcon("rowz_icon_blank");                                    
+          }
+          if(bln_debug){
+            this.fn_debug();
+          }
+
+        }  
+        fn_setText(str_value){ 
+          
+          if(str_value=="notset"){
+            str_value="";
+          }          
+          
+          if(str_value){                                                    
+            this.obj_span.fn_setText(str_value);
+            this.obj_span.fn_setDisplay(true);          
+          }         
+          else{
+            this.obj_span.fn_setDisplay(false);
+          }
+        }
+        fn_getText(){
+          let str_text;          
+          str_text=this.obj_span.fn_getText();                    
+          return str_text;
+        }
+        
+        
+        fn_setStyleProperty(str_name, str_value){          
+
+          str_name=obj_shared.fn_hyphenToCamelCase(str_name);          
+          
+          switch(str_name){
+            case "fontSize":                                        
+              this.fn_setControlStyleProperty(this.obj_span, str_name, str_value);
+              this.fn_setControlStyleProperty(this.obj_icon, str_name, "1.5em");//note: 1.5em relative to parent container
+              break;
+            case "color":                            
+            case "fontWeight":                                                    
+              this.fn_setControlStyleProperty(this.obj_span, str_name, str_value);
+              this.fn_setControlStyleProperty(this.obj_icon, str_name, str_value);            
+              break;
+            default:              
+          }   
+          super.fn_setStyleProperty(str_name, str_value);              
+        }
+        fn_getStyleProperty(str_name){
+
+          str_name=obj_shared.fn_hyphenToCamelCase(str_name);
+        
+          switch(str_name){
+            case "fontWeight":                                          
+            case "color":                            
+            case "fontSize":                            
+              return this.fn_getControlStyleProperty(this.obj_span, str_name);
+            default:
+              return super.fn_getStyleProperty(str_name);                  
+          }
+        }
+        fn_getComputedStyleProperty(str_name){
+
+          str_name=obj_shared.fn_hyphenToCamelCase(str_name);
+          
+          switch(str_name){
+            case "fontWeight":                                          
+            case "color":                            
+            case "fontSize":                                     
+              return this.fn_getControlComputedStyleProperty(this.obj_span, str_name);              
+            default:
+              return super.fn_getComputedStyleProperty(str_name);                  
+          }
+        }
+        ///////////////////////
+        ///////////////////////
+        ///////////////////////
+      }//END CLS
+      //END TAG
+      //END component/form_button_anchor        
+/*type: form_button_anchor//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_button_icon//*/
+      //XSTART component/form_button_icon
+      class form_button_icon extends component{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                          
+        }        
+        ///////////////////////
+        ///////////////////////
+        ///////////////////////
+        fn_setStyleProperty(str_name, str_value){          
+          
+          super.fn_setStyleProperty(str_name, str_value);
+
+          const svgElement =this.dom_obj.querySelector('svg');
+          //font awesome will nest a new svg tag into the icon i element
+          //this is only seen in the HTML after program execution breaks , for eaxmampel after the first trip to the server.
+          if(svgElement){            
+            svgElement.style.setProperty(str_name, str_value);
+          }
+          else{
+            //this is generally the case, surprisingly
+            //console.log("no font awsome svg");            
+          }
+        }        
+        ///////////////////////
+        ///////////////////////
+        ///////////////////////          
+      }//END CLS
+      //END TAG
+      //END component/form_button_icon        
+/*type: form_button_icon//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_button_search//*/
+
+            //XSTART component/form_button_search
+              class form_button_search extends form_inputandbutton_submit{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                
+                }                
+              }//END CLS
+              //END TAG
+              //END component/form_button_search
+/*type: form_button_search//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_button_showhide//*/
+      //XSTART component/form_showhide
+      class form_button_showhide extends form_button_rich{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+
+          this.obj_holder.bln_listenClick=true;
+        }
+        fn_onClick(e){
+          
+          super.fn_onClick(e);                    
+          
+          let obj_control=this.obj_controlTarget;
+          if(obj_control){
+            this.fn_toggleControl();
+          }
+        }
+        fn_toggleControl(){
+
+          //console.log("fn_toggleOptions");
+
+          let obj_control=this.obj_controlTarget;         
+
+          //obj_control.fn_debugText(obj_control.bln_open);
+          
+          if(obj_control.bln_open){            
+            obj_control.bln_open=false;                        
+            obj_control.fn_setDisplay(false);
+            //obj_control.fn_debugText("closing");
+          }
+          else{
+            obj_control.bln_open=true;                        
+            obj_control.fn_setDisplay(true);
+            //obj_control.fn_debugText("opening");
+          }
+        }
+      }//END CLS
+      //END TAG
+      //END component/form_showhide        
+/*type: form_button_showhide//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_button_span//*/
+      //XSTART component/form_button_span
+      class form_button_span extends component{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        ///////////////////////
+        ///////////////////////
+        ///////////////////////
+        
+        ///////////////////////
+        ///////////////////////
+        ///////////////////////
+      }//END CLS
+      //END TAG
+      //END component/form_button_span        
+/*type: form_button_span//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_checkbox//*/
+      //XSTART component/form_checkbox
+      class form_checkbox extends form_input{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);   
+        }
+
+        fn_getValue(){                    
+          
+            let bln_value =this.fn_getDomProperty("checked");
+            bln_value=obj_shared.fn_parseBool(bln_value);                      
+            //console.log("checkbox fn_getValue: " + bln_value);
+            return bln_value;
+        }
+
+        fn_setValue(str_value="off"){                    
+          let bln_value=obj_shared.fn_parseBool(str_value);          
+          this.fn_setDomProperty("checked", bln_value);
+          //console.log("checkbox fn_setValue: " + bln_value);
+        }
+
+        fn_setText(){}
+
+        fn_onChange(e){                                        
+          let bln_value=obj_shared.fn_parseBool(this.fn_getDomProperty("checked"));                                        
+          //it seems we need to flip the bool , as we are getting the current value , not the new value
+          bln_value=obj_shared.fn_flipBool(bln_value);                              
+
+          if(bln_value){
+            this.dom_obj.value="on"
+            this.fn_setDomProperty("checked", true);
+          }
+          else{
+            this.dom_obj.value="off"
+            this.fn_setDomProperty("checked", false);          
+          }          
+          super.fn_onChange(e);
+        }        
+      }//END CLS
+      //END TAG
+      //END component/form_checkbox        
+/*type: form_checkbox//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_field//*/
+
+            //XSTART component/form_field
+              class form_field extends component{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                                  
+                }  
+                fn_onLoad(){    
+                  super.fn_onLoad();                  
+                  if(this.fn_getDebugPin()){this.fn_highlightBorder("gray");}                                    
+                }                
+                fn_onChildClick(e){                                                      
+                  
+                  this.fn_parentEvent("Click", e);
+
+                                    
+                  this.fn_unsetEvent();
+                }  
+                fn_onChildDblClick(e){                                                      
+                  
+                  this.fn_parentEvent("DblClick", e);
+                  this.fn_unsetEvent();
+                }                                                 
+                fn_onChildMouseUp(e){
+                  this.fn_parentEvent("MouseUp", e);
+                  this.fn_unsetEvent();
+                } 
+                fn_onChildMouseDown(e){
+                  this.fn_parentEvent("MouseDown", e);
+                  this.fn_unsetEvent();
+                } 
+                fn_onChildMouseEnter(e){                                                                                          
+                  this.fn_parentEvent("MouseEnter", e);
+                  this.fn_unsetEvent();
+                } 
+                fn_onChildMouseLeave(e){                                                                                          
+                  this.fn_parentEvent("MouseLeave", e);
+                  this.fn_unsetEvent();
+                } 
+                fn_onChildFocus(e){                                                                                          
+                  this.fn_parentEvent("Focus", e);
+                  this.fn_unsetEvent();
+                } 
+                fn_onChildInput(e){                                                                                          
+                  this.fn_parentEvent("Input", e);
+                  this.fn_unsetEvent();
+                }                  
+                fn_onChildChange(e){                                   
+                  this.fn_parentEvent("Change", e);
+                  this.fn_unsetEvent();
+                }
+                fn_onChildKeyDown(e){     
+                  this.fn_parentEvent("KeyDown", e);
+                  this.fn_unsetEvent();
+                }
+                fn_onChildKeyUp(e){                                  
+                  //console.log("Form Field KeyUp keyCode: " + e.keyCode);                           
+
+                                    
+                  this.fn_parentEvent("KeyUp", e);
+
+                                    
+                  this.fn_unsetEvent();
+                }
+                fn_onChildBlur(e){                               
+                                    
+                  this.fn_parentEvent("Blur", e);
+
+                                    
+                  this.fn_unsetEvent();
+                }
+                
+              }//END CLS
+              //END TAG
+              //END component/form_field
+/*type: form_field//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_form//*/
+
+            //XSTART component/form_form
+              class form_form extends component{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                }                
+
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                      
+                  
+                  this.obj_holder.bln_listenSubmit=true;
+              }    
+
+              fn_onSubmit(e){                              
+
+                //alert("form fn_onSubmit: " + e.type);
+                obj_project.fn_forgetEvent(e);                
+                this.fn_parentEventBubble("Submit", e);//this causes things to happen                  
+              }
+              }//END CLS
+              //END TAG
+              //END component/form_form
+/*type: form_form//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_hardrule//*/
+      //XSTART component/form_hardrule
+      class form_hardrule extends component{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_applyThemeStructure(){                              
+          if(!obj_project.obj_theme){return;}
+          this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeFormHardRule;                
+          this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                                
+        }
+      }//END CLS
+      //END TAG
+      //END component/form_hardrule        
+/*type: form_hardrule//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_icon//*/
+      //XSTART component/form_icon
+      class form_icon extends component{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }      
+        xfn_setDisabled(bln_value){          
+        }  
+      }//END CLS
+      //END TAG
+      //END component/form_icon        
+/*type: form_icon//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_iframe//*/
+
+            //XSTART component/form_iframe
+              class form_iframe extends component{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                
+                }
+                fn_navigateURL(str_url){                              
+                  if(this.fn_hasContextHolderParent()){return;}
+                  let obj_glass;
+                  if(this["fn_getGlass"]){
+                    obj_glass=this.fn_getGlass();        
+                  }          
+                  if(!obj_glass){return;}              
+                  obj_glass.location.href=str_url;                        
+                }          
+                fn_getGlass(){
+                  return this.dom_obj.contentWindow;
+                }
+              }//END CLS
+              //END TAG
+              //END component/form_iframe
+/*type: form_iframe//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_inputandbutton_input//*/
+      //XSTART component/form_inputandbutton_input
+      class form_inputandbutton_input extends form_input{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_applyThemeStructure(){                                                          
+          if(!obj_project.obj_theme){return;}
+          this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeRowzSearch;                
+          this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                                              
+        }
+      }//END CLS
+      //END TAG
+      //END component/form_inputandbutton_input        
+/*type: form_inputandbutton_input//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_label//*/
+
+            //XSTART component/form_label
+              class form_label extends form_input{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                                  
+                 
+                }
+                fn_holdEvent(){
+                  super.fn_dropEvent();
+  
+                  this.obj_holder.bln_listenClick=true;
+                  this.obj_holder.bln_listenMouseEnter=true;
+                  this.obj_holder.bln_listenMouseLeave=true;
+                  this.obj_holder.bln_listenMouseUp=true;
+                  this.obj_holder.bln_listenMouseDown=true;                  
+                }
+
+                fn_setText(str_value){
+                  this.fn_setDomProperty("innerHTML", str_value);                                      
+                }
+
+                fn_onLoad(){
+                  super.fn_onLoad();                                                      
+                }
+                fn_applyThemeStructure(){                                                        
+                  this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeFormLabel;                
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+                }
+
+                fn_setUnLocked(){
+                  this.bln_locked=false;
+                  this.fn_setStyleProperty('cursor', 'pointer');                  
+                }
+                fn_setLocked(){
+                  if(this.bln_locked){return;}
+                  this.bln_locked=true;
+                  this.fn_setStyleProperty('cursor', 'default');                  
+                }
+                fn_getLocked(){
+                  return this.bln_locked;
+                }
+                fn_onClick(e){                  
+                  obj_project.fn_calmEvent(e);       
+                  if(this.fn_getLocked()){return;}                                    
+                  this.fn_parentEvent("Click", e);
+                }
+                fn_onMouseUp(e){        
+                  obj_project.fn_calmEvent(e);       
+                  if(this.fn_getLocked()){return;}                                    
+                  this.fn_parentEvent("MouseUp", e);
+                }
+                fn_onMouseDown(e){        
+                  obj_project.fn_calmEvent(e);       
+                  if(this.fn_getLocked()){return;}                                    
+                  this.fn_parentEvent("MouseDown", e);
+                }
+                fn_onMouseEnter(e){        
+                  obj_project.fn_calmEvent(e);       
+                  if(this.fn_getLocked()){return;}                                    
+                  this.fn_parentEvent("MouseEnter", e);
+                }
+                fn_onMouseLeave(e){         
+                  obj_project.fn_calmEvent(e);       
+                  if(this.fn_getLocked()){return;}                                    
+                  this.fn_parentEvent("MouseLeave", e);
+                }
+                
+              }//END CLS
+              //END TAG
+              //END component/form_label
+/*type: form_label//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_legend//*/
+      //XSTART component/form_legend
+      class form_legend extends form_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+          this.obj_holder.bln_listenClick=true;                  
+          this.obj_holder.bln_listenKeyUp=true;                  
+          
+        }
+
+        fn_onLoad(){          
+          super.fn_onLoad();
+          this.fn_setDomProperty("tabIndex", "0");
+          this.fn_setStyleProperty("userSelect", "none");
+          this.fn_setStyleProperty("opacity", "1");          
+        }
+
+        fn_applyThemeStructure(){                              
+          if(!obj_project.obj_theme){return;}
+          this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeFormLegend;                
+          this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                      
+        }
+
+        
+
+        fn_onClick(e){                            
+          this.fn_fireLegend(e);  
+        }
+        fn_onKeyUp(e){      
+          
+          if(e.key==="Enter"){
+            this.fn_fireLegend(e);  
+          }
+
+          
+        }
+        fn_fireLegend(e){
+          //console.log("xxxxRebbit");                                    
+          
+          
+          obj_project.fn_forgetEvent(e);    
+
+          let obj_parent=this.fn_getParentComponent();          
+          this.fn_notify(obj_parent, "fn_legendOnClick", this);                                  
+        }
+      }//END CLS
+      //END TAG
+      //END component/form_legend        
+/*type: form_legend//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_nonbreakingspace//*/
+      //XSTART component/form_nonbreakingspace
+      class form_nonbreakingspace extends component{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/form_nonbreakingspace        
+/*type: form_nonbreakingspace//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_panel//*/
+
+            //XSTART component/form_panel
+              class form_panel extends component{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                
+                  if(this.fn_getDebugPin()){this.fn_highlightBorder("purple");}                  
+                }                       
+
+                fn_onRowMember(obj_row){                         
+
+                  this.obj_row=obj_row;                  
+                  this.obj_paramRow=this.obj_row.obj_paramRow;                                    
+                  this.obj_paramRS=this.obj_paramRow.obj_paramRS;                                                       
+                  
+                  this.fn_setStyleProperty("display", "flex");
+                  this.fn_setStyleProperty("flex-wrap", "wrap");
+                  this.fn_setAxis(this.obj_paramRS.bln_axisPanel);                                                                                          
+                }
+              }//END CLS
+              //END TAG
+              //END component/form_panel
+/*type: form_panel//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_panellist//*/
+      //XSTART component/form_panellist
+      class form_panellist extends component{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }        
+
+        fn_addPanel(obj_param){          
+          let obj_panel=this.fn_addContextItem(obj_param.str_type);                                                                        
+          obj_panel.obj_param=obj_param;          
+          //obj_panel.fn_setDisplayFlex(false);
+          return obj_panel;
+        }
+        fn_displayPanel(obj_panel){          
+
+          let i, arr_item, obj_item;
+          arr_item=this.obj_design.arr_item;
+          if(!obj_panel && arr_item.length){            
+            obj_panel=arr_item[0];
+          }
+          for(i=0;i<arr_item.length;i++){
+            obj_item=arr_item[i];            
+            if(obj_item===obj_panel){
+              obj_item.fn_openFlex();
+            }
+            else{
+              obj_item.fn_closeFlex();
+            }
+          }
+
+        }
+        fn_legendOnClick(obj_panel){                                
+
+          //console.log("form_panellist fn_legendOnClick");
+
+          let obj_parent=this.fn_getParentComponent();          
+          this.fn_notify(obj_parent, "fn_legendOnClick", obj_panel);                                  
+        }
+
+        
+      }//END CLS
+      //END TAG
+      //END component/form_panellist        
+/*type: form_panellist//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_radio//*/
+      //XSTART component/form_radio
+      class form_radio extends component{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/form_radio        
+/*type: form_radio//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_section//*/
+
+            //XSTART component/form_section
+              class form_section extends component{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                                                                     
+                }  
+                fn_onLoad(){    
+                  super.fn_onLoad();                  
+                  if(this.fn_getDebugPin()){this.fn_highlightBorder("red");}                  
+                }                
+              }//END CLS
+              //END TAG
+              //END component/form_section
+/*type: form_section//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_select//*/
+
+            //XSTART component/form_select
+              class form_select extends component{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                
+                  this.obj_holder.bln_listenClick=true;                 
+                  this.obj_holder.bln_listenChange=true;                
+                  this.obj_holder.bln_listenBlur=true;                                            
+                }                
+                fn_onClick(e){             
+                  this.fn_parentEvent("Click", e);
+                }                
+                fn_onChange(e){                               
+                  this.fn_parentEvent("Change", e);
+                }
+                fn_onBlur(e){                                         
+                  this.fn_parentEvent("Blur", e);
+                }
+                fn_addOption(str_text, str_value){
+                  let option = document.createElement("option");
+                  option.text = str_text;
+                  option.value = str_value;                  
+                  this.dom_obj.add(option);                                                                     
+                  return option;
+                }                
+              }//END CLS
+              //END TAG
+              //END component/form_select
+/*type: form_select//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_span//*/
+
+            //XSTART component/form_span
+              class form_span extends component{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                    
+                }                
+                fn_onClick(e){   
+                  obj_project.fn_forgetEvent(e);    
+                }                  
+                
+              }//END CLS
+              //END TAG
+              //END component/form_span
+/*type: form_span//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_tab//*/
+      //XSTART component/form_tab
+      class form_tab extends form_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+          this.obj_holder.bln_listenFocus=true;                  
+        }
+        fn_onClick(e){          
+          let obj_parent=this.fn_getParentComponent();
+          obj_parent.fn_tagOnClick(this, e);
+          
+          obj_project.fn_forgetEvent(e);    
+        }
+        fn_onFocus(e){          
+          let obj_parent=this.fn_getParentComponent();
+          obj_parent.fn_tagOnFocus(this, e);
+          
+          obj_project.fn_forgetEvent(e);    
+        }
+
+      }//END CLS
+      //END TAG
+      //END component/form_tab        
+/*type: form_tab//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_table//*/
+
+            //XSTART component/form_table
+              class form_table extends component{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);  
+                }       
+                fn_addItem(obj_ini=false){
+                  let obj_item;        
+                  if(!obj_ini){
+                    obj_ini=new Holder;
+                    obj_ini.obj_design.str_type="tablerow";                   
+                  }      
+                  obj_item=super.fn_addItem(obj_ini);//CallSuper          
+                  return obj_item;
+                }
+                fn_setCellStyle(str_name, str_value){
+                  let arr, obj_item;
+                  arr=this.obj_design.arr_item;
+                  for(let i=0;i<arr.length;i++){
+                      obj_item=arr[i];              
+                      obj_item.fn_setCellStyle(str_name, str_value);            
+                  }
+                }
+                fn_locateItem(str_idXDesign, str_type){
+                  if(str_idXDesign===undefined){return;}
+                  if(str_idXDesign===""){return;}
+                  let arr, obj_item, obj_locate;
+                  arr=this.obj_design.arr_item;
+                  for(let i=0;i<arr.length;i++){
+                      obj_item=arr[i];              
+                      obj_locate=obj_item.fn_locateItem(str_idXDesign, str_type);            
+                      if(obj_locate){
+                        return obj_locate;
+                      }
+                  }
+                  return false;
+                }
+            
+            
+              }//END CLS
+              //END TAG
+              //END component/form_table
+/*type: form_table//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_tableheader//*/
+
+            //XSTART component/form_tableheader
+              class form_tableheader extends tablecell{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                
+                }
+              }//END CLS
+              //END TAG
+              //END component/form_tableheader
+/*type: form_tableheader//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_tablerow//*/
+
+            //XSTART component/form_tablerow
+              class form_tablerow extends component{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);
+                }       
+                fn_addItem(obj_ini){
+                  let obj_item;  
+            
+                  if(obj_ini.obj_design.str_type===undefined){
+                    obj_ini.obj_design.str_type="tablecell";                         
+                  }
+                  obj_item=super.fn_addItem(obj_ini);//CallSuper          
+                  return obj_item;
+                }
+                fn_setCellStyle(str_name, str_value){
+            
+                  let arr, obj_item;
+                  arr=this.obj_design.arr_item;
+                  for(let i=0;i<arr.length;i++){
+                      obj_item=arr[i];              
+                      obj_item.fn_setStyleProperty(str_name, str_value);            
+                  }
+                }
+                fn_locateItem(str_idXDesign, str_type){
+                  let arr, obj_item, obj_locate;
+                  arr=this.obj_design.arr_item;
+                  for(let i=0;i<arr.length;i++){
+                      obj_item=arr[i];              
+                      obj_locate=obj_item.fn_locateItem(str_idXDesign, str_type);            
+                      if(obj_locate){
+                        return obj_locate;
+                      }
+                  }
+                  return false;
+                }
+              }//END CLS
+              //END TAG
+              //END component/form_tablerow
+/*type: form_tablerow//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_tablist//*/
+      //XSTART component/form_tablist
+      class form_tablist extends component{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_addTab(obj_param){
+          let obj_tab=this.fn_addContextItem("form_tab");                                                                                  
+          obj_tab.fn_setText(obj_param.str_name);
+          obj_tab.obj_param=obj_param;          
+          return obj_tab;
+        }
+        
+        fn_tagOnClick(obj_tab, e){
+          let obj_parent=this.fn_getParentComponent();
+          obj_parent.fn_tagOnClick(obj_tab, e);
+        }
+        fn_fireFocus(obj_tab=false){
+          let arr_item=this.obj_design.arr_item;          
+          if(!obj_tab && arr_item.length){            
+            obj_tab=arr_item[0];
+          }          
+          if(!obj_tab){
+            //strange as this is the whole point
+            return;
+          }
+          const e = new Event("focus");
+          obj_tab.dom_obj.dispatchEvent(e);
+        }
+        fn_tagOnFocus(obj_tab, e){          
+          let obj_parent=this.fn_getParentComponent();
+          obj_parent.fn_tagOnFocus(obj_tab, e);
+        }
+      }//END CLS
+      //END TAG
+      //END component/form_tablist        
+/*type: form_tablist//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_tabset//*/
+      //XSTART component/form_tabset
+      class form_tabset extends component{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+          this.obj_mapPanel=new Map();          
+          this.obj_mapTab=new Map();                   
+
+        }       
+        fn_onLoad(obj_ini){
+          super.fn_onLoad(obj_ini);                
+          this.obj_panellist=this.fn_getComponent("form_panellist");          
+          this.obj_tablist=this.fn_getComponent("form_tablist");          
+          this.fn_setDisplayFlex(false);         
+        }
+
+        fn_hideInterface(){
+          
+          this.fn_closeFlex();
+        } 
+        fn_showInterface(){          
+
+          if(!this.bln_opened){
+            this.bln_opened=true;                        
+            this.obj_tablist.fn_fireFocus();  
+          }
+          this.fn_openFlex();
+        } 
+        fn_toggleInterface(){
+
+          if(!this.bln_opened){
+            this.bln_opened=true;            
+            this.obj_panellist.fn_displayPanel();  
+          }
+
+          this.fn_toggleDisplayFlex();
+        }        
+
+        
+        fn_getTabPanel(obj_param){          
+          let obj_panel;
+          obj_panel=this.obj_mapPanel.get(obj_param.str_name);
+          if(!obj_panel){                                                                             
+            obj_panel=this.obj_panellist.fn_addPanel(obj_param);
+            this.obj_mapPanel.set(obj_param.str_name, obj_panel);                       
+            if(!this.bln_tabLegend){
+              let obj_tab=this.obj_tablist.fn_addTab(obj_param);
+              this.obj_mapTab.set(obj_param.str_name, obj_tab);                                   
+            }
+            
+          }                    
+          return obj_panel;
+        }    
+        fn_tagOnClick(obj_tab, e){                                
+          this.fn_showTab(obj_tab);            
+        }
+        fn_tagOnFocus(obj_tab, e){                                
+          this.fn_showTab(obj_tab);            
+        }
+        fn_showTab(obj_tab){
+          let obj_panel=this.fn_getTabPanel(obj_tab.obj_param);          
+          this.obj_panellist.fn_displayPanel(obj_panel);
+          return obj_panel;
+        }
+        fn_legendOnClick(obj_panel){                                         
+         
+         let obj_panelNext=obj_shared.fn_getNextMapItem(this.obj_mapPanel, obj_panel.obj_param.str_name)
+         this.obj_panellist.fn_displayPanel(obj_panelNext);
+         
+        }
+
+      }//END CLS
+      //END TAG
+      //END component/form_tabset        
+/*type: form_tabset//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_text//*/
+      //XSTART component/form_text
+      class form_text extends form_input{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+          
+        }
+        fn_holdEvent(){
+          super.fn_dropEvent();
+
+          this.obj_holder.bln_listenSelectStart=true;                                    
+        }
+        fn_applyThemeStructure(){                    
+          super.fn_applyThemeStructure();
+        }
+        fn_onSelectStart(e){                                    
+          obj_project.fn_calmEvent(e);
+        }                
+        fn_setText(str_value){
+          if(str_value===""){    
+            str_value="&nbsp;";//if blank will cause display issue
+          } 
+          this.fn_setDomProperty("innerHTML", str_value);                                      
+      }
+      }//END CLS
+      //END TAG
+      //END component/form_text        
+/*type: form_text//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: form_textarea//*/
+      //XSTART component/form_textarea
+      class form_textarea extends form_input{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                          
+        }                
+      }//END CLS
+      //END TAG
+      //END component/form_textarea        
+/*type: form_textarea//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: report_column//*/
+//START component/report_column
+class report_column extends xapp_columnform{
+  constructor(obj_ini) {      
+    super(obj_ini);        
+  } 
+  fn_initialize(obj_ini){
+    super.fn_initialize(obj_ini);                        
+  }                                               
+  
+  fn_computeField(){                                    
+    
+    let obj_field, obj_label, obj_control, str_type;                  
+
+    let obj_metaColumn=this.obj_metaColumn;
+    
+    let str_name=obj_metaColumn.str_name;     
+    let str_nameQualified=obj_metaColumn.str_nameQualified;                       
+    let str_value=obj_metaColumn.str_value;                                         
+    if(this.obj_paramRS.bln_headingRow){
+      str_value=str_name;                                         
+    }
+
+    this.fn_setText(str_value);   
+
+    //str_type="form_span";                  
+    //obj_control=this.fn_addContextItem(str_type);
+    //obj_control.fn_setText(str_value);                      
+    //this.obj_control=obj_control;                      
+  }  
+
+
+}//END CLS
+//END TAG              
+//END component/report_column
+/*type: report_column//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_accordion//*/
+
+            //XSTART component/xapp_accordion
+              class xapp_accordion extends component{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                                  
+                  
+                  // this.fn_extends("component");            
+
+                  //START INITIALIZE STYLE              
+                  if(this.obj_domStyle.width===undefined){this.obj_domStyle.width="100%";}            
+                  //if(this.obj_domStyle.padding===undefined){this.obj_domStyle.paddingBottom="0px";}
+                  if(this.obj_domStyle.display===undefined){this.obj_domStyle.display="block";}                                   
+                }
+                fn_onLoad(){    
+                  super.fn_onLoad();                                    
+                }
+                fn_applyThemeStructure(){                        
+                  if(!obj_project.obj_theme){return;}
+                  this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeXappAccordion;                  
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                                            
+                }
+
+                fn_addItem(obj_ini=false){
+                  let obj_item;        
+                  if(!obj_ini){
+                    obj_ini=new Holder;
+                    obj_ini.obj_design.str_type="menu_button";                                       
+                    obj_ini.obj_domStyle.flexDirection="row";           
+                      obj_ini.obj_domStyle.flexWrap="wrap";                  
+                  }      
+                  obj_item=super.fn_addItem(obj_ini);//CallSuper                                              
+                  return obj_item;
+                }
+              
+                //START COMPONENTEVENT HANDLING                
+                fn_open(){
+                    this.fn_openParent();
+                }
+                fn_close(){
+                    this.fn_closeLevel();
+                    this.fn_displayOnLevel();                    
+                }                                  
+                fn_openParent(){        
+                    let obj_container=this.fn_getParentComponent();        
+                    let str_method="fn_open";        
+                    if(obj_container && obj_container[str_method]){
+                        obj_container[str_method]();
+                    }              
+                }
+                fn_hasOpenChild(obj_exclude, bln_ignoreBefore){                  
+                  let bln_seen=false;                  
+                    for(var i=0;i<this.obj_design.arr_item.length;i++){
+                        let obj_item=this.obj_design.arr_item[i];
+                        if(bln_ignoreBefore){if(obj_item===obj_exclude){bln_seen=true;}if(!bln_seen){continue;}}
+                        if(obj_item && obj_item!==obj_exclude){                                                    
+                            if(obj_item.fn_getIsOpen()){                              
+                              return true;
+                            }
+                        }              
+                    }
+                    return false;
+
+                }             
+                fn_closeChildren(){
+                  
+                }
+                fn_closeLevel(obj_exclude, bln_ignoreBefore ){                  
+                  let str_method="fn_close";        
+                  let bln_seen=false;
+                    for(var i=0;i<this.obj_design.arr_item.length;i++){
+                        let obj_item=this.obj_design.arr_item[i];
+                        if(bln_ignoreBefore){if(obj_item===obj_exclude){bln_seen=true;}if(!bln_seen){continue;}}
+                        if(obj_item && obj_item!==obj_exclude && obj_item[str_method]){
+                            if(!obj_item.obj_design.bln_isPinned){                              
+                                obj_item[str_method]();
+                            }
+                        }              
+                    }
+                }                
+                fn_hideLevel(obj_exclude, bln_ignoreBefore){                                    
+                  this.fn_notifyChildren("fn_interfaceHide", obj_exclude, bln_ignoreBefore);                  
+                }
+                fn_showLevel(obj_exclude, bln_ignoreBefore){                                  
+                  this.fn_notifyChildren("fn_interfaceShow", obj_exclude, bln_ignoreBefore);                  
+                }
+                fn_displayOnLevel(obj_exclude, bln_ignoreBefore){                  
+                  this.fn_notifyChildren("fn_displayOn", obj_exclude, bln_ignoreBefore);                  
+                }                
+                fn_displayOffLevel(obj_exclude, bln_ignoreBefore){                  
+                  this.fn_notifyChildren("fn_displayOff", obj_exclude, bln_ignoreBefore);                  
+                }                                
+
+                fn_autoOpen(obj_exclude, bln_ignoreBefore){
+                  //let str_method="fn_open";
+                  let str_method="fn_toggle";                  
+                  let bln_seen=false;
+                  for(var i=0;i<this.obj_design.arr_item.length;i++){
+                    let obj_item=this.obj_design.arr_item[i];
+                    if(bln_ignoreBefore){if(obj_item===obj_exclude){bln_seen=true;}if(!bln_seen){continue;}}                             
+                    if(obj_item && obj_item!==obj_exclude && obj_item[str_method] && obj_item.fn_getAutoOpenPin()){                        
+                        obj_item[str_method]();                                            
+                    }                                      
+                  }
+                }
+                fn_notifyChildren(str_method, obj_exclude, bln_ignoreBefore){                  
+                  let bln_seen=false;
+                  let arr_item=this.obj_design.arr_item;
+                  for(var i=0;i<arr_item.length;i++){
+                    let obj_item=arr_item[i];
+                    if(bln_ignoreBefore){if(obj_item===obj_exclude){bln_seen=true;}if(!bln_seen){continue;}}                             
+                    if(obj_item && obj_item!==obj_exclude && obj_item[str_method]){                        
+                        obj_item[str_method]();                    
+                    }                                      
+                  }
+                }
+              }//END CLS
+              //END TAG
+              //END component/xapp_accordion
+/*type: xapp_accordion//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_archive_record//*/
+      //XSTART component/xapp_button_archive_record
+      class xapp_button_archive_record extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                  
+          let obj_menuButton=this.fn_getMenuButton();                  
+          if(!obj_menuButton){return;}                                    
+
+          let bln_value=obj_shared.fn_messageConfirm("Archive this record?");          
+          if(bln_value){          
+            obj_menuButton.fn_formArchiveRecord();
+          } 
+          
+          obj_project.fn_forgetEvent(e);
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_archive_record        
+/*type: xapp_button_archive_record//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_backup//*/
+      //XSTART component/xapp_button_backup
+      class xapp_button_backup extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                                    
+          
+          obj_project.fn_forgetEvent(e);                  
+          let obj_menuButton=this.fn_getMenuButton();          
+          let obj_dashboard=obj_menuButton.fn_locateItem("xapp_dashboard_setting");          
+          if(obj_dashboard){                    
+            obj_dashboard.fn_backup();
+          }                  
+        }     
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_backup        
+/*type: xapp_button_backup//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_complete_record//*/
+
+            //XSTART component/xapp_button_complete_record
+              class xapp_button_complete_record extends xapp_console_button{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini); 
+                }                
+                fn_onClick(e){                  
+                  let obj_menuButton=this.fn_getMenuButton();                  
+                  if(!obj_menuButton){return;}                          
+                  
+                  obj_menuButton.fn_formCompleteRecord();                  
+                  
+                  obj_project.fn_forgetEvent(e);    
+                }
+              }//END CLS
+              //END TAG
+              //END component/xapp_button_complete_record
+/*type: xapp_button_complete_record//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_data_nav_back//*/
+      //XSTART component/xapp_button_data_nav_back
+      class xapp_button_data_nav_back extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+          //this.bln_debugNavigate=true;
+        }
+        fn_onClick(e){        
+          let obj_parent=this.fn_getParentComponent();          
+          let obj_menuButton=obj_parent.obj_menuButton;                  
+          if(!obj_menuButton){return;}                                    
+          obj_menuButton.fn_dataNavBack();
+          
+          obj_project.fn_forgetEvent(e);    
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_data_nav_back        
+/*type: xapp_button_data_nav_back//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_data_nav_forward//*/
+      //XSTART component/xapp_button_data_nav_forward
+      class xapp_button_data_nav_forward extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+          //this.bln_debugNavigate=true;
+        }
+        fn_onClick(e){        
+          let obj_parent=this.fn_getParentComponent();          
+          let obj_menuButton=obj_parent.obj_menuButton;                  
+          if(!obj_menuButton){return;}                                    
+          obj_menuButton.fn_dataNavForward();                    
+          
+          obj_project.fn_forgetEvent(e);    
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_data_nav_forward        
+/*type: xapp_button_data_nav_forward//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_data_nav_toggle//*/
+      //XSTART component/xapp_button_data_nav_toggle
+      class xapp_button_data_nav_toggle extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){        
+          let obj_parent=this.fn_getParentComponent();          
+          let obj_menuButton=obj_parent.obj_menuButton;                  
+          if(!obj_menuButton){return;}                                    
+          obj_menuButton.fn_dataNavToggle();                    
+          
+          obj_project.fn_forgetEvent(e);    
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_data_nav_toggle        
+/*type: xapp_button_data_nav_toggle//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_file_import//*/
+      //XSTART component/xapp_button_file_import
+      class xapp_button_file_import extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                  
+
+          
+          obj_project.fn_forgetEvent(e);    
+
+          let obj_menuButton=this.fn_getMenuButton();                  
+          if(!obj_menuButton){return;}                                    
+
+          let obj_dashboard=obj_menuButton.fn_locateItem("xapp_dashboard_view");
+          if(obj_dashboard){                    
+            obj_dashboard.fn_buttonFileImportOnClick();
+          }                  
+          
+        
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_file_import        
+/*type: xapp_button_file_import//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_file_select//*/
+      //XSTART component/xapp_button_file_select
+      class xapp_button_file_select extends form_button_rich{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){          
+
+          
+          obj_project.fn_calmEvent(e);//dont cancel the event 
+
+          let obj_menuButton=this.fn_getMenuButton();                  
+          if(!obj_menuButton){return;}                                    
+
+          let obj_dashboard=obj_menuButton.fn_locateItem("xapp_dashboard_view");
+          if(obj_dashboard){                    
+            obj_dashboard.fn_buttonFileSelectOnClick();
+          }                  
+        }
+
+        fn_inputFileSelectOnChange(){
+        
+          let obj_menuButton=this.fn_getMenuButton();                  
+          if(!obj_menuButton){return;}                                    
+
+          let obj_dashboard=obj_menuButton.fn_locateItem("xapp_dashboard_view");
+          if(obj_dashboard){                    
+            obj_dashboard.fn_inputFileSelectOnChange();
+          }                  
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_file_select        
+/*type: xapp_button_file_select//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_filteroff_record//*/
+
+            //XSTART component/xapp_button_filteroff_record
+              class xapp_button_filteroff_record extends xapp_console_button{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                
+                }                
+                fn_onClick(e){                  
+                  let obj_menuButton=this.fn_getMenuButton();
+                  if(!obj_menuButton){return;}                                       
+                  
+                  obj_menuButton.fn_formRemoveJoinFilter();
+                  
+                  
+                  obj_project.fn_forgetEvent(e);    
+                }
+              }//END CLS
+              //END TAG
+              //END component/xapp_button_filteroff_record
+/*type: xapp_button_filteroff_record//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_filteron_record//*/
+
+            //XSTART component/xapp_button_filteron_record
+              class xapp_button_filteron_record extends xapp_console_button{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                
+                }                
+                fn_onClick(e){                  
+                  let obj_menuButton=this.fn_getMenuButton();
+                  if(!obj_menuButton){return;}                      
+                  
+                  obj_menuButton.fn_formApplyJoinFilter();
+                  
+                  
+                  obj_project.fn_forgetEvent(e);
+                }
+              }//END CLS
+              //END TAG
+              //END component/xapp_button_filteron_record
+/*type: xapp_button_filteron_record//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_general_archive_hide//*/
+      //XSTART component/xapp_button_general_archive_hide
+      class xapp_button_general_archive_hide extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                                    
+          let obj_menuButton=this.fn_getMenuButton();
+          if(!obj_menuButton){return;}  
+          
+          obj_menuButton.fn_formHideArchive();          
+          
+          obj_project.fn_forgetEvent(e);    
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_general_archive_hide        
+/*type: xapp_button_general_archive_hide//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_general_archive_show//*/
+      //XSTART component/xapp_button_general_archive_show
+      class xapp_button_general_archive_show extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                                    
+          let obj_menuButton=this.fn_getMenuButton();
+          if(!obj_menuButton){return;}  
+          
+          obj_menuButton.fn_formShowArchive();          
+          
+          obj_project.fn_forgetEvent(e);    
+        }        
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_general_archive_show        
+/*type: xapp_button_general_archive_show//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_general_form_down//*/
+      //XSTART component/xapp_button_general_form_down
+      class xapp_button_general_form_down extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                                    
+          let obj_menuButton=this.fn_getMenuButton();
+          if(!obj_menuButton){return;}  
+          
+          obj_menuButton.fn_formMoveDown();          
+          
+          obj_project.fn_forgetEvent(e);    
+        }                
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_general_form_down        
+/*type: xapp_button_general_form_down//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_general_form_gap//*/
+      //XSTART component/xapp_button_general_form_gap
+      class xapp_button_general_form_gap extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                                    
+          let obj_menuButton=this.fn_getMenuButton();
+          if(!obj_menuButton){return;}  
+          
+          obj_menuButton.fn_formGap();          
+          
+          obj_project.fn_forgetEvent(e);    
+        }                
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_general_form_gap        
+/*type: xapp_button_general_form_gap//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_general_form_group//*/
+      //XSTART component/xapp_button_general_form_group
+      class xapp_button_general_form_group extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                                    
+          let obj_menuButton=this.fn_getMenuButton();
+          if(!obj_menuButton){return;}  
+          
+          obj_menuButton.fn_formAddGroup();          
+          
+          obj_project.fn_forgetEvent(e);    
+        }                
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_general_form_group        
+/*type: xapp_button_general_form_group//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_general_form_up//*/
+      //XSTART component/xapp_button_general_form_up
+      class xapp_button_general_form_up extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                                    
+          let obj_menuButton=this.fn_getMenuButton();
+          if(!obj_menuButton){return;}  
+          
+          obj_menuButton.fn_formMoveUp();          
+          
+          obj_project.fn_forgetEvent(e);    
+        }        
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_general_form_up        
+/*type: xapp_button_general_form_up//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_general_row_hide//*/
+      //XSTART component/xapp_button_general_row_hide
+      class xapp_button_general_row_hide extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                                    
+          let obj_menuButton=this.fn_getMenuButton();
+          if(!obj_menuButton){return;}  
+          
+          obj_menuButton.fn_formHideRowz();          
+          
+          obj_project.fn_forgetEvent(e);    
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_general_row_hide        
+/*type: xapp_button_general_row_hide//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_general_row_show//*/
+      //XSTART component/xapp_button_general_row_show
+      class xapp_button_general_row_show extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                                    
+          let obj_menuButton=this.fn_getMenuButton();
+          if(!obj_menuButton){return;}  
+          
+          obj_menuButton.fn_formShowRowz();          
+          
+          obj_project.fn_forgetEvent(e);    
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_general_row_show        
+/*type: xapp_button_general_row_show//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_general_use_task_date//*/
+      //XSTART component/xapp_button_general_use_task_date
+      class xapp_button_general_use_task_date extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_general_use_task_date        
+/*type: xapp_button_general_use_task_date//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_general_use_task_datetime//*/
+      //XSTART component/xapp_button_general_use_task_datetime
+      class xapp_button_general_use_task_datetime extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_general_use_task_datetime        
+/*type: xapp_button_general_use_task_datetime//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_linkoff_record//*/
+
+            //XSTART component/xapp_button_linkoff_record
+              class xapp_button_linkoff_record extends xapp_console_button{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                
+                }                
+                fn_onClick(e){                  
+                  let obj_menuButton=this.fn_getMenuButton();
+                  if(!obj_menuButton){return;}                      
+                  
+                  obj_menuButton.fn_formLinkOffRecord();
+                  
+                  
+                  obj_project.fn_forgetEvent(e);
+                }
+              }//END CLS
+              //END TAG
+              //END component/xapp_button_linkoff_record
+/*type: xapp_button_linkoff_record//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_linkon_record//*/
+
+            //XSTART component/xapp_button_linkon_record
+              class xapp_button_linkon_record extends xapp_console_button{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                
+                }                
+                fn_onClick(e){                  
+                  let obj_menuButton=this.fn_getMenuButton();
+                  if(!obj_menuButton){return;}                      
+                  
+                  obj_menuButton.fn_formLinkOnRecord();
+                  
+                  
+                  obj_project.fn_forgetEvent(e);
+                }
+              }//END CLS
+              //END TAG
+              //END component/xapp_button_linkon_record
+/*type: xapp_button_linkon_record//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_maintain//*/
+      //XSTART component/xapp_button_maintain
+      class xapp_button_maintain extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                                    
+          
+          obj_project.fn_forgetEvent(e);                  
+          let obj_menuButton=this.fn_getMenuButton();          
+          let obj_dashboard=obj_menuButton.fn_locateItem("xapp_dashboard_setting");          
+          if(obj_dashboard){                    
+            obj_dashboard.fn_maintain();
+          }                  
+        }                
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_maintain        
+/*type: xapp_button_maintain//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_maintain_debug_release//*/
+      //XSTART component/xapp_button_maintain_debug_release
+      class xapp_button_maintain_debug_release extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                                    
+          
+          obj_project.fn_forgetEvent(e);                  
+          let obj_menuButton=this.fn_getMenuButton();
+          let obj_dashboard=obj_menuButton.fn_locateItem("xapp_dashboard_setting");          
+          if(obj_dashboard){                    
+            obj_dashboard.fn_maintain_debug_release();
+          }                  
+        }                        
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_maintain_debug_release        
+/*type: xapp_button_maintain_debug_release//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_navigate_desktop//*/
+
+            //XSTART component/xapp_button_navigate_desktop
+              class xapp_button_navigate_desktop extends xapp_console_button{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                
+                  //this.obj_holder.bln_debugNavigate=true;                  
+                }                
+                fn_onClick(e){                                    
+                  obj_path.fn_navigateSubdomain("desk");
+                  obj_project.fn_forgetEvent(e);    
+                }
+              }//END CLS
+              //END TAG
+              //END component/xapp_button_navigate_desktop
+/*type: xapp_button_navigate_desktop//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_navigate_lobby//*/
+      //XSTART component/xapp_button_navigate_lobby
+      class xapp_button_navigate_lobby extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                                    
+          obj_path.fn_navigateSubdomain("www");
+          obj_project.fn_forgetEvent(e);    
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_navigate_lobby        
+/*type: xapp_button_navigate_lobby//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_navigate_login//*/
+
+            //XSTART component/xapp_button_navigate_login
+              class xapp_button_navigate_login extends xapp_console_button{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                
+                }
+                fn_onClick(e){                                    
+                                 
+                  
+                  obj_path.fn_navigateSubdomain("lock");                                    
+                  
+                  
+                  obj_project.fn_forgetEvent(e);    
+                }
+              }//END CLS
+              //END TAG
+              //END component/xapp_button_navigate_login
+/*type: xapp_button_navigate_login//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_navigate_mall//*/
+      //XSTART component/xapp_button_navigate_mall
+      class xapp_button_navigate_mall extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                                    
+          let obj_menuButton=this.fn_getMenuButton();
+          if(!obj_menuButton){return;}  
+          
+          obj_menuButton.fn_formNavigateMall();
+          
+          
+          obj_project.fn_forgetEvent(e);    
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_navigate_mall        
+/*type: xapp_button_navigate_mall//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_navigate_newcolumn//*/
+      //XSTART component/xapp_button_navigate_newcolumn
+      class xapp_button_navigate_newcolumn extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                                    
+          let obj_menuButton=this.fn_getMenuButton();
+          if(!obj_menuButton){return;}  
+          
+          obj_menuButton.fn_formNavigateNewColumn();
+          
+          
+          obj_project.fn_forgetEvent(e);    
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_navigate_newcolumn        
+/*type: xapp_button_navigate_newcolumn//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_navigate_newrow//*/
+      //XSTART component/xapp_button_navigate_newrow
+      class xapp_button_navigate_newrow extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                                    
+          let obj_menuButton=this.fn_getMenuButton();
+          if(!obj_menuButton){return;}  
+          
+          obj_menuButton.fn_formNavigateNewRow();
+          
+          
+          obj_project.fn_forgetEvent(e);    
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_navigate_newrow        
+/*type: xapp_button_navigate_newrow//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_navigate_office//*/
+      //XSTART component/xapp_button_navigate_office
+      class xapp_button_navigate_office extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }        
+        fn_onClick(e){                                    
+          let obj_menuButton=this.fn_getMenuButton();
+          if(!obj_menuButton){return;}  
+          
+          obj_menuButton.fn_formNavigateOffice();
+          
+          
+          obj_project.fn_forgetEvent(e);    
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_navigate_office        
+/*type: xapp_button_navigate_office//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_navigate_record//*/
+
+            //XSTART component/xapp_button_navigate_record
+              class xapp_button_navigate_record extends xapp_console_button{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                
+                  this.bln_debugText=true;
+                }                
+                fn_onClick(e){                  
+                  let obj_menuButton=this.fn_getMenuButton();
+                  if(!obj_menuButton){return;}                      
+                  
+                  obj_menuButton.fn_formNavigateRecord();                  
+                  
+                  obj_project.fn_forgetEvent(e);
+                }
+              }//END CLS
+              //END TAG
+              //END component/xapp_button_navigate_record
+/*type: xapp_button_navigate_record//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_navigate_rowz//*/
+      //XSTART component/xapp_button_navigate_rowz
+      class xapp_button_navigate_rowz extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){    
+                                        
+          obj_path.fn_navigateSubdomain("desk");
+          obj_project.fn_forgetEvent(e);    
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_navigate_rowz        
+/*type: xapp_button_navigate_rowz//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_navigate_settings//*/
+      //XSTART component/xapp_button_navigate_settings
+      class xapp_button_navigate_settings extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                          
+          //this.bln_debugButtonSettings=true;          
+        }        
+        fn_onClick(e){                                    
+          let obj_menuButton=this.fn_getMenuButton();
+          if(!obj_menuButton){return;}  
+          
+          obj_menuButton.fn_formNavigateSettings();
+          
+          
+          obj_project.fn_forgetEvent(e);    
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_navigate_settings        
+/*type: xapp_button_navigate_settings//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_new_record//*/
+
+            //XSTART component/xapp_button_new_record
+              class xapp_button_new_record extends xapp_console_button{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                
+
+                  this.bln_debugText=true;
+                }  
+                fn_onClick(e){                  
+                  let obj_menuButton=this.fn_getMenuButton();                  
+                  if(!obj_menuButton){return;}                                                      
+                  
+                  obj_menuButton.fn_formNewRecord(); 
+                  
+                  
+                  obj_project.fn_forgetEvent(e);
+                }
+              }//END CLS
+              //END TAG
+              //END component/xapp_button_new_record
+/*type: xapp_button_new_record//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_next_record//*/
+      //XSTART component/xapp_button_next_record
+      class xapp_button_next_record extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_next_record        
+/*type: xapp_button_next_record//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_provision//*/
+      //XSTART component/xapp_button_provision
+      class xapp_button_provision extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                                    
+          
+          obj_project.fn_forgetEvent(e);                  
+          let obj_menuButton=this.fn_getMenuButton();          
+          let obj_dashboard=obj_menuButton.fn_locateItem("xapp_dashboard_setting");          
+          if(obj_dashboard){                    
+            obj_dashboard.fn_provision();
+          }       
+        }           
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_provision        
+/*type: xapp_button_provision//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_provision_b2b//*/
+      //XSTART component/xapp_button_provision_b2b
+      class xapp_button_provision_b2b extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_provision_b2b        
+/*type: xapp_button_provision_b2b//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_provision_b2c//*/
+      //XSTART component/xapp_button_provision_b2c
+      class xapp_button_provision_b2c extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_provision_b2c        
+/*type: xapp_button_provision_b2c//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_provision_linked_contact_hide//*/
+      //XSTART component/xapp_button_provision_linked_contact_hide
+      class xapp_button_provision_linked_contact_hide extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_provision_linked_contact_hide        
+/*type: xapp_button_provision_linked_contact_hide//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_provision_linked_contact_show//*/
+      //XSTART component/xapp_button_provision_linked_contact_show
+      class xapp_button_provision_linked_contact_show extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_provision_linked_contact_show        
+/*type: xapp_button_provision_linked_contact_show//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_provision_linked_opportunity_hide//*/
+      //XSTART component/xapp_button_provision_linked_opportunity_hide
+      class xapp_button_provision_linked_opportunity_hide extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_provision_linked_opportunity_hide        
+/*type: xapp_button_provision_linked_opportunity_hide//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_provision_linked_opportunity_show//*/
+      //XSTART component/xapp_button_provision_linked_opportunity_show
+      class xapp_button_provision_linked_opportunity_show extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_provision_linked_opportunity_show        
+/*type: xapp_button_provision_linked_opportunity_show//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_provision_linked_task_hide//*/
+      //XSTART component/xapp_button_provision_linked_task_hide
+      class xapp_button_provision_linked_task_hide extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_provision_linked_task_hide        
+/*type: xapp_button_provision_linked_task_hide//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_provision_linked_task_show//*/
+      //XSTART component/xapp_button_provision_linked_task_show
+      class xapp_button_provision_linked_task_show extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_provision_linked_task_show        
+/*type: xapp_button_provision_linked_task_show//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_push_reset//*/
+      //XSTART component/xapp_button_push_reset
+      class xapp_button_push_reset extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                                    
+          
+          obj_project.fn_forgetEvent(e);                  
+          let obj_menuButton=this.fn_getMenuButton();
+          let obj_dashboard=obj_menuButton.fn_locateItem("xapp_dashboard_push_row");
+          if(obj_dashboard){                    
+            obj_dashboard.fn_push_reset();
+          }                  
+        }                                     
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_push_reset        
+/*type: xapp_button_push_reset//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_push_schedule//*/
+      //XSTART component/xapp_button_push_schedule
+      class xapp_button_push_schedule extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                                    
+          
+          obj_project.fn_forgetEvent(e);              
+          let str_url;          
+          let str_lokalDomain=obj_path.fn_getLokalDomain();
+          str_url="api."+str_lokalDomain+"/interface/push/"; 
+          str_url=obj_path.fn_getURLSiteProtocol(str_url);                    
+          window.open(str_url, "_push");
+        }                
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_push_schedule        
+/*type: xapp_button_push_schedule//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_queryterm//*/
+      //XSTART component/xapp_button_queryterm
+      class xapp_button_queryterm extends form_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+          this.bln_enabled=true;
+
+          this.obj_holder.bln_listenMouseDown=true;                  
+          this.obj_holder.bln_listenMouseUp=true;                  
+        }
+        fn_onMouseDown(e){                            
+
+          this.obj_parentInterface.fn_queryTermButtonOnMouseDown(this, e);          
+          
+          obj_project.fn_forgetEvent(e);    
+        }
+        fn_onMouseUp(e){                  
+          this.obj_parentInterface.fn_queryTermButtonOnMouseUp(this, e);          
+          
+          obj_project.fn_forgetEvent(e);    
+        }
+        fn_onClick(e){                  
+          this.obj_parentInterface.fn_queryTermButtonOnClick(this, e);
+          
+          
+          obj_project.fn_forgetEvent(e);    
+        }
+        fn_onDblClick(e){ 
+          
+          this.obj_parentInterface.fn_queryTermButtonOnDblClick(this, e);
+          
+          
+          obj_project.fn_forgetEvent(e);    
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_queryterm        
+/*type: xapp_button_queryterm//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_columnform_metajointype//*/
+
+            //XSTART component/xapp_columnform_metajointype
+              class xapp_columnform_metajointype extends xapp_columnform{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                
+                }
+                fn_onLoad(){
+                  super.fn_onLoad();                
+                  if(this.fn_hasContextHolderParent()){return;}                           
+                }
+                fn_onChildChange(){                   
+
+                  super.fn_onChildChange();
+
+                  if(this.str_value==="2"){
+                    //console.log("change auto join , chnaage type menu ");  
+                  }
+                  
+                  
+                  
+                }                                         
+              }//END CLS
+              //END TAG
+              //END component/xapp_columnform_metajointype
+/*type: xapp_columnform_metajointype//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
 /*type: xapp_console//*/
 
             //XSTART component/xapp_console
@@ -16560,6 +18461,290 @@ class login_dashboard extends xapp_dashboard{
 
 
 /*START COMPONENT//*/
+/*type: xapp_dashboard_push//*/
+      //XSTART component/xapp_dashboard_push
+      class xapp_dashboard_push extends xapp_dashboard{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_loadDashboard(){
+          if(!super.fn_loadDashboard()){return;}                                                                                              
+          
+          this.obj_menuPanel=this.fn_getParentComponent();                  
+          if(this.obj_menuPanel){
+            
+            this.obj_consoleContainerMaintain=this.obj_menuPanel.fn_addConsoleContainer("console_container_maintain", true);            
+            this.obj_button_push_schedule=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_push_schedule");                                    
+            this.obj_consoleContainerMaintain.fn_showItem(this.obj_button_push_schedule);            
+          }                    
+        }         
+        
+      }//END CLS
+      //END TAG
+      //END component/xapp_dashboard_push        
+/*type: xapp_dashboard_push//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_dashboard_push_row//*/
+      //XSTART component/xapp_dashboard_push_row
+      class xapp_dashboard_push_row extends xapp_dashboard{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_loadDashboard(){
+          if(!super.fn_loadDashboard()){return;}                                                                                              
+          
+          this.obj_menuPanel=this.fn_getParentComponent();                  
+          if(this.obj_menuPanel){
+            this.obj_consoleContainerMaintain=this.obj_menuPanel.fn_addConsoleContainer("console_container_maintain", true);            
+            this.obj_button_push_reset=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_push_reset");                                    
+            this.obj_consoleContainerMaintain.fn_showItem(this.obj_button_push_reset);                                    
+          }                    
+        } 
+        
+        fn_push_reset(){
+
+          let obj_column, obj_row;
+          let obj_menuButton=this.obj_holder.obj_parentMenu;                             
+          let obj_recordset=obj_menuButton.obj_dataView;                              
+          obj_row=obj_recordset.fn_getRow(0);          
+          
+          obj_column=obj_row.fn_getColumnViaName("`meta_push`.`meta_push`.`ScriptStatus`");                    
+          this.fn_updateColumnValue(obj_column, "READY");   
+          obj_column=obj_row.fn_getColumnViaName("`meta_push`.`meta_push`.`SystemIdCurrent`");                    
+          this.fn_updateColumnValue(obj_column, "0");   
+          obj_column=obj_row.fn_getColumnViaName("`meta_push`.`meta_push`.`SystemIdTo`");                              
+          this.fn_updateColumnValue(obj_column, "0");   
+          obj_column=obj_row.fn_getColumnViaName("`meta_push`.`meta_push`.`ScriptDate`");                    
+          this.fn_updateColumnValue(obj_column, "");   
+
+        }
+
+        fn_updateColumnValue(obj_column, str_value){
+          obj_column.fn_setValue(str_value);
+          obj_column.fn_pushColumn();                                 
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_dashboard_push_row        
+/*type: xapp_dashboard_push_row//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_dashboard_setting//*/
+      //XSTART component/xapp_dashboard_setting
+      class xapp_dashboard_setting extends xapp_dashboard{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+
+        fn_loadDashboard(){
+          if(!super.fn_loadDashboard()){return;}                                                                                              
+          
+          this.obj_menuPanel=this.fn_getParentComponent();                  
+          if(this.obj_menuPanel){
+            let obj_consoleContainerMaintain;
+            this.obj_consoleContainerMaintain=obj_consoleContainerMaintain=this.obj_menuPanel.fn_addConsoleContainer("console_container_maintain", true);                        
+            this.obj_button_maintain=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_maintain");            
+            this.obj_button_provision=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision");
+            this.obj_button_backup=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_backup");                                    
+            this.obj_button_maintain_debug_release=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_maintain_debug_release");                                                                       
+            
+            obj_consoleContainerMaintain.fn_showItem(this.obj_button_maintain);
+            obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision);    
+            obj_consoleContainerMaintain.fn_showItem(this.obj_button_backup);                        
+            obj_consoleContainerMaintain.fn_showItem(this.obj_button_maintain_debug_release);                      
+            
+
+            /*
+            this.obj_button_provision_account=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_account");
+            this.obj_button_provision_opportunity=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_opportunity");
+            this.obj_button_provision_contact=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_contact");
+            this.obj_button_provision_task=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_task");
+            
+            this.obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_account);                 
+            this.obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_opportunity);                 
+            this.obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_contact);                 
+            this.obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_task);                 
+            //*/
+            
+            
+          }                    
+        } 
+        fn_refreshDashboard(){         
+        }
+
+        fn_refreshMenu(){
+          let obj_menuButton=this.obj_holder.obj_parentMenu;          
+          obj_menuButton.fn_refreshMenu();
+        }        
+        
+        fn_maintain(){
+          let obj_ini=new Object;            
+          obj_ini.str_action="maintain";                                     
+          this.fn_runServerAction(obj_ini);                                                                  
+        }        
+        fn_provision(){
+          let obj_ini=new Object;            
+          obj_ini.str_action="provision";                                     
+          this.fn_runServerAction(obj_ini);                                                                  
+        }        
+
+        fn_maintain_debug_release(){
+          let obj_ini=new Object;            
+          obj_ini.str_action="maintain_debug_release";                                               
+          this.fn_runServerAction(obj_ini);                                                                  
+        }
+
+        maintain_debug_release(){
+          this.fn_refreshMenu();
+        }
+
+        fn_backup(){
+          
+          let obj_ini=new Object;            
+          obj_ini.str_action="backup";                                     
+          this.fn_runServerAction(obj_ini);                                                                  
+        } 
+        
+        
+        
+      }//END CLS
+      //END TAG
+      //END component/xapp_dashboard_setting        
+/*type: xapp_dashboard_setting//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_dashboard_view//*/
+      //XSTART component/xapp_dashboard_view
+      class xapp_dashboard_view extends xapp_dashboard{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_loadDashboard(){
+          if(!super.fn_loadDashboard()){return;}                                                                                              
+          
+          this.obj_menuPanel=this.fn_getParentComponent();                  
+          if(this.obj_menuPanel){            
+            let obj_consoleContainer=this.obj_consoleContainerRecord=this.obj_menuPanel.fn_addConsoleContainer("console_container_record", true);                                    
+            
+            this.obj_button_file_select=obj_consoleContainer.fn_getConsoleComponent("xapp_button_file_select");                                                                                   
+            this.obj_input_file_select=this.obj_button_file_select.fn_getComponent("xapp_input_file_select");                                                                                               
+            this.obj_button_file_import=obj_consoleContainer.fn_getConsoleComponent("xapp_button_file_import");                                                                       
+
+            let obj_menuButton=this.fn_getMenuButton();
+            let obj_settingMenu=obj_menuButton.obj_parentMenu;
+            let obj_standardMenu=obj_settingMenu.obj_parentMenu;
+            let int_metaViewId=obj_standardMenu.fn_getMetaViewId();            
+            let int_metaRowzId=obj_standardMenu.fn_getMetaRowzId();            
+            let int_idParentMetaRowz=obj_standardMenu.fn_getParentRowzId();            
+            if(int_metaViewId){
+              this.int_metaViewId=int_metaViewId;
+              this.int_metaRowzId=int_metaRowzId;
+              obj_consoleContainer.fn_showItem(this.obj_button_file_select);                        
+              //obj_consoleContainer.fn_showItem(this.obj_button_file_import);                        
+            }            
+            else if(!int_idParentMetaRowz){
+              let obj_consoleContainerMaintain=this.obj_consoleContainerRecord=this.obj_menuPanel.fn_addConsoleContainer("console_container_maintain", true);                        
+              console.log("int_idParentMetaRowz: " + int_idParentMetaRowz);              
+
+              //*
+              this.obj_button_provision_b2b=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_b2b");
+              this.obj_button_provision_b2c=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_b2c");
+              this.obj_button_provision_account_opportunity=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_linked_opportunity_hide");
+              this.obj_button_provision_linked_opportunity=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_linked_opportunity_show");
+              this.obj_button_provision_account_contact=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_linked_contact_hide");
+              this.obj_button_provision_linked_contact=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_linked_contact_show");
+              this.obj_button_provision_account_task=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_linked_task_hide");
+              this.obj_button_provision_linked_task=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision_linked_task_show");              
+              
+              obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_b2b);                 
+              obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_b2c);                 
+              obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_account_opportunity);                 
+              obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_linked_opportunity);                 
+              obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_account_contact);                 
+              obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_linked_contact);                 
+              obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_account_task);                 
+              obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision_linked_task);                 
+              
+              //*/
+
+            }
+            
+          }                    
+        } 
+
+        fn_buttonFileSelectOnClick(){          
+          const fileInput = this.obj_input_file_select.dom_obj;
+          fileInput.click();        
+        }
+        fn_inputFileSelectOnChange(){                                        
+          
+          this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_file_select);                        
+          this.obj_consoleContainerRecord.fn_showItem(this.obj_button_file_import);                        
+          
+        }
+        fn_buttonFileImportOnClick(){          
+          
+          const fileInput = this.obj_input_file_select.dom_obj;
+          const file = fileInput.files[0]; // Get the selected file
+      
+          if (file) {        
+            
+              
+            //*
+              const formData = new FormData();      
+              formData.append('file', file); // Append the file to FormData                            
+              formData.append('str_action', "import_file");               
+              formData.int_idMetaView=this.int_metaViewId;
+              formData.int_idMetaRowz=this.int_metaRowzId;              
+              formData.str_action="import_file";            
+              formData.str_nameFolderServer="xapp_dashboard_setting";                                                                                          
+              formData.str_idAJAXNotifier=this.obj_design.str_idXDesign;              
+              this.fn_runServerFileUpload(formData);                                                                                     
+              //*/
+      
+              /*
+              let obj_ini=new Object;                                
+              obj_ini.str_action="import_file";            
+              obj_ini.str_nameFolderServer="xapp_dashboard_setting";                                                                            
+              obj_ini.data_formData=formData;
+              this.fn_runServerAction(obj_ini);                                                                       
+              //*/
+              
+          } else {              
+              obj_shared.fn_messageWarn("Please select a file");
+          }
+        }
+        import_file(){          
+          this.obj_consoleContainerRecord.fn_showItem(this.obj_button_file_select);                        
+          this.obj_consoleContainerRecord.fn_hideItem(this.obj_button_file_import);                        
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_dashboard_view        
+/*type: xapp_dashboard_view//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
 /*type: xapp_data_childmenu//*/
 
             //XSTART component/xapp_data_childmenu
@@ -16649,6 +18834,48 @@ class login_dashboard extends xapp_dashboard{
 
 
 /*START COMPONENT//*/
+/*type: xapp_dataform_childmenu//*/
+
+            //XSTART component/xapp_dataform_childmenu
+              class xapp_dataform_childmenu extends xapp_dataform{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);                
+                  this.obj_holder.bln_computeRows=false;                  
+                }                
+                fn_onLoad(){    
+                  super.fn_onLoad();                  
+                  if(this.fn_getDebugPin()){this.fn_highlightBorder("pink");}                  
+                }
+                fn_onDataStart(){                
+                  super.fn_onDataStart();
+                  let obj_parent=this.obj_paramRS.obj_menuButton;                                                
+                  if(!obj_parent){return;}                                    
+                  obj_parent.fn_onDataStartChildMenu();                                    
+                }
+                fn_onDataEnd(obj_post){                  
+                  let obj_parent=this.obj_paramRS.obj_menuButton;                                                
+                  if(!obj_parent){return;}                                    
+                  obj_parent.fn_onDataEndChildMenu(obj_post);                  
+                }
+                
+                fn_onComputeRow(){                                                   
+                  let obj_row=this.obj_paramRS.obj_row;                  
+                  if(!obj_row){return;}
+                  let obj_parent=this.obj_paramRS.obj_menuButton;                                                
+                  if(!obj_parent){return;}                                    
+                  obj_parent.fn_onComputeRowChildMenu(obj_row);                                    
+                }                  
+              }//END CLS
+              //END TAG
+              //END component/xapp_dataform_childmenu
+/*type: xapp_dataform_childmenu//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
 /*type: xapp_dynamic_content//*/
 
             //XSTART component/xapp_dynamic_content
@@ -16726,6 +18953,186 @@ class login_dashboard extends xapp_dashboard{
 
 
 /*START COMPONENT//*/
+/*type: xapp_form_select//*/
+
+            //XSTART component/xapp_form_select
+            class xapp_form_select extends form_input{
+              constructor(obj_ini) {      
+                super(obj_ini);        
+              } 
+              fn_initialize(obj_ini){
+                super.fn_initialize(obj_ini);                                               
+              }
+              fn_holdEvent(){
+                super.fn_dropEvent();
+
+                this.obj_holder.bln_listenClick=true;
+                this.obj_holder.bln_listenChange=true;
+                this.obj_holder.bln_listenBlur=true;        
+
+              }
+              fn_onClick(e){             
+                obj_project.fn_forgetEvent(e);                      
+              }
+              fn_onChange(e){                                             
+                this.fn_parentEvent("Change", e);                  
+                obj_project.fn_calmEvent(e);                
+              }
+              fn_onBlur(e){                                         
+                this.fn_parentEvent("Blur", e);
+                obj_project.fn_forgetEvent(e);                      
+              }
+
+              fn_getListIdValue(str_valueList){
+
+                let arr_valueList=str_valueList.split(", ");
+                let arr_listIdValue=[];
+                for (const option of this.dom_obj.options) {                  
+                  if (arr_valueList.includes(option.text)) {
+                    arr_listIdValue.push(option.value);
+                  }
+                }
+                
+                let str_listIdValue=arr_listIdValue.join(", ");
+                //console.log("str_listIdValue: " + str_listIdValue);
+                return str_listIdValue;
+              }
+
+              fn_getValue(obj_column){  
+                
+                const selectedValues = Array.from(this.dom_obj.selectedOptions).map(option => option.text);
+                let str_value = selectedValues.join(', ');                                
+                //console.log("fn_getValue str_value: " + str_value);
+
+                if(str_value){
+                  let arr_value=str_value.split(", ");                                                
+                  arr_value = arr_value.filter(element => element !== "");                
+                  str_value = arr_value.join(', ');
+                }
+                else{
+                  //no problem, allow a single blank value
+                }
+                
+                
+                if(obj_column){
+                  let obj_metaColumn=obj_column.obj_metaColumn;                                    
+                  if(str_value.length>obj_metaColumn.MaxLength){
+                    str_value=obj_shared.fn_removeAfterLastIndex(str_value, ", ");
+                  } 
+                }
+                
+                return str_value;
+              }
+
+              fn_setValue(str_value, obj_column){ 
+                
+                //console.log("fn_setValue str_value: " + str_value);                
+                
+                let arr_value=str_value.split(", ");                                                
+                
+                let str_selected;
+                for (const option of this.dom_obj.options) {                  
+                  str_selected = false;                                        
+                  if (arr_value.includes(option.text)) {
+                    str_selected = true;                      
+                  }
+                  option.selected = str_selected;                      
+                }
+                
+              }
+
+              fn_setText(str_value){                  
+                this.str_value=str_value;
+              }
+              fn_loadList(arr_rows, obj_column){                   
+
+                this.dom_obj.innerHTML = '';
+                
+                let obj_metaColumn=obj_column.obj_metaColumn;                                                  
+                let obj_metaList=obj_metaColumn.obj_metaList;                
+                
+                /*
+                  //{"MetaViewId":"200007","SelectField":"Name","WhereField":"MetaGroup","WhereCriteria":"","AllowMultiple":false}        
+                  obj_metaList.MetaViewId                  
+                  obj_metaList.SelectField
+                  obj_metaList.WhereField
+                  obj_metaList.WhereCriteria
+                  obj_metaList.AllowMultiple
+                  obj_metaList.AutoFetchPin                  
+                  //*/                  
+
+                let str_text, str_value;
+                this.fn_addOption("", "");
+                for(var i=0;i<arr_rows.length;i++){                            
+                  
+                  
+                  if(obj_metaList.ListMember){
+                    str_text=arr_rows[i];
+                    str_value=arr_rows[i];
+                  }
+                  else{
+
+                    const obj_row=arr_rows[i];
+                    //console.log(obj_row);
+                    str_text=obj_row[obj_metaList.SelectField];                  
+                    str_value=obj_row["RecordId"];                  
+                  }
+                  
+                  this.fn_addOption(str_text, str_value);
+              
+                }
+
+                this.fn_removeStyleProperty("height");                                    
+                this.fn_setStyleProperty("width", "auto");                
+
+                //this.fn_debug();
+            }
+            fn_addOption(str_text, str_value){
+              let option = document.createElement("option");
+              option.text = str_text;
+              option.value = str_value;                  
+              this.dom_obj.add(option);                                                                     
+              return option
+            }
+            
+              
+              
+
+              
+              
+            }//END CLS
+            //END TAG
+            //END component/xapp_form_select
+/*type: xapp_form_select//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_input_file_select//*/
+      //XSTART component/xapp_input_file_select
+      class xapp_input_file_select extends form_input{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onChange(e){
+          
+          obj_project.fn_calmEvent(e);//dont cancel the event 
+
+          let obj_parent=this.fn_getParentComponent();
+          obj_parent.fn_inputFileSelectOnChange();
+          
+        }
+      }//END CLS
+      //END TAG
+      //END component/xapp_input_file_select        
+/*type: xapp_input_file_select//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
 /*type: xapp_menu_panel//*/
             //XSTART component/xapp_menu_panel
               class xapp_menu_panel extends form_menu_panel{
@@ -16797,12 +19204,10 @@ class login_dashboard extends xapp_dashboard{
                 this.int_totalRowCount=0;
               }
 
-              fn_applyThemeStructure(){    
-                
-                this.obj_themeStructure=obj_project.obj_themeChildMenu;                
-                this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+              fn_applyThemeStructure(){                    
+                this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeRowzChild;                
+                this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
               }
-
               
               fn_setMenuPanel(){     
                 super.fn_setMenuPanel();                  
@@ -17950,10 +20355,35 @@ class login_dashboard extends xapp_dashboard{
 
 
 /*START COMPONENT//*/
-/*type: xapp_row//*/
+/*type: xapp_report_view//*/
 
-            //XSTART component/xapp_row
-              class xapp_row extends component{
+            //XSTART component/xapp_report_view
+              class xapp_report_view extends xapp_dataform_view{
+                constructor(obj_ini) {      
+                  super(obj_ini);        
+                } 
+                fn_initialize(obj_ini){
+                  super.fn_initialize(obj_ini);   
+                  this.obj_holder.bln_reportView=true;
+                  this.obj_holder.str_typeColumn="report_column";
+                  
+                }                
+                fn_initializeRS(obj_menuButton){                
+                  super.fn_initializeRS(obj_menuButton);
+                  this.obj_paramRS.bln_reportView=this.obj_holder.bln_reportView;                                    
+                }
+              }//END CLS
+              //END TAG
+              //END component/xapp_report_view
+/*type: xapp_report_view//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_rowform//*/
+
+            //XSTART component/xapp_rowform
+              class xapp_rowform extends xapp_row{
                 constructor(obj_ini) {      
                   super(obj_ini);        
                 } 
@@ -17961,273 +20391,277 @@ class login_dashboard extends xapp_dashboard{
                   super.fn_initialize(obj_ini);                
                 }
                 fn_initializeRow(obj_paramRS){                  
+
+                  super.fn_initializeRow(obj_paramRS);                  
                   
-                  this.obj_paramRS=obj_paramRS;                                                                                          
-                  
-
-                  this.obj_paramRow={};                  
-                  this.obj_paramRow.int_countColumn=0;                  
-                  this.obj_paramRow.int_countSection=0;                                    
-                  this.obj_paramRow.int_sectionColumnCount=0;   
-                  
-                  this.obj_paramRow.int_ordinalPosition=this.obj_paramRS.int_ordinalPosition;                                    
-                  this.obj_paramRow.obj_paramRS=this.obj_paramRS;  
-                  
-                  this.obj_holder.obj_fieldset=this;//"menu" columns will be added to this row
-                  
-
-                  this.fn_computeMetaColumn();                                  
-                  
-                  this.fn_removeChildren();                                       
-                }    
-                  
-                fn_preComputeColumn(){
-                }
-
-                fn_postComputeColumn(){}
-
-                fn_computeMetaColumn(){ 
-                  
-                  let arr_item=this.obj_paramRow.arr_metaColumn=[];
-                  let obj_recordset=this.obj_paramRS.obj_recordset;
-                  let int_totalColumn=this.obj_paramRS.int_totalColumn;                  
-                  let obj_metaData=this.obj_paramRow.obj_metaData={};                                   
-                  
-                  for (let i = 0; i < int_totalColumn;i++) {                                                                
-                    let obj_metaColumn=obj_recordset.fn_getMetaColumn(i);                                                                                                    
-                    arr_item.push(obj_metaColumn);                    
-                    if(obj_metaColumn.IsMetaData){                                            
-                      obj_metaData.bln_hasData=true;                                                                                        
-                      obj_metaData[obj_metaColumn.MetaColumnName]=obj_metaColumn.str_value;                                            
-                    }                    
-                  }
-                }
-
-                fn_settingsColumnInterfaceLockedPin(str_exempt){
-                
-                  this.obj_paramRow.CustomPin=false;
-                  let arr_column=this.obj_paramRow.arr_column;                                    
-                  this.obj_paramRow.bln_interfaceLockedPin=true;
-                  for(let i=0;i<arr_column.length;i++){
-
-                    let obj_column=arr_column[i];                                        
-                    let obj_metaColumn=obj_column.obj_metaColumn;                                        
-                    if(obj_metaColumn.MetaColumnName.toLowerCase()!=='metacolumnname' && obj_metaColumn.MetaColumnName.toLowerCase()!=='metarowzname'){
-                      continue;
-                    }
-                    
-                    let bln_value=obj_shared.fn_inString(str_exempt, obj_metaColumn.str_value);                    
-                    if(bln_value){                    
-                      this.obj_paramRow.bln_interfaceLockedPin=false;
-                      break;
-                    }
-                    
-                  }                                     
-
-                  
-                  if(this.obj_paramRow.bln_interfaceLockedPin){
-
-                    for(let i=0;i<arr_column.length;i++){
-
-                      let obj_column=arr_column[i];                                        
-                      obj_column.fn_settingsColumnInterfaceLockedPin();                      
-                    }                                      
-
-                  }
-                }
-
-
-                
-                fn_computeColumns(){                  
-
-                  this.obj_paramRow.arr_column=[];
-
-                  let int_totalColumn=this.obj_paramRS.int_totalColumn;
-                  let obj_recordset=this.obj_paramRS.obj_recordset;
-                  
-                  for (let i = 0; i < int_totalColumn; i++) {                                            
-                    
-                    this.fn_preComputeColumn();                    
-
-                    let obj_metaColumn=obj_recordset.fn_getMetaColumn(i);                                                            
-                    //console.log(obj_metaColumn);
-                    this.obj_paramRow.obj_metaColumn=obj_metaColumn;                                        
-                    //to do : check the column type
-                    
-                    this.fn_computeColumn(i);                    
-                    
-                    
-                    this.obj_paramRow.int_countColumn++;                    
-                    
-                    this.fn_postComputeColumn();                                        
-                  }
-
-                  this.fn_postComputeColumns();                                       
-                  
-                } 
-                
-                fn_postComputeColumns(){                  
-                  this.fn_parseColumns();
+                  if(!this.obj_paramRS.bln_reportView){
+                    //this.fn_debugText("fn_flipAxis");
+                    //this.fn_flipAxis(this.obj_paramRS.bln_axis);
+                  }                  
+                }                  
+                fn_onLoad(){    
+                  super.fn_onLoad();                  
+                  if(this.fn_getDebugPin()){this.fn_highlightBorder("yellow");}                                    
                 }                
-
-                fn_parseColumns(){
-
-                  const arr_nameSummary=[];
-                  const arr_valueSummary=[];
-                  
+                fn_onNewRecordPushDefaultValueColumns(bln_isData=false){
                   let arr, i, obj_column;
-                  arr=this.obj_paramRow.arr_column;                  
-                  let obj_columnMarked;
+                  arr=this.obj_paramRow.arr_column;
                   for (i=0;i<arr.length;i++){                    
                     obj_column=arr[i];
-                    if(obj_column.bln_isMarked){
-                      obj_column.fn_onMarkColumn();
+                    let obj_metaColumn=obj_column.obj_metaColumn;                  
+                    if(obj_metaColumn.DefaultValue){
+                      //console.log(obj_metaColumn);
+                      if(!bln_isData){
+                        if(obj_metaColumn.IsMetaData){
+                          continue;
+                        }
+                      }
+                      else{
+                        if(!obj_metaColumn.IsMetaData){
+                          continue;
+                        }
+                      }                    
+                      obj_column.fn_pushColumn();
                     }
+                    
+                    
                     //console.log(obj_column);
-                    //if(obj_column.obj_metaColumn.SectionTitle==="Meta"){
-                    if(obj_column.obj_metaColumn.MetaColumnAPIName==="metadataid"){                      
-                      obj_columnMarked=obj_column;
-                    }
-                    
-                    let bln_addRecordSummary=obj_column.obj_metaColumn.RecordSummaryPin;
-                    if(obj_column.obj_metaColumn.MetaPermissionTag.toLowerCase()==="#interface"){
-                      if(!obj_userHome.Interface){
-                        bln_addRecordSummary=false;                        
-                      }
-                      
-                    }
-                    
-                    if(bln_addRecordSummary){
-                      //console.log(obj_column);
-                      //console.log(obj_column.obj_metaColumn);
-                      //obj_column.fn_setHiddenPin(true);
-                      let str_name=obj_column.obj_metaColumn.MetaLabel;
-                      let str_value=obj_shared.fn_replace(obj_column.str_valueDisplay, "&nbsp;", "");                      
-                      if(str_value){
-                        //console.log("[" + str_value + "]");                        
-                        arr_nameSummary.push(str_name);
-                        arr_valueSummary.push(str_value);
-                      }
-                    }
                   }
+
+                }
+
+                
+                fn_onDataSetModeLocked(){                  
+                  //currently not used , but remains as template for column-wide event handle
+                  let arr, i, obj_column;
+                  arr=this.obj_paramRow.arr_column;
+                  for (i=0;i<arr.length;i++){                    
+                    obj_column=arr[i];
+                    obj_column.fn_onDataSetModeLocked();                    
+                  }
+                }
+
+                fn_onDataSetModeUnLocked(){
+                  //currently not used , but remains as template for column-wide event handle                  
+                  let arr, i, obj_column;
+                  arr=this.obj_paramRow.arr_column;
+                  for (i=0;i<arr.length;i++){                    
+                    obj_column=arr[i];
+                    obj_column.fn_onDataSetModeUnLocked();
+                  }
+                }
+                
+                fn_preComputeColumn(){
+                  super.fn_preComputeColumn();
+                }
+
+                fn_postComputeColumn(){
+                  if(this.obj_paramRS.bln_autoSection){
+                    this.obj_paramRow.int_sectionColumnCount++;                  
+                  }
+                }
+                
+                fn_computeColumns(){                  
                   
-                  if(obj_columnMarked){//position Meta at End
-                    let obj_parent=obj_columnMarked.fn_getParentComponent();                    
-                    const childElement = obj_parent.dom_obj;
-                    const parentElement = childElement.parentNode;                  
-                    parentElement.removeChild(childElement);                        
-                    parentElement.appendChild(childElement);
-                    
-                    let str_html=obj_shared.fn_getHTMLTable(arr_nameSummary, arr_valueSummary );                    
-                    if(str_html){
-                      let obj_control=obj_parent.fn_addContextItem("form_span");   
-                      obj_control.fn_setText(str_html);
-                      //obj_control.fn_setDisabled(true);
-                    }
-                  } 
-                }
+                  this.fn_addFormPanel();
 
+                  super.fn_computeColumns();
+                }                
 
+                fn_postComputeColumns(){
 
-                
-                fn_describeRow(){
-
-                  let arr_item=this.obj_paramRow.arr_metaColumn;                  
-                  console.log("arr_metaColumn.length: " + arr_item.length);                    
-                  for (let i = 0; i < arr_item.length; i++) {                        
-                    let obj_metaColumn=arr_item[i];
-                    console.log("obj_metaColumn.str_name: " + obj_metaColumn.str_name);                    
-                    console.log("obj_metaColumn.str_value: " + obj_metaColumn.str_value);
-                    console.log(obj_metaColumn);                    
-                    console.log("-----------------");                    
-                  }
-                  return false;
-                }
-
-                fn_getColumnViaName(str_name){
-                  let str_lname=str_name.toLowerCase();                 
-                  let arr_item=this.obj_paramRow.arr_column;                                    
-                  for (let i = 0; i < arr_item.length; i++) {                        
-                    let obj_column=arr_item[i];
-                    let obj_metaColumn=obj_column.obj_metaColumn;                    
-                 
-                    if(obj_metaColumn.str_name.toLowerCase()===str_lname){                 
-                      return obj_column;
-                    }
-                  }
+                  super.fn_postComputeColumns();
                   
-                  return false;
-                }
-
-                
-                fn_getColumnViaNameSpecial(str_name){
-                  let str_lname=str_name.toLowerCase();
-                  //console.log("fn_getColumnViaName: " + str_lname);
-                  //console.log("str_lname: " + str_lname);
-                  let arr_item=this.obj_paramRow.arr_column;                  
-                  
-                  for (let i = 0; i < arr_item.length; i++) {                        
-                    let obj_column=arr_item[i];
-                    let obj_metaColumn=obj_column.obj_metaColumn;                    
-                    //console.log("obj_metaColumn: " + obj_metaColumn.str_name.toLowerCase());
-                    if(obj_metaColumn.str_name.toLowerCase()===str_lname){
-                      //console.log("FOUND SEARCH FOR: " + str_lname);
-                      return obj_column;
+                  const obj_fieldset=this.obj_holder.obj_fieldset;
+                  if(obj_fieldset){//refers only to the last section on the form
+                    if(!obj_fieldset.obj_design.lockOpen){                    
+                      obj_fieldset.fn_close();
                     }
                   }
-                  //console.log("NOT FOUND SEARCH FOR: " + str_lname);
-                  return false;
                 }
-                
-                fn_getColumnViaPosition(int_ordinalPosition){
-                  return this.obj_paramRow.arr_column[int_ordinalPosition];                  
-                }
-                
+
+                fn_addFormPanel(){                                                                    
+                  if(this.obj_paramRS.bln_reportView){return;}
+                  const obj_formPanel=this.fn_addContextItem("form_panel");                                    
+                  obj_formPanel.fn_onRowMember(this);                                    
+                  this.obj_holder.obj_formPanel=obj_formPanel;                  
+                  
+                }        
+
                 fn_computeColumn(int_countColumn){ 
 
                   let str_type, obj_column;
                   
                   str_type=this.obj_paramRS.str_typeColumn;                    
-                  if(this.obj_paramRow.obj_metaColumn.MetaClassType){                                        
-                    str_type=this.obj_paramRow.obj_metaColumn.MetaClassType;                    
+                  if(this.obj_paramRow.obj_metaColumn.MetaClassType){//class type for column                                    
+                    str_type=this.obj_paramRow.obj_metaColumn.MetaClassType;                  
                   }
-
-                  obj_column=this.obj_holder.obj_fieldset.fn_addContextItem(str_type);   
-                  
                   //console.log("str_type:" + str_type);
+
+                  this.fn_configureSection(int_countColumn);
+                  
+                  const obj_fieldset=this.obj_holder.obj_fieldset;                  
+
+                  obj_column=obj_fieldset.fn_addContextItem(str_type);
                   
                   if(obj_column){
-                    this.obj_paramRow.arr_column.push(obj_column);                    
-                    obj_column.fn_initializeColumn(this);//after value will now in place.                                        
+                    this.obj_paramRow.arr_column.push(obj_column);
+                    obj_column.fn_initializeColumn(this);//paramrow has the current metacolumn                    
                     obj_column.fn_computeField();                  
+
+                    this.fn_onComputecolumn(obj_column);                                      
+                    
+                  }
+                  //obj_column.fn_debug();
+                }                 
+
+                fn_configureSection(int_countColumn){                  
                   
-                    this.fn_onComputecolumn(obj_column);                  
+                  let str_sectionTitle=this.obj_paramRow.obj_metaColumn.SectionTitle;
                   
+
+                  this.bln_shift=false;                    
+                  if(!int_countColumn){                  
+                    if(!str_sectionTitle){
+                      //str_sectionTitle="Record";
+                    }                    
+                  }
+                  
+                  if(str_sectionTitle){                                                          
+                    this.bln_shift=true;                    
+                  }                  
+
+                  if(this.bln_shift){
+                    this.fn_addSection(this.obj_paramRow.obj_metaColumn);                                     
+                  }
+                }                    
+                fn_getColumnViaPosition(int_ordinalPosition){
+                  return this.obj_paramRow.arr_column[int_ordinalPosition];
+                  
+                }
+                fn_getColumnKey(obj_column=false){
+                  let obj_recordset, obj_metaColumn, obj_metaColumnKey, obj_columnKey
+                  if(obj_column){
+                    if(obj_column){
+                      obj_metaColumn=obj_column.obj_metaColumn;                      
+                      let MetaTableKeyField=obj_metaColumn.MetaTableKeyField;                      
+                      if(MetaTableKeyField.toLowerCase()==="metadataid"){                                                
+                        obj_columnKey=this.fn_getColumnDataId();
+                        return obj_columnKey;
+                      }
+                    }
+                  }
+                  obj_recordset=this.obj_paramRS.obj_recordset;
+                  obj_metaColumn=obj_recordset.fn_getMetaColumnViaOrdinalPosition(0);                       
+                  obj_metaColumnKey=obj_recordset.fn_getMetaColumnPrimaryKey(obj_metaColumn);                              
+                  obj_columnKey=this.fn_getColumnViaPosition(obj_metaColumnKey.int_ordinalPosition);                                                                                    
+                  obj_columnKey.fn_setMetaColumnKey(obj_metaColumnKey);
+                  return obj_columnKey;
+                }
+                fn_getColumnDataId(){
+                  let obj_recordset=this.obj_paramRS.obj_recordset;
+                  let obj_metaColumnDataId=obj_recordset.fn_getMetaColumnViaFieldShortName("metadataid");                                                                          
+                  return this.fn_getColumnViaPosition(obj_metaColumnDataId.int_ordinalPosition);                                                                                
+                }
+                fn_getColumnArchiveDate(){
+                  let obj_recordset=this.obj_paramRS.obj_recordset;
+                  let obj_metaColumnArchiveDate=obj_recordset.fn_getMetaColumnViaFieldShortName("ArchiveDate");                                                                          
+                  return this.fn_getColumnViaPosition(obj_metaColumnArchiveDate.int_ordinalPosition);                                                                                
+                }
+                
+
+                fn_addSection(obj_metaColumn){                                                      
+                  
+                  
+                  this.obj_paramRow.int_countSection++;                  
+                  this.obj_paramRow.int_sectionColumnCount=0;                                     
+                  
+                  const obj_fieldset=this.obj_holder.obj_fieldset=this.obj_holder.obj_formPanel.fn_addContextItem("form_fieldset");
+                  obj_fieldset.fn_onRowMember(this);
+
+                  
+                  let str_sectionTitle=obj_metaColumn.SectionTitle;
+                  if(str_sectionTitle){                                                                                
+                    obj_fieldset.fn_setText(str_sectionTitle);                                                       
                   }
 
-                //obj_column.fn_debug();
+                  let bln_lockOpen=true;                                      
+                  let bln_sectionClose=obj_metaColumn.SectionClose;
+                  if(bln_sectionClose){                         
+                    bln_lockOpen=false;                                                                           
+                  }
+                  obj_fieldset.obj_design.lockOpen=bln_lockOpen;                    
+                }               
 
-                  
-                }                                
                 
+                fn_getListSelectFromServer(obj_column){                  
+                  this.obj_paramRS.obj_recordset.fn_getListSelectFromServer(obj_column);
+                }
+                fn_pushColumn(obj_column){
+                  //console.log("row fn_pushColumn");
+                  this.obj_paramRS.obj_recordset.fn_pushColumn(obj_column);
+                }
                 fn_onComputecolumn(obj_column){
                   this.obj_paramRS.obj_recordset.fn_onComputeColumn(obj_column);
                 }
 
-                fn_getColumnKey(obj_column=false){                                  
+                fn_removeThemeError(){
+
+                  let arr_column=this.obj_paramRow.arr_column;
+                  for(let i=0;i<arr_column.length;i++){
+
+                    let obj_column=arr_column[i];                                        
+                    obj_column.fn_removeThemeError();
+                  }                  
+
                 }
-                fn_getColumnDataId(){                  
-                }
-                fn_getColumnArchiveDate(){                
-                }
-                
 
                 
                 
+                fn_setModeExecuteView(){
+                  
+                  super.fn_setModeExecuteView();
+
+                  let arr_column=this.obj_paramRow.arr_column;                  
+                  for(let i=0;i<arr_column.length;i++){
+
+                    let obj_column=arr_column[i];                    
+                    if(obj_column===this.obj_selectedColumn){
+                      continue;
+                    }                    
+                    let obj_metaColumn=obj_column.obj_metaColumn;                    
+                    if(obj_metaColumn.MetaList && obj_metaColumn.obj_metaList){                    
+                      if(obj_metaColumn.obj_metaList.AllowMultiple){                        
+                        //continue;
+                      }
+                    }                    
+                   
+                    if(obj_metaColumn.bln_debugColumn){
+                      obj_column.fn_debugLabel("ROW obj_column.fn_getModeExecuteEdit: " + obj_column.fn_getModeExecuteEdit());
+                    }
+                    if(obj_column.fn_getModeExecuteEdit()){
+                      obj_column.fn_transferEditToView();                                                               
+                    }
+                  }                  
+
+                }
+
+                fn_setModeExecuteEdit(){
+                  alert("should not see row fn_setModeExecuteEdit");
+                  super.fn_setModeExecuteEdit();
+
+                  let arr_column=this.obj_paramRow.arr_column;
+                  for(let i=0;i<arr_column.length;i++){
+
+                    let obj_column=arr_column[i];
+                    obj_column.fn_setModeExecuteEdit();
+                  }                  
+
+                }
               }//END CLS
               //END TAG
-              //END component/xapp_row
-/*type: xapp_row//*/
+              //END component/xapp_rowform
+/*type: xapp_rowform//*/
 /*END COMPONENT//*/
 
 
@@ -18295,7 +20729,7 @@ class login_dashboard extends xapp_dashboard{
 //START COMPONENTMAP
 
 //START AUTO GENERATED COMPONENT MAP
-const obj_ComponentMap = new Map([['component', component],['xapp_ajax', xapp_ajax],['xapp_component', xapp_component],['form_fieldset', form_fieldset],['form_input', form_input],['tablecell', tablecell],['tableheader', tableheader],['tablerow', tablerow],['table', table],['form_button', form_button],['form_button_rich', form_button_rich],['xapp_menu_operation', xapp_menu_operation],['xapp_menu', xapp_menu],['form_menu_panel', form_menu_panel],['xapp_base', xapp_base],['xapp_console_container', xapp_console_container],['xapp_data', xapp_data],['xapp_dataform', xapp_dataform],['form_inputandbutton', form_inputandbutton],['xapp_button', xapp_button],['xapp_console_button', xapp_console_button],['form_form', form_form],['xapp_dashboard', xapp_dashboard],['xapp', xapp],['form_tablecell', form_tablecell],['form_inputandbutton_submit', form_inputandbutton_submit],['authorise_end', authorise_end],['block', block],['block_structure', block_structure],['form_anchor', form_anchor],['form_button_anchor', form_button_anchor],['form_button_icon', form_button_icon],['form_button_search', form_button_search],['form_button_showhide', form_button_showhide],['form_button_span', form_button_span],['form_checkbox', form_checkbox],['form_field', form_field],['form_hardrule', form_hardrule],['form_icon', form_icon],['form_iframe', form_iframe],['form_input_login_email', form_input_login_email],['form_input_login_pass', form_input_login_pass],['form_inputandbutton_input', form_inputandbutton_input],['form_label', form_label],['form_legend', form_legend],['form_nonbreakingspace', form_nonbreakingspace],['form_panel', form_panel],['form_panellist', form_panellist],['form_radio', form_radio],['form_section', form_section],['form_select', form_select],['form_span', form_span],['form_tab', form_tab],['form_table', form_table],['form_tableheader', form_tableheader],['form_tablerow', form_tablerow],['form_tablist', form_tablist],['form_tabset', form_tabset],['form_text', form_text],['form_textarea', form_textarea],['lock', lock],['login_dashboard', login_dashboard],['loginpanelform', loginpanelform],['xapp_accordion', xapp_accordion],['xapp_button_general_archive_hide', xapp_button_general_archive_hide],['xapp_button_general_archive_show', xapp_button_general_archive_show],['xapp_button_general_form_down', xapp_button_general_form_down],['xapp_button_general_form_gap', xapp_button_general_form_gap],['xapp_button_general_form_group', xapp_button_general_form_group],['xapp_button_general_form_up', xapp_button_general_form_up],['xapp_button_general_row_hide', xapp_button_general_row_hide],['xapp_button_general_row_show', xapp_button_general_row_show],['xapp_button_general_use_task_date', xapp_button_general_use_task_date],['xapp_button_general_use_task_datetime', xapp_button_general_use_task_datetime],['xapp_button_navigate_desktop', xapp_button_navigate_desktop],['xapp_button_navigate_lobby', xapp_button_navigate_lobby],['xapp_button_navigate_login', xapp_button_navigate_login],['xapp_button_navigate_mall', xapp_button_navigate_mall],['xapp_button_navigate_newcolumn', xapp_button_navigate_newcolumn],['xapp_button_navigate_newrow', xapp_button_navigate_newrow],['xapp_button_navigate_office', xapp_button_navigate_office],['xapp_button_navigate_rowz', xapp_button_navigate_rowz],['xapp_button_navigate_settings', xapp_button_navigate_settings],['xapp_button_queryterm', xapp_button_queryterm],['xapp_column', xapp_column],['xapp_console', xapp_console],['xapp_console_search', xapp_console_search],['xapp_context_holder', xapp_context_holder],['xapp_data_childmenu', xapp_data_childmenu],['xapp_data_view', xapp_data_view],['xapp_dynamic_content', xapp_dynamic_content],['xapp_form_container_search', xapp_form_container_search],['xapp_menu_panel', xapp_menu_panel],['xapp_menuform', xapp_menuform],['xapp_propertysheet', xapp_propertysheet],['xapp_propertysheet_input', xapp_propertysheet_input],['xapp_queryterm_interface', xapp_queryterm_interface],['xapp_report_interface_fieldcriteria', xapp_report_interface_fieldcriteria],['xapp_report_interface_fieldlist', xapp_report_interface_fieldlist],['xapp_row', xapp_row],['xapp_theme', xapp_theme],['xapp_widgetboard', xapp_widgetboard]]);
+const obj_ComponentMap = new Map([['component', component],['xapp_ajax', xapp_ajax],['xapp_component', xapp_component],['xapp_row', xapp_row],['xapp_data', xapp_data],['xapp_dataform', xapp_dataform],['xapp_dataform_view', xapp_dataform_view],['form_fieldset', form_fieldset],['form_input', form_input],['tablecell', tablecell],['tableheader', tableheader],['tablerow', tablerow],['table', table],['form_button', form_button],['form_button_rich', form_button_rich],['xapp_menu_operation', xapp_menu_operation],['xapp_menu', xapp_menu],['form_menu_panel', form_menu_panel],['xapp_base', xapp_base],['xapp_console_container', xapp_console_container],['xapp_dashboard', xapp_dashboard],['form_inputandbutton', form_inputandbutton],['xapp_button', xapp_button],['xapp_column', xapp_column],['xapp_columnform', xapp_columnform],['xapp_console_button', xapp_console_button],['form_tablecell', form_tablecell],['form_inputandbutton_submit', form_inputandbutton_submit],['xapp', xapp],['app', app],['authorise_gate', authorise_gate],['block', block],['block_structure', block_structure],['form_anchor', form_anchor],['form_button_anchor', form_button_anchor],['form_button_icon', form_button_icon],['form_button_search', form_button_search],['form_button_showhide', form_button_showhide],['form_button_span', form_button_span],['form_checkbox', form_checkbox],['form_field', form_field],['form_form', form_form],['form_hardrule', form_hardrule],['form_icon', form_icon],['form_iframe', form_iframe],['form_inputandbutton_input', form_inputandbutton_input],['form_label', form_label],['form_legend', form_legend],['form_nonbreakingspace', form_nonbreakingspace],['form_panel', form_panel],['form_panellist', form_panellist],['form_radio', form_radio],['form_section', form_section],['form_select', form_select],['form_span', form_span],['form_tab', form_tab],['form_table', form_table],['form_tableheader', form_tableheader],['form_tablerow', form_tablerow],['form_tablist', form_tablist],['form_tabset', form_tabset],['form_text', form_text],['form_textarea', form_textarea],['report_column', report_column],['xapp_accordion', xapp_accordion],['xapp_button_archive_record', xapp_button_archive_record],['xapp_button_backup', xapp_button_backup],['xapp_button_complete_record', xapp_button_complete_record],['xapp_button_data_nav_back', xapp_button_data_nav_back],['xapp_button_data_nav_forward', xapp_button_data_nav_forward],['xapp_button_data_nav_toggle', xapp_button_data_nav_toggle],['xapp_button_file_import', xapp_button_file_import],['xapp_button_file_select', xapp_button_file_select],['xapp_button_filteroff_record', xapp_button_filteroff_record],['xapp_button_filteron_record', xapp_button_filteron_record],['xapp_button_general_archive_hide', xapp_button_general_archive_hide],['xapp_button_general_archive_show', xapp_button_general_archive_show],['xapp_button_general_form_down', xapp_button_general_form_down],['xapp_button_general_form_gap', xapp_button_general_form_gap],['xapp_button_general_form_group', xapp_button_general_form_group],['xapp_button_general_form_up', xapp_button_general_form_up],['xapp_button_general_row_hide', xapp_button_general_row_hide],['xapp_button_general_row_show', xapp_button_general_row_show],['xapp_button_general_use_task_date', xapp_button_general_use_task_date],['xapp_button_general_use_task_datetime', xapp_button_general_use_task_datetime],['xapp_button_linkoff_record', xapp_button_linkoff_record],['xapp_button_linkon_record', xapp_button_linkon_record],['xapp_button_maintain', xapp_button_maintain],['xapp_button_maintain_debug_release', xapp_button_maintain_debug_release],['xapp_button_navigate_desktop', xapp_button_navigate_desktop],['xapp_button_navigate_lobby', xapp_button_navigate_lobby],['xapp_button_navigate_login', xapp_button_navigate_login],['xapp_button_navigate_mall', xapp_button_navigate_mall],['xapp_button_navigate_newcolumn', xapp_button_navigate_newcolumn],['xapp_button_navigate_newrow', xapp_button_navigate_newrow],['xapp_button_navigate_office', xapp_button_navigate_office],['xapp_button_navigate_record', xapp_button_navigate_record],['xapp_button_navigate_rowz', xapp_button_navigate_rowz],['xapp_button_navigate_settings', xapp_button_navigate_settings],['xapp_button_new_record', xapp_button_new_record],['xapp_button_next_record', xapp_button_next_record],['xapp_button_provision', xapp_button_provision],['xapp_button_provision_b2b', xapp_button_provision_b2b],['xapp_button_provision_b2c', xapp_button_provision_b2c],['xapp_button_provision_linked_contact_hide', xapp_button_provision_linked_contact_hide],['xapp_button_provision_linked_contact_show', xapp_button_provision_linked_contact_show],['xapp_button_provision_linked_opportunity_hide', xapp_button_provision_linked_opportunity_hide],['xapp_button_provision_linked_opportunity_show', xapp_button_provision_linked_opportunity_show],['xapp_button_provision_linked_task_hide', xapp_button_provision_linked_task_hide],['xapp_button_provision_linked_task_show', xapp_button_provision_linked_task_show],['xapp_button_push_reset', xapp_button_push_reset],['xapp_button_push_schedule', xapp_button_push_schedule],['xapp_button_queryterm', xapp_button_queryterm],['xapp_columnform_metajointype', xapp_columnform_metajointype],['xapp_console', xapp_console],['xapp_console_search', xapp_console_search],['xapp_context_holder', xapp_context_holder],['xapp_dashboard_push', xapp_dashboard_push],['xapp_dashboard_push_row', xapp_dashboard_push_row],['xapp_dashboard_setting', xapp_dashboard_setting],['xapp_dashboard_view', xapp_dashboard_view],['xapp_data_childmenu', xapp_data_childmenu],['xapp_data_view', xapp_data_view],['xapp_dataform_childmenu', xapp_dataform_childmenu],['xapp_dynamic_content', xapp_dynamic_content],['xapp_form_container_search', xapp_form_container_search],['xapp_form_select', xapp_form_select],['xapp_input_file_select', xapp_input_file_select],['xapp_menu_panel', xapp_menu_panel],['xapp_menuform', xapp_menuform],['xapp_propertysheet', xapp_propertysheet],['xapp_propertysheet_input', xapp_propertysheet_input],['xapp_queryterm_interface', xapp_queryterm_interface],['xapp_report_interface_fieldcriteria', xapp_report_interface_fieldcriteria],['xapp_report_interface_fieldlist', xapp_report_interface_fieldlist],['xapp_report_view', xapp_report_view],['xapp_rowform', xapp_rowform],['xapp_theme', xapp_theme],['xapp_widgetboard', xapp_widgetboard]]);
 //END AUTO GENERATED MAP
 
 
@@ -18308,7 +20742,7 @@ const obj_ComponentMap = new Map([['component', component],['xapp_ajax', xapp_aj
 /*type: TemplateCode//*/
 
 //START Project.js
-class Project extends lock{
+class Project extends app{
     constructor(obj_ini) {
         super(obj_ini); // call the super class constructor
         
@@ -18323,262 +20757,771 @@ class Project extends lock{
         //alert(obj_projectTarget)        
     }    
 
-    fn_calculateFontSize(obj_themeOption){
+//START THEME HAMDLER  
+fn_calculateFontSizeIncrement(obj_theme, int_fontSize, int_increment=0){
+  obj_theme.int_fontSize1=int_fontSize;
+  obj_theme.int_fontSize2=obj_theme.int_fontSize1+int_increment;
+  obj_theme.int_fontSize3=obj_theme.int_fontSize2+int_increment;
+  obj_theme.int_fontSize4=obj_theme.int_fontSize3+int_increment;
+  obj_theme.int_fontSize5=obj_theme.int_fontSize4+int_increment;      
+}
 
-        let int_fontSize;
-          switch(obj_themeOption.str_fontSize){
-              case "small":
-                  if(this.bln_isMobile){this.fn_calculateFontSize("medium");} 
-                  int_fontSize=8;
-                  break;
-              case "medium":
-                  int_fontSize=10;
-                  break;
-              case "large":
-                if(this.bln_isMobile){this.fn_calculateFontSize("medium");} 
-                  int_fontSize=13;
-                  break;
-              default:
-                  int_fontSize=10;
-          }
-          
-          
-        
-        obj_themeOption.int_size1=int_fontSize;
-        obj_themeOption.int_size2=obj_themeOption.int_size1+1;
-        obj_themeOption.int_size3=obj_themeOption.int_size2+1;
-        obj_themeOption.int_size4=obj_themeOption.int_size3+1;
-        obj_themeOption.int_size5=obj_themeOption.int_size4+1;      
+fn_calculateFontSize(obj_theme){ 
   
-        obj_themeOption.int_size1/=10;
-        obj_themeOption.int_size2/=10;
-        obj_themeOption.int_size3/=10;
-        obj_themeOption.int_size4/=10;
-        obj_themeOption.int_size5/=10;              
-      }
-  
-      fn_applyThemeStructure(){        
-          
-          //some code requires themeobjects empty or not
-          let obj_theme=obj_project.obj_theme;          
-          if(!obj_theme){return;}
 
-          let obj_themeOption=new Object;
+  switch(obj_theme.str_fontSize){        
+      case "small":
+        //if(this.bln_isMobile){this.fn_calculateFontSize("medium");return;}               
+          this.fn_calculateFontSizeIncrement(obj_theme, 10, 0);                            
+          obj_theme.int_fontSize4=obj_theme.int_fontSize3+1;
+          obj_theme.int_fontSize5=obj_theme.int_fontSize4+2;      
+          break;
+      case "medium":                            
+          this.fn_calculateFontSizeIncrement(obj_theme, 10, 1);                            
+          break;          
+      case "large":
+        //if(this.bln_isMobile){this.fn_calculateFontSize("medium");return;}               
+          this.fn_calculateFontSizeIncrement(obj_theme, 13, 1);                            
+          break;                      
+      default:
+        this.fn_calculateFontSize("medium");
+        return;
+  }
+
   
-          let obj_themeItem;        
+  obj_theme.int_fontSize1=obj_theme.int_fontSize1/10;
+  obj_theme.int_fontSize2=obj_theme.int_fontSize2/10;
+  obj_theme.int_fontSize3=obj_theme.int_fontSize3/10;
+  obj_theme.int_fontSize4=obj_theme.int_fontSize4/10;
+  obj_theme.int_fontSize5=obj_theme.int_fontSize5/10;
+}
+
+fn_setBorderDisplay(obj_theme){  
+let bln_value=obj_theme.bln_borderDisplay;
+obj_theme.bln_borderRowz=bln_value;
+obj_theme.bln_borderButton=bln_value;
+obj_theme.bln_borderFieldset=bln_value;
+obj_theme.bln_borderLegend=bln_value;    
+obj_theme.bln_borderLabel=bln_value;      
+obj_theme.bln_borderInput=bln_value;                
+obj_theme.bln_borderSearch=bln_value;                    
+}
+fn_setBorderRadiusDisplay(obj_theme){  
+let bln_value=obj_theme.bln_borderRadiusDisplay;
+obj_theme.bln_borderRadiusRowz=bln_value;
+obj_theme.bln_borderRadiusButton=bln_value;
+obj_theme.bln_borderRadiusFieldset=bln_value;
+obj_theme.bln_borderRadiusLegend=bln_value;    
+obj_theme.bln_borderRadiusLabel=bln_value;      
+obj_theme.bln_borderRadiusInput=bln_value;        
+obj_theme.bln_borderRadiusSearch=bln_value;        
+}
+
+fn_getTestThemeName(){
+
+  return obj_shared.fn_getRandomValueFromObject(this.obj_color);  
+
+}
+
+
+
+fn_setFillArea(obj_theme, obj_fill){
+
+  let str_fillBase, str_fillForm, str_fillBorder;
+  const str_fill=obj_theme.str_fill;
   
-          this.obj_themeBackground=this.fn_getThemeObject("form_blockbackground");
-          this.obj_themeMidground=this.fn_getThemeObject("form_blockmidground");
-          this.obj_themeForground=this.fn_getThemeObject("form_blockforground");
-          this.obj_themeHighlight=this.fn_getThemeObject("form_blockhighlight");          
+  const str_fill_1=obj_fill.str_fill_1;
+  const str_fill_2=obj_fill.str_fill_2;
+
+  const obj_gradient=obj_theme.obj_gradient;
+  
+  str_fillBase=str_fill;
+  str_fillForm=str_fill_1;
+  str_fillBorder=str_fill_2;    
   
   
-          obj_theme.str_backGround=this.obj_themeBackground.fn_getStyleProperty("background");
-          obj_theme.str_midGround=this.obj_themeMidground.fn_getStyleProperty("background");
-          obj_theme.str_forGround=this.obj_themeForground.fn_getStyleProperty("background");
-          obj_theme.str_highLight=this.obj_themeHighlight.fn_getStyleProperty("background");        
-          obj_theme.str_color="slate gray";//change according to light or dark analysis
+  if(obj_gradient.bln_face){    
+    str_fillForm=str_fill;
+    str_fillBase=str_fill_1;
+    str_fillBorder=str_fill_2;
+  }
   
-          obj_themeOption.bln_applyBorder=false;//user session
-          obj_themeOption.str_borderStyle="solid";//user session                        
-          obj_themeOption.str_borderSize="small";
-          obj_themeOption.str_deviderSize="small";
-          obj_themeOption.str_fontSize="medium";
-          
-          this.fn_calculateFontSize(obj_themeOption);        
-          //console.log(obj_themeOption);          
-          
-          this.obj_themeProject={
-              //*//STRUCTURE                
-              display:"flex",                                    
-              fontSize:"1.0rem",
-              display:"flex",                                    
-              padding:"1.0em",                                    
-              gap:"1.0em",                                    
-              fontWeight:"normal",                                    
-              cusor:"pointer",                                                
-              justifyContent:"center",
-              alignItems:"center",                      
-              //STRUCTURE                              
-              //*/
-          
-              //*//OPTION
-              borderColor:"orange",                    
-              color:"yellow",            
-              backgroundColor:"rgb(65,65,65)",
   
-              borderWidth:"0em",
-              borderRadius:"0em",            
-              borderStyle:"solid",           
-              marginBottom:"0em",            
-              //OPTION
-              //*/
-          }                               
+  obj_fill.str_fill=str_fill;
+  obj_fill.str_fillBase=str_fillBase;
+  obj_fill.str_fillForm=str_fillForm;
+  obj_fill.str_fillBorder=str_fillBorder;  
+}
+
+fn_filterGradientLight(obj_theme){        
   
-          /////////////////////////////////////////
-          /////////////////////////////////////////
-          obj_themeItem=obj_shared.fn_shallowCopy(obj_project.obj_themeProject);                
-          //*//STRUCTURE           
-          obj_themeItem.fontSize=obj_themeOption.int_size5+"rem";                
-          obj_themeItem.fontWeight="bold";                        
-          obj_themeItem.padding="1.0em";                                
-          obj_themeItem.width="100%";        
-          obj_themeItem.cursor="pointer";                               
-          //STRUCTURE   
-          //*/
+  let int_value=obj_theme.obj_gradient.int_light;  
+  let bln_value=obj_shared.fn_filterValue(int_value, obj_theme.int_min,obj_theme.int_max);         
+  if(!bln_value){
+    console.log("failed int_value: " + int_value);
+    console.log("failed obj_theme.int_min: " + obj_theme.int_min);
+    console.log("failed obj_theme.int_max: " + obj_theme.int_max);
+  }
+  return bln_value;
+} 
+
+
+
+fn_setFillPalette(obj_theme, obj_fill){  
   
-          //*//OPTION                
-          obj_themeItem.borderColor=obj_theme.str_forGround;
-          obj_themeItem.color=obj_theme.str_forGround;
-          obj_themeItem.backgroundColor=obj_theme.str_midGround;        
+  let obj_shade, obj_contrast;
+
+  const obj_gradient=obj_theme.obj_gradient;
+
+  obj_shade=new Object;    
+  obj_shade.str_fill=obj_theme.str_fill;  
+  obj_shade.bln_value=obj_gradient.bln_lighten;  
+
+  let int_percentLight, int_percentContrast;
+  int_percentLight=10;
+  int_percentContrast=5;  
+  if(obj_gradient.bln_contrast){
+    int_percentLight=15;
+    int_percentContrast=10;  
+  }  
+  let int_totalLight=(int_percentLight+(int_percentLight+int_percentContrast));
+  obj_theme.int_percentLight=int_percentLight;
+  obj_theme.int_percentContrast=int_percentContrast;
+  obj_theme.int_totalLight=int_totalLight;
+
+  obj_theme.int_min=0;
+  obj_theme.int_max=100;
+  if(obj_gradient.bln_lighten){//due to getting lighter    
+    obj_theme.int_min=0;
+    obj_theme.int_max=(100-int_totalLight);//due to getting darker
+  }
+  else{    
+    obj_theme.int_min=0+int_totalLight;
+    obj_theme.int_max=100;//due to getting darker
+  }
+  obj_theme.bln_filterPass=this.fn_filterGradientLight(obj_theme);        
+  if(!obj_theme.bln_filterPass){
+    return;
+  }
+
+  obj_contrast={    
+    int_percentHue:0,
+    int_percentSaturation:0,
+    int_percentLight:int_percentLight,
+  }
+  obj_shared.fn_assignProperty(obj_shade, obj_contrast);  
+
+
+  obj_fill.str_fill_1=obj_shared.fn_getShade(obj_shade);              
+  //console.log(obj_fill.str_fill_1);
+
+
+  obj_contrast.int_percentLight=(int_percentLight+int_percentContrast);//10 percent more than fill 1    
+  obj_shade.str_fill=obj_theme.str_fill;//use fill1 as starting point
+  obj_shared.fn_assignProperty(obj_shade, obj_contrast);    
+  obj_fill.str_fill_2=obj_shared.fn_getShade(obj_shade);              
+  obj_fill.obj_shade=obj_shade;
+
+  obj_theme.bln_filterPass=true;  
+}
+
+fn_addColorItem(obj_current){  
+
+  this.arr_color.push(obj_current);    
   
-          obj_themeItem.bln_applyBorder=false;                
-          obj_themeItem.bln_applyDevider=true;
-          obj_project.fn_applyThemeOption(obj_themeItem);        
-          //OPTION
-          //*/                
-          obj_project.obj_themeMenuButton=obj_themeItem;        
-          //MENUBUTTON
-          /////////////////////////////////////////
-          /////////////////////////////////////////
+  let int_hue, int_saturation, int_light;
+  let obj_hsl, str_label;  
+  int_hue=obj_current.int_hue;
+  int_saturation=obj_current.int_saturation;
+
+  int_hue=obj_current.int_hue;
+  int_saturation=obj_current.int_saturation;
+  int_light=60;  
+  str_label=obj_current.str_label + "-light"
+  obj_hsl=obj_shared.fn_getGradientObject(int_hue, int_saturation, int_light, "", str_label);    
+  this.arr_color.push(obj_hsl);
+
+  int_hue=obj_current.int_hue;
+  int_saturation=obj_current.int_saturation;
+  int_light=30;  
+  str_label=obj_current.str_label + "-dark"
+  obj_hsl=obj_shared.fn_getGradientObject(int_hue, int_saturation, int_light, "", str_label);    
+  this.arr_color.push(obj_hsl);
   
-          /////////////////////////////////////////
-          /////////////////////////////////////////
-          //CHILDMENU        
-          obj_themeItem=obj_shared.fn_shallowCopy(obj_project.obj_themeMenuButton);                
-          //*//STRUCTURE           
-          obj_themeItem.fontSize=obj_themeOption.int_size4+"rem";                
-          obj_themeItem.padding="1.0em";                 
-          //STRUCTURE   
-          //*/
+  if(obj_current.int_hue>=10){
+    int_hue=obj_current.int_hue-10;
+    int_saturation=obj_current.int_saturation;
+    int_light=30;      
+    str_label=obj_current.str_label + "-alt"
+    obj_hsl=obj_shared.fn_getGradientObject(int_hue, int_saturation, int_light, "", str_label);    
+    this.arr_color.push(obj_hsl);  
+  }
   
-          //*//OPTION                
-          obj_themeItem.bln_applyBorder=false;
-          obj_themeItem.bln_applyDevider=true;
-          obj_project.fn_applyThemeOption(obj_themeItem);
-          //OPTION
-          //*/                
-          obj_project.obj_themeChildMenu=obj_themeItem;        
-          //CHILDMENU             
-          /////////////////////////////////////////
-          /////////////////////////////////////////
-          
-          /////////////////////////////////////////
-          /////////////////////////////////////////
-          //DYNAMICMENU
-          //obj_themeItem=obj_shared.fn_shallowCopy(this.obj_themeChildMenu);                
-          //obj_themeItem.fontSize=obj_themeOption.int_size3+"rem";                
-          //*//STRUCTURE                   
-          //STRUCTURE   
-          //*/
   
-          //*//OPTION        
-          //this.fn_applyThemeOption(obj_themeItem);        
-          //OPTION
-          //*/                
-          //this.obj_themeDynamicMenu=obj_themeItem;        
-          //DYNAMICMENU
-          /////////////////////////////////////////
-          /////////////////////////////////////////
   
-          /////////////////////////////////////////
-          /////////////////////////////////////////
-          //FORMBUTTON        
-          obj_themeItem=obj_shared.fn_shallowCopy(obj_project.obj_themeProject);                
-          //*//STRUCTURE           
-          obj_themeItem.fontSize=obj_themeOption.int_size2+"rem";                
-          obj_themeItem.fontWeight="bold";  
-          obj_themeItem.cursor="pointer";                              
-          //STRUCTURE   
-          //*/
+}
+
+fn_getColorMap(obj_theme){  
+
+  let obj_hsl;
+  let int_value;
+
+  let int_hue, int_saturation, int_light
+  int_saturation=100;
+  int_light=50;
+
+  this.arr_color = [];  
+  let arr_item = [];  
+  let arr_mod;    
   
-          //*//OPTION
-          obj_themeItem.borderColor=obj_theme.str_midGround;
-          obj_themeItem.color=obj_theme.str_midGround;        
-          obj_themeItem.backgroundColor=obj_theme.str_forGround;        
+  obj_hsl=obj_shared.fn_getGradientObject(0, 100, 50, "", "red");//red
+  this.fn_addColorItem(obj_hsl);
+  obj_hsl=obj_shared.fn_getGradientObject(30, 100, 50, "", "Orange");
+  this.fn_addColorItem(obj_hsl);
+  //obj_hsl=obj_shared.fn_getGradientObject(60, 100, 50, "", "Yellow");
+  //this.fn_addColorItem(obj_hsl);
+  //obj_hsl=obj_shared.fn_getGradientObject(120, 100, 50, "", "Green");
+  //this.fn_addColorItem(obj_hsl);
+  //obj_hsl=obj_shared.fn_getGradientObject(180, 100, 50, "", "Cyan");
+  //this.fn_addColorItem(obj_hsl);
+  obj_hsl=obj_shared.fn_getGradientObject(240, 100, 50, "", "Blue");
+  this.fn_addColorItem(obj_hsl);
+  obj_hsl=obj_shared.fn_getGradientObject(270, 100, 50, "", "Purple");
+  this.fn_addColorItem(obj_hsl);
+  obj_hsl=obj_shared.fn_getGradientObject(300, 100, 50, "", "Magenta");
+  this.fn_addColorItem(obj_hsl);
   
-          obj_themeItem.bln_applyBorder=this.bln_applyBorder;//user session                                
-          obj_project.fn_applyThemeOption(obj_themeItem);
-          //OPTION
-          //*/                
-          obj_project.obj_themeFormButton=obj_themeItem;        
-          //FORMBUTTON
-          /////////////////////////////////////////
-          /////////////////////////////////////////
+  arr_item=this.arr_color;
+  obj_hsl=obj_shared.fn_getGradientObject(0, 0, 100, "", "White");
+  arr_item.push(obj_hsl);  
+  obj_hsl=obj_shared.fn_getGradientObject(0, 0, 0, "", "Black");
+  arr_item.push(obj_hsl);  
+  obj_hsl=obj_shared.fn_getGradientObject(0, 0, 50, "", "Gray");
+  arr_item.push(obj_hsl); 
+  obj_hsl=obj_shared.fn_getGradientObject(0, 0, 60, "", "Gray-light");
+  arr_item.push(obj_hsl);   
+  obj_hsl=obj_shared.fn_getGradientObject(0, 0, 30, "", "Gray-dak");
+  arr_item.push(obj_hsl);     
   
-          /////////////////////////////////////////
-          /////////////////////////////////////////
-          //FORMINPUT        
-          obj_themeItem=obj_shared.fn_shallowCopy(obj_project.obj_themeProject);                
-          //*//STRUCTURE                             
-          obj_themeItem.fontSize=obj_themeOption.int_size1+"rem";                
-          obj_themeItem.padding="1.0em";                        
-          obj_themeItem.fontWeight="normal";                        
-          obj_themeItem.maxHeight="500px";                                          
-          obj_themeItem.overflow="Auto";                                          
-          obj_themeItem.wordBreak="normal";                                          
-          //STRUCTURE   
-          //*/
-          
-          //*//OPTION
-          obj_themeItem.borderColor=obj_theme.str_backGround;
-          obj_themeItem.color=obj_theme.str_color;
-          obj_themeItem.backgroundColor=obj_theme.str_forGround;                          
-          
-          obj_themeItem.bln_applyBorder=this.bln_applyBorder;//user session                                
-          obj_project.fn_applyThemeOption(obj_themeItem);
-          //OPTION
+  console.log(this.arr_color);
+
+  let int_max=this.arr_color.length-1;
+  int_value=obj_shared.fn_getRandomInt(0, int_max); // Generates a random integer between 1 and 8    
+  obj_hsl=this.arr_color[int_value];
   
-          //*/                
-          obj_project.obj_themeFormInput=obj_themeItem;        
-          //FORMINPUT
-          /////////////////////////////////////////
-          /////////////////////////////////////////
-      }
   
-      fn_applyThemeOption(obj_themeItem){
-        
-        //BORDER      
-        let int_borderSize=0.0;                        
-        if(obj_themeItem.bln_applyBorder){
-          switch(this.str_borderSize){                    
-            case "small":
-              int_borderSize=1.0;                    
-              break;
-            case "medium":
-              int_borderSize=1.0;                    
-              break;
-            case "large":
-              int_borderSize=1.5;                    
-              break;
-            default:
-              int_borderSize=0.5;                    
-          }        
-        }
-        const int_borderRadius=(2*int_borderSize);
-        obj_themeItem.borderWidth=int_borderSize + "em";              
-        obj_themeItem.borderRadius=int_borderRadius + "em";                          
-        //BORDER
-        
-        //DEVIDER
-        let int_deviderSize=0.0;                        
-        if(obj_themeItem.bln_applyDevider){        
+  //obj_hsl=obj_shared.fn_getGradientObject(230, 100, 30, "", "blue-mod");  
+  //obj_hsl=obj_shared.fn_getGradientObject(300, 100, 50, "", "magenta");    
+  //obj_hsl=obj_shared.fn_getGradientObject(0, 100, 50, "", "Red");  
+  //obj_hsl=obj_shared.fn_getGradientObject(230, 100, 30, "", "Blue-Alt-Test");    
+  //obj_hsl=obj_shared.fn_getGradientObject(300, 100, 60, "", "magenta-lighter-test");  
+  //obj_hsl=obj_shared.fn_getGradientObject(300, 100, 30, "", "magenta-darker-test");  
+  //obj_hsl=obj_shared.fn_getGradientObject(0, 0, 30, "", "dark-gray-test");  
+  //obj_hsl=obj_shared.fn_getGradientObject(0, 0, 60, "", "light-gray-test");  
+  //obj_hsl=obj_shared.fn_getGradientObject(0, 0, 100, "", "White");  
   
-          switch(this.str_deviderSize){                  
-            case "medium":
-              int_deviderSize=0.5;                        
-              break;
-            case "large":
-              int_deviderSize=1;                        
-              break;
-            default:
-              int_deviderSize=0.1;                        
-          }        
-        }
-        obj_themeItem.marginBottom=int_deviderSize + "em";              
-        //DEVIDER
-      }
-    
+  obj_theme.str_fill=obj_hsl.str_hsl;  
+  obj_theme.obj_gradient=obj_hsl;
+}
+
+  
+
+
+fn_setUserTheme(obj_theme){    
+
+//https://convertingcolors.com/hex-color-A52A2A.html?search=brown
+//https://coolors.co/palettes/trending
+//https://imagecolorpicker.com/
+//coolors affiliate link https://coolors.co/?ref=6754517d5fa59e000b79f378   
+
+//Load Border and Radius Option
+obj_theme.bln_borderDisplay=false;
+obj_theme.bln_borderRadiusDisplay=false;      
+this.fn_setBorderDisplay(obj_theme);      
+this.fn_setBorderRadiusDisplay(obj_theme);
+obj_theme.bln_borderRowz=false;  
+obj_theme.bln_borderRadiusRowz=false;  
+obj_theme.bln_borderButton=true;
+obj_theme.bln_borderRadiusButton=true;
+obj_theme.bln_borderSearch=true;  
+obj_theme.bln_borderRadiusSearch=true;  
+obj_theme.bln_borderFieldset=true;
+obj_theme.bln_borderRadiusFieldset=true;
+obj_theme.bln_borderLegend=true;
+obj_theme.bln_borderRadiusLegend=true;
+obj_theme.bln_borderLabel=true;
+obj_theme.bln_borderRadiusLabel=true;
+obj_theme.bln_borderInput=true;
+obj_theme.bln_borderRadiusInput=true;
+//Load Border and Radius Option
+
+this.fn_getColorMap(obj_theme);//generate array of hsl colors    
+
+const obj_gradient=obj_theme.obj_gradient;
+if(obj_theme.obj_gradient.int_light>=60){
+  obj_gradient.bln_lighten = false;//true by default
+}
+obj_gradient.bln_contrast=true;
+obj_gradient.bln_face=obj_shared.fn_getRandomInt(0, 1);
+
+
+if(obj_gradient.int_light>80){
+  //let obj_hslText=obj_shared.fn_getGradientObject(183, 100, 75, "", "Textcolor");
+  let obj_hslText=obj_shared.fn_getGradientObject(0, 33, 36, "", "Dark Red Brown");
+  obj_theme.str_textColorUI=obj_hslText.str_hsl;        
+}
+
+
+obj_theme.bln_flipBorder=false;
+obj_theme.bln_flipForm=false;
+
+let obj_fill=new Object;
+this.fn_setFillPalette(obj_theme, obj_fill);//we can choose to lighten, or darken based on wether the main color is light or dark
+this.fn_setFillArea(obj_theme, obj_fill);//we can choose which areas are lighter or darker
+obj_theme.str_fillBase=obj_fill.str_fillBase;
+obj_theme.str_fillForm=obj_fill.str_fillForm;       
+obj_theme.str_fillBorder=obj_fill.str_fillBorder;  
+
+if(!obj_theme.bln_filterPass){
+  //obj_theme.str_name=this.fn_getTestThemeName();  
+  //obj_theme.str_name="yellow";
+  //return this.fn_setUserTheme(obj_theme);  
+  console.log("obj_theme.bln_filterPassxxxxx: " + obj_theme.bln_filterPass);
+  obj_theme.str_fillBase="hsl(180, 100%, 50%)";
+  obj_theme.str_fillForm="hsl(180, 100%, 65%)";
+  obj_theme.str_fillBorder="hsl(180, 100%, 85%)";
+  
+}
+
+
+
+
+
+
+//*
+//console.log("obj_theme.str_name: " + obj_theme.str_name);
+console.log("str_label: " + obj_theme.obj_gradient.str_label);
+console.log("obj_theme.str_fill:" + obj_theme.str_fill);
+console.log("obj_theme.bln_filterPass: " + obj_theme.bln_filterPass);
+console.log("obj_gradient.int_hue: " + obj_theme.obj_gradient.int_hue);
+console.log("obj_gradient.int_saturation: " + obj_theme.obj_gradient.int_saturation);
+console.log("obj_gradient.int_light: " + obj_theme.obj_gradient.int_light);
+
+
+console.log("obj_theme.int_min: " + obj_theme.int_min);
+console.log("obj_theme.int_max: " + obj_theme.int_max);
+console.log("obj_theme.int_totalLight: " + obj_theme.int_totalLight);    
+
+
+console.log("obj_gradient.bln_face: " + obj_gradient.bln_face);
+console.log("obj_gradient.bln_lighten: " + obj_gradient.bln_lighten);
+console.log("obj_gradient.bln_contrast: " + obj_gradient.bln_contrast);
+console.log("obj_theme.int_percentLight: " + obj_theme.int_percentLight);
+console.log("obj_theme.int_percentContrast: " + obj_theme.int_percentContrast);
+
+console.log("str_fill:" + obj_theme.str_fill);
+if(obj_gradient.bln_face){    
+  console.log("str_fillForm:" + obj_theme.str_fillForm);  
+  console.log("str_fillBase:" + obj_theme.str_fillBase);
+  console.log("str_fillBorder:" + obj_theme.str_fillBorder);
+}
+else{
+  console.log("str_fillBase:" + obj_theme.str_fillBase);
+  console.log("str_fillForm:" + obj_theme.str_fillForm);    
+  console.log("str_fillBorder:" + obj_theme.str_fillBorder);
+}
+//*/
+}
+
+fn_applyThemeStructure(){        
+  
+
+  //some code requires themeobjects empty or not
+  //const obj_theme=this.obj_theme;          
+  //if(!obj_theme){return;}
+
+  const obj_theme=new Object;          
+  if(!obj_theme){return;}  
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //THEME      
+  //STRUCTURE             
+  obj_theme.display="flex";        
+  obj_theme.padding="1em";        
+  obj_theme.gap="1em";    
+  //STRUCTURE    
+  
+  //OPTION                      
+  obj_theme.str_borderStyle="solid";//user session                        
+  obj_theme.str_borderSize="none";                 
+  obj_theme.str_borderRadiusSize="medium";//set to none for square
+  obj_theme.str_deviderSize="small";      
+  obj_theme.str_fontSize="medium";                            
+  //OPTION                  
+  //THEME
+  /////////////////////////////////////////
+  /////////////////////////////////////////     
+  
+  //default to be adjusted accoridng to light or dark theme                  
+  obj_theme.str_textColorUI="white";                              
+  obj_theme.str_fillInput="white";      
+  obj_theme.str_borderColorInput="gainsboro";            
+  obj_theme.str_textColorInput="black";                  
+  //defaults to be adjusted accoridng to light or dark theme          
+  
+  this.fn_setUserTheme(obj_theme);                                   
+  
+  this.fn_calculateFontSize(obj_theme);                    
+  obj_theme.str_highLightFill="orange"; 
+  
+  //document.body.style.backgroundColor=obj_theme.str_fillBase;        
+
+  let obj_holder=this.obj_holder;
+  let str_fillBorder, str_fillForm, str_fillBase;
+  
+
+  let obj_themeItem;        
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //XAPPACCORDION
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_theme);                
+  //STRUCTURE                             
+  obj_themeItem.padding="0em";
+  obj_themeItem.display="block";
+  //STRUCTURE     
+  //OPTION        
+  obj_themeItem.bln_border=false;         
+  obj_themeItem.backgroundColor=obj_theme.str_fillBase;        
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION            
+  obj_holder.obj_themeXappAccordion=obj_themeItem;                
+  //XAPPACCORDION
+  /////////////////////////////////////////
+  /////////////////////////////////////////        
+  
+  
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //MENUBUTTON
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_theme);                
+  //STRUCTURE                           
+  obj_themeItem.fontWeight="bold";                                
+  obj_themeItem.width="100%";        
+  obj_themeItem.cursor="pointer";                                       
+  obj_themeItem.justifyContent="center";
+  obj_themeItem.alignItems="center";        
+  //STRUCTURE
+  //OPTION       
+  obj_themeItem.str_fontLabel="form_rowz";                    
+  obj_themeItem.bln_border=obj_theme.bln_borderRowz;              
+  obj_themeItem.bln_borderRadius=obj_theme.bln_borderRadiusRowz;                          
+
+  str_fillBorder=obj_theme.str_fillBorder;
+  str_fillForm=obj_theme.str_fillForm;    
+  if(obj_theme.bln_flipBorder){[str_fillBorder, str_fillForm]=obj_shared.fn_flipVariable(str_fillBorder, str_fillForm);}    
+  obj_themeItem.borderColor=str_fillBorder;          
+  obj_themeItem.backgroundColor=str_fillForm;                
+  
+  obj_themeItem.color=obj_theme.str_textColorUI;
+  obj_project.fn_applyThemeOption(obj_themeItem);  
+  //OPTION                    
+  obj_holder.obj_themeRowz=obj_themeItem;        
+  //MENUBUTTON
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //CHILDMENU        
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_holder.obj_themeRowz);                
+  //STRUCTURE                                   
+  //STRUCTURE
+  //OPTION                
+  obj_themeItem.str_fontLabel="form_rowzchild";                        
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION                            
+  obj_holder.obj_themeRowzChild=obj_themeItem;        
+  //CHILDMENU             
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //DYNAMICMENU
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_holder.obj_themeRowzChild);                        
+  //STRUCTURE                                   
+  //STRUCTURE
+  //OPTION                
+  obj_themeItem.str_fontLabel="form_rowzdynamic";                        
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION                    
+  obj_holder.obj_themeRowzDynamic=obj_themeItem;        
+  //DYNAMICMENU
+  /////////////////////////////////////////
+  /////////////////////////////////////////          
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //FORMBUTTON        
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_theme);                
+  //STRUCTURE                           
+  //STRUCTURE           
+  //OPTION                                  
+  obj_themeItem.str_fontLabel="form_button";                                
+  obj_themeItem.bln_border=obj_theme.bln_borderButton;    
+  obj_themeItem.bln_borderRadius=obj_theme.bln_borderRadiusButton;              
+  
+  str_fillBorder=obj_theme.str_fillBorder;
+  str_fillForm=obj_theme.str_fillForm;    
+  if(obj_theme.bln_flipBorder){[str_fillBorder, str_fillForm]=obj_shared.fn_flipVariable(str_fillBorder, str_fillForm);}    
+  obj_themeItem.borderColor=str_fillBorder;          
+  obj_themeItem.backgroundColor=str_fillForm;                
+  obj_themeItem.color=obj_theme.str_textColorUI;        
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION            
+  obj_holder.obj_themeButton=obj_themeItem;        
+  //FORMBUTTON
+  /////////////////////////////////////////
+  ///////////////////////////////////////// 
+  
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //FORMFIELDSET        
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_theme);                
+  //STRUCTURE                             
+  //STRUCTURE   
+  //OPTION                     
+  obj_themeItem.str_fontLabel="form_fieldset";              
+  obj_themeItem.bln_border=obj_theme.bln_borderFieldset;      
+  obj_themeItem.bln_borderRadius=obj_theme.bln_borderRadiusFieldset;        
+  
+  str_fillBorder=obj_theme.str_fillBorder;
+  str_fillForm=obj_theme.str_fillForm;    
+  if(obj_theme.bln_flipBorder){[str_fillBorder, str_fillForm]=obj_shared.fn_flipVariable(str_fillBorder, str_fillForm);}    
+  if(obj_theme.bln_flipForm){[str_fillBorder, str_fillForm]=obj_shared.fn_flipVariable(str_fillBorder, str_fillForm);}      
+  obj_themeItem.borderColor=str_fillBorder;          
+  obj_themeItem.backgroundColor=str_fillForm;                
+obj_themeItem.color=obj_theme.str_textColorUI;
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION
+  obj_holder.obj_themeFormFieldset=obj_themeItem;                
+  //FORMFIELDSET        
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //FORMLEGEND
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_holder.obj_themeFormFieldset);                
+  //STRUCTURE                             
+  //STRUCTURE   
+  //OPTION                          
+  obj_themeItem.str_fontLabel="form_legend";                                
+  obj_themeItem.bln_border=obj_theme.bln_borderLegend;      
+  obj_themeItem.bln_borderRadius=obj_theme.bln_borderRadiusLegend;        
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION
+  obj_holder.obj_themeFormLegend=obj_themeItem;        
+  //FORMLEGEND
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //FORMLABEL
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_holder.obj_themeFormLegend);                
+  //STRUCTURE                             
+  //STRUCTURE   
+  //OPTION                
+  obj_themeItem.str_fontLabel="form_label";                                
+  obj_themeItem.bln_border=obj_theme.bln_borderLabel;      
+  obj_themeItem.bln_borderRadius=obj_theme.bln_borderRadiusLabel;              
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION      
+  obj_holder.obj_themeFormLabel=obj_themeItem;              
+  //FORMLABEL
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //FORMINPUT        
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_holder.obj_themeFormLabel);
+  //STRUCTURE                                           
+  obj_themeItem.fontWeight="normal";                        
+  obj_themeItem.maxHeight="500px";                                          
+  obj_themeItem.overflow="Auto";                                          
+  obj_themeItem.wordBreak="normal";                      
+  //STRUCTURE
+  //OPTION                      
+  obj_themeItem.str_fontLabel="form_input";                                
+  obj_themeItem.bln_border=obj_theme.bln_borderInput;
+  obj_themeItem.bln_borderRadius=obj_theme.bln_borderRadiusInput;        
+  obj_themeItem.borderColor=obj_theme.str_borderColorInput;
+  obj_themeItem.backgroundColor=obj_theme.str_fillInput;                                                                       
+  obj_themeItem.color=obj_theme.str_textColorInput;      
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION            
+  obj_holder.obj_themeFormInput=obj_themeItem;        
+  //FORMINPUT
+  /////////////////////////////////////////
+  /////////////////////////////////////////      
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //FORMINPUT        
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_holder.obj_themeFormInput);
+  //STRUCTURE                                                             
+  obj_themeItem.fontWeight="bold";
+  //STRUCTURE
+  //OPTION                      
+  obj_themeItem.str_fontLabel="rowz_search";                                      
+  obj_themeItem.bln_border=obj_theme.bln_borderSearch;  
+  obj_themeItem.bln_borderRadius=obj_theme.bln_borderRadiusSearch;  
+  obj_themeItem.borderColor=obj_holder.obj_themeButton.borderColor;  
+  obj_themeItem.backgroundColor=obj_theme.str_fillInput;                                                                       
+  
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION            
+  obj_holder.obj_themeRowzSearch=obj_themeItem;              
+  //FORMINPUT
+  /////////////////////////////////////////
+  /////////////////////////////////////////  
+  
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //FORMHARDRULE
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_theme);                
+  //STRUCTURE                             
+  obj_themeItem.padding="0.5em";                  
+  //STRUCTURE           
+  //OPTION                
+  obj_themeItem.str_fontLabel="form_hardrule";                                      
+  obj_themeItem.bln_border=obj_holder.obj_themeRowz.bln_border;  
+  obj_themeItem.bln_borderRadius=obj_holder.obj_themeRowz.bln_borderRadius;  
+  obj_themeItem.borderColor=obj_holder.obj_themeRowz.borderColor;       
+  obj_themeItem.backgroundColor=obj_holder.obj_themeRowz.backgroundColor;
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION        
+  obj_holder.obj_themeFormHardRule=obj_themeItem;        
+  //FORMHARDRULE
+  /////////////////////////////////////////
+  /////////////////////////////////////////        
+  
+}
+
+fn_applyThemeOption(obj_themeItem){
+this.fn_applyThemeFont(obj_themeItem);
+this.fn_applyThemeBorder(obj_themeItem);
+this.fn_applyThemeDevider(obj_themeItem);
+}
+
+fn_applyThemeFont(obj_themeItem){      
+
+//FONTSIZE
+let int_fontSize;  
+switch(obj_themeItem.str_fontLabel){                    
+  case "form_rowz":
+    int_fontSize=obj_themeItem.int_fontSize5;            
+    break;          
+  case "form_rowzchild":
+    int_fontSize=obj_themeItem.int_fontSize4;            
+    break;                                
+  case "form_rowzdynamic":
+    int_fontSize=obj_themeItem.int_fontSize3;
+    break;                  
+  case "form_button":
+    int_fontSize=obj_themeItem.int_fontSize2;
+    break;
+  case "form_input":
+    int_fontSize=obj_themeItem.int_fontSize1;
+    break;
+  case "standard":
+    int_fontSize=obj_themeItem.int_fontSize1;
+    break;
+  default:
+    int_fontSize=obj_themeItem.int_fontSize1;
+}         
+obj_themeItem.fontSize=int_fontSize + "rem";                     
+//FONTSIZE
+}
+
+fn_applyThemeBorder(obj_themeItem){  
+
+//BORDER            
+let str_borderSize="none";      
+if(obj_themeItem.bln_border)      {
+  str_borderSize=obj_themeItem.str_borderSize;        
+  if(str_borderSize==="none"){
+    str_borderSize="medium";
+  }        
+}
+let int_borderSize;                                 
+switch(str_borderSize){                    
+  case "small":
+    int_borderSize=0.3;                    
+    break;
+  case "medium":
+    int_borderSize=0.5;                    
+    break;
+  case "large":
+    int_borderSize=1.0;                    
+    break;
+  default:
+    int_borderSize=0;                    
+}                
+obj_themeItem.borderWidth=int_borderSize + "em";
+//BORDER
+
+//BORDERRADIUS
+let str_borderRadiusSize="none"      
+if(obj_themeItem.bln_borderRadius){
+  str_borderRadiusSize=obj_themeItem.str_borderRadiusSize;
+  if(!int_borderSize){int_borderSize=0.5;}        
+}            
+let int_borderRadiusSize;
+switch(str_borderRadiusSize){                          
+  case "small":
+    int_borderRadiusSize=1;                    
+    break;
+  case "medium":
+    int_borderRadiusSize=1.5;                    
+    break;
+  case "large":
+    int_borderRadiusSize=2;                    
+    break;
+  default:
+    int_borderRadiusSize=0;                    
+}                         
+obj_themeItem.borderRadius=(int_borderRadiusSize*int_borderSize) + "em";                                            
+//BORDERRADIUS       
+}
+
+fn_applyThemeDevider(obj_themeItem){ 
+
+//DEVIDER
+let int_deviderSize;                        
+switch(obj_themeItem.str_deviderSize){                                    
+  case "small":
+    int_deviderSize=0.1;                        
+    break;
+  case "medium":
+    int_deviderSize=0.5;                        
+    break;
+  case "large":
+    int_deviderSize=1;                        
+    break;
+  default:
+    int_deviderSize=0;                        
+}        
+obj_themeItem.marginBottom=int_deviderSize + "em";                  
+//DEVIDER  
+}
+//END THEME HAMDLER
+
 
     fn_setEvent(e, obj_itemEvent){                        
         if(!this.obj_itemEvent){                  
@@ -18712,7 +21655,7 @@ class Project extends lock{
   }//END OF CLS
 
   /*START DESIGN BOOT VARIABLE//*/
-obj_boot.obj_design.int_idRecord=6014; 
+obj_boot.obj_design.int_idRecord=76974; 
 /*END DESIGN BOOT VARIABLE//*/
 //END Project.js
 
@@ -18729,23 +21672,43 @@ obj_boot.obj_design.int_idRecord=6014;
 
 /*START INSTANCE JSON MAP//*/
 var obj_InstanceJSONMap = new Map([
-[6014, {"obj_theme": {"obj_design": {"str_type": "xapp_theme", "int_idRecord": 77570}}, "obj_design": {"str_tag": "lock", "arr_item": [{"obj_design": {"str_type": "xapp_theme", "int_idRecord": 77570}}, {"obj_design": {"str_type": "authorise_end", "int_idRecord": 77532}}, {"obj_design": {"str_type": "xapp_dynamic_content", "int_idRecord": "76967"}}, {"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": "76968"}}], "str_name": "lock", "str_text": "CRUD", "str_type": "lock", "bln_editPin": true, "str_content": "", "int_idRecord": 6014, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_60426365", "str_nameShort": "lock", "str_themeType": "lock", "bln_isLocalHome": true, "str_classExtend": "xapp", "str_createdDate": "2022-09-11 20:12:26", "str_categoryName": "Lock", "str_modifiedDate": "2022-09-11 20:12:26", "str_releaseLabel": "notset", "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "int_radioDisplayMode": 3}, "user_agent": "Firefox", "obj_domStyle": {"visibility": "visible"}, "MetaDataViewId": 101426, "MetaLinkViewId": 100475, "MetaUserViewId": 1, "obj_domProperty": {"Id": "myId_60426365"}, "MetaDataViewName": "meta_data", "MetaLinkViewName": "meta_link", "MetaUserViewName": "meta_user", "obj_themeProject": {"gap": "1.0em", "color": "yellow", "cusor": "pointer", "display": "flex", "padding": "1.0em", "fontSize": "1.0rem", "alignItems": "center", "fontWeight": "normal", "borderColor": "orange", "borderStyle": "solid", "borderWidth": "0em", "borderRadius": "0em", "marginBottom": "0em", "justifyContent": "center", "backgroundColor": "rgb(65,65,65)"}, "bln_closePeersPin": true, "bln_togglePeersPin": true, "obj_themeChildMenu": {"gap": "1.0em", "color": "white", "cusor": "pointer", "width": "100%", "cursor": "pointer", "display": "flex", "padding": "1.0em", "fontSize": "1.3rem", "alignItems": "center", "fontWeight": "bold", "borderColor": "white", "borderStyle": "solid", "borderWidth": "0em", "borderRadius": "0em", "marginBottom": "0.1em", "justifyContent": "center", "backgroundColor": "rgb(64, 169, 236)", "bln_applyDevider": true}, "obj_themeForground": {"obj_design": {"str_type": "form_span", "int_idRecord": "77776"}}, "obj_themeFormInput": {"gap": "1.0em", "color": "slate gray", "cusor": "pointer", "display": "flex", "padding": "1.0em", "fontSize": "1rem", "overflow": "Auto", "maxHeight": "500px", "wordBreak": "normal", "alignItems": "center", "fontWeight": "normal", "borderColor": "rgb(37, 150, 190)", "borderStyle": "solid", "borderWidth": "0em", "borderRadius": "0em", "marginBottom": "0em", "justifyContent": "center", "backgroundColor": "white"}, "obj_themeHighlight": {"obj_design": {"str_type": "form_span", "int_idRecord": "77777"}}, "obj_themeMidground": {"obj_design": {"str_type": "form_span", "int_idRecord": "77775"}}, "obj_themeBackground": {"obj_design": {"str_type": "form_span", "int_idRecord": "77774"}}, "obj_themeFormButton": {"gap": "1.0em", "color": "rgb(64, 169, 236)", "cusor": "pointer", "cursor": "pointer", "display": "flex", "padding": "1.0em", "fontSize": "1.1rem", "alignItems": "center", "fontWeight": "bold", "borderColor": "rgb(64, 169, 236)", "borderStyle": "solid", "borderWidth": "0em", "borderRadius": "0em", "marginBottom": "0em", "justifyContent": "center", "backgroundColor": "white"}, "obj_themeMenuButton": {"gap": "1.0em", "color": "white", "cusor": "pointer", "width": "100%", "cursor": "pointer", "display": "flex", "padding": "1.0em", "fontSize": "1.4rem", "alignItems": "center", "fontWeight": "bold", "borderColor": "white", "borderStyle": "solid", "borderWidth": "0em", "borderRadius": "0em", "marginBottom": "0.1em", "justifyContent": "center", "backgroundColor": "rgb(64, 169, 236)", "bln_applyDevider": true}, "dom_objContentContainer": {"Id": "myId_60426365"}}],
+[6009, {"obj_design": {"str_tag": "authorise_gate", "str_name": "authorise_gate", "str_text": "notset", "str_type": "authorise_gate", "bln_editPin": true, "str_content": "", "int_idRecord": 6009, "str_classList": "notset", "str_idProject": "myId_38012811", "str_idXDesign": "myId_26668681", "str_nameShort": "authorise_gate", "str_themeType": "authorise_gate", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_ajax", "str_createdDate": "2022-09-10 18:52:39", "str_categoryName": "Anchor", "str_modifiedDate": "2022-09-10 18:52:39", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true}, "user_agent": "Firefox"}],
 [7585, {"obj_design": {"str_tag": "input", "str_name": "form_inputandbutton_input", "str_text": "", "str_type": "form_inputandbutton_input", "bln_debug": true, "str_value": "", "bln_editPin": true, "str_content": "", "int_idRecord": 7585, "bln_mouseDown": true, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_98446896", "str_nameShort": "form_inputandbutton_input", "str_themeType": "form_input", "bln_isLocalHome": true, "str_classExtend": "form_input", "str_createdDate": "2022-02-02 19:57:30", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:57:30", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "font-size": "1rem", "background": "rgb(65, 65, 65)"}}],
 [7775, {"obj_design": {"str_tag": "form_context", "arr_item": [{"obj_design": {"str_type": "form_form", "int_idRecord": 77012}}, {"obj_design": {"str_type": "form_menu_panel", "int_idRecord": 77018}}, {"obj_design": {"str_type": "form_panel", "int_idRecord": 77019}}, {"obj_design": {"str_type": "form_iframe", "int_idRecord": 76753}}, {"obj_design": {"str_type": "form_section", "int_idRecord": 77020}}, {"obj_design": {"str_type": "form_field", "int_idRecord": 77024}}, {"obj_design": {"str_type": "form_textarea", "int_idRecord": 77025}}, {"obj_design": {"str_type": "form_checkbox", "int_idRecord": 77084}}, {"obj_design": {"str_type": "form_input", "int_idRecord": 77026}}, {"obj_design": {"str_type": "form_radio", "int_idRecord": "77335"}}, {"obj_design": {"str_type": "form_button", "int_idRecord": 77490}}, {"obj_design": {"str_type": "form_button_rich", "int_idRecord": 77489}}, {"obj_design": {"str_type": "form_button_search", "int_idRecord": 77379}}, {"obj_design": {"str_type": "form_button_showhide", "int_idRecord": 77491}}, {"obj_design": {"str_type": "form_tab", "int_idRecord": 77195}}, {"obj_design": {"str_type": "form_select", "int_idRecord": 77027}}, {"obj_design": {"str_type": "form_inputandbutton", "int_idRecord": 77030}}, {"obj_design": {"str_type": "block", "int_idRecord": 77032}}, {"obj_design": {"str_type": "form_table", "int_idRecord": 76764}}, {"obj_design": {"str_type": "form_tablerow", "int_idRecord": 76766}}, {"obj_design": {"str_type": "form_tablecell", "int_idRecord": 76767}}, {"obj_design": {"str_type": "form_tableheader", "int_idRecord": 76765}}, {"obj_design": {"str_type": "form_hardrule", "int_idRecord": 77033}}, {"obj_design": {"str_type": "form_nonbreakingspace", "int_idRecord": "77337"}}, {"obj_design": {"str_type": "form_anchor", "int_idRecord": 77034}}, {"obj_design": {"str_type": "form_icon", "int_idRecord": 77381}}, {"obj_design": {"str_type": "form_fieldset", "int_idRecord": 77184}}, {"obj_design": {"str_type": "form_legend", "int_idRecord": 77187}}, {"obj_design": {"str_type": "form_tabset", "int_idRecord": 77192}}, {"obj_design": {"str_type": "form_label", "int_idRecord": 77339}}, {"obj_design": {"str_type": "form_span", "int_idRecord": 77341}}], "str_name": "form_context", "str_text": "notset", "str_type": "xapp_context_holder", "bln_editPin": true, "str_content": "", "int_idRecord": 7775, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_71626268", "str_nameShort": "form_context", "str_themeType": "xapp_context_holder", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "Form", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": "false", "bln_isContextHolder": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-flow": "wrap"}, "obj_domProperty": {"Id": "myId_71626268"}, "dom_objContentContainer": {"Id": "myId_71626268"}}],
 [75368, {"obj_design": {"str_tag": "menu_context", "arr_item": [{"obj_design": {"str_type": "xapp_base", "int_idRecord": 77082}}, {"obj_design": {"str_type": "xapp_menu", "int_idRecord": 77451}}, {"obj_design": {"str_type": "xapp_menuform", "int_idRecord": 76683}}, {"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": 76596}}, {"obj_design": {"str_type": "xapp_menu_operation", "int_idRecord": 76650}}, {"obj_design": {"str_type": "xapp_menu_panel", "int_idRecord": 76146}}, {"obj_design": {"str_type": "xapp_console", "int_idRecord": "77454"}}, {"obj_design": {"str_type": "xapp_component", "int_idRecord": 76771}}, {"obj_design": {"str_type": "xapp_dashboard", "int_idRecord": 76255}}, {"obj_design": {"str_type": "xapp_widgetboard", "int_idRecord": 76171}}, {"obj_design": {"str_type": "xapp_accordion", "int_idRecord": 76677}}, {"obj_design": {"str_type": "xapp_propertysheet", "int_idRecord": 76799}}, {"obj_design": {"str_type": "xapp_propertysheet_input", "int_idRecord": 76801}}], "str_name": "menu_context", "str_text": "notset", "str_type": "xapp_context_holder", "bln_editPin": true, "str_content": "", "int_idRecord": 75368, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_67217171", "str_nameShort": "menu_context", "str_themeType": "xapp_context_holder", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_ajax", "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "Xapp", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "bln_isContextHolder": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-flow": "wrap"}, "obj_domProperty": {"Id": "myId_67217171"}, "dom_objContentContainer": {"Id": "myId_67217171"}}],
+[75398, {"obj_design": {"str_tag": "xapp_dataform_childmenu", "blnIsTag": true, "str_name": "xapp_dataform_childmenu", "str_type": "xapp_dataform_childmenu", "bln_editPin": true, "int_idRecord": 75398, "str_idXDesign": "myId_22221016", "str_nameShort": "xapp_dataform_childmenu", "str_themeType": "xapp_dataform_childmenu", "bln_dynamicPin": true, "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_dataform", "str_createdDate": "2022-02-02 20:10:52", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 20:10:52", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-wrap": "wrap", "flex-direction": "column"}, "str_defaultTypeRow": "xapp_rowform", "str_defaultTypeColumn": "xapp_columnform"}],
+[75415, {"obj_design": {"str_tag": "xapp_dataform_view", "str_name": "xapp_dataform_view", "str_type": "xapp_dataform_view", "bln_editPin": true, "int_idRecord": 75415, "str_idXDesign": "myId_02551675", "str_nameShort": "xapp_dataform_view", "str_themeType": "xapp_dataform_view", "bln_dynamicPin": true, "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_dataform", "str_createdDate": "2022-02-02 20:10:52", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 20:10:52", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "width": "100%", "display": "flex", "flex-wrap": "wrap", "flex-direction": "column"}, "str_defaultTypeRow": "xapp_rowform", "str_defaultTypeColumn": "xapp_columnform"}],
 [75418, {"obj_design": {"str_tag": "button", "str_name": "xapp_console_button", "str_text": "xapp_console_button", "str_type": "xapp_console_button", "bln_editPin": true, "int_idRecord": 75418, "str_idXDesign": "myId_16137562", "str_nameShort": "xapp_console_button", "str_themeType": "form_button", "bln_palettePin": true, "str_classExtend": "xapp_button", "str_createdDate": "2022-11-20 23:26:20", "str_categoryName": "Xtra", "str_modifiedDate": "2022-11-20 23:26:20", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"padding": "1.0em"}, "obj_domProperty": {"innerHTML": "xapp_console_button", "innerText": "My Button"}}],
+[75499, {"obj_design": {"str_tag": "report_column", "blnIsTag": true, "str_name": "report_column", "str_text": "notset", "str_type": "report_column", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": 75499, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_00671016", "str_nameShort": "report_column", "str_themeType": "report_column", "bln_palettePin": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "black", "padding": "1.0em", "overflow": "auto", "max-width": "275px", "maxheight": "175", "min-width": "275px", "background": "white", "max-height": "175px", "word-break": "normal"}, "str_colorHighlight": "orange"}],
+[75502, {"obj_design": {"str_tag": "xapp_report_view", "str_name": "xapp_report_view", "str_type": "xapp_report_view", "bln_editPin": true, "int_idRecord": 75502, "str_idXDesign": "myId_55161727", "str_nameShort": "xapp_report_view", "str_themeType": "xapp_dataform", "bln_dynamicPin": true, "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_dataform_view", "str_createdDate": "2022-02-02 20:10:52", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 20:10:52", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-wrap": "wrap", "flex-direction": "column"}, "str_defaultTypeRow": "xapp_rowform", "str_defaultTypeColumn": "xapp_columnform"}],
+[75518, {"obj_design": {"str_tag": "xapp_columnform", "str_name": "xapp_columnform", "str_type": "xapp_columnform", "bln_editPin": true, "str_context": "crud_context", "int_idRecord": 75518, "str_idXDesign": "myId_17873663", "str_nameShort": "xapp_columnform", "str_themeType": "xapp_column", "bln_palettePin": true, "str_classExtend": "xapp_column", "str_createdDate": "2022-11-20 18:03:50", "str_categoryName": "Xtra", "str_modifiedDate": "2022-11-20 18:03:50", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"display": "flex", "flex-flow": "column wrap"}, "obj_domProperty": {"name": "xapp_column_form"}, "dom_objContentContainer": {"name": "xapp_column_form"}}],
+[75523, {"obj_design": {"str_tag": "report_column_block", "str_name": "report_column_block", "str_type": "report_column", "bln_editPin": true, "int_idRecord": 75523, "str_idXDesign": "myId_33153717", "str_nameShort": "report_column_block", "str_themeType": "report_column_block", "bln_palettePin": true, "bln_isLocalHome": true, "str_createdDate": "2022-01-31 21:10:58", "str_modifiedDate": "2022-01-31 21:10:58", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"display": "block"}}],
+[76031, {"obj_design": {"str_tag": "xapp_columnform_metajointype", "str_name": "xapp_columnform_metajointype", "str_type": "xapp_columnform_metajointype", "bln_editPin": true, "str_context": "crud_context", "int_idRecord": 76031, "str_idXDesign": "myId_88464849", "str_nameShort": "xapp_columnform_metajointype", "str_themeType": "xapp_column", "bln_palettePin": true, "str_classExtend": "xapp_columnform", "str_createdDate": "2022-11-20 18:03:50", "str_categoryName": "Xtra", "str_modifiedDate": "2022-11-20 18:03:50", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}}],
 [76146, {"obj_design": {"str_tag": "xapp_menu_panel", "str_name": "xapp_menu_panel", "str_text": "notset", "str_type": "xapp_menu_panel", "bln_editPin": true, "str_content": "", "int_idRecord": 76146, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_11592266", "str_nameShort": "xapp_menu_panel", "str_themeType": "form_menu_panel", "bln_palettePin": true, "str_classExtend": "form_menu_panel", "str_createdDate": "2022-11-15 08:47:57", "str_categoryName": "Xtra", "str_modifiedDate": "2022-11-15 08:47:57", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "column": "wrap", "display": "flex", "padding": "1.0em", "flex flow": "column wrap", "flex-wrap": "wrap", "background": "grey", "flexdirection": "column", "flex-direction": "column"}}],
 [76171, {"obj_design": {"str_tag": "xapp_widgetboard", "str_name": "xapp_widgetboard", "str_type": "xapp_widgetboard", "bln_editPin": true, "int_idRecord": 76171, "str_idXDesign": "myId_25555422", "str_nameShort": "xapp_widgetboard", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_component", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:05:11", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "border": "1px solid white", "display": "none", "padding": "1.0em", "flex-flow": "row wrap", "flex-wrap": "wrap", "flex-direction": "column"}}],
+[76198, {"obj_design": {"str_tag": "xapp_rowform", "str_name": "xapp_rowform", "str_type": "xapp_rowform", "bln_editPin": true, "str_context": "crud_context", "int_idRecord": 76198, "str_idXDesign": "myId_91898889", "str_nameShort": "xapp_rowform", "str_themeType": "xapp_row", "bln_dynamicPin": true, "bln_palettePin": true, "str_classExtend": "xapp_row", "str_createdDate": "2022-11-20 17:23:17", "str_categoryName": "Xtra", "str_modifiedDate": "2022-11-20 17:23:17", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-flow": "row wrap"}}],
 [76255, {"obj_design": {"str_tag": "xapp_dashboard", "str_name": "xapp_dashboard", "str_type": "xapp_dashboard", "bln_editPin": true, "int_idRecord": 76255, "str_idXDesign": "myId_81785083", "str_nameShort": "xapp_dashboard", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_component", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:05:11", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "border": "1px solid white", "display": "none", "padding": "0px", "flex-flow": "row wrap", "flex-wrap": "wrap", "flex-direction": "column"}}],
+[76259, {"obj_design": {"str_tag": "xapp_context_dataform", "arr_item": [{"obj_design": {"str_type": "xapp_form_select", "int_idRecord": 76680}}, {"obj_design": {"str_type": "xapp_dataform", "int_idRecord": 76682}}, {"obj_design": {"str_type": "xapp_dataform_view", "int_idRecord": 75415}}, {"obj_design": {"str_type": "xapp_dataform_childmenu", "int_idRecord": 75398}}, {"obj_design": {"str_type": "xapp_rowform", "int_idRecord": 76198}}, {"obj_design": {"str_type": "xapp_columnform", "int_idRecord": 75518}}, {"obj_design": {"str_type": "xapp_columnform_metajointype", "int_idRecord": 76031}}], "str_name": "xapp_context_dataform", "str_text": "notset", "str_type": "xapp_context_holder", "bln_editPin": true, "str_content": "", "int_idRecord": 76259, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_87869460", "str_nameShort": "xapp_context_dataform", "str_themeType": "xapp_context_holder", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "Xtra", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": "false", "bln_isContextHolder": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"display": "flex"}, "obj_domProperty": {"Id": "myId_87869460"}, "dom_objContentContainer": {"Id": "myId_87869460"}}],
+[76392, {"obj_design": {"str_tag": "xapp_context_report", "arr_item": [{"obj_design": {"str_type": "report_column", "int_idRecord": 75499}}, {"obj_design": {"str_type": "report_column", "int_idRecord": 75523}}, {"obj_design": {"str_type": "xapp_report_view", "int_idRecord": 75502}}], "str_name": "xapp_context_report", "str_text": "notset", "str_type": "xapp_context_holder", "bln_editPin": true, "str_content": "", "int_idRecord": 76392, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_88282206", "str_nameShort": "xapp_context_report", "str_themeType": "xapp_context_holder", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "Xtra", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": "false", "bln_isContextHolder": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"display": "flex"}, "obj_domProperty": {"Id": "myId_88282206"}, "dom_objContentContainer": {"Id": "myId_88282206"}}],
 [76394, {"obj_design": {"str_tag": "xapp_menu_context_holder", "arr_item": [{"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": 7775}}, {"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": 75368}}, {"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": 76686}}], "str_name": "xapp_menu_context_holder", "str_type": "xapp_context_holder", "bln_editPin": true, "int_idRecord": 76394, "str_idXDesign": "myId_91985606", "str_nameShort": "xapp_menu_context_holder", "str_themeType": "xapp_context_holder", "bln_palettePin": true, "bln_isLocalHome": true, "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "Xapp", "str_modifiedDate": "2022-11-01 21:47:45", "bln_lockComponent": true, "bln_classController": "false", "bln_isContextHolder": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "none", "flex flow": "row wrap", "flex-flow": "row wrap"}, "obj_domProperty": {"Id": "myId_91985606"}, "dom_objContentContainer": {"Id": "myId_91985606"}}],
+[76519, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "", "str_name": "xapp_button_filteroff_record", "str_text": "Filter is On", "str_type": "xapp_button_filteroff_record", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 76519, "str_classList": "notset", "str_idProject": "myId_25365115", "str_idXDesign": "myId_51756751", "str_nameShort": "xapp_button_filteroff_record", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_51756751", "innerHTML": "Show Others", "innerText": "Show Others", "arial-label": "Show Others"}, "dom_objContentContainer": {"Id": "myId_51756751", "arial-label": "Show Others"}}],
+[76587, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "", "str_name": "xapp_button_filteron_record", "str_text": "Filter is Off", "str_type": "xapp_button_filteron_record", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 76587, "str_classList": "notset", "str_idProject": "myId_25365115", "str_idXDesign": "myId_35554885", "str_nameShort": "xapp_button_filteron_record", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_35554885", "innerHTML": "Linked", "innerText": "Show Linked", "arial-label": "Show Linked"}, "dom_objContentContainer": {"Id": "myId_35554885", "arial-label": "Show Linked"}}],
+[76590, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_top", "str_name": "xapp_button_navigate_record", "str_text": "Top", "str_type": "xapp_button_navigate_record", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 76590, "str_classList": "notset", "str_idProject": "myId_25365115", "str_idXDesign": "myId_39252468", "str_nameShort": "xapp_button_navigate_record", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "bln_debugText": true, "obj_domProperty": {"Id": "myId_39252468", "innerHTML": "View", "innerText": "View", "aria-label": "View Record"}, "dom_objContentContainer": {"Id": "myId_39252468", "aria-label": "View Record"}}],
+[76591, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_linkon", "str_name": "xapp_button_linkon_record", "str_text": "Link", "str_type": "xapp_button_linkon_record", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 76591, "str_classList": "notset", "str_idProject": "myId_25365115", "str_idXDesign": "myId_52655813", "str_nameShort": "xapp_button_linkon_record", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_52655813", "innerHTML": "Link", "innerText": "Link", "arial-label": "Link Record"}, "dom_objContentContainer": {"Id": "myId_52655813", "arial-label": "Link Record"}}],
+[76592, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_linkoff", "str_name": "xapp_button_linkoff_record", "str_text": "Break Link", "str_type": "xapp_button_linkoff_record", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 76592, "str_classList": "notset", "str_idProject": "myId_25365115", "str_idXDesign": "myId_81583588", "str_nameShort": "xapp_button_linkoff_record", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_81583588", "innerHTML": "Linked", "innerText": "Linked"}, "dom_objContentContainer": {"Id": "myId_81583588"}}],
+[76594, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_refresh", "str_name": "xapp_button_complete_record", "str_text": "", "str_type": "xapp_button_complete_record", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 76594, "str_classList": "notset", "str_idProject": "myId_25365115", "str_idXDesign": "myId_85551563", "str_nameShort": "xapp_button_complete_record", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_85551563", "alt": "Refresh Record", "innerHTML": "Refresh", "innerText": "Complete", "arial-label": "Refresh Record"}, "dom_objContentContainer": {"Id": "myId_85551563", "alt": "Refresh Record", "arial-label": "Refresh Record"}}],
+[76595, {"obj_design": {"str_tag": "console_container_record", "arr_item": [{"obj_design": {"str_type": "xapp_button_new_record", "int_idRecord": 77390}}, {"obj_design": {"str_type": "xapp_button_archive_record", "int_idRecord": 77499}}, {"obj_design": {"str_type": "xapp_button_next_record", "int_idRecord": 77527}}, {"obj_design": {"str_type": "xapp_button_complete_record", "int_idRecord": 76594}}, {"obj_design": {"str_type": "xapp_button_navigate_record", "int_idRecord": 76590}}, {"obj_design": {"str_type": "xapp_button_filteroff_record", "int_idRecord": 76519}}, {"obj_design": {"str_type": "xapp_button_filteron_record", "int_idRecord": 76587}}, {"obj_design": {"str_type": "xapp_button_linkon_record", "int_idRecord": 76591}}, {"obj_design": {"str_type": "xapp_button_linkoff_record", "int_idRecord": 76592}}, {"obj_design": {"str_type": "xapp_button_data_nav_toggle", "int_idRecord": 76997}}, {"obj_design": {"str_type": "xapp_button_queryterm", "int_idRecord": 77177}}, {"obj_design": {"str_type": "xapp_button_file_select", "int_idRecord": 77501}}, {"obj_design": {"str_type": "xapp_input_file_select", "int_idRecord": 77218}}, {"obj_design": {"str_type": "xapp_button_file_import", "int_idRecord": 77495}}], "str_name": "console_container_record", "str_text": "notset", "str_type": "xapp_console_container", "bln_editPin": true, "str_content": "", "int_idRecord": 76595, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_25365115", "str_nameShort": "console_container_record", "str_themeType": "form_container", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xapp", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "border": "0px solid purple", "display": "flex", "justify": "content", "str_name": "crud_console_record_control", "flex-flow": "row wrap", "justify-content": "end"}, "obj_domProperty": {"Id": "myId_25365115"}, "dom_objContentContainer": {"Id": "myId_25365115"}}],
 [76596, {"obj_design": {"str_tag": "menu_console", "arr_item": [{"obj_design": {"str_type": "xapp_console_container", "int_idRecord": 76746}}, {"obj_design": {"str_type": "xapp_button", "int_idRecord": 77152}}, {"obj_design": {"str_type": "xapp_console_button", "int_idRecord": 75418}}, {"obj_design": {"str_type": "xapp_console_container", "int_idRecord": 76655}}, {"obj_design": {"str_type": "xapp_form_container_search", "int_idRecord": 76626}}, {"obj_design": {"str_type": "xapp_console_container", "int_idRecord": 76605}}, {"obj_design": {"str_type": "xapp_button_queryterm", "int_idRecord": 77171}}, {"obj_design": {"str_type": "xapp_queryterm_interface", "int_idRecord": 77173}}, {"obj_design": {"str_type": "xapp_report_interface_fieldlist", "int_idRecord": 77200}}, {"obj_design": {"str_type": "xapp_report_interface_fieldcriteria", "int_idRecord": 77201}}], "str_name": "menu_console", "str_text": "notset", "str_type": "xapp_context_holder", "bln_editPin": true, "str_content": "", "int_idRecord": 76596, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_58935386", "str_nameShort": "menu_console", "str_themeType": "xapp_context_holder", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "Other", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": "false", "bln_isContextHolder": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-flow": "row wrap"}, "obj_domProperty": {"Id": "myId_58935386"}, "dom_objContentContainer": {"Id": "myId_58935386"}}],
 [76605, {"obj_design": {"str_tag": "xapp_console_container_general", "arr_item": [{"obj_design": {"str_type": "xapp_button_navigate_settings", "int_idRecord": 77396}}, {"obj_design": {"str_type": "xapp_button_navigate_mall", "int_idRecord": 77037}}, {"obj_design": {"str_type": "xapp_button_navigate_desktop", "int_idRecord": 77397}}, {"obj_design": {"str_type": "xapp_button_navigate_lobby", "int_idRecord": 77485}}, {"obj_design": {"str_type": "xapp_button_navigate_rowz", "int_idRecord": 77486}}, {"obj_design": {"str_type": "xapp_button_navigate_office", "int_idRecord": 77038}}, {"obj_design": {"str_type": "xapp_button_navigate_login", "int_idRecord": 77430}}, {"obj_design": {"str_type": "xapp_button_navigate_newrow", "int_idRecord": 77496}}, {"obj_design": {"str_type": "xapp_button_navigate_newcolumn", "int_idRecord": 77497}}, {"obj_design": {"str_type": "xapp_button_general_archive_hide", "int_idRecord": 77520}}, {"obj_design": {"str_type": "xapp_button_general_archive_show", "int_idRecord": 77519}}, {"obj_design": {"str_type": "xapp_button_general_use_task_date", "int_idRecord": 77530}}, {"obj_design": {"str_type": "xapp_button_general_use_task_datetime", "int_idRecord": 77531}}, {"obj_design": {"str_type": "xapp_button_general_row_hide", "int_idRecord": 77517}}, {"obj_design": {"str_type": "xapp_button_general_row_show", "int_idRecord": 77518}}, {"obj_design": {"str_type": "xapp_button_general_form_up", "int_idRecord": 77523}}, {"obj_design": {"str_type": "xapp_button_general_form_down", "int_idRecord": 77522}}, {"obj_design": {"str_type": "xapp_button_general_form_gap", "int_idRecord": 77524}}, {"obj_design": {"str_type": "xapp_button_general_form_group", "int_idRecord": 77525}}], "str_name": "xapp_console_container_general", "str_text": "", "str_type": "xapp_console_container", "bln_editPin": true, "str_content": "", "int_idRecord": 76605, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_36985869", "str_nameShort": "xapp_console_container_general", "str_themeType": "form_container", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xapp", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"gap": "1.0em", "border": "0px solid purple", "display": "flex", "str_name": "crud_console_record_control", "flex-flow": "row wrap", "backkground": "red"}, "obj_domProperty": {"Id": "myId_36985869"}, "dom_objContentContainer": {"Id": "myId_36985869"}}],
 [76626, {"obj_design": {"str_tag": "form", "arr_item": [{"obj_design": {"str_type": "xapp_console_search", "int_idRecord": 76627}}], "str_name": "xapp_form_container_search", "str_text": "notset", "str_type": "xapp_form_container_search", "bln_editPin": true, "str_content": "", "int_idRecord": 76626, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_66136639", "str_nameShort": "xapp_form_container_search", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_container", "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "Xtra", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-flow": "row wrap"}, "obj_domProperty": {"Id": "myId_66136639"}, "dom_objContentContainer": {"1": {"Id": "myId_50437881", "aria-label": "New Record"}, "Id": "myId_66136639"}}],
 [76627, {"obj_design": {"str_tag": "xapp_console_search", "arr_item": [{"obj_design": {"str_type": "form_inputandbutton_input", "int_idRecord": 7585}}, {"obj_design": {"str_type": "form_button_search", "int_idRecord": 77500}}], "str_name": "xapp_console_search", "str_text": "notset", "str_type": "xapp_console_search", "bln_editPin": true, "str_content": "", "int_idRecord": 76627, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_08666691", "str_nameShort": "xapp_console_search", "str_themeType": "form_container", "bln_palettePin": true, "str_classExtend": "form_inputandbutton", "str_createdDate": "2022-11-12 12:20:33", "str_categoryName": "Xapp", "str_modifiedDate": "2022-11-12 12:20:33", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"gap": "1em", "border": "0px solid purple", "display": "flex", "flex-flow": "row wrap"}, "obj_domProperty": {"Id": "myId_08666691"}, "dom_objContentContainer": {"Id": "myId_08666691"}}],
 [76650, {"obj_design": {"str_tag": "xapp_menu_operation", "str_name": "xapp_menu_operation", "str_text": "xapp_menu_operation", "str_type": "xapp_menu_operation", "bln_editPin": true, "str_content": "", "int_idRecord": 76650, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_56611515", "str_nameShort": "xapp_menu_operation", "str_themeType": "xapp_menu_operation", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_button_rich", "str_createdDate": "2022-02-02 20:04:57", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 20:04:57", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"padding-bottom": "2px"}, "obj_domProperty": {"innerHTML": "xapp_menu_operation", "innerText": "xapp_menu_operation", "xDesign_MenuButtonClick": "fn_MenuButtonClick"}, "dom_objContentContainer": {"xDesign_MenuButtonClick": "fn_MenuButtonClick"}}],
 [76655, {"obj_design": {"str_tag": "xapp_console_container", "str_name": "xapp_console_container", "str_text": "notset", "str_type": "xapp_console_container", "bln_editPin": true, "str_content": "", "int_idRecord": 76655, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_51089095", "str_nameShort": "xapp_console_container", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_base", "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "Anchor", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "notset", "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-flow": "row wrap", "justify-content": "end"}}],
-[76677, {"obj_design": {"str_tag": "xapp_accordion", "blnIsTag": true, "str_name": "xapp_accordion", "str_text": "notset", "str_type": "xapp_accordion", "bln_editPin": true, "str_content": "", "int_idRecord": 76677, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_11651443", "str_nameShort": "xapp_accordion", "str_themeType": "xapp_accordion", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-11-01 21:51:10", "str_categoryName": "Xapp", "str_modifiedDate": "2022-11-01 21:51:10", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"width": "100%", "display": "block"}}],
-[76683, {"obj_meta": {"str_text": "", "bln_viewPin": 0, "int_joinType": 0, "int_idMetaRowz": 0, "int_idMetaView": 0, "str_metaRowzName": "", "str_metaTypeData": "", "MetaPermissionTag": "100", "str_buttonConsole": "", "bln_togglePeersPin": true, "str_optionChildMenu": "", "int_idParentMetaRowz": 0, "str_metaTypeDashboard": "", "str_metaConstraintName": ""}, "obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "str_icon": "star", "str_name": "xapp_menuform", "str_text": "xapp_menuform", "str_type": "xapp_menuform", "bln_editPin": true, "str_content": "", "int_idRecord": 76683, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_37375355", "str_nameShort": "xapp_menuform", "str_themeType": "menu_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_menu", "str_createdDate": "2022-02-02 20:04:57", "str_categoryName": "Xapp", "str_modifiedDate": "2022-02-02 20:04:57", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "width": "100%", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "font-size": "1rem", "align-text": "center", "background": "rgb(65,65,65)", "margin-bottom": "1em"}, "str_optionData": "Data", "str_optionMenu": "Menu", "obj_domProperty": {"Id": "myId_37375355", "innerHTML": "xapp_menuform", "innerText": "xapp_menuform", "xDesign_MenuButtonClick": "fn_MenuButtonClick"}, "str_optionReport": "Report", "str_optionWidget": "Widget", "int_totalRowCount": 0, "str_listSeparator": "-", "str_optionMenuForm": "MenuForm", "str_defaultTypeData": "xapp_dataform_view", "str_defaultTypeMenu": "xapp_menuform", "str_optionDashboard": "Dashboard", "bln_constraintKeyPin": true, "str_defaultTypeDataChildMenu": "xapp_dataform_childmenu"}],
+[76677, {"obj_design": {"str_tag": "xapp_accordion", "blnIsTag": true, "str_name": "xapp_accordion", "str_text": "notset", "str_type": "xapp_accordion", "bln_editPin": true, "str_content": "", "int_idRecord": 76677, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_11651443", "str_nameShort": "xapp_accordion", "str_themeType": "xapp_accordion", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-11-01 21:51:10", "str_categoryName": "Xapp", "str_modifiedDate": "2022-11-01 21:51:10", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"width": "100%", "border": "1em solid orange", "display": "block", "padding": "1em", "background": "rgb(65,65,65)"}}],
+[76680, {"obj_design": {"str_tag": "select", "str_name": "xapp_form_select", "str_text": "notset", "str_type": "xapp_form_select", "bln_editPin": true, "str_content": "", "int_idRecord": 76680, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_00108041", "str_nameShort": "xapp_form_select", "str_themeType": "form_input", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-02-02 19:57:30", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:57:30", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "font-size": "1rem", "background": "rgb(65, 65, 65)"}}],
+[76681, {"obj_design": {"str_tag": "xapp_dataform_context_holder", "arr_item": [{"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": 76259}}, {"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": 76392}}, {"obj_design": {"str_type": "xapp_console_container", "int_idRecord": 76595}}, {"obj_design": {"str_type": "xapp_console_container", "int_idRecord": 77114}}], "str_name": "xapp_dataform_context_holder", "str_text": "notset", "str_type": "xapp_context_holder", "bln_editPin": true, "str_content": "", "int_idRecord": 76681, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_58934923", "str_nameShort": "xapp_dataform_context_holder", "str_themeType": "xapp_context_holder", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "Xapp", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": "false", "bln_isContextHolder": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"gap": "1em", "display": "flex"}, "obj_domProperty": {"Id": "myId_58934923"}, "dom_objContentContainer": {"Id": "myId_58934923"}}],
+[76682, {"obj_design": {"str_tag": "xapp_dataform", "str_name": "xapp_dataform", "str_text": "notset", "str_type": "xapp_dataform", "bln_editPin": true, "str_content": "", "int_idRecord": 76682, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_83282842", "str_nameShort": "xapp_dataform", "str_themeType": "xapp_dataform", "bln_dynamicPin": true, "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_data", "str_createdDate": "2022-02-02 20:10:52", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 20:10:52", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-wrap": "wrap", "flex-direction": "column"}, "str_defaultTypeRow": "xapp_rowform", "str_defaultTypeColumn": "xapp_columnform"}],
+[76683, {"obj_meta": {"str_text": "", "bln_viewPin": 0, "int_joinType": 0, "int_idMetaRowz": 0, "int_idMetaView": 0, "str_metaRowzName": "", "str_metaTypeData": "", "MetaPermissionTag": "100", "str_buttonConsole": "", "bln_togglePeersPin": true, "str_optionChildMenu": "", "int_idParentMetaRowz": 0, "str_metaTypeDashboard": "", "str_metaConstraintName": ""}, "obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "str_icon": "star", "str_name": "xapp_menuform", "str_text": "xapp_menuform", "str_type": "xapp_menuform", "bln_editPin": true, "str_content": "", "int_idRecord": 76683, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_37375355", "str_nameShort": "xapp_menuform", "str_themeType": "menu_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_menu", "str_createdDate": "2022-02-02 20:04:57", "str_categoryName": "Xapp", "str_modifiedDate": "2022-02-02 20:04:57", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "width": "100%", "border": "1em solid orange", "display": "flex", "padding": "1em", "font-size": "1rem", "align-text": "center", "background": "rgb(65,65,65)", "margin-bottom": "1em"}, "str_optionData": "Data", "str_optionMenu": "Menu", "obj_domProperty": {"Id": "myId_37375355", "innerHTML": "xapp_menuform", "innerText": "xapp_menuform", "xDesign_MenuButtonClick": "fn_MenuButtonClick"}, "str_optionReport": "Report", "str_optionWidget": "Widget", "int_totalRowCount": 0, "str_listSeparator": "-", "str_optionMenuForm": "MenuForm", "str_defaultTypeData": "xapp_dataform_view", "str_defaultTypeMenu": "xapp_menuform", "str_optionDashboard": "Dashboard", "bln_constraintKeyPin": true, "str_defaultTypeDataChildMenu": "xapp_dataform_childmenu"}],
 [76685, {"obj_design": {"str_tag": "xapp_data", "str_name": "xapp_data", "str_type": "xapp_data", "bln_editPin": true, "int_idRecord": 76685, "str_idXDesign": "myId_62156312", "str_nameShort": "xapp_data", "str_themeType": "xapp_data", "bln_dynamicPin": true, "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_ajax", "str_createdDate": "2022-02-02 20:10:52", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 20:10:52", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-wrap": "wrap", "flex-direction": "column"}, "str_defaultTypeRow": "xapp_row", "str_defaultTypeColumn": "xapp_column"}],
 [76686, {"obj_design": {"str_tag": "xapp_context_data", "arr_item": [{"obj_design": {"str_type": "xapp_row", "int_idRecord": 76689}}, {"obj_design": {"str_type": "xapp_column", "int_idRecord": 76687}}, {"obj_design": {"str_type": "xapp_data_childmenu", "int_idRecord": 76690}}, {"obj_design": {"str_type": "xapp_data_view", "int_idRecord": 76688}}, {"obj_design": {"str_type": "xapp_data", "int_idRecord": 76685}}], "str_name": "xapp_context_data", "str_type": "xapp_context_holder", "bln_editPin": true, "int_idRecord": 76686, "str_idXDesign": "myId_99139996", "str_nameShort": "xapp_context_data", "str_themeType": "xapp_context_holder", "bln_palettePin": true, "bln_isLocalHome": true, "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "Xtra", "str_modifiedDate": "2022-11-01 21:47:45", "bln_lockComponent": true, "bln_classController": "false", "bln_isContextHolder": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-flow": "wrap"}, "obj_domProperty": {"Id": "myId_99139996"}, "dom_objContentContainer": {"Id": "myId_99139996"}}],
 [76687, {"obj_design": {"str_tag": "xapp_column", "str_name": "xapp_column", "str_type": "xapp_column", "bln_editPin": true, "str_context": "crud_context", "int_idRecord": 76687, "str_idXDesign": "myId_17696919", "str_nameShort": "xapp_column", "str_themeType": "xapp_column", "bln_palettePin": true, "str_createdDate": "2022-11-20 18:03:50", "str_categoryName": "Xtra", "str_modifiedDate": "2022-11-20 18:03:50", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"display": "flex", "flex-flow": "column wrap"}}],
@@ -18761,10 +21724,13 @@ var obj_InstanceJSONMap = new Map([
 [76771, {"obj_design": {"str_tag": "xapp_component", "str_name": "xapp_component", "str_type": "xapp_component", "bln_editPin": true, "int_idRecord": 76771, "str_idXDesign": "myId_12259382", "str_nameShort": "xapp_component", "str_themeType": "xapp_component", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_ajax", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:05:11", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "border": "1px solid white", "display": "none", "padding": "1.0em", "flex-flow": "row wrap", "flex-wrap": "wrap", "flex-direction": "column"}}],
 [76799, {"obj_design": {"str_tag": "xapp_propertysheet", "blnIsTag": true, "str_name": "xapp_propertysheet", "str_type": "xapp_propertysheet", "bln_editPin": true, "int_idRecord": 76799, "str_classList": "input,table", "str_idXDesign": "myId_78332315", "str_nameShort": "xapp_propertysheet", "str_themeType": "xapp_propertysheet", "bln_palettePin": true, "bln_isLocalHome": true, "str_createdDate": "2022-10-22 22:43:39", "str_categoryName": "Xtra", "str_modifiedDate": "2022-10-22 22:43:39", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}}],
 [76801, {"obj_design": {"str_tag": "input", "str_name": "xapp_propertysheet_input", "str_type": "xapp_propertysheet_input", "bln_editPin": true, "int_idRecord": 76801, "str_idXDesign": "myId_11033391", "str_nameShort": "xapp_propertysheet_input", "str_themeType": "form_input", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_input", "str_createdDate": "2022-02-02 19:57:30", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:57:30", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"border": "0px none", "cursor": "pointer", "padding": "1.0em"}}],
-[76967, {"obj_design": {"str_tag": "xapp_dynamic_content", "str_name": "xapp_dynamic_content", "str_text": "notset", "str_type": "xapp_dynamic_content", "bln_editPin": true, "str_content": "", "int_idRecord": "76967", "str_classList": "notset", "str_idProject": "myId_24662136", "str_idXDesign": "myId_67767017", "str_nameShort": "xapp_dynamic_content", "str_themeType": "xapp_dynamic_content", "bln_dynamicPin": true, "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-02-02 20:12:17", "str_modifiedDate": "2022-02-02 20:12:17", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"width": "100%", "cursor": "default", "height": "100%", "display": "flex", "overflow": "auto", "flex-wrap": "wrap"}, "obj_domProperty": {"Id": "myId_67767017"}, "dom_objContentContainer": {"Id": "myId_67767017"}}],
-[76968, {"obj_design": {"str_tag": "xapp_context_holder", "arr_item": [{"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": 76969}}, {"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": 76394}}], "str_name": "xapp_context_holder", "str_text": "notset", "str_type": "xapp_context_holder", "bln_editPin": true, "str_content": "", "int_idRecord": "76968", "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_42742327", "str_nameShort": "xapp_context_holder", "str_themeType": "xapp_context_holder", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-11-01 21:47:45", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "notset", "bln_classController": "false", "bln_isContextHolder": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "none", "flex-flow": "wrap"}, "obj_domProperty": {"Id": "myId_42742327"}, "dom_objContentContainer": {"Id": "myId_42742327"}}],
-[76969, {"obj_design": {"str_tag": "login_context_holder", "arr_item": [{"obj_design": {"str_type": "login_dashboard", "int_idRecord": 76970}}], "str_name": "login_context_holder", "str_text": "notset", "str_type": "xapp_context_holder", "bln_editPin": true, "str_content": "", "int_idRecord": 76969, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_11678710", "str_nameShort": "login_context_holder", "str_themeType": "xapp_context_holder", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-11-01 21:47:45", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "notset", "bln_classController": "false", "bln_isContextHolder": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "none", "flex-flow": "wrap"}, "obj_domProperty": {"Id": "myId_11678710"}, "dom_objContentContainer": {"Id": "myId_11678710"}}],
-[76970, {"obj_design": {"str_tag": "login_dashboard", "arr_item": [{"obj_design": {"str_type": "form_section", "int_idRecord": 77544}}], "str_name": "login_dashboard", "str_text": "notset", "str_type": "login_dashboard", "bln_editPin": true, "str_content": "", "int_idRecord": 76970, "str_classList": "notset", "str_idProject": "myId_60426365", "str_idXDesign": "myId_79770339", "str_nameShort": "login_dashboard", "str_themeType": "login_dashboard", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_dashboard", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Lock", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"gap": "1.0em", "border": "0px solid white", "display": "none", "flex-flow": "row wrap", "flex-wrap": "wrap", "align-items": "center", "flex-direction": "column", "justify-content": "center"}, "obj_domProperty": {"Id": "myId_79770339"}, "dom_objContentContainer": {"Id": "myId_79770339"}}],
+[76974, {"arr_color": [{"int_hue": 0, "str_hsl": "hsl(0, 100%, 50%)", "int_light": 50, "str_label": "red", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 0, "str_hsl": "hsl(0, 100%, 60%)", "int_light": 60, "str_label": "red-light", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 0, "str_hsl": "hsl(0, 100%, 30%)", "int_light": 30, "str_label": "red-dark", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 30, "str_hsl": "hsl(30, 100%, 50%)", "int_light": 50, "str_label": "Orange", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 30, "str_hsl": "hsl(30, 100%, 60%)", "bln_face": 1, "int_light": 60, "str_label": "Orange-light", "bln_contrast": true, "int_saturation": 100}, {"int_hue": 30, "str_hsl": "hsl(30, 100%, 30%)", "int_light": 30, "str_label": "Orange-dark", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 20, "str_hsl": "hsl(20, 100%, 30%)", "int_light": 30, "str_label": "Orange-alt", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 240, "str_hsl": "hsl(240, 100%, 50%)", "int_light": 50, "str_label": "Blue", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 240, "str_hsl": "hsl(240, 100%, 60%)", "int_light": 60, "str_label": "Blue-light", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 240, "str_hsl": "hsl(240, 100%, 30%)", "int_light": 30, "str_label": "Blue-dark", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 230, "str_hsl": "hsl(230, 100%, 30%)", "int_light": 30, "str_label": "Blue-alt", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 270, "str_hsl": "hsl(270, 100%, 50%)", "int_light": 50, "str_label": "Purple", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 270, "str_hsl": "hsl(270, 100%, 60%)", "int_light": 60, "str_label": "Purple-light", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 270, "str_hsl": "hsl(270, 100%, 30%)", "int_light": 30, "str_label": "Purple-dark", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 260, "str_hsl": "hsl(260, 100%, 30%)", "int_light": 30, "str_label": "Purple-alt", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 300, "str_hsl": "hsl(300, 100%, 50%)", "int_light": 50, "str_label": "Magenta", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 300, "str_hsl": "hsl(300, 100%, 60%)", "int_light": 60, "str_label": "Magenta-light", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 300, "str_hsl": "hsl(300, 100%, 30%)", "int_light": 30, "str_label": "Magenta-dark", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 290, "str_hsl": "hsl(290, 100%, 30%)", "int_light": 30, "str_label": "Magenta-alt", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 0, "str_hsl": "hsl(0, 0%, 100%)", "int_light": 100, "str_label": "White", "bln_lighten": true, "int_saturation": 0}, {"int_hue": 0, "str_hsl": "hsl(0, 0%, 0%)", "int_light": 0, "str_label": "Black", "bln_lighten": true, "int_saturation": 0}, {"int_hue": 0, "str_hsl": "hsl(0, 0%, 50%)", "int_light": 50, "str_label": "Gray", "bln_lighten": true, "int_saturation": 0}, {"int_hue": 0, "str_hsl": "hsl(0, 0%, 60%)", "int_light": 60, "str_label": "Gray-light", "bln_lighten": true, "int_saturation": 0}, {"int_hue": 0, "str_hsl": "hsl(0, 0%, 30%)", "int_light": 30, "str_label": "Gray-dak", "bln_lighten": true, "int_saturation": 0}], "obj_theme": {"obj_design": {"str_type": "xapp_theme", "int_idRecord": 77570}}, "obj_design": {"str_tag": "app", "arr_item": [{"obj_design": {"str_type": "xapp_theme", "int_idRecord": 77570}}, {"obj_design": {"str_type": "xapp_theme", "int_idRecord": 77570}}, {"obj_design": {"str_type": "authorise_gate", "int_idRecord": 6009}}, {"obj_design": {"str_type": "xapp_dynamic_content", "int_idRecord": "76977"}}, {"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": 76978}}], "str_name": "app", "str_text": "notset", "str_type": "app", "bln_editPin": true, "str_content": "", "int_idRecord": 76974, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_63641161", "str_nameShort": "app", "str_themeType": "xapp_theme", "str_classExtend": "xapp", "str_createdDate": "2023-09-23 14:55:13", "str_categoryName": "App", "str_modifiedDate": "2023-09-23 14:55:13", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "int_radioDisplayMode": 3}, "user_agent": "Firefox", "obj_domStyle": {"font-size": "", "font-family": ""}, "MetaDataViewId": 101426, "MetaLinkViewId": 100475, "MetaUserViewId": 1, "obj_domProperty": {"Id": "myId_63641161"}, "MetaDataViewName": "meta_data", "MetaLinkViewName": "meta_link", "MetaUserViewName": "meta_user", "bln_closePeersPin": true, "bln_togglePeersPin": true, "dom_objContentContainer": {"Id": "myId_63641161"}}],
+[76977, {"obj_design": {"str_tag": "xapp_dynamic_content", "str_name": "xapp_dynamic_content", "str_type": "xapp_dynamic_content", "bln_editPin": true, "int_idRecord": "76977", "str_idProject": "myId_24662136", "str_idXDesign": "myId_17564540", "str_nameShort": "xapp_dynamic_content", "str_themeType": "xapp_dynamic_content", "bln_dynamicPin": true, "bln_palettePin": true, "bln_isLocalHome": true, "str_createdDate": "2022-02-02 20:12:17", "str_modifiedDate": "2022-02-02 20:12:17", "bln_createRelease": "false", "bln_classController": "false", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"width": "100%", "cursor": "default", "height": "100%", "display": "flex", "overflow": "auto", "flex-wrap": "wrap"}, "obj_domProperty": {"Id": "myId_17564540"}, "dom_objContentContainer": {"Id": "myId_17564540"}}],
+[76978, {"obj_design": {"str_tag": "xapp_context_holder", "arr_item": [{"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": 76979}}, {"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": 76394}}, {"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": 76681}}, {"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": 77111}}], "str_name": "xapp_context_holder", "str_type": "xapp_context_holder", "bln_editPin": true, "int_idRecord": 76978, "str_idXDesign": "myId_90019415", "str_nameShort": "xapp_context_holder", "str_themeType": "xapp_context_holder", "bln_palettePin": true, "bln_isLocalHome": true, "str_createdDate": "2022-11-01 21:47:45", "str_modifiedDate": "2022-11-01 21:47:45", "bln_classController": "false", "bln_isContextHolder": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "none", "flex-flow": "wrap"}, "obj_domProperty": {"Id": "myId_90019415"}, "dom_objContentContainer": {"Id": "myId_90019415"}}],
+[76979, {"obj_design": {"str_tag": "mycrm_context_holder", "str_name": "mycrm_context_holder", "str_type": "xapp_context_holder", "bln_editPin": true, "int_idRecord": 76979, "str_idXDesign": "myId_52777788", "str_nameShort": "mycrm_context_holder", "str_themeType": "xapp_context_holder", "bln_palettePin": true, "bln_isLocalHome": true, "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "Xtra", "str_modifiedDate": "2022-11-01 21:47:45", "bln_classController": "false", "bln_isContextHolder": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-flow": "wrap"}}],
+[76987, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_chevron_left", "str_name": "xapp_button_data_nav_back", "str_text": "", "str_type": "xapp_button_data_nav_back", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 76987, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_96679567", "str_nameShort": "xapp_button_data_nav_back", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_96679567", "type": "submit", "innerHTML": "<", "innerText": "<"}, "dom_objContentContainer": {"Id": "myId_96679567"}}],
+[76988, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_chevron_right", "str_name": "xapp_button_data_nav_forward", "str_text": "", "str_type": "xapp_button_data_nav_forward", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 76988, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_75699707", "str_nameShort": "xapp_button_data_nav_forward", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_75699707", "type": "submit", "innerHTML": ">", "innerText": ">"}, "dom_objContentContainer": {"Id": "myId_75699707"}}],
+[76997, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_name": "xapp_button_data_nav_toggle", "str_text": "xapp_button_data_nav_toggle", "str_type": "xapp_button_data_nav_toggle", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 76997, "str_classList": "notset", "str_idProject": "myId_25365115", "str_idXDesign": "myId_73660700", "str_nameShort": "xapp_button_data_nav_toggle", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_73660700", "innerHTML": "Toggle", "innerText": "toggle"}, "dom_objContentContainer": {"Id": "myId_73660700"}}],
 [77012, {"obj_design": {"str_tag": "form", "str_name": "form_form", "str_text": "notset", "str_type": "form_form", "bln_editPin": true, "str_content": "", "int_idRecord": 77012, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_09399160", "str_nameShort": "form_form", "str_themeType": "form_form", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "component", "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "Xtra", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "notset", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-wrap": "wrap", "flex-direction": "column", " background-color": "coral"}}],
 [77018, {"obj_design": {"str_tag": "form_menu_panel", "str_name": "form_menu_panel", "str_text": "notset", "str_type": "form_menu_panel", "bln_editPin": true, "str_content": "", "int_idRecord": 77018, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_29791368", "str_nameShort": "form_menu_panel", "str_themeType": "form_menu_panel", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-15 08:47:57", "str_categoryName": "Xtra", "str_modifiedDate": "2022-11-15 08:47:57", "str_releaseLabel": "notset", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "border": "0px solid white", "display": "flex", "padding": "1.0em", "flex flow": "column wrap", "flexdirection": "column", "flex-direction": "column"}, "obj_domProperty": {"Id": "myId_29791368"}, "dom_objContentContainer": {"Id": "myId_29791368"}}],
 [77019, {"obj_design": {"str_tag": "form_panel", "str_name": "form_panel", "str_text": "notset", "str_type": "form_panel", "bln_editPin": true, "str_content": "", "int_idRecord": 77019, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_21969641", "str_nameShort": "form_panel", "str_themeType": "form_panel", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Form", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"gap": "1.0em", "display": "flex", "padding": "1.0em", "flex-flow": "wrap", "flex-wrap": "column wrap"}}],
@@ -18779,38 +21745,49 @@ var obj_InstanceJSONMap = new Map([
 [77029, {"obj_design": {"str_tag": "button", "str_name": "form_inputandbutton_submit", "str_text": "My Button", "str_type": "form_inputandbutton_submit", "str_value": "My Button", "bln_editPin": true, "str_content": "", "int_idRecord": 77029, "str_classList": "notset", "str_idProject": "myId_36537180", "str_idXDesign": "myId_32160437", "str_nameShort": "form_inputandbutton_submit", "str_themeType": "form_inputandbutton_submit", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_button_rich", "str_createdDate": "2022-02-02 19:57:30", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:57:30", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"border": "0px none", "cursor": "pointer", "height": "40px", "padding": "0px"}, "obj_domProperty": {"type": "submit"}}],
 [77030, {"obj_design": {"str_tag": "inputandbutton", "arr_item": [{"obj_design": {"str_type": "form_input", "int_idRecord": "77028"}}, {"obj_design": {"str_type": "form_inputandbutton_submit", "int_idRecord": 77029}}], "str_name": "form_inputandbutton", "str_text": "notset", "str_type": "form_inputandbutton", "bln_editPin": true, "str_content": "", "int_idRecord": 77030, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_62726192", "str_nameShort": "form_inputandbutton", "str_themeType": "form_panel", "bln_palettePin": true, "str_classExtend": "notset", "str_createdDate": "2022-11-20 10:37:36", "str_categoryName": "Xtra", "str_modifiedDate": "2022-11-20 10:37:36", "str_releaseLabel": "notset", "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domProperty": {"Id": "myId_62726192"}, "dom_objContentContainer": {"Id": "myId_62726192"}}],
 [77032, {"obj_design": {"str_tag": "block", "str_name": "block", "str_text": "notset", "str_type": "block", "bln_editPin": true, "str_content": "", "int_idRecord": 77032, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_72497127", "str_nameShort": "block", "str_themeType": "block", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:10:58", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:10:58", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"display": "block"}}],
-[77033, {"obj_design": {"str_tag": "hr", "str_name": "form_hardrule", "str_text": "notset", "str_type": "form_hardrule", "bln_editPin": true, "str_content": "", "int_idRecord": 77033, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_79277021", "str_nameShort": "form_hardrule", "str_themeType": "form_hardrule", "bln_palettePin": true, "str_classExtend": "notset", "str_createdDate": "2023-09-28 17:30:59", "str_categoryName": "Form", "str_modifiedDate": "2023-09-28 17:30:59", "str_releaseLabel": "notset", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"width": "100%", "border": "0px", "height": "1.0em", "background": "gray"}}],
+[77033, {"obj_design": {"str_tag": "hr", "str_name": "form_hardrule", "str_text": "notset", "str_type": "form_hardrule", "bln_editPin": true, "str_content": "", "int_idRecord": 77033, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_79277021", "str_nameShort": "form_hardrule", "str_themeType": "form_hardrule", "bln_palettePin": true, "str_classExtend": "notset", "str_createdDate": "2023-09-28 17:30:59", "str_categoryName": "Form", "str_modifiedDate": "2023-09-28 17:30:59", "str_releaseLabel": "notset", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"color": "orange", "width": "100%", "border": "0.5em solid orange", "height": "1.0em", "display": "flex", "padding": "1em", "font-size": "1rem", "background": "rgb(65, 65, 65)"}}],
 [77034, {"obj_design": {"str_tag": "a", "str_name": "form_anchor", "str_text": "notset", "str_type": "form_anchor", "bln_editPin": true, "str_content": "", "int_idRecord": 77034, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_79120090", "str_nameShort": "form_anchor", "str_themeType": "form_anchor", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"width": "100%", "border": "1px solid black", "display": "block", "text-decoration": "none"}, "obj_domProperty": {"Id": "myId_79120090", "target": "_blank"}, "dom_objContentContainer": {"Id": "myId_79120090"}}],
 [77037, {"obj_design": {"str_tag": "button", "blnIsTag": true, "str_name": "xapp_button_navigate_mall", "str_text": "Mall", "str_type": "xapp_button_navigate_mall", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77037, "str_idProject": "myId_36985869", "str_idXDesign": "myId_01089000", "str_nameShort": "xapp_button_navigate_mall", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"str_name": "xapp_button_navigate_desktop", "innerHTML": "Mall", "innerText": "Desktop"}, "dom_objContentContainer": {"str_name": "xapp_button_navigate_desktop"}}],
 [77038, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_office", "str_name": "xapp_button_navigate_office", "str_text": "Office", "str_type": "xapp_button_navigate_office", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77038, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_76211896", "str_nameShort": "xapp_button_navigate_office", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_76211896", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_76211896", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
 [77082, {"obj_design": {"str_tag": "xapp_base", "blnIsTag": true, "str_name": "xapp_base", "str_type": "xapp_base", "bln_editPin": true, "int_idRecord": 77082, "str_idXDesign": "myId_76307086", "str_nameShort": "xapp_base", "str_themeType": "component", "bln_palettePin": true, "str_createdDate": "2023-11-19 12:58:13", "str_categoryName": "Xtra", "str_modifiedDate": "2023-11-19 12:58:13", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true}}],
 [77084, {"obj_design": {"str_tag": "input", "str_name": "form_checkbox", "str_text": "on", "str_type": "form_checkbox", "bln_editPin": true, "str_content": "", "int_idRecord": 77084, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_61351551", "str_nameShort": "form_checkbox", "str_themeType": "form_input", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-02-02 19:57:30", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:57:30", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"width": "40px", "border": "0px none", "cursor": "pointer", "height": "40px", "margin": "0px", "content": "\\2713", "vertical-align": "middle"}, "obj_domProperty": {"type": "checkbox", "checked": true}}],
+[77110, {"obj_design": {"str_tag": "console_container_maintain", "arr_item": [{"obj_design": {"str_type": "xapp_button_provision", "int_idRecord": 77505}}, {"obj_design": {"str_type": "xapp_button_maintain", "int_idRecord": 77510}}, {"obj_design": {"str_type": "xapp_button_provision_b2b", "int_idRecord": 77508}}, {"obj_design": {"str_type": "xapp_button_provision_b2c", "int_idRecord": 77513}}, {"obj_design": {"str_type": "xapp_button_provision_linked_opportunity_hide", "int_idRecord": 77514}}, {"obj_design": {"str_type": "xapp_button_provision_linked_opportunity_show", "int_idRecord": 77506}}, {"obj_design": {"str_type": "xapp_button_provision_linked_contact_hide", "int_idRecord": 77515}}, {"obj_design": {"str_type": "xapp_button_provision_linked_contact_show", "int_idRecord": 77507}}, {"obj_design": {"str_type": "xapp_button_provision_linked_task_hide", "int_idRecord": 77516}}, {"obj_design": {"str_type": "xapp_button_provision_linked_task_show", "int_idRecord": 77509}}, {"obj_design": {"str_type": "xapp_button_maintain_debug_release", "int_idRecord": 77511}}, {"obj_design": {"str_type": "xapp_button_push_reset", "int_idRecord": 77165}}, {"obj_design": {"str_type": "xapp_button_push_schedule", "int_idRecord": 77168}}, {"obj_design": {"str_type": "xapp_button_backup", "int_idRecord": 77512}}], "str_name": "console_container_maintain", "str_text": "notset", "str_type": "xapp_console_container", "bln_editPin": true, "str_content": "", "int_idRecord": 77110, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_20107211", "str_nameShort": "console_container_maintain", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xapp", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"gap": "1.0em", "border": "0px solid purple", "display": "flex", "str_name": "crud_console_record_control", "flex-flow": "row wrap", "backkground": "red", "justify-content": "end"}, "obj_domProperty": {"Id": "myId_20107211"}, "dom_objContentContainer": {"Id": "myId_20107211"}}],
+[77111, {"obj_design": {"str_tag": "xapp_admin_context", "arr_item": [{"obj_design": {"str_type": "xapp_console_container", "int_idRecord": 77110}}, {"obj_design": {"str_type": "xapp_dashboard_setting", "int_idRecord": 77133}}, {"obj_design": {"str_type": "xapp_dashboard_push", "int_idRecord": 77164}}, {"obj_design": {"str_type": "xapp_dashboard_push_row", "int_idRecord": 77167}}, {"obj_design": {"str_type": "xapp_dashboard_view", "int_idRecord": "77215"}}], "str_name": "xapp_admin_context", "str_text": "notset", "str_type": "xapp_context_holder", "bln_editPin": true, "str_content": "", "int_idRecord": 77111, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_00383002", "str_nameShort": "xapp_admin_context", "str_themeType": "xapp_context_holder", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "Xapp", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": "false", "bln_isContextHolder": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"display": "flex"}, "obj_domProperty": {"Id": "myId_00383002"}, "dom_objContentContainer": {"Id": "myId_00383002"}}],
+[77114, {"obj_design": {"str_tag": "xapp_console_container_datasummary", "arr_item": [{"obj_design": {"str_type": "xapp_button_data_nav_back", "int_idRecord": 76987}}, {"obj_design": {"str_type": "xapp_button_data_nav_forward", "int_idRecord": 76988}}, {"obj_design": {"str_type": "xapp_button_data_nav_toggle", "int_idRecord": 76997}}], "str_name": "xapp_console_container_datasummary", "str_type": "xapp_console_container", "bln_editPin": true, "int_idRecord": 77114, "str_idXDesign": "myId_09060272", "str_nameShort": "xapp_console_container_datasummary", "str_themeType": "xapp_console_container", "bln_palettePin": true, "bln_isLocalHome": true, "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:05:11", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": "false", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "border": "0px solid purple", "display": "flex", "str_name": "crud_console_record_control", "flex-flow": "row wrap", "backkground": "red"}, "obj_domProperty": {"Id": "myId_09060272"}, "dom_objContentContainer": {"Id": "myId_09060272"}}],
+[77133, {"obj_design": {"str_tag": "xapp_dashboard_setting", "str_name": "xapp_dashboard_setting", "str_type": "xapp_dashboard_setting", "bln_editPin": true, "int_idRecord": 77133, "str_classList": "programiconbutton", "str_idProject": "myId_63641161", "str_idXDesign": "myId_74077442", "str_nameShort": "xapp_dashboard_setting", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_dashboard", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:05:11", "bln_createRelease": "false", "bln_classController": "false", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "width": "100%", "border": "0px solid black", "display": "none", "padding": "1.0em", "flex-flow": "row wrap", "flex-wrap": "wrap", "flex-direction": "column"}}],
 [77152, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_anchor", "int_idRecord": 77388}}], "str_icon": "xapp_desk", "str_name": "xapp_button", "str_text": "xapp_button", "str_type": "xapp_button", "bln_editPin": true, "str_content": "", "int_idRecord": 77152, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_11190110", "str_nameShort": "xapp_button", "str_themeType": "form_button", "bln_palettePin": true, "str_classExtend": "form_button_rich", "str_createdDate": "2022-11-20 23:26:20", "str_categoryName": "Xtra", "str_modifiedDate": "2022-11-20 23:26:20", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"padding": "1.0em", "aliign-items": "center"}, "obj_domProperty": {"Id": "myId_11190110", "innerHTML": "xapp_button", "innerText": "My Button"}, "dom_objContentContainer": {"Id": "myId_11190110"}}],
+[77164, {"obj_design": {"str_tag": "xapp_dashboard_push", "str_name": "xapp_dashboard_push", "str_type": "xapp_dashboard_push", "bln_editPin": true, "int_idRecord": 77164, "str_classList": "programiconbutton", "str_idXDesign": "myId_37341954", "str_nameShort": "xapp_dashboard_push", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_dashboard", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:05:11", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "width": "100%", "border": "0px solid black", "display": "none", "padding": "1.0em", "flex-flow": "row wrap", "flex-wrap": "wrap", "flex-direction": "column"}}],
+[77165, {"obj_design": {"str_tag": "button", "blnIsTag": true, "str_name": "xapp_button_push_reset", "str_text": "Reset Push", "str_type": "xapp_button_push_reset", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77165, "str_classList": "notset", "str_idProject": "myId_20107211", "str_idXDesign": "myId_76468180", "str_nameShort": "xapp_button_push_reset", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"str_name": "xapp_button_navigate_desktop", "innerHTML": "Reset Push", "innerText": "Desktop"}, "dom_objContentContainer": {"data": "", "str_name": "xapp_button_navigate_desktop"}}],
+[77167, {"obj_design": {"str_tag": "xapp_dashboard_push_row", "str_name": "xapp_dashboard_push_row", "str_type": "xapp_dashboard_push_row", "bln_editPin": true, "int_idRecord": 77167, "str_classList": "programiconbutton", "str_idXDesign": "myId_25022733", "str_nameShort": "xapp_dashboard_push_row", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_dashboard", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:05:11", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "width": "100%", "border": "0px solid black", "display": "none", "padding": "1.0em", "flex-flow": "row wrap", "flex-wrap": "wrap", "flex-direction": "column"}}],
+[77168, {"obj_design": {"str_tag": "button", "blnIsTag": true, "str_name": "xapp_button_push_schedule", "str_text": "Push", "str_type": "xapp_button_push_schedule", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77168, "str_classList": "notset", "str_idProject": "myId_20107211", "str_idXDesign": "myId_37771064", "str_nameShort": "xapp_button_push_schedule", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"str_name": "xapp_button_navigate_desktop", "innerHTML": "Push", "innerText": "Auto Maintain"}, "dom_objContentContainer": {"data": "", "str_name": "xapp_button_navigate_desktop"}}],
 [77171, {"obj_design": {"str_tag": "button", "str_name": "xapp_button_queryterm", "str_text": "My Button", "str_type": "xapp_button_queryterm", "bln_editPin": true, "int_idRecord": 77171, "str_idXDesign": "myId_05444353", "str_nameShort": "xapp_button_queryterm", "str_themeType": "form_button", "bln_palettePin": true, "str_classExtend": "form_button", "str_createdDate": "2022-11-20 23:26:20", "str_categoryName": "Xtra", "str_modifiedDate": "2022-11-20 23:26:20", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"border": "0px none", "cursor": "pointer", "height": "40px", "padding": "1.0em", "border-radius": "2px"}, "obj_domProperty": {"innerText": "My Button"}}],
 [77173, {"obj_design": {"str_tag": "fieldset", "str_name": "xapp_queryterm_interface", "str_type": "xapp_queryterm_interface", "bln_editPin": true, "int_idRecord": 77173, "str_idXDesign": "myId_41499791", "str_nameShort": "xapp_queryterm_interface", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_fieldset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:05:11", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "padding": "1.0em", "flex-flow": "wrap", "flex-wrap": "wrap", "flex-direction": "column"}}],
-[77184, {"obj_design": {"str_tag": "fieldset", "lockOpen": true, "str_name": "form_fieldset", "str_text": "notset", "str_type": "form_fieldset", "bln_editPin": true, "str_content": "", "int_idRecord": 77184, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_01091007", "str_nameShort": "form_fieldset", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Form", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"gap": "1.0em", "border": "1px outset gray", "display": "flex", "padding": "1.0em", "flex-flow": "wrap", "flex-wrap": "wrap", "align-self": "flex-start", "background": "gray", "border-radius": "4px", "flex-direction": "column"}, "bln_toggleState": true}],
-[77187, {"obj_design": {"str_tag": "legend", "str_name": "form_legend", "str_text": "MyText", "str_type": "form_legend", "bln_editPin": true, "str_content": "", "int_idRecord": 77187, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_82227821", "str_nameShort": "form_legend", "str_themeType": "form_legend", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_button", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Form", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "white", "border": "1px outset gray", "display": "block", "opacity": "1", "padding": "1.0em", "background": "gray", "user-select": "none", "border-radius": "4px", "text-decoration": "none"}, "obj_domProperty": {"href": "https://www.mycode.buzz", "target": "_blank", "tabIndex": "0", "innerHTML": "MyText"}, "dom_objContentContainer": {"href": "https://www.mycode.buzz", "target": "_blank"}}],
+[77177, {"obj_design": {"str_tag": "button", "blnIsTag": true, "str_name": "xapp_button_queryterm", "str_text": "Query Term", "str_type": "xapp_button_queryterm", "bln_editPin": true, "str_content": "My component", "int_idRecord": 77177, "str_idProject": "myId_25365115", "str_idXDesign": "myId_11729888", "str_nameShort": "xapp_button_queryterm", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"innerHTML": "Query Term", "innerText": "Add"}, "dom_objContentContainer": {}}],
+[77184, {"obj_design": {"str_tag": "fieldset", "lockOpen": true, "str_name": "form_fieldset", "str_text": "notset", "str_type": "form_fieldset", "bln_editPin": true, "str_content": "", "int_idRecord": 77184, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_01091007", "str_nameShort": "form_fieldset", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Form", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"gap": "1.0em", "border": "1em solid orange", "margin": "", "display": "flex", "padding": "1.0em", "overflow": "", "flex-flow": "row wrap", "flex-wrap": "wrap", "align-self": "", "background": "rgb(65, 65, 65)", "border-radius": "0.5em", "flex-direction": "column"}, "bln_toggleState": true}],
+[77187, {"obj_design": {"str_tag": "legend", "str_name": "form_legend", "str_text": "MyText", "str_type": "form_legend", "bln_editPin": true, "str_content": "", "int_idRecord": 77187, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_82227821", "str_nameShort": "form_legend", "str_themeType": "form_legend", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_button", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Form", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "opacity": "1", "padding": "1.0em", "font-size": "1rem", "background": "rgb(65, 65, 65)", "user-select": "none", "border-radius": "", "text-decoration": ""}, "obj_domProperty": {"href": "https://www.mycode.buzz", "target": "_blank", "tabIndex": "0", "innerHTML": "MyText"}, "dom_objContentContainer": {"href": "https://www.mycode.buzz", "target": "_blank"}}],
 [77192, {"obj_design": {"str_tag": "tabset", "arr_item": [{"obj_design": {"str_type": "form_panellist", "int_idRecord": 77193}}, {"obj_design": {"str_type": "form_tablist", "int_idRecord": 77194}}], "str_name": "form_tabset", "str_text": "notset", "str_type": "form_tabset", "bln_editPin": true, "str_content": "", "int_idRecord": 77192, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_13355182", "str_nameShort": "form_tabset", "str_themeType": "form_tabset", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_tablist": {"obj_design": {"str_type": "form_tablist", "int_idRecord": 77194}}, "obj_domStyle": {"gap": "1.0em", "display": "none", "flex-wrap": "wrap", "flex-direction": "column"}, "obj_panellist": {"obj_design": {"str_type": "form_panellist", "int_idRecord": 77193}}, "obj_domProperty": {"Id": "myId_13355182", "role": "tablist", "aria-label": "Tab Set"}, "dom_objContentContainer": {"Id": "myId_13355182", "aria-label": "Tab Set"}}],
 [77193, {"obj_design": {"str_tag": "panellist", "str_name": "form_panellist", "str_type": "form_panellist", "bln_editPin": true, "int_idRecord": 77193, "str_idXDesign": "myId_25489299", "str_nameShort": "form_panellist", "str_themeType": "form_panellist", "bln_palettePin": true, "bln_isLocalHome": true, "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:05:11", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"flex-wrap": "wrap", "flex-direction": "column"}, "obj_domProperty": {"role": "tablist", "aria-label": "Tab Set"}, "dom_objContentContainer": {"aria-label": "Tab Set"}}],
 [77194, {"obj_design": {"str_tag": "tablist", "str_name": "form_tablist", "str_type": "form_tablist", "bln_editPin": true, "int_idRecord": 77194, "str_idXDesign": "myId_15515595", "str_nameShort": "form_tablist", "str_themeType": "form_tablist", "bln_palettePin": true, "bln_isLocalHome": true, "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:05:11", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-flow": "row wrap", "flex-wrap": "wrap", "flex-direction": "column"}, "obj_domProperty": {"role": "tablist", "aria-label": "Tab Set"}, "dom_objContentContainer": {"aria-label": "Tab Set"}}],
 [77195, {"obj_design": {"str_tag": "button", "str_name": "form_tab", "str_text": "My Button", "str_type": "form_tab", "bln_editPin": true, "str_content": "", "int_idRecord": 77195, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_03131030", "str_nameShort": "form_tab", "str_themeType": "form_button", "bln_palettePin": true, "str_classExtend": "form_button", "str_createdDate": "2022-11-20 23:26:20", "str_categoryName": "Xtra", "str_modifiedDate": "2022-11-20 23:26:20", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"border": "0px none", "cursor": "pointer", "height": "40px", "padding": "1.0em", "border-radius": "2px"}, "obj_domProperty": {"innerHTML": "My Button", "innerText": "My Button"}}],
 [77200, {"obj_design": {"str_tag": "fieldset", "str_name": "xapp_report_interface_fieldlist", "str_type": "xapp_report_interface_fieldlist", "bln_editPin": true, "int_idRecord": 77200, "str_idXDesign": "myId_04630046", "str_nameShort": "xapp_report_interface_fieldlist", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_fieldset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:05:11", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "padding": "1.0em", "flex-flow": "wrap", "flex-wrap": "wrap", "flex-direction": "column"}}],
 [77201, {"obj_design": {"str_tag": "fieldset", "str_name": "xapp_report_interface_fieldcriteria", "str_type": "xapp_report_interface_fieldcriteria", "bln_editPin": true, "int_idRecord": 77201, "str_idXDesign": "myId_30910110", "str_nameShort": "xapp_report_interface_fieldcriteria", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_fieldset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:05:11", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "padding": "1.0em", "flex-flow": "wrap", "flex-wrap": "wrap", "flex-direction": "column"}}],
+[77215, {"obj_design": {"str_tag": "xapp_dashboard_view", "str_name": "xapp_dashboard_view", "str_type": "xapp_dashboard_view", "bln_editPin": true, "int_idRecord": "77215", "str_classList": "programiconbutton", "str_idXDesign": "myId_55117575", "str_nameShort": "xapp_dashboard_view", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_dashboard", "str_createdDate": "2022-01-31 21:05:11", "str_modifiedDate": "2022-01-31 21:05:11", "bln_createRelease": "false", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "width": "100%", "border": "0px solid black", "display": "none", "padding": "1.0em", "flex-flow": "row wrap", "flex-wrap": "wrap", "flex-direction": "column"}}],
+[77218, {"obj_design": {"str_tag": "input", "blnIsTag": true, "str_name": "xapp_input_file_select", "str_text": "Select File", "str_type": "xapp_input_file_select", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77218, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_28226265", "str_nameShort": "xapp_input_file_select", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xapp", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"cursor": "pointer", "display": "none", "opacity": "1", "padding": "1.0em"}, "obj_domProperty": {"type": "file", "innerHTML": "Import File", "innerText": "View"}, "dom_objContentContainer": {"data": ""}}],
 [77335, {"obj_design": {"str_tag": "input", "str_name": "form_radio", "str_text": "notset", "str_type": "form_radio", "bln_editPin": true, "str_content": "", "int_idRecord": "77335", "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_74996919", "str_nameShort": "form_radio", "str_themeType": "form_input", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-02-02 19:57:30", "str_modifiedDate": "2022-02-02 19:57:30", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"width": "40px", "border": "0px none", "cursor": "pointer", "height": "40px", "margin": "0px", "content": "\\2713", "vertical-align": "middle"}, "obj_domProperty": {"Id": "myId_74996919", "type": "radio", "checked": true, "innerHTML": "&nbsp;"}, "dom_objContentContainer": {"Id": "myId_74996919"}}],
 [77337, {"obj_design": {"str_tag": "br", "str_name": "form_nonbreakingspace", "str_text": "notset", "str_type": "form_nonbreakingspace", "bln_editPin": true, "str_content": "", "int_idRecord": "77337", "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_88201141", "str_nameShort": "form_nonbreakingspace", "str_themeType": "form_nonbreakingspace", "bln_palettePin": true, "str_classExtend": "notset", "str_createdDate": "2023-09-28 17:30:59", "str_modifiedDate": "2023-09-28 17:30:59", "str_releaseLabel": "notset", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"width": "100%", "border": "0px", "height": "1.0em", "background": "yellow"}, "obj_domProperty": {"Id": "myId_88201141"}, "dom_objContentContainer": {"Id": "myId_88201141"}}],
 [77339, {"obj_design": {"str_tag": "label", "str_name": "form_label", "str_text": "My Label", "str_type": "form_label", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": 77339, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_11122295", "str_nameShort": "form_label", "str_themeType": "form_label", "bln_palettePin": true, "str_classExtend": "notset", "str_createdDate": "2022-11-13 21:59:51", "str_categoryName": "Xtra", "str_modifiedDate": "2022-11-13 21:59:51", "str_releaseLabel": "notset", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "black", "border": "1px solid rgba(255, 255, 255, 0.0)", "cursor": "pointer", "margin": "3px", "padding": "1.0em", "overflow": "auto", "max-width": "175px", "min-width": "175px", "align-self": "flex-start", "max-height": "175px", "word-break": "normal", "border-radius": "4px"}, "obj_domProperty": {"Id": "myId_11122295", "innerText": "My Label"}, "dom_objContentContainer": {"Id": "myId_11122295"}}],
 [77341, {"obj_design": {"str_tag": "span", "blnIsTag": true, "str_name": "form_span", "str_text": "notset", "str_type": "form_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": 77341, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_18418551", "str_nameShort": "form_span", "str_themeType": "form_input", "bln_palettePin": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "Form", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "notset", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"color": "black", "border": "0px solid black", "padding": "1.0em", "overflow": "auto", "maxheight": "175", "background": "white", "max-height": "500px", "word-break": "normal", "font-family": "Tahoma", "border-radius": "4px"}, "obj_domProperty": {"Id": "myId_18418551"}, "dom_objContentContainer": {"Id": "myId_18418551"}}],
-[77377, {"obj_design": {"str_tag": "form", "arr_item": [{"obj_design": {"str_type": "form_input_login_email", "int_idRecord": 77538}}, {"obj_design": {"str_type": "form_input_login_pass", "int_idRecord": 77533}}, {"obj_design": {"str_type": "form_button_rich", "int_idRecord": 77541}}, {"obj_design": {"str_type": "form_button_rich", "int_idRecord": 77545}}], "str_name": "loginpanelform", "str_text": "notset", "str_type": "loginpanelform", "bln_editPin": true, "str_content": "", "int_idRecord": 77377, "str_classList": "notset", "str_idProject": "myId_06166711", "str_idXDesign": "myId_29131132", "str_nameShort": "loginpanelform", "str_themeType": "form_form", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_form", "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "lock", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtProject": true}, "user_agent": "Firefox", "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-wrap": "wrap", "flex-direction": "column", " background-color": "coral"}, "obj_domProperty": {"Id": "myId_29131132"}, "dom_objContentContainer": {"0": {"Id": "myId_37191444", "maxlength": "100", "font-weight": "bold"}, "1": {"Id": "myId_17521741", "inputmode": "numeric", "maxlength": "6", "minlength": "6"}, "2": {"Id": "myId_07559595", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}, "3": {"Id": "myId_78332329", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}, "Id": "myId_29131132"}}],
 [77379, {"obj_design": {"str_tag": "button", "blnIsTag": true, "str_name": "form_button_search", "str_text": "Search", "str_type": "form_button_search", "str_value": "Search", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77379, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_48693643", "str_nameShort": "form_button_search", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "form_inputandbutton_submit", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"border": "0px none white", "cursor": "pointer", "padding": "1.0em", "pointer": "black", "flex flow": "column wrap", "border-radius": "2px", "rgb(18, 47, 66)": "rgb(18, 47, 66)", "background-color": "white"}, "obj_domProperty": {"Id": "myId_48693643", "type": "submit", "innerHTML": "Search", "innerText": "Submit"}, "dom_objContentContainer": {"Id": "myId_48693643", "data": ""}}],
 [77381, {"obj_design": {"str_tag": "i", "str_name": "form_icon", "str_text": "notset", "str_type": "form_icon", "bln_editPin": true, "str_content": "", "int_idRecord": 77381, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_92278787", "str_nameShort": "form_icon", "str_themeType": "form_icon", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"margin": "1.0em"}, "obj_domProperty": {"Id": "myId_92278787"}, "dom_objContentContainer": {"Id": "myId_92278787"}}],
 [77386, {"obj_design": {"str_tag": "span", "blnIsTag": true, "str_name": "form_button_span", "str_text": "form_button_span", "str_type": "form_button_span", "bln_editPin": true, "bln_typeable": true, "int_idRecord": 77386, "str_idProject": "myId_11190110", "str_idXDesign": "myId_57242915", "str_nameShort": "form_button_span", "str_themeType": "form_button_span", "bln_palettePin": true, "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "Form", "str_modifiedDate": "2022-11-18 16:02:10", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"maxheight": "175"}, "obj_domProperty": {"Id": "myId_57242915", "innerHTML": "form_button_span"}, "dom_objContentContainer": {"Id": "myId_57242915"}}],
 [77387, {"obj_design": {"str_tag": "i", "str_name": "form_button_icon", "str_type": "form_button_icon", "bln_editPin": true, "int_idRecord": 77387, "str_idProject": "myId_79120090", "str_idXDesign": "myId_24281989", "str_nameShort": "form_button_icon", "str_themeType": "form_button_icon", "bln_palettePin": true, "bln_isLocalHome": true, "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Form", "str_modifiedDate": "2022-01-31 21:05:11", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"color": "rgb(64, 169, 236)"}, "obj_domProperty": {"Id": "myId_24281989"}, "dom_objContentContainer": {"Id": "myId_24281989"}}],
 [77388, {"obj_icon": {"obj_design": {"str_type": "form_button_icon", "int_idRecord": 77387}}, "obj_span": {"obj_design": {"str_type": "form_button_span", "int_idRecord": 77386}}, "obj_design": {"str_tag": "a", "arr_item": [{"obj_design": {"str_type": "form_button_span", "int_idRecord": 77386}}, {"obj_design": {"str_type": "form_button_icon", "int_idRecord": 77387}}], "str_name": "xapp_form_anchor", "str_type": "form_anchor", "bln_editPin": true, "int_idRecord": 77388, "str_idProject": "myId_11190110", "str_idXDesign": "myId_00791702", "str_nameShort": "xapp_form_anchor", "str_themeType": "form_anchor", "bln_palettePin": true, "bln_isLocalHome": true, "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:05:11", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": "false", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"gap": "1.0em", "text": "de", "border": "0px solid black", "display": "flex", "align-items": "center", "justify-content": "center", "text-decoration": "none"}, "obj_domProperty": {"Id": "myId_00791702", "target": "_blank"}, "dom_objContentContainer": {"Id": "myId_00791702"}}],
+[77390, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_add", "str_name": "xapp_button_new_record", "str_text": "New Record", "str_type": "xapp_button_new_record", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77390, "str_classList": "notset", "str_idProject": "myId_25365115", "str_idXDesign": "myId_34824025", "str_nameShort": "xapp_button_new_record", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "bln_debugText": true, "obj_domProperty": {"Id": "myId_34824025", "innerHTML": "Refresh", "innerText": "Complete", "aria-label": "New Record"}, "dom_objContentContainer": {"Id": "myId_34824025", "aria-label": "New Record"}}],
 [77393, {"obj_icon": {"obj_design": {"str_type": "form_button_icon", "int_idRecord": 77387}}, "obj_span": {"obj_design": {"str_type": "form_button_span", "int_idRecord": 77386}}, "obj_design": {"str_tag": "a", "arr_item": [{"obj_design": {"str_type": "form_button_span", "int_idRecord": 77386}}, {"obj_design": {"str_type": "form_button_icon", "int_idRecord": 77387}}], "str_name": "form_button_anchor", "str_text": "notset", "str_type": "form_button_anchor", "bln_editPin": true, "str_content": "", "int_idRecord": 77393, "str_classList": "notset", "str_idProject": "myId_77377077", "str_idXDesign": "myId_66119667", "str_nameShort": "form_button_anchor", "str_themeType": "form_button_anchor", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Form", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "text": "de", "color": "white", "border": "0px solid black", "display": "flex", "font-size": "1rem", "align-items": "center", "justify-content": "center", "text-decoration": "none"}, "obj_domProperty": {"Id": "myId_66119667", "target": "_blank"}, "dom_objContentContainer": {"Id": "myId_66119667"}}],
 [77396, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_settings", "str_name": "xapp_button_navigate_settings", "str_text": "", "str_type": "xapp_button_navigate_settings", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77396, "str_classList": "notset", "str_idProject": "myId_25365115", "str_idXDesign": "myId_25205280", "str_nameShort": "xapp_button_navigate_settings", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_25205280", "title": "Settings", "innerHTML": "Refresh", "innerText": "Complete", "aria-label": "Settings"}, "dom_objContentContainer": {"Id": "myId_25205280", "aria-label": "Settings"}}],
 [77397, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_desk", "str_name": "xapp_button_navigate_desktop", "str_text": "Home", "str_type": "xapp_button_navigate_desktop", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77397, "str_classList": "notset", "str_idProject": "myId_25365115", "str_idXDesign": "myId_15925355", "str_nameShort": "xapp_button_navigate_desktop", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "cursor": "", "display": "flex", "opacity": "1", "padding": "1em", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_15925355", "title": "Home", "innerHTML": "Refresh", "innerText": "Complete", "aria-label": "Home"}, "dom_objContentContainer": {"Id": "myId_15925355", "aria-label": "Home"}}],
 [77430, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_lock", "str_name": "xapp_button_navigate_login", "str_text": "Exit", "str_type": "xapp_button_navigate_login", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77430, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_23559322", "str_nameShort": "xapp_button_navigate_login", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_23559322", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_23559322", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
-[77451, {"obj_meta": {"str_text": "", "bln_viewPin": 0, "int_idMetaRowz": 0, "int_idMetaView": 0, "str_metaRowzName": "", "str_metaTypeData": "", "MetaPermissionTag": "100", "str_buttonConsole": "", "bln_togglePeersPin": true, "str_optionChildMenu": "", "int_idParentMetaRowz": 0, "str_metaTypeDashboard": "", "str_metaConstraintName": ""}, "obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "star", "str_name": "xapp_menu", "str_text": "xapp_menu", "str_type": "xapp_menu", "bln_editPin": true, "str_content": "", "int_idRecord": 77451, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_77377077", "str_nameShort": "xapp_menu", "str_themeType": "menu_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_menu_operation", "str_createdDate": "2022-02-02 20:04:57", "str_categoryName": "Xapp", "str_modifiedDate": "2022-02-02 20:04:57", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "yellow", "width": "100%", "border": "0.5rem solid yellow", "cursor": "", "display": "flex", "padding": "1em", "font-size": "1rem", "background": "rgb(65, 65, 65)", "align-items": "", "border-radius": "", "margin-bottom": "1em", "padding-bottom": "2px", "justify-content": ""}, "str_optionData": "Data", "str_optionMenu": "Menu", "obj_domProperty": {"Id": "myId_77377077", "innerHTML": "xapp_menu", "innerText": "xapp_menu", "xDesign_MenuButtonClick": "fn_MenuButtonClick"}, "str_optionReport": "Report", "str_optionWidget": "Widget", "str_listSeparator": "-", "str_optionMenuForm": "MenuForm", "str_defaultTypeData": "xapp_data_view", "str_defaultTypeMenu": "xapp_menu", "str_optionDashboard": "Dashboard", "bln_constraintKeyPin": true, "str_defaultTypeDataChildMenu": "xapp_data_childmenu"}],
+[77451, {"obj_meta": {"str_text": "", "bln_viewPin": 0, "int_idMetaRowz": 0, "int_idMetaView": 0, "str_metaRowzName": "", "str_metaTypeData": "", "MetaPermissionTag": "100", "str_buttonConsole": "", "bln_togglePeersPin": true, "str_optionChildMenu": "", "int_idParentMetaRowz": 0, "str_metaTypeDashboard": "", "str_metaConstraintName": ""}, "obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "star", "str_name": "xapp_menu", "str_text": "xapp_menu", "str_type": "xapp_menu", "bln_editPin": true, "str_content": "", "int_idRecord": 77451, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_77377077", "str_nameShort": "xapp_menu", "str_themeType": "menu_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_menu_operation", "str_createdDate": "2022-02-02 20:04:57", "str_categoryName": "Xapp", "str_modifiedDate": "2022-02-02 20:04:57", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "width": "100%", "border": "1em solid orange", "cursor": "", "display": "flex", "padding": "1em", "font-size": "1rem", "background": "rgb(65, 65, 65)", "align-items": "", "border-radius": "", "margin-bottom": "1em", "padding-bottom": "2px", "justify-content": ""}, "str_optionData": "Data", "str_optionMenu": "Menu", "obj_domProperty": {"Id": "myId_77377077", "innerHTML": "xapp_menu", "innerText": "xapp_menu", "xDesign_MenuButtonClick": "fn_MenuButtonClick"}, "str_optionReport": "Report", "str_optionWidget": "Widget", "str_listSeparator": "-", "str_optionMenuForm": "MenuForm", "str_defaultTypeData": "xapp_data_view", "str_defaultTypeMenu": "xapp_menu", "str_optionDashboard": "Dashboard", "bln_constraintKeyPin": true, "str_defaultTypeDataChildMenu": "xapp_data_childmenu"}],
 [77452, {"obj_design": {"str_tag": "block_start", "str_name": "block_start", "str_text": "notset", "str_type": "block_structure", "bln_editPin": true, "str_content": "", "int_idRecord": 77452, "str_position": "start", "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_37013033", "str_nameShort": "block_start", "str_themeType": "form_container", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:10:58", "str_categoryName": "xapp", "str_modifiedDate": "2022-01-31 21:10:58", "str_releaseLabel": "", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "flex": "1 1 auto", "border": "0px solid yellow", "1 1 50%": "1.0em", "display": "flex", "flex-wrap": "wrap", "justify-content": "start"}, "obj_domProperty": {"Id": "myId_37013033"}, "dom_objContentContainer": {"Id": "myId_37013033"}}],
 [77453, {"obj_design": {"str_tag": "block_end", "str_name": "block_end", "str_text": "notset", "str_type": "block_structure", "bln_editPin": true, "str_content": "", "int_idRecord": 77453, "str_position": "end", "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_01401823", "str_nameShort": "block_end", "str_themeType": "form_container", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:10:58", "str_categoryName": "xapp", "str_modifiedDate": "2022-01-31 21:10:58", "str_releaseLabel": "", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "flex": "1 1 auto", "border": "0px solid blue", "display": "flex", "flex-wrap": "wrap", "background": "green", "justify-content": "end"}, "obj_domProperty": {"Id": "myId_01401823"}, "dom_objContentContainer": {"Id": "myId_01401823"}}],
 [77454, {"obj_design": {"str_tag": "xapp_console", "arr_item": [{"obj_design": {"str_type": "block_structure", "int_idRecord": 77452}}, {"obj_design": {"str_type": "block_structure", "int_idRecord": 77453}}], "str_name": "xapp_console", "str_text": "notset", "str_type": "xapp_console", "bln_editPin": true, "str_content": "", "int_idRecord": "77454", "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_22307377", "str_nameShort": "xapp_console", "str_themeType": "form_container", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-02-02 20:10:52", "str_categoryName": "xapp", "str_modifiedDate": "2022-02-02 20:10:52", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_blockEnd": {"obj_design": {"str_type": "block_structure", "int_idRecord": 77453}}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-wrap": "wrap", "flexdirection": "column"}, "obj_blockStart": {"obj_design": {"str_type": "block_structure", "int_idRecord": 77452}}, "obj_domProperty": {"Id": "myId_22307377"}, "dom_objContentContainer": {"Id": "myId_22307377"}}],
@@ -18819,9 +21796,24 @@ var obj_InstanceJSONMap = new Map([
 [77489, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "star", "str_name": "form_button_rich", "str_text": "My Button", "str_type": "form_button_rich", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77489, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_11150032", "str_nameShort": "form_button_rich", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Form", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "cursor": "pointer", "display": "flex", "padding": "1em", "background": "rgb(65, 65, 65)", "align-items": "", "justify-content": ""}, "obj_domProperty": {"Id": "myId_11150032", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_11150032", "str_name": "xapp_button_navigate_desktop"}}],
 [77490, {"obj_design": {"str_tag": "button", "blnIsTag": true, "str_icon": "xapp_star", "str_name": "form_button", "str_text": "My Button", "str_type": "form_button", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77490, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_12330123", "str_nameShort": "form_button", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_12330123", "str_name": "xapp_button_navigate_desktop", "innerHTML": "My Button", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_12330123", "data": "", "str_name": "xapp_button_navigate_desktop"}}],
 [77491, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "form_button_showhide", "str_text": "My Button", "str_type": "form_button_showhide", "bln_expand": true, "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77491, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_78802071", "str_nameShort": "form_button_showhide", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_button_rich", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_78802071", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_78802071", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
+[77495, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "rowz_upload_file", "str_name": "xapp_button_file_import", "str_text": "Step 2: Import File", "str_type": "xapp_button_file_import", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77495, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_31131690", "str_nameShort": "xapp_button_file_import", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_31131690", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_31131690", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
 [77496, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "", "str_name": "xapp_button_navigate_newrow", "str_text": "New Row", "str_type": "xapp_button_navigate_newrow", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77496, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_18827111", "str_nameShort": "xapp_button_navigate_newrow", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_18827111", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_18827111", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
 [77497, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "", "str_name": "xapp_button_navigate_newcolumn", "str_text": "New Column", "str_type": "xapp_button_navigate_newcolumn", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77497, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_52721115", "str_nameShort": "xapp_button_navigate_newcolumn", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_52721115", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_52721115", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
+[77499, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "", "str_name": "xapp_button_archive_record", "str_text": "Archive Record", "str_type": "xapp_button_archive_record", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77499, "str_classList": "notset", "str_idProject": "myId_25365115", "str_idXDesign": "myId_22102372", "str_nameShort": "xapp_button_archive_record", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_22102372", "innerHTML": "Refresh", "innerText": "Complete", "aria-label": "New Record"}, "dom_objContentContainer": {"Id": "myId_22102372", "aria-label": "New Record"}}],
 [77500, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_search", "str_name": "form_button_search", "str_text": "Search", "str_type": "form_button_search", "str_value": "Search", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77500, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_50437881", "str_nameShort": "form_button_search", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_inputandbutton_submit", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_50437881", "innerHTML": "Refresh", "innerText": "Complete", "aria-label": "New Record"}, "dom_objContentContainer": {"Id": "myId_50437881", "aria-label": "New Record"}}],
+[77501, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}, {"obj_design": {"str_type": "xapp_input_file_select", "int_idRecord": 77218}}], "blnIsTag": true, "str_icon": "rowz_upload_file", "str_name": "xapp_button_file_select", "str_text": "Step 1: Choose File", "str_type": "xapp_button_file_select", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77501, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_28207122", "str_nameShort": "xapp_button_file_select", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_28207122", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_28207122", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
+[77505, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_wrench", "str_name": "xapp_button_provision", "str_text": "Provision", "str_type": "xapp_button_provision", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77505, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_14322737", "str_nameShort": "xapp_button_provision", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_14322737", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_14322737", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
+[77506, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "xapp_button_provision_linked_opportunity_show", "str_text": "Show Linked Opportunities", "str_type": "xapp_button_provision_linked_opportunity_show", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77506, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_35323172", "str_nameShort": "xapp_button_provision_linked_opportunity_show", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_35323172", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_35323172", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
+[77507, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "xapp_button_provision_linked_contact_show", "str_text": "Show Linked Contacts", "str_type": "xapp_button_provision_linked_contact_show", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77507, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_13373239", "str_nameShort": "xapp_button_provision_linked_contact_show", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_13373239", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_13373239", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
+[77508, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "xapp_button_provision_b2b", "str_text": "B2B Model", "str_type": "xapp_button_provision_b2b", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77508, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_27734227", "str_nameShort": "xapp_button_provision_b2b", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_27734227", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_27734227", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
+[77509, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "xapp_button_provision_linked_task_show", "str_text": "Show Linked Tasks", "str_type": "xapp_button_provision_linked_task_show", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77509, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_25422221", "str_nameShort": "xapp_button_provision_linked_task_show", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_25422221", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_25422221", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
+[77510, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_wrench", "str_name": "xapp_button_maintain", "str_text": "Maintain", "str_type": "xapp_button_maintain", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77510, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_37233216", "str_nameShort": "xapp_button_maintain", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_37233216", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_37233216", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
+[77511, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_wrench", "str_name": "xapp_button_maintain_debug_release", "str_text": "Debug Release", "str_type": "xapp_button_maintain_debug_release", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77511, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_35617732", "str_nameShort": "xapp_button_maintain_debug_release", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_35617732", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_35617732", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
+[77512, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_wrench", "str_name": "xapp_button_backup", "str_text": "Backup", "str_type": "xapp_button_backup", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77512, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_28218884", "str_nameShort": "xapp_button_backup", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_28218884", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_28218884", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
+[77513, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "xapp_button_provision_b2c", "str_text": "B2C Model", "str_type": "xapp_button_provision_b2c", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77513, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_73811662", "str_nameShort": "xapp_button_provision_b2c", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_73811662", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_73811662", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
+[77514, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "xapp_button_provision_linked_opportunity_hide", "str_text": "Hide Linked Opportunities", "str_type": "xapp_button_provision_linked_opportunity_hide", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77514, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_42235730", "str_nameShort": "xapp_button_provision_linked_opportunity_hide", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_42235730", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_42235730", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
+[77515, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "xapp_button_provision_linked_contact_hide", "str_text": "Hide Linked Contacts", "str_type": "xapp_button_provision_linked_contact_hide", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77515, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_22206726", "str_nameShort": "xapp_button_provision_linked_contact_hide", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_22206726", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_22206726", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
+[77516, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "xapp_button_provision_linked_task_hide", "str_text": "Hide Linked Tasks", "str_type": "xapp_button_provision_linked_task_hide", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77516, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_77777817", "str_nameShort": "xapp_button_provision_linked_task_hide", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_77777817", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_77777817", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
 [77517, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_visibility_off", "str_name": "xapp_button_general_row_hide", "str_text": "Hide Row", "str_type": "xapp_button_general_row_hide", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77517, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_07873870", "str_nameShort": "xapp_button_general_row_hide", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_07873870", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_07873870", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
 [77518, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_visibility_on", "str_name": "xapp_button_general_row_show", "str_text": "Show Row", "str_type": "xapp_button_general_row_show", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77518, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_70742723", "str_nameShort": "xapp_button_general_row_show", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_70742723", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_70742723", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
 [77519, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_visibility_on", "str_name": "xapp_button_general_archive_show", "str_text": "Show Archive", "str_type": "xapp_button_general_archive_show", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77519, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_11317771", "str_nameShort": "xapp_button_general_archive_show", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_11317771", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_11317771", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
@@ -18830,38 +21822,34 @@ var obj_InstanceJSONMap = new Map([
 [77523, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "", "str_name": "xapp_button_general_form_up", "str_text": "Move Up", "str_type": "xapp_button_general_form_up", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77523, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_37265133", "str_nameShort": "xapp_button_general_form_up", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_37265133", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_37265133", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
 [77524, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "", "str_name": "xapp_button_general_form_gap", "str_text": "Form Gap", "str_type": "xapp_button_general_form_gap", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77524, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_23224334", "str_nameShort": "xapp_button_general_form_gap", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_23224334", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_23224334", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
 [77525, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "", "str_name": "xapp_button_general_form_group", "str_text": "Form Group", "str_type": "xapp_button_general_form_group", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77525, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_43777772", "str_nameShort": "xapp_button_general_form_group", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_43777772", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_43777772", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
+[77527, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "", "str_name": "xapp_button_next_record", "str_text": "Next Record", "str_type": "xapp_button_next_record", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77527, "str_classList": "notset", "str_idProject": "myId_25365115", "str_idXDesign": "myId_48221342", "str_nameShort": "xapp_button_next_record", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_48221342", "innerHTML": "Refresh", "innerText": "Complete", "aria-label": "New Record"}, "dom_objContentContainer": {"Id": "myId_48221342", "aria-label": "New Record"}}],
 [77530, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_calendar_month", "str_name": "xapp_button_general_use_task_date", "str_text": "Use Task Date", "str_type": "xapp_button_general_use_task_date", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77530, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_92128822", "str_nameShort": "xapp_button_general_use_task_date", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_92128822", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_92128822", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
 [77531, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_calendar_month", "str_name": "xapp_button_general_use_task_datetime", "str_text": "Use Date & Time", "str_type": "xapp_button_general_use_task_datetime", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77531, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_22868883", "str_nameShort": "xapp_button_general_use_task_datetime", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_22868883", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_22868883", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
-[77532, {"obj_design": {"str_tag": "authorise_end", "str_name": "authorise_end", "str_text": "notset", "str_type": "authorise_end", "bln_editPin": true, "str_content": "", "int_idRecord": 77532, "str_classList": "notset", "str_idProject": "myId_38012811", "str_idXDesign": "myId_17387151", "str_nameShort": "authorise_end", "str_themeType": "authorise_end", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_ajax", "str_createdDate": "2022-09-10 18:52:39", "str_categoryName": "Anchor", "str_modifiedDate": "2022-09-10 18:52:39", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true}, "obj_domProperty": {"Id": "myId_17387151"}, "dom_objContentContainer": {"Id": "myId_17387151"}}],
-[77533, {"obj_design": {"str_tag": "input", "str_name": "form_input_login_pass", "str_text": "notset", "str_type": "form_input_login_pass", "bln_expand": true, "bln_editPin": true, "str_content": "", "int_idRecord": 77533, "str_classList": "notset", "str_idProject": "myId_29131132", "str_idXDesign": "myId_17521741", "str_nameShort": "form_input_login_pass", "str_themeType": "form_input", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-02-02 19:57:30", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:57:30", "str_releaseLabel": "", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtProject": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"border": "0px none", "cursor": "pointer", "display": "none", "padding": "20px", "font-size": "1.2rem", "font-weight": "bold", "border-radius": "", "background-color": ""}, "obj_domProperty": {"Id": "myId_17521741", "size": "20", "type": "", "pattern": "[0-9]*", "inputmode": "numeric", "maxlength": "6", "minlength": "6", "placeholder": "One Time Pass"}, "dom_objContentContainer": {"Id": "myId_17521741", "inputmode": "numeric", "maxlength": "6", "minlength": "6"}}],
-[77538, {"obj_design": {"str_tag": "input", "str_name": "form_input_login_email", "str_text": "notset", "str_type": "form_input_login_email", "bln_expand": true, "bln_editPin": true, "str_content": "", "int_idRecord": 77538, "str_classList": "notset", "str_idProject": "myId_29131132", "str_idXDesign": "myId_37191444", "str_nameShort": "form_input_login_email", "str_themeType": "form_input", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_input", "str_createdDate": "2022-02-02 19:57:30", "str_categoryName": "", "str_modifiedDate": "2022-02-02 19:57:30", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtProject": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"border": "0px none", "cursor": "pointer", "padding": "30px", "font-weight": "bold"}, "obj_domProperty": {"Id": "myId_37191444", "name": "email", "type": "email", "required": true, "maxlength": "100", "font-weight": "bold", "placeholder": "Your email address", "autocomplete": "on"}, "dom_objContentContainer": {"Id": "myId_37191444", "maxlength": "100", "font-weight": "bold"}}],
-[77541, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_send", "str_name": "form_button_login_email", "str_text": "Send Key", "str_type": "form_button_rich", "bln_expand": true, "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77541, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_07559595", "str_nameShort": "form_button_login_email", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "lock", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtProject": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_07559595", "type": "submit", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_07559595", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
-[77544, {"obj_design": {"str_tag": "section", "arr_item": [{"obj_design": {"str_type": "loginpanelform", "int_idRecord": 77377}}], "str_name": "form_section", "str_text": "notset", "str_type": "form_section", "bln_expand": true, "bln_editPin": true, "str_content": "", "int_idRecord": "77544", "str_classList": "notset", "str_idProject": "myId_06166711", "str_idXDesign": "myId_34183798", "str_nameShort": "form_section", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "padding": "30px", "flex-flow": "wrap", "flex-wrap": "wrap", "align-items": "center", "font-weight": "bold", "flex-direction": "column", "justify-content": "center"}, "obj_domProperty": {"Id": "myId_34183798"}, "dom_objContentContainer": {"Id": "myId_34183798"}}],
-[77545, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_key", "str_name": "form_button_login_pass", "str_text": "Enter Pass", "str_type": "form_button_rich", "bln_expand": true, "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77545, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_78332329", "str_nameShort": "form_button_login_pass", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "lock", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtProject": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_78332329", "type": "submit", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_78332329", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
-[77570, {"obj_design": {"str_tag": "theme_ocean", "arr_item": [{"obj_design": {"str_type": "xapp_accordion", "int_idRecord": "77773"}}, {"obj_design": {"str_type": "form_span", "int_idRecord": "77774"}}, {"obj_design": {"str_type": "form_span", "int_idRecord": "77775"}}, {"obj_design": {"str_type": "form_span", "int_idRecord": "77776"}}, {"obj_design": {"str_type": "form_span", "int_idRecord": "77777"}}], "str_name": "theme_ocean", "str_text": "notset", "str_type": "xapp_theme", "bln_editPin": true, "str_content": "", "int_idRecord": 77570, "str_classList": "notset", "str_idProject": "myId_01221712", "str_idXDesign": "myId_29727565", "str_nameShort": "theme_ocean", "str_themeType": "xapp_theme", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2024-11-30 12:02:09", "str_categoryName": "Anchor", "str_modifiedDate": "2024-11-30 12:02:09", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtProject": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"display": "block", "font-size": "", "font-family": ""}, "obj_domProperty": {"Id": "myId_29727565"}, "dom_objContentContainer": {"Id": "myId_29727565"}}],
-[77771, {"obj_design": {"str_tag": "form_menu_panel", "arr_item": [{"obj_design": {"str_type": "block", "int_idRecord": 77821}}], "str_name": "form_menu_panel", "str_text": "notset", "str_type": "form_menu_panel", "bln_editPin": true, "str_content": "", "int_idRecord": "77771", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_99777780", "str_nameShort": "form_menu_panel", "str_themeType": "form_menu_panel", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-15 08:47:57", "str_categoryName": "", "str_modifiedDate": "2022-11-15 08:47:57", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "border": "0px solid white", "display": "flex", "padding": "1em", "flex flow": "column wrap", "flexdirection": "column", "flex-direction": "column"}, "obj_domProperty": {"Id": "myId_99777780"}, "dom_objContentContainer": {"Id": "myId_99777780"}}],
-[77772, {"obj_design": {"str_tag": "form", "arr_item": [{"obj_design": {"str_type": "form_menu_panel", "int_idRecord": "77771"}}], "str_name": "form_form", "str_text": "notset", "str_type": "form_form", "bln_editPin": true, "str_content": "", "int_idRecord": "77772", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_04703888", "str_nameShort": "form_form", "str_themeType": "form_form", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "component", "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-wrap": "wrap", "flex-direction": "column", " background-color": "coral"}, "obj_domProperty": {"Id": "myId_04703888"}, "dom_objContentContainer": {"0": {"Id": "myId_19412971"}, "1": {"Id": "myId_23118334", "str_name": "xapp_button_navigate_desktop"}, "Id": "myId_04703888"}}],
-[77773, {"obj_design": {"str_tag": "xapp_accordion", "arr_item": [{"obj_design": {"str_type": "form_button_rich", "int_idRecord": 77816}}, {"obj_design": {"str_type": "form_form", "int_idRecord": "77772"}}], "blnIsTag": true, "str_name": "xapp_accordion", "str_text": "notset", "str_type": "xapp_accordion", "bln_editPin": true, "str_content": "", "int_idRecord": "77773", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_38394983", "str_nameShort": "xapp_accordion", "str_themeType": "xapp_accordion", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-01 21:51:10", "str_categoryName": "", "str_modifiedDate": "2022-11-01 21:51:10", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"flex": "wrap", "width": "100%", "display": "block", "justify-content": "", "background-color": "rgb(37, 150, 190)"}, "obj_domProperty": {"Id": "myId_38394983"}, "dom_objContentContainer": {"Id": "myId_38394983"}}],
-[77774, {"obj_design": {"str_tag": "form_blockbackground", "blnIsTag": true, "str_name": "form_blockbackground", "str_text": "notset", "str_type": "form_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77774", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_58870858", "str_nameShort": "form_blockbackground", "str_themeType": "form_blockbackground", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "", "border": "", "padding": "1.0em", "overflow": "", "maxheight": "175", "background": "rgb(37, 150, 190)", "max-height": "", "word-break": "", "font-family": "", "border-radius": "4px"}, "obj_domProperty": {"Id": "myId_58870858"}, "dom_objContentContainer": {"Id": "myId_58870858"}}],
-[77775, {"obj_design": {"str_tag": "form_blockmidground", "blnIsTag": true, "str_name": "form_blockmidground", "str_text": "", "str_type": "form_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77775", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_37817050", "str_nameShort": "form_blockmidground", "str_themeType": "form_blockmidground", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "", "border": "", "padding": "1.0em", "overflow": "", "maxheight": "175", "background": "rgb(64, 169, 236)", "max-height": "", "word-break": "", "font-family": "", "border-radius": "4px"}, "obj_domProperty": {"Id": "myId_37817050", "innerHTML": ""}, "dom_objContentContainer": {"Id": "myId_37817050"}}],
-[77776, {"obj_design": {"str_tag": "form_blockforground", "blnIsTag": true, "str_name": "form_blockforground", "str_text": "notset", "str_type": "form_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77776", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_18017798", "str_nameShort": "form_blockforground", "str_themeType": "form_blockforground", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "", "border": "", "padding": "1.0em", "overflow": "", "maxheight": "175", "background": "white", "max-height": "", "word-break": "", "font-family": "", "border-radius": "4px"}, "obj_domProperty": {"Id": "myId_18017798"}, "dom_objContentContainer": {"Id": "myId_18017798"}}],
-[77777, {"obj_design": {"str_tag": "form_blockhighlight", "blnIsTag": true, "str_name": "form_blockhighlight", "str_text": "notset", "str_type": "form_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77777", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_89738359", "str_nameShort": "form_blockhighlight", "str_themeType": "form_blockhighlight", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "", "border": "", "padding": "1.0em", "overflow": "", "maxheight": "175", "background": "orange", "max-height": "", "word-break": "", "font-family": "", "border-radius": "4px"}, "obj_domProperty": {"Id": "myId_89738359"}, "dom_objContentContainer": {"Id": "myId_89738359"}}],
-[77813, {"obj_design": {"str_tag": "span", "blnIsTag": true, "str_name": "form_button_span", "str_text": "My Button", "str_type": "form_button_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77813", "str_classList": "notset", "str_idProject": "myId_11190110", "str_idXDesign": "myId_67672923", "str_nameShort": "form_button_span", "str_themeType": "form_button_span", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "white", "display": "block", "font-size": "1.2rem", "maxheight": "175", "font-weight": "bold"}, "obj_domProperty": {"Id": "myId_67672923", "innerHTML": "My Button"}, "dom_objContentContainer": {"Id": "myId_67672923"}}],
-[77814, {"obj_design": {"str_tag": "i", "str_name": "form_button_icon", "str_text": "star", "str_type": "form_button_icon", "bln_editPin": true, "str_content": "", "int_idRecord": "77814", "str_classList": "notset", "str_idProject": "myId_79120090", "str_idXDesign": "myId_67661363", "str_nameShort": "form_button_icon", "str_themeType": "form_button_icon", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "white", "display": "block", "font-size": "1.5em", "font-weight": "bold"}, "obj_domProperty": {"Id": "myId_67661363", "innerHTML": "star"}, "dom_objContentContainer": {"Id": "myId_67661363"}}],
-[77815, {"obj_icon": {"obj_design": {"str_type": "form_button_icon", "int_idRecord": "77814"}}, "obj_span": {"obj_design": {"str_type": "form_button_span", "int_idRecord": "77813"}}, "obj_design": {"str_tag": "a", "arr_item": [{"obj_design": {"str_type": "form_button_span", "int_idRecord": "77813"}}, {"obj_design": {"str_type": "form_button_icon", "int_idRecord": "77814"}}], "str_name": "form_button_anchor", "str_text": "notset", "str_type": "form_button_anchor", "bln_editPin": true, "str_content": "", "int_idRecord": 77815, "str_classList": "notset", "str_idProject": "myId_77377077", "str_idXDesign": "myId_37371641", "str_nameShort": "form_button_anchor", "str_themeType": "form_button_anchor", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "0.5em", "text": "de", "color": "white", "border": "0px solid black", "display": "flex", "font-size": "1.2rem", "align-items": "center", "font-weight": "bold", "justify-content": "center", "text-decoration": "none"}, "obj_domProperty": {"Id": "myId_37371641", "target": "_blank"}, "dom_objContentContainer": {"Id": "myId_37371641"}}],
-[77816, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77815}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "menu_button", "str_text": "My Button", "str_type": "form_button_rich", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77816, "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_14263737", "str_nameShort": "menu_button", "str_themeType": "menu_buttonx", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "form_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"gap": "1em", "color": "white", "width": "100%", "border": "1.0em solid orange", "cursor": "pointer", "display": "flex", "padding": "1em", "font-size": "1.2rem", "background": "green", "align-items": "center", "font-weight": "bold", "margin-bottom": "1px", "justify-content": "center"}, "obj_domProperty": {"Id": "myId_14263737", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_14263737", "str_name": "xapp_button_navigate_desktop"}}],
-[77821, {"obj_design": {"str_tag": "form_container", "arr_item": [{"obj_design": {"str_type": "form_panel", "int_idRecord": "77835"}}, {"obj_design": {"str_type": "form_hardrule", "int_idRecord": "77836"}}], "str_name": "form_container", "str_text": "notset", "str_type": "block", "bln_editPin": true, "str_content": "", "int_idRecord": 77821, "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_29752282", "str_nameShort": "form_container", "str_themeType": "form_container", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:10:58", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:10:58", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true}, "obj_domStyle": {"gap": "1em", "display": "flex", "padding": "0em", "flex-flow": "wrap", "background": "transparent", "align-items": ""}, "obj_domProperty": {"Id": "myId_29752282"}, "dom_objContentContainer": {"Id": "myId_29752282"}}],
-[77835, {"obj_design": {"str_tag": "form_panel", "arr_item": [{"obj_design": {"str_type": "form_fieldset", "int_idRecord": 77857}}], "str_name": "form_panel", "str_text": "notset", "str_type": "form_panel", "bln_editPin": true, "str_content": "", "int_idRecord": "77835", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_81978191", "str_nameShort": "form_panel", "str_themeType": "form_panel", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "border": "0px solid red", "display": "flex", "padding": "1em", "flex-flow": "", "flex-wrap": "column wrap", "background": "", "align-items": "end"}, "obj_domProperty": {"Id": "myId_81978191"}, "dom_objContentContainer": {"Id": "myId_81978191"}}],
-[77836, {"obj_design": {"str_tag": "hr", "str_name": "form_hardrule", "str_text": "notset", "str_type": "form_hardrule", "bln_editPin": true, "str_content": "", "int_idRecord": "77836", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_33710013", "str_nameShort": "form_hardrule", "str_themeType": "form_hardrule", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2023-09-28 17:30:59", "str_categoryName": "", "str_modifiedDate": "2023-09-28 17:30:59", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"width": "100%", "border": "0px", "height": "1.0em", "background": "rgb(64, 169, 236)"}, "obj_domProperty": {"Id": "myId_78947874"}, "dom_objContentContainer": {"Id": "myId_78947874"}}],
-[77849, {"obj_design": {"str_tag": "legend", "str_name": "form_legend", "str_text": "MyText", "str_type": "form_legend", "bln_editPin": true, "str_content": "", "int_idRecord": "77849", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_38338887", "str_nameShort": "form_legend", "str_themeType": "form_legend", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "form_button", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"gap": "1em", "color": "white", "border": "3px solid rgb(37, 150, 190)", "display": "block", "opacity": "1", "padding": "1em", "background": "rgb(64, 169, 236)", "user-select": "none", "border-radius": "0.5em", "text-decoration": "none"}, "obj_domProperty": {"Id": "myId_37333474", "href": "https://www.mycode.buzz", "target": "_blank", "tabIndex": "0", "innerHTML": "MyText"}, "dom_objContentContainer": {"Id": "myId_37333474", "href": "https://www.mycode.buzz", "target": "_blank"}}],
-[77850, {"obj_design": {"str_tag": "label", "str_name": "form_label", "str_text": "My Label", "str_type": "form_label", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": 77850, "str_classList": "notset", "str_idProject": "myId_13000276", "str_idXDesign": "myId_37338337", "str_nameShort": "form_label", "str_themeType": "form_label", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-13 21:59:51", "str_categoryName": "", "str_modifiedDate": "2022-11-13 21:59:51", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "color": "white", "border": "1em solid orange", "cursor": "pointer", "margin": "", "padding": "1em", "overflow": "", "font-size": "1.1rem", "max-width": "", "min-width": "", "align-self": "flex-start", "background": "green", "max-height": "", "word-break": "", "border-radius": "1em"}, "obj_domProperty": {"Id": "myId_35320233", "innerText": "My Label"}, "dom_objContentContainer": {"Id": "myId_35320233"}}],
-[77851, {"obj_design": {"str_tag": "text", "blnIsTag": true, "str_name": "form_text", "str_text": "-", "str_type": "form_text", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": 77851, "str_classList": "notset", "str_idProject": "myId_13000276", "str_idXDesign": "myId_23883377", "str_nameShort": "form_text", "str_themeType": "form_inputx", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "color": "white", "border": "0.4em solid orange", "padding": "1em", "overflow": "auto", "font-size": "1rem", "maxheight": "175", "min-width": "", "background": "green", "max-height": "500px", "word-break": "normal", "border-radius": "0.5em"}, "obj_domProperty": {"Id": "myId_07195217", "innerHTML": "-"}, "dom_objContentContainer": {"Id": "myId_07195217"}}],
-[77852, {"obj_design": {"str_tag": "field", "arr_item": [{"obj_design": {"str_type": "form_label", "int_idRecord": 77850}}, {"obj_design": {"str_type": "form_text", "int_idRecord": 77851}}], "str_name": "form_field", "str_text": "notset", "str_type": "form_field", "bln_editPin": true, "str_content": "", "int_idRecord": 77852, "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_83777172", "str_nameShort": "form_field", "str_themeType": "form_field", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "border": "", "display": "flex", "padding": "0em", "flex-flow": "", "flex-wrap": "column wrap", "align-items": "", "justify-content": "", " justify-content": "center"}, "obj_domProperty": {"Id": "myId_83777172"}, "dom_objContentContainer": {"Id": "myId_83777172"}}],
-[77853, {"obj_design": {"str_tag": "span", "blnIsTag": true, "str_name": "form_button_span", "str_text": "My Button", "str_type": "form_button_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77853", "str_classList": "notset", "str_idProject": "myId_11190110", "str_idXDesign": "myId_81813982", "str_nameShort": "form_button_span", "str_themeType": "form_button_span", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "rgb(64, 169, 236)", "display": "block", "font-size": "1.1rem", "maxheight": "175", "font-weight": "bold", "font-wiegth": "bold"}, "obj_domProperty": {"Id": "myId_87111743", "innerHTML": "My Button"}, "dom_objContentContainer": {"Id": "myId_87111743"}}],
-[77854, {"obj_design": {"bln": "expand", "str_tag": "i", "str_name": "form_button_icon", "str_text": "star", "str_type": "form_button_icon", "str_class": "star", "bln_expand": true, "bln_editPin": true, "str_content": "", "int_idRecord": "77854", "str_classList": "notset", "str_idProject": "myId_79120090", "str_idXDesign": "myId_88339798", "str_nameShort": "form_button_icon", "str_themeType": "form_button_icon", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "rgb(64, 169, 236)", "display": "block", "font-size": "1.5em", "font-weight": "bold"}, "obj_domProperty": {"Id": "myId_17078909", "innerHTML": "star"}, "dom_objContentContainer": {"Id": "myId_17078909"}}],
-[77855, {"obj_icon": {"obj_design": {"str_type": "form_button_icon", "int_idRecord": 77854}}, "obj_span": {"obj_design": {"str_type": "form_button_span", "int_idRecord": 77853}}, "obj_design": {"str_tag": "a", "arr_item": [{"obj_design": {"str_type": "form_button_span", "int_idRecord": 77853}}, {"obj_design": {"str_type": "form_button_icon", "int_idRecord": 77854}}], "str_name": "form_button_anchor", "str_text": "notset", "str_type": "form_button_anchor", "bln_editPin": true, "str_content": "", "int_idRecord": "77855", "str_classList": "notset", "str_idProject": "myId_11190110", "str_idXDesign": "myId_83341813", "str_nameShort": "form_button_anchor", "str_themeType": "form_button_anchor", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "0.5em", "text": "de", "color": "rgb(64, 169, 236)", "border": "0px solid black", "display": "flex", "font-size": "1.1rem", "align-items": "center", "font-weight": "bold", "justify-content": "center", "text-decoration": "none"}, "obj_domProperty": {"Id": "myId_83341813", "target": "_blank"}, "dom_objContentContainer": {"Id": "myId_83341813"}}],
-[77856, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77855}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "form_button_rich", "str_text": "My Button", "str_type": "form_button_rich", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77856, "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_23118334", "str_nameShort": "form_button_rich", "str_themeType": "form_buttonx", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "form_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"gap": "1em", "color": "white", "border": "0.5em solid orange", "cursor": "pointer", "display": "flex", "padding": "1em", "font-size": "1.1rem", "background": "green", "align-items": "center", "font-weight": "bold", "border-radius": "0.5em"}, "obj_domProperty": {"Id": "myId_23118334", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_23118334", "str_name": "xapp_button_navigate_desktop"}}],
-[77857, {"obj_design": {"str_tag": "fieldset", "arr_item": [{"obj_design": {"str_type": "form_legend", "int_idRecord": "77849"}}, {"obj_design": {"str_type": "form_field", "int_idRecord": 77852}}, {"obj_design": {"str_type": "form_button_rich", "int_idRecord": 77856}}], "lockOpen": true, "str_name": "form_fieldset", "str_text": "notset", "str_type": "form_fieldset", "bln_editPin": true, "str_content": "", "int_idRecord": 77857, "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_19412971", "str_nameShort": "form_fieldset", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "border": "1px outset rgb(64, 169, 236)", "margin": "0px", "display": "flex", "padding": "1em", "overflow": "hidden", "flex-flow": "row wrap", "flex-wrap": "wrap", "align-self": "flex-start", "background": "rgb(64, 169, 236)", "align-items": "start", "border-radius": "0.5em", "flex-direction": "row"}, "bln_toggleState": true, "obj_domProperty": {"Id": "myId_19412971"}, "dom_objContentContainer": {"Id": "myId_19412971"}}]
+[77570, {"obj_design": {"str_tag": "theme_ocean", "arr_item": [{"obj_design": {"str_type": "xapp_accordion", "int_idRecord": "77880"}}, {"obj_design": {"str_type": "form_span", "int_idRecord": "77881"}}, {"obj_design": {"str_type": "form_span", "int_idRecord": "77882"}}, {"obj_design": {"str_type": "form_span", "int_idRecord": "77883"}}, {"obj_design": {"str_type": "form_span", "int_idRecord": "77884"}}], "str_name": "theme_ocean", "str_text": "notset", "str_type": "xapp_theme", "bln_editPin": true, "str_content": "", "int_idRecord": 77570, "str_classList": "notset", "str_idProject": "myId_01221712", "str_idXDesign": "myId_29727565", "str_nameShort": "theme_ocean", "str_themeType": "xapp_theme", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2024-11-30 12:02:09", "str_categoryName": "Anchor", "str_modifiedDate": "2024-11-30 12:02:09", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtProject": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"display": "block", "font-size": "", "font-family": ""}, "obj_domProperty": {"Id": "myId_29727565"}, "dom_objContentContainer": {"Id": "myId_29727565"}}],
+[77861, {"obj_design": {"str_tag": "span", "blnIsTag": true, "str_name": "form_button_span", "str_text": "My Button", "str_type": "form_button_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77861", "str_classList": "notset", "str_idProject": "myId_11190110", "str_idXDesign": "myId_10076366", "str_nameShort": "form_button_span", "str_themeType": "form_button_span", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "white", "display": "block", "font-size": "1.2rem", "maxheight": "175", "font-weight": "bold"}, "obj_domProperty": {"Id": "myId_10076366", "innerHTML": "My Button"}, "dom_objContentContainer": {"Id": "myId_10076366"}}],
+[77862, {"obj_design": {"str_tag": "i", "str_name": "form_button_icon", "str_text": "star", "str_type": "form_button_icon", "bln_editPin": true, "str_content": "", "int_idRecord": "77862", "str_classList": "notset", "str_idProject": "myId_79120090", "str_idXDesign": "myId_48131142", "str_nameShort": "form_button_icon", "str_themeType": "form_button_icon", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "white", "display": "block", "font-size": "1.5em", "font-weight": "bold"}, "obj_domProperty": {"Id": "myId_48131142", "innerHTML": "star"}, "dom_objContentContainer": {"Id": "myId_48131142"}}],
+[77863, {"obj_icon": {"obj_design": {"str_type": "form_button_icon", "int_idRecord": 77862}}, "obj_span": {"obj_design": {"str_type": "form_button_span", "int_idRecord": 77861}}, "obj_design": {"str_tag": "a", "arr_item": [{"obj_design": {"str_type": "form_button_span", "int_idRecord": 77861}}, {"obj_design": {"str_type": "form_button_icon", "int_idRecord": 77862}}], "str_name": "form_button_anchor", "str_text": "notset", "str_type": "form_button_anchor", "bln_editPin": true, "str_content": "", "int_idRecord": "77863", "str_classList": "notset", "str_idProject": "myId_77377077", "str_idXDesign": "myId_62440730", "str_nameShort": "form_button_anchor", "str_themeType": "form_button_anchor", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "0.5em", "text": "de", "color": "white", "border": "0px solid black", "display": "flex", "font-size": "1.2rem", "align-items": "center", "font-weight": "bold", "justify-content": "center", "text-decoration": "none"}, "obj_domProperty": {"Id": "myId_62440730", "target": "_blank"}, "dom_objContentContainer": {"Id": "myId_62440730"}}],
+[77864, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77863}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "menu_button", "str_text": "My Button", "str_type": "form_button_rich", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": "77864", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_10880106", "str_nameShort": "menu_button", "str_themeType": "menu_button", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "form_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"gap": "1em", "color": "white", "width": "100%", "border": "1em solid orange", "cursor": "pointer", "display": "flex", "padding": "1em", "font-size": "1.2rem", "background": "green", "align-items": "center", "font-weight": "bold", "margin-bottom": "", "justify-content": "center"}, "obj_domProperty": {"Id": "myId_10880106", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_10880106", "str_name": "xapp_button_navigate_desktop"}}],
+[77865, {"obj_design": {"str_tag": "legend", "str_name": "form_legend", "str_text": "MyText", "str_type": "form_legend", "bln_editPin": true, "str_content": "", "int_idRecord": "77865", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_14016036", "str_nameShort": "form_legend", "str_themeType": "form_legend", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "form_button", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"gap": "1em", "color": "white", "border": "0.5em solid orange", "display": "flex", "opacity": "1", "padding": "1em", "background": "green", "user-select": "none", "border-radius": "0.5em", "text-decoration": ""}, "obj_domProperty": {"Id": "myId_14016036", "href": "https://www.mycode.buzz", "target": "_blank", "tabIndex": "0", "innerHTML": "MyText"}, "dom_objContentContainer": {"Id": "myId_14016036", "href": "https://www.mycode.buzz", "target": "_blank"}}],
+[77866, {"obj_design": {"str_tag": "label", "str_name": "form_label", "str_text": "My Label", "str_type": "form_label", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77866", "str_classList": "notset", "str_idProject": "myId_13000276", "str_idXDesign": "myId_40316030", "str_nameShort": "form_label", "str_themeType": "form_label", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-13 21:59:51", "str_categoryName": "", "str_modifiedDate": "2022-11-13 21:59:51", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "color": "white", "border": "0.5em solid orange", "cursor": "pointer", "margin": "", "padding": "1em", "overflow": "", "font-size": "1.1rem", "max-width": "", "min-width": "", "align-self": "flex-start", "background": "green", "max-height": "", "word-break": "", "border-radius": "1em"}, "obj_domProperty": {"Id": "myId_40316030", "innerText": "My Label"}, "dom_objContentContainer": {"Id": "myId_40316030"}}],
+[77867, {"obj_design": {"str_tag": "text", "blnIsTag": true, "str_name": "form_text", "str_text": "-", "str_type": "form_text", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77867", "str_classList": "notset", "str_idProject": "myId_13000276", "str_idXDesign": "myId_30380630", "str_nameShort": "form_text", "str_themeType": "form_input", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "color": "white", "border": "0.5em solid orange", "padding": "1em", "overflow": "auto", "font-size": "1rem", "maxheight": "175", "min-width": "", "background": "green", "max-height": "500px", "word-break": "normal", "border-radius": "0.5em"}, "obj_domProperty": {"Id": "myId_30380630", "innerHTML": "-"}, "dom_objContentContainer": {"Id": "myId_30380630"}}],
+[77868, {"obj_design": {"str_tag": "field", "arr_item": [{"obj_design": {"str_type": "form_label", "int_idRecord": 77866}}, {"obj_design": {"str_type": "form_text", "int_idRecord": 77867}}], "str_name": "form_field", "str_text": "notset", "str_type": "form_field", "bln_editPin": true, "str_content": "", "int_idRecord": "77868", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_04461374", "str_nameShort": "form_field", "str_themeType": "form_field", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "border": "", "display": "flex", "padding": "0em", "flex-flow": "", "flex-wrap": "column wrap", "align-items": "", "justify-content": "", " justify-content": "center"}, "obj_domProperty": {"Id": "myId_04461374"}, "dom_objContentContainer": {"Id": "myId_04461374"}}],
+[77869, {"obj_design": {"str_tag": "span", "blnIsTag": true, "str_name": "form_button_span", "str_text": "My Button", "str_type": "form_button_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77869", "str_classList": "notset", "str_idProject": "myId_11190110", "str_idXDesign": "myId_70130314", "str_nameShort": "form_button_span", "str_themeType": "form_button_span", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "white", "display": "block", "font-size": "1.1rem", "maxheight": "175", "font-weight": "bold", "font-wiegth": "bold"}, "obj_domProperty": {"Id": "myId_70130314", "innerHTML": "My Button"}, "dom_objContentContainer": {"Id": "myId_70130314"}}],
+[77870, {"obj_design": {"bln": "expand", "str_tag": "i", "str_name": "form_button_icon", "str_text": "star", "str_type": "form_button_icon", "str_class": "star", "bln_expand": true, "bln_editPin": true, "str_content": "", "int_idRecord": "77870", "str_classList": "notset", "str_idProject": "myId_79120090", "str_idXDesign": "myId_71730443", "str_nameShort": "form_button_icon", "str_themeType": "form_button_icon", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "white", "display": "block", "font-size": "1.5em", "font-weight": "bold"}, "obj_domProperty": {"Id": "myId_71730443", "innerHTML": "star"}, "dom_objContentContainer": {"Id": "myId_71730443"}}],
+[77871, {"obj_icon": {"obj_design": {"str_type": "form_button_icon", "int_idRecord": 77870}}, "obj_span": {"obj_design": {"str_type": "form_button_span", "int_idRecord": 77869}}, "obj_design": {"str_tag": "a", "arr_item": [{"obj_design": {"str_type": "form_button_span", "int_idRecord": 77869}}, {"obj_design": {"str_type": "form_button_icon", "int_idRecord": 77870}}], "str_name": "form_button_anchor", "str_text": "notset", "str_type": "form_button_anchor", "bln_editPin": true, "str_content": "", "int_idRecord": "77871", "str_classList": "notset", "str_idProject": "myId_11190110", "str_idXDesign": "myId_41070040", "str_nameShort": "form_button_anchor", "str_themeType": "form_button_anchor", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "0.5em", "text": "de", "color": "white", "border": "0px solid black", "display": "flex", "font-size": "1.1rem", "align-items": "center", "font-weight": "bold", "justify-content": "center", "text-decoration": "none"}, "obj_domProperty": {"Id": "myId_41070040", "target": "_blank"}, "dom_objContentContainer": {"Id": "myId_41070040"}}],
+[77872, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77871}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "form_button_rich", "str_text": "My Button", "str_type": "form_button_rich", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": "77872", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_83414743", "str_nameShort": "form_button_rich", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "form_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"gap": "1em", "color": "white", "border": "0.5em solid orange", "cursor": "pointer", "display": "flex", "padding": "1em", "font-size": "1.1rem", "background": "green", "align-items": "center", "font-weight": "bold", "border-radius": "0.5em"}, "obj_domProperty": {"Id": "myId_83414743", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_83414743", "str_name": "xapp_button_navigate_desktop"}}],
+[77873, {"obj_design": {"str_tag": "legend", "str_name": "form_legend", "str_text": "MyText", "str_type": "form_legend", "bln_editPin": true, "str_content": "", "int_idRecord": "77873", "str_classList": "notset", "str_idProject": "myId_63641161", "str_idXDesign": "myId_37487013", "str_nameShort": "form_legend", "str_themeType": "form_legend", "bln_dynamicPin": true, "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_button", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"gap": "1em", "color": "white", "border": "0.5em solid orange", "display": "flex", "opacity": "1", "padding": "1em", "background": "green", "user-select": "none", "border-radius": "0.5em", "text-decoration": ""}, "obj_domProperty": {"Id": "myId_37487013", "href": "https://www.mycode.buzz", "target": "_blank", "tabIndex": "0", "innerHTML": "MyText"}, "dom_objContentContainer": {"Id": "myId_37487013", "href": "https://www.mycode.buzz", "target": "_blank"}}],
+[77874, {"obj_design": {"str_tag": "fieldset", "arr_item": [{"obj_design": {"str_type": "form_legend", "int_idRecord": "77865"}}, {"obj_design": {"str_type": "form_field", "int_idRecord": "77868"}}, {"obj_design": {"str_type": "form_button_rich", "int_idRecord": "77872"}}, {"obj_design": {"str_type": "form_legend", "int_idRecord": "77873"}}], "lockOpen": true, "str_name": "form_fieldset", "str_text": "notset", "str_type": "form_fieldset", "bln_editPin": true, "str_content": "", "int_idRecord": "77874", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_28040276", "str_nameShort": "form_fieldset", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "border": "1em solid orange", "margin": "0px", "display": "flex", "padding": "1em", "overflow": "hidden", "flex-flow": "row wrap", "flex-wrap": "wrap", "align-self": "", "background": "green", "align-items": "start", "border-radius": "0.5em", "flex-direction": "row"}, "bln_toggleState": true, "obj_domProperty": {"Id": "myId_28040276"}, "dom_objContentContainer": {"Id": "myId_28040276"}}],
+[77875, {"obj_design": {"str_tag": "form_panel", "arr_item": [{"obj_design": {"str_type": "form_fieldset", "int_idRecord": "77874"}}], "str_name": "form_panel", "str_text": "notset", "str_type": "form_panel", "bln_editPin": true, "str_content": "", "int_idRecord": "77875", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_33706461", "str_nameShort": "form_panel", "str_themeType": "form_panel", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "border": "0px solid red", "display": "flex", "padding": "1em", "flex-flow": "", "flex-wrap": "column wrap", "background": "", "align-items": "end"}, "obj_domProperty": {"Id": "myId_33706461"}, "dom_objContentContainer": {"Id": "myId_33706461"}}],
+[77876, {"obj_design": {"str_tag": "hr", "str_name": "form_hardrule", "str_text": "notset", "str_type": "form_hardrule", "bln_editPin": true, "str_content": "", "int_idRecord": "77876", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_41368203", "str_nameShort": "form_hardrule", "str_themeType": "form_hardrule", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2023-09-28 17:30:59", "str_categoryName": "", "str_modifiedDate": "2023-09-28 17:30:59", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "white", "width": "100%", "border": "1em solid orange", "height": "1.0em", "padding": "1em", "background": "green", "border-radius": "0em"}, "obj_domProperty": {"Id": "myId_41368203"}, "dom_objContentContainer": {"Id": "myId_41368203"}}],
+[77877, {"obj_design": {"str_tag": "form_container", "arr_item": [{"obj_design": {"str_type": "form_panel", "int_idRecord": "77875"}}, {"obj_design": {"str_type": "form_hardrule", "int_idRecord": "77876"}}], "str_name": "form_container", "str_text": "notset", "str_type": "block", "bln_editPin": true, "str_content": "", "int_idRecord": "77877", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_43031101", "str_nameShort": "form_container", "str_themeType": "form_container", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:10:58", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:10:58", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true}, "obj_domStyle": {"gap": "1em", "display": "flex", "padding": "0em", "flex-flow": "wrap", "background": "transparent", "align-items": ""}, "obj_domProperty": {"Id": "myId_43031101"}, "dom_objContentContainer": {"Id": "myId_43031101"}}],
+[77878, {"obj_design": {"str_tag": "form_menu_panel", "arr_item": [{"obj_design": {"str_type": "block", "int_idRecord": "77877"}}], "str_name": "form_menu_panel", "str_text": "notset", "str_type": "form_menu_panel", "bln_editPin": true, "str_content": "", "int_idRecord": "77878", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_64003014", "str_nameShort": "form_menu_panel", "str_themeType": "form_menu_panel", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-15 08:47:57", "str_categoryName": "", "str_modifiedDate": "2022-11-15 08:47:57", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "border": "0px solid white", "display": "flex", "padding": "1em", "flex flow": "column wrap", "flexdirection": "column", "flex-direction": "column"}, "obj_domProperty": {"Id": "myId_64003014"}, "dom_objContentContainer": {"Id": "myId_64003014"}}],
+[77879, {"obj_design": {"str_tag": "form", "arr_item": [{"obj_design": {"str_type": "form_menu_panel", "int_idRecord": "77878"}}], "str_name": "form_form", "str_text": "notset", "str_type": "form_form", "bln_editPin": true, "str_content": "", "int_idRecord": "77879", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_27017070", "str_nameShort": "form_form", "str_themeType": "form_form", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "component", "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-wrap": "wrap", "flex-direction": "column", " background-color": "coral"}, "obj_domProperty": {"Id": "myId_27017070"}, "dom_objContentContainer": {"0": {"Id": "myId_28040276"}, "1": {"Id": "myId_83414743", "str_name": "xapp_button_navigate_desktop"}, "Id": "myId_27017070"}}],
+[77880, {"obj_design": {"str_tag": "xapp_accordion", "arr_item": [{"obj_design": {"str_type": "form_button_rich", "int_idRecord": "77864"}}, {"obj_design": {"str_type": "form_form", "int_idRecord": "77879"}}], "blnIsTag": true, "str_name": "xapp_accordion", "str_text": "notset", "str_type": "xapp_accordion", "bln_editPin": true, "str_content": "", "int_idRecord": "77880", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_72400131", "str_nameShort": "xapp_accordion", "str_themeType": "xapp_accordion", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-01 21:51:10", "str_categoryName": "", "str_modifiedDate": "2022-11-01 21:51:10", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"flex": "wrap", "width": "100%", "border": "0em solid orange", "display": "block", "padding": "0em", "justify-content": "", "background-color": "green"}, "obj_domProperty": {"Id": "myId_72400131"}, "dom_objContentContainer": {"Id": "myId_72400131"}}],
+[77881, {"obj_design": {"str_tag": "form_blockbackground", "blnIsTag": true, "str_name": "form_blockbackground", "str_text": "notset", "str_type": "form_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77881", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_10184107", "str_nameShort": "form_blockbackground", "str_themeType": "form_blockbackground", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "", "border": "", "padding": "1.0em", "overflow": "", "maxheight": "175", "background": "rgb(37, 150, 190)", "max-height": "", "word-break": "", "font-family": "", "border-radius": "4px"}, "obj_domProperty": {"Id": "myId_10184107"}, "dom_objContentContainer": {"Id": "myId_10184107"}}],
+[77882, {"obj_design": {"str_tag": "form_blockmidground", "blnIsTag": true, "str_name": "form_blockmidground", "str_text": "", "str_type": "form_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77882", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_04706324", "str_nameShort": "form_blockmidground", "str_themeType": "form_blockmidground", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "", "border": "", "padding": "1.0em", "overflow": "", "maxheight": "175", "background": "rgb(64, 169, 236)", "max-height": "", "word-break": "", "font-family": "", "border-radius": "4px"}, "obj_domProperty": {"Id": "myId_04706324", "innerHTML": ""}, "dom_objContentContainer": {"Id": "myId_04706324"}}],
+[77883, {"obj_design": {"str_tag": "form_blockforground", "blnIsTag": true, "str_name": "form_blockforground", "str_text": "notset", "str_type": "form_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77883", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_38024034", "str_nameShort": "form_blockforground", "str_themeType": "form_blockforground", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "", "border": "", "padding": "1.0em", "overflow": "", "maxheight": "175", "background": "white", "max-height": "", "word-break": "", "font-family": "", "border-radius": "4px"}, "obj_domProperty": {"Id": "myId_38024034"}, "dom_objContentContainer": {"Id": "myId_38024034"}}],
+[77884, {"obj_design": {"str_tag": "form_blockhighlight", "blnIsTag": true, "str_name": "form_blockhighlight", "str_text": "notset", "str_type": "form_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77884", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_83720170", "str_nameShort": "form_blockhighlight", "str_themeType": "form_blockhighlight", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "", "border": "", "padding": "1.0em", "overflow": "", "maxheight": "175", "background": "orange", "max-height": "", "word-break": "", "font-family": "", "border-radius": "4px"}, "obj_domProperty": {"Id": "myId_83720170"}, "dom_objContentContainer": {"Id": "myId_83720170"}}]
 ]);
 /*END INSTANCE JSON MAP//*/
 

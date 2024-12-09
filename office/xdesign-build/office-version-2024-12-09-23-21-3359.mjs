@@ -759,6 +759,21 @@ class Shared{
     return true;
   }
 
+  fn_getRandomValueFromObject(obj_my) {
+  
+    const keys = Object.keys(obj_my);
+    const randomKey = keys[Math.floor(Math.random() * keys.length)];
+    return randomKey;
+  }
+  fn_flipVariable(str_value1, str_value2){    
+    return [str_value1, str_value2] = [str_value2, str_value1];  
+  }  
+  fn_getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
   fn_shallowCopy(obj_template){
     return { ...obj_template };            
   }
@@ -2290,20 +2305,141 @@ fn_maintainList(obj_list){
     }
 
     return browserName;
-}
-
-fn_isMobile() {
-  return window.matchMedia("(max-width: 767px)").matches ? true : false;
-}       
-fn_parseList(str_json){                  
-  if(!str_json){
-    return {};
   }
-  return JSON.parse(str_json);
-}
 
-        
+  fn_isMobile() {
+    return window.matchMedia("(max-width: 767px)").matches ? true : false;
+  }       
+  fn_parseList(str_json){                  
+    if(!str_json){
+      return {};
+    }
+    return JSON.parse(str_json);
+  }
 
+  //START SHARED THEME HANLDER
+  fn_getShade(obj_shade){        
+    let str_hsl;
+    str_hsl=obj_shade.str_fill;            
+    let obj_gradient=this.fn_getGradienObjectFromHSL(str_hsl);
+    str_hsl=this.fn_setHueHSL(obj_gradient, obj_shade.int_percentHue, obj_shade.bln_value);        
+    str_hsl=this.fn_setSaturateHSL(obj_gradient, obj_shade.int_percentSaturation, obj_shade.bln_value);    
+    str_hsl=this.fn_setLightHSL(obj_gradient, obj_shade.int_percentLight, obj_shade.bln_value); 
+    str_hsl=this.fn_formatHSL(str_hsl);
+    return str_hsl;
+  }       
+  fn_getGradientObject(int_hue, int_saturation, int_light, str_hsl, str_label="MyColor"){
+    
+    let obj_gradient={          
+      int_hue:int_hue,
+      int_saturation:int_saturation,
+      int_light:int_light,
+    }
+    if(!str_hsl){
+      str_hsl=this.fn_getHSLString(obj_gradient);
+    }
+    obj_gradient.str_hsl=str_hsl;
+    obj_gradient.str_label=str_label;
+    obj_gradient.bln_face=false;
+    obj_gradient.bln_lighten=true;    
+    return obj_gradient;
+  }   
+  fn_getGradienObjectFromHSL(str_hsl){      
+  
+    let int_hue=this.fn_getGradientValue(str_hsl, 0);//hue  
+    let int_saturation=this.fn_getGradientValue(str_hsl, 1);//saturation
+    let int_light=this.fn_getGradientValue(str_hsl, 2);//light
+    let obj_gradient=this.fn_getGradientObject(int_hue, int_saturation, int_light, str_hsl);    
+    return obj_gradient;
+  }
+  
+  fn_setHueHSL(obj_gradient, int_amount, bln_value){
+    let int_position=0;    
+    let int_value=obj_gradient.int_hue;
+    int_value=this.fn_changeValue(int_value, int_amount, bln_value);    
+    int_value=this.fn_boundDegree(int_value);    
+    return this.fn_setHSL(obj_gradient.str_hsl, int_position, int_value);
+  }  
+  fn_setSaturateHSL(obj_gradient, int_amount, bln_value){
+
+    let int_position=1;    
+    let int_value=obj_gradient.int_saturation;
+    int_value=this.fn_changeValue(int_value, int_amount, bln_value);    
+    int_value=this.fn_boundPercentage(int_value);    
+    return this.fn_setHSL(obj_gradient.str_hsl, int_position, int_value);
+  }    
+  fn_setLightHSL(obj_gradient, int_amount, bln_value){
+
+    let int_position=2;    
+    let int_value=obj_gradient.int_light;
+    int_value=this.fn_changeValue(int_value, int_amount, bln_value);    
+    int_value=this.fn_boundPercentage(int_value);    
+    return this.fn_setHSL(obj_gradient.str_hsl, int_position, int_value);
+  }    
+  fn_setHSL(str_hsl, int_position, int_value) {                     
+    let str_value=this.fn_setGradientValue(str_hsl, int_position, int_value);            
+    str_value="HSL"+str_value;
+    return str_value;
+  }
+  fn_getGradientValue(str_value, int_position){
+    const arr_value=this.fn_splitGradient(str_value);          
+    return Number(arr_value[int_position]);    
+  }
+  fn_setGradientValue(str_value, int_position, int_value){
+    const arr_value=this.fn_splitGradient(str_value);          
+    arr_value[int_position]=int_value;     
+    return this.fn_getGradientString(arr_value);          
+  }  
+  fn_getGradientString(arr_value){    
+    let str_value="("+arr_value.join(',')+")";          
+    return str_value;
+  }
+  fn_splitGradient(str_value){          
+    str_value=this.fn_replace(str_value, "%", "");        
+    str_value=str_value.replace("°", "");
+    str_value=str_value.replace("(", "");
+    str_value=str_value.replace(")", "");
+    str_value=str_value.replace("hsl", "");
+    str_value=str_value.replace("HSL", "");    
+    let arr_value=str_value.split(",");  
+    return arr_value;  
+  }  
+  fn_formatHSL(str_value){      
+    const arr_value=this.fn_splitGradient(str_value);          
+    arr_value[1]+="%";
+    arr_value[2]+="%";
+    str_value="HSL("+arr_value.join(',')+")";      
+    return str_value;  
+  }
+  fn_changeValue(int_value, int_amount, bln_value){    
+    if(bln_value){int_value+=int_amount;}
+    else{int_value-=int_amount;}
+    return int_value;
+  }
+  
+  fn_boundPercentage(int_value){
+    return this.fn_boundValue(int_value, 0,100);   
+  }
+  fn_boundDegree(int_value){
+    return this.fn_boundValue(int_value, 0, 359);   
+  }  
+  fn_boundValue(int_value, int_min, int_max){    
+    if(int_value<int_min){int_value=int_min;}
+    if(int_value>int_max){int_value=int_max;}        
+    return int_value;
+  }
+  fn_filterValue(int_value, int_min, int_max){    
+    if(int_value<int_min){return false;}
+    if(int_value>int_max){return false;}        
+    return true;
+  }
+  fn_getHSLString(obj_gradient){  
+    let int_hue=obj_gradient.int_hue;
+    let int_saturation=obj_gradient.int_saturation;
+    let int_light=obj_gradient.int_light;
+    return `hsl(${int_hue}, ${int_saturation}%, ${int_light}%)`;
+  }  
+  //END SHARED THEME HANLDER
     
 }//END CLS
 
@@ -2477,7 +2613,7 @@ class BaseObject extends LevelObject{
             //this.obj_design.arr_item=[];
         }           
 
-        this.obj_themeStructure=new Object;
+        this.obj_holder.obj_themeStructure=new Object;
         
         //this.fn_setIsContainer(false);               
 
@@ -3024,11 +3160,8 @@ class BaseObject extends LevelObject{
         
         
         let dom_frameElement=window.frameElement;        
-        if(!dom_frameElement){
-            return;
-        }
-        let str_name=dom_frameElement.getAttribute("name");        
-        
+        if(!dom_frameElement){return;}
+        let str_name=dom_frameElement.getAttribute("name");                
         if(str_name==="xdesign-frame"){//ie a project that is being designed}        
             if(this.obj_design.int_modeExecute<10){
                 this.fn_initializePluginDesign();//can be overidden                
@@ -3628,6 +3761,7 @@ class BaseObject extends LevelObject{
     fn_setStyleOutline(str_colorBackground, str_colorBorder){        
         
         this.fn_setStyleProperty("backgroundColor", str_colorBackground);        
+        this.fn_setStyleProperty("borderColor", str_colorBorder);                      
     }    
 
     
@@ -7931,6 +8065,11 @@ class form_fieldset extends component{
     this.fn_setStyleProperty("overflow", "hidden");                      
     this.fn_setStyleProperty("margin", "0px");                      
   }
+  fn_applyThemeStructure(){                        
+    if(!obj_project.obj_theme){return;}
+    this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeFormFieldset;                
+    this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                          
+  }
   fn_onRowMember(obj_row){
 
     this.obj_row=obj_row;                  
@@ -8068,10 +8207,9 @@ class form_fieldset extends component{
                   this.obj_holder.bln_listenInput=false;
                   this.obj_holder.bln_listenSelectStart=false;
                 }
-                fn_applyThemeStructure(){                                      
-                  
-                  this.obj_themeStructure=obj_project.obj_themeFormInput;                
-                  this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+                fn_applyThemeStructure(){                                                        
+                  this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeFormInput;                
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
                 }
                 fn_onSelectStart(e){
                   //console.log("hit input");
@@ -8360,9 +8498,8 @@ class table extends component {
                   if(this.fn_hasContextHolderParent()){return;}                      
                 }   
                 fn_applyThemeStructure(){                                      
-
-                  this.obj_themeStructure=obj_project.obj_themeFormButton;                
-                  this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+                  this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeButton;                                  
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
                 }
 
                 fn_expand(){//called by base onload                  
@@ -8404,8 +8541,28 @@ class table extends component {
         } 
         fn_initialize(obj_ini){
           super.fn_initialize(obj_ini);                
+        }
+        fn_setText(str_value){          
+          
+          super.fn_setText(str_value);          
+          
+          if(this.obj_design.str_themeType==="form_button"){
+            if(obj_project.bln_isMobile){
+              
+              if(obj_shared.fn_isSmallScreen()){//less than 400              
+                if(this.obj_design.str_icon){
+                  this.fn_showIcon(this.obj_design.str_icon);                  
+                  //str_value="";
+                  
+                } 
+              }
+            }
+          }
 
-
+          let obj_anchor=this.fn_getComponent("form_button_anchor");          
+          if(obj_anchor){          
+            obj_anchor.fn_setText(str_value);          
+          }          
         }
         fn_onLoad(){          
           super.fn_onLoad();
@@ -8414,9 +8571,8 @@ class table extends component {
           this.fn_showIcon(this.obj_design.str_icon);                    
         }                        
 
-        fn_applyThemeStructure(){                              
-          let obj_theme=obj_project.obj_theme;
-          if(!obj_theme){return;}
+        fn_applyThemeStructure(){                                        
+          if(!obj_project.obj_theme){return;}
           super.fn_applyThemeStructure();          
         }
         fn_setSubDomain(str_value){
@@ -8461,26 +8617,7 @@ class table extends component {
             obj_anchor.fn_showIcon(str_value);                          
           }  
         } 
-        fn_setText(str_value){          
-          
-          super.fn_setText(str_value);
-          
-          if(this.obj_design.str_themeType==="form_button"){
-            if(obj_project.bln_isMobile){
-              if(obj_shared.fn_isSmallScreen()){//less than 400              
-                if(this.obj_design.str_icon){
-                  this.fn_showIcon(this.obj_design.str_icon);                  
-                  str_value="";
-                } 
-              }
-            }
-          }
-
-          let obj_anchor=this.fn_getComponent("form_button_anchor");          
-          if(obj_anchor){          
-            obj_anchor.fn_setText(str_value);          
-          }          
-        }
+        
         fn_getText(){
 
           let str_text;
@@ -8842,7 +8979,7 @@ class table extends component {
               }
               fn_onClose(){                      
                 
-                const str_value=this.obj_themeStructure.marginBottom;                
+                const str_value=this.obj_holder.obj_themeStructure.marginBottom;                
                 this.fn_setStyleProperty("marginBottom", str_value);                              
                   
                 if(this.bln_rebound){this.fn_open();}
@@ -9347,9 +9484,12 @@ class table extends component {
           }   
 
           fn_applyThemeStructure(){                    
-            
-            this.obj_themeStructure=obj_project.obj_themeMenuButton;                
-            this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy                        
+          
+            this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeRowz;                
+            if(this.fn_getIsDynamicMenu()){
+              this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeRowzDynamic;                
+            }            
+            this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                        
           }
           
           fn_runSearch(){//overridden by Menuform
@@ -12264,6 +12404,7 @@ class table extends component {
           
           obj_item.fn_configureDynamicMenuFromRow(obj_row);                                                      
           
+
           
           
           return obj_item;
@@ -12299,9 +12440,9 @@ class table extends component {
             this.obj_columnArchiveDate=obj_rowMenu.fn_getColumnArchiveDate();//required to toggle archive / restore button text in menupane            
             this.fn_setMenuRecordId(this.obj_columnKey.str_value);            
           }
-          //END Configure Dynamic Menu Key
+          //END Configure Dynamic Menu Key         
+          
         }
-
         
         fn_updateButtonText(obj_recordset){
           let str_value=this.fn_formatButtonText(obj_recordset);        
@@ -12778,12 +12919,10 @@ class table extends component {
                 this.int_totalRowCount=0;
               }
 
-              fn_applyThemeStructure(){    
-                
-                this.obj_themeStructure=obj_project.obj_themeChildMenu;                
-                this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+              fn_applyThemeStructure(){                    
+                this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeRowzChild;                
+                this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
               }
-
               
               fn_setMenuPanel(){     
                 super.fn_setMenuPanel();                  
@@ -14498,9 +14637,7 @@ class table extends component {
 
                   this.obj_field.fn_setStyleProperty("display", "flex");
                   this.fn_setStyleProperty("flex-wrap", "wrap");
-                  this.obj_field.fn_setAxis(this.obj_paramRS.bln_axisColumn);                  
-
-                  
+                  this.obj_field.fn_setAxis(this.obj_paramRS.bln_axisColumn);
                   
                   if(!this.obj_paramRS.bln_reportView){
                     //this.obj_field.fn_flipAxis(this.obj_paramRS.bln_axis);                  
@@ -14759,7 +14896,7 @@ class table extends component {
                 } 
                 
                 fn_showLabelBorder(){    
-                    this.obj_label.fn_setStyleProperty("borderColor", obj_project.obj_themeForground.fn_getStyleProperty("backgroundColor"));                                    
+                    //this.obj_label.fn_setStyleProperty("borderColor", obj_project.obj_themeForground.fn_getStyleProperty("backgroundColor"));                                    
                 }        
                 fn_highlightLabelBorder(){    
                   //this.obj_label.fn_setStyleProperty("borderColor", obj_project.obj_themeForground.fn_getStyleProperty("backgroundColor"));                                    
@@ -14767,7 +14904,7 @@ class table extends component {
               
                 fn_hideLabelBorder(){                                      
                   //this.obj_label.fn_setStyleProperty("borderColor", "transparent");                                                                      
-                  this.obj_label.fn_setStyleProperty("borderColor", obj_project.obj_themeBackground.fn_getStyleProperty("backgroundColor"));                                  
+                  //this.obj_label.fn_setStyleProperty("borderColor", obj_project.obj_themeBackground.fn_getStyleProperty("backgroundColor"));                                  
                 }
 
                 fn_onChildMouseUp(e){                         
@@ -14865,9 +15002,12 @@ class table extends component {
                 fn_applyThemeEdit(){
 
                   
-                  this.obj_control.fn_applyThemeEdit(this.str_colorHighlight);                  
+                  //this.obj_control.fn_applyThemeEdit(this.str_colorHighlight);                  
                   //this.obj_control.fn_setStyleProperty("color", "#333333");                  
                   //this.obj_control.fn_setStyleProperty("color", "#444444");                  
+
+                  //this.obj_control.fn_setStyleProperty("backgroundColor", obj_project.obj_theme.str_highLightFill);        
+                  //this.obj_control.fn_setStyleProperty("borderColor", obj_project.obj_theme.str_forGround);                      
                     
                 }
 
@@ -16210,7 +16350,7 @@ class table extends component {
                 } 
                 fn_initialize(obj_ini){
                   super.fn_initialize(obj_ini);                
-                }
+                }                
               }//END CLS
               //END TAG
               //END component/form_button_search
@@ -16459,6 +16599,11 @@ class table extends component {
         fn_initialize(obj_ini){
           super.fn_initialize(obj_ini);                
         }
+        fn_applyThemeStructure(){                              
+          if(!obj_project.obj_theme){return;}
+          this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeFormHardRule;                
+          this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                                
+        }
       }//END CLS
       //END TAG
       //END component/form_hardrule        
@@ -16525,17 +16670,10 @@ class table extends component {
         fn_initialize(obj_ini){
           super.fn_initialize(obj_ini);                
         }
-        fn_applyThemeStructure(){                              
-          
-          let obj_theme=obj_project.obj_theme;
-          if(!obj_theme){return;}
-          super.fn_applyThemeStructure();          
-
-          let obj_themeItem=this.obj_themeStructure;
-          //obj_themeItem.backgroundColor="green";                          
-          this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
-          
-          
+        fn_applyThemeStructure(){                                                          
+          if(!obj_project.obj_theme){return;}
+          this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeRowzSearch;                
+          this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                                              
         }
       }//END CLS
       //END TAG
@@ -16548,7 +16686,7 @@ class table extends component {
 /*type: form_label//*/
 
             //XSTART component/form_label
-              class form_label extends component{
+              class form_label extends form_input{
                 constructor(obj_ini) {      
                   super(obj_ini);        
                 } 
@@ -16566,8 +16704,16 @@ class table extends component {
                   this.obj_holder.bln_listenMouseDown=true;                  
                 }
 
+                fn_setText(str_value){
+                  this.fn_setDomProperty("innerHTML", str_value);                                      
+                }
+
                 fn_onLoad(){
                   super.fn_onLoad();                                                      
+                }
+                fn_applyThemeStructure(){                                                        
+                  this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeFormLabel;                
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
                 }
 
                 fn_setUnLocked(){
@@ -16636,11 +16782,10 @@ class table extends component {
           this.fn_setStyleProperty("opacity", "1");          
         }
 
-        fn_applyThemeStructure(){                    
-          let obj_theme=obj_project.obj_theme;
-          if(!obj_theme){return;}
-          this.obj_themeStructure=obj_project.obj_themeFormLegend;                
-          this.fn_applyStyle(this.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+        fn_applyThemeStructure(){                              
+          if(!obj_project.obj_theme){return;}
+          this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeFormLegend;                
+          this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                      
         }
 
         
@@ -18292,6 +18437,11 @@ class report_column extends xapp_columnform{
                 }
                 fn_onLoad(){    
                   super.fn_onLoad();                                    
+                }
+                fn_applyThemeStructure(){                        
+                  if(!obj_project.obj_theme){return;}
+                  this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeXappAccordion;                  
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                                            
                 }
 
                 fn_addItem(obj_ini=false){
@@ -21513,262 +21663,771 @@ class Project extends office{
         //alert(obj_projectTarget)        
     }    
 
-    fn_calculateFontSize(obj_themeOption){
+//START THEME HAMDLER  
+fn_calculateFontSizeIncrement(obj_theme, int_fontSize, int_increment=0){
+  obj_theme.int_fontSize1=int_fontSize;
+  obj_theme.int_fontSize2=obj_theme.int_fontSize1+int_increment;
+  obj_theme.int_fontSize3=obj_theme.int_fontSize2+int_increment;
+  obj_theme.int_fontSize4=obj_theme.int_fontSize3+int_increment;
+  obj_theme.int_fontSize5=obj_theme.int_fontSize4+int_increment;      
+}
 
-        let int_fontSize;
-          switch(obj_themeOption.str_fontSize){
-              case "small":
-                  if(this.bln_isMobile){this.fn_calculateFontSize("medium");} 
-                  int_fontSize=8;
-                  break;
-              case "medium":
-                  int_fontSize=10;
-                  break;
-              case "large":
-                if(this.bln_isMobile){this.fn_calculateFontSize("medium");} 
-                  int_fontSize=13;
-                  break;
-              default:
-                  int_fontSize=10;
-          }
-          
-          
-        
-        obj_themeOption.int_size1=int_fontSize;
-        obj_themeOption.int_size2=obj_themeOption.int_size1+1;
-        obj_themeOption.int_size3=obj_themeOption.int_size2+1;
-        obj_themeOption.int_size4=obj_themeOption.int_size3+1;
-        obj_themeOption.int_size5=obj_themeOption.int_size4+1;      
+fn_calculateFontSize(obj_theme){ 
   
-        obj_themeOption.int_size1/=10;
-        obj_themeOption.int_size2/=10;
-        obj_themeOption.int_size3/=10;
-        obj_themeOption.int_size4/=10;
-        obj_themeOption.int_size5/=10;              
-      }
-  
-      fn_applyThemeStructure(){        
-          
-          //some code requires themeobjects empty or not
-          let obj_theme=obj_project.obj_theme;          
-          if(!obj_theme){return;}
 
-          let obj_themeOption=new Object;
+  switch(obj_theme.str_fontSize){        
+      case "small":
+        //if(this.bln_isMobile){this.fn_calculateFontSize("medium");return;}               
+          this.fn_calculateFontSizeIncrement(obj_theme, 10, 0);                            
+          obj_theme.int_fontSize4=obj_theme.int_fontSize3+1;
+          obj_theme.int_fontSize5=obj_theme.int_fontSize4+2;      
+          break;
+      case "medium":                            
+          this.fn_calculateFontSizeIncrement(obj_theme, 10, 1);                            
+          break;          
+      case "large":
+        //if(this.bln_isMobile){this.fn_calculateFontSize("medium");return;}               
+          this.fn_calculateFontSizeIncrement(obj_theme, 13, 1);                            
+          break;                      
+      default:
+        this.fn_calculateFontSize("medium");
+        return;
+  }
+
   
-          let obj_themeItem;        
+  obj_theme.int_fontSize1=obj_theme.int_fontSize1/10;
+  obj_theme.int_fontSize2=obj_theme.int_fontSize2/10;
+  obj_theme.int_fontSize3=obj_theme.int_fontSize3/10;
+  obj_theme.int_fontSize4=obj_theme.int_fontSize4/10;
+  obj_theme.int_fontSize5=obj_theme.int_fontSize5/10;
+}
+
+fn_setBorderDisplay(obj_theme){  
+let bln_value=obj_theme.bln_borderDisplay;
+obj_theme.bln_borderRowz=bln_value;
+obj_theme.bln_borderButton=bln_value;
+obj_theme.bln_borderFieldset=bln_value;
+obj_theme.bln_borderLegend=bln_value;    
+obj_theme.bln_borderLabel=bln_value;      
+obj_theme.bln_borderInput=bln_value;                
+obj_theme.bln_borderSearch=bln_value;                    
+}
+fn_setBorderRadiusDisplay(obj_theme){  
+let bln_value=obj_theme.bln_borderRadiusDisplay;
+obj_theme.bln_borderRadiusRowz=bln_value;
+obj_theme.bln_borderRadiusButton=bln_value;
+obj_theme.bln_borderRadiusFieldset=bln_value;
+obj_theme.bln_borderRadiusLegend=bln_value;    
+obj_theme.bln_borderRadiusLabel=bln_value;      
+obj_theme.bln_borderRadiusInput=bln_value;        
+obj_theme.bln_borderRadiusSearch=bln_value;        
+}
+
+fn_getTestThemeName(){
+
+  return obj_shared.fn_getRandomValueFromObject(this.obj_color);  
+
+}
+
+
+
+fn_setFillArea(obj_theme, obj_fill){
+
+  let str_fillBase, str_fillForm, str_fillBorder;
+  const str_fill=obj_theme.str_fill;
   
-          this.obj_themeBackground=this.fn_getThemeObject("form_blockbackground");
-          this.obj_themeMidground=this.fn_getThemeObject("form_blockmidground");
-          this.obj_themeForground=this.fn_getThemeObject("form_blockforground");
-          this.obj_themeHighlight=this.fn_getThemeObject("form_blockhighlight");          
+  const str_fill_1=obj_fill.str_fill_1;
+  const str_fill_2=obj_fill.str_fill_2;
+
+  const obj_gradient=obj_theme.obj_gradient;
+  
+  str_fillBase=str_fill;
+  str_fillForm=str_fill_1;
+  str_fillBorder=str_fill_2;    
   
   
-          obj_theme.str_backGround=this.obj_themeBackground.fn_getStyleProperty("background");
-          obj_theme.str_midGround=this.obj_themeMidground.fn_getStyleProperty("background");
-          obj_theme.str_forGround=this.obj_themeForground.fn_getStyleProperty("background");
-          obj_theme.str_highLight=this.obj_themeHighlight.fn_getStyleProperty("background");        
-          obj_theme.str_color="slate gray";//change according to light or dark analysis
+  if(obj_gradient.bln_face){    
+    str_fillForm=str_fill;
+    str_fillBase=str_fill_1;
+    str_fillBorder=str_fill_2;
+  }
   
-          obj_themeOption.bln_applyBorder=false;//user session
-          obj_themeOption.str_borderStyle="solid";//user session                        
-          obj_themeOption.str_borderSize="small";
-          obj_themeOption.str_deviderSize="small";
-          obj_themeOption.str_fontSize="medium";
-          
-          this.fn_calculateFontSize(obj_themeOption);        
-          //console.log(obj_themeOption);          
-          
-          this.obj_themeProject={
-              //*//STRUCTURE                
-              display:"flex",                                    
-              fontSize:"1.0rem",
-              display:"flex",                                    
-              padding:"1.0em",                                    
-              gap:"1.0em",                                    
-              fontWeight:"normal",                                    
-              cusor:"pointer",                                                
-              justifyContent:"center",
-              alignItems:"center",                      
-              //STRUCTURE                              
-              //*/
-          
-              //*//OPTION
-              borderColor:"orange",                    
-              color:"yellow",            
-              backgroundColor:"rgb(65,65,65)",
   
-              borderWidth:"0em",
-              borderRadius:"0em",            
-              borderStyle:"solid",           
-              marginBottom:"0em",            
-              //OPTION
-              //*/
-          }                               
+  obj_fill.str_fill=str_fill;
+  obj_fill.str_fillBase=str_fillBase;
+  obj_fill.str_fillForm=str_fillForm;
+  obj_fill.str_fillBorder=str_fillBorder;  
+}
+
+fn_filterGradientLight(obj_theme){        
   
-          /////////////////////////////////////////
-          /////////////////////////////////////////
-          obj_themeItem=obj_shared.fn_shallowCopy(obj_project.obj_themeProject);                
-          //*//STRUCTURE           
-          obj_themeItem.fontSize=obj_themeOption.int_size5+"rem";                
-          obj_themeItem.fontWeight="bold";                        
-          obj_themeItem.padding="1.0em";                                
-          obj_themeItem.width="100%";        
-          obj_themeItem.cursor="pointer";                               
-          //STRUCTURE   
-          //*/
+  let int_value=obj_theme.obj_gradient.int_light;  
+  let bln_value=obj_shared.fn_filterValue(int_value, obj_theme.int_min,obj_theme.int_max);         
+  if(!bln_value){
+    console.log("failed int_value: " + int_value);
+    console.log("failed obj_theme.int_min: " + obj_theme.int_min);
+    console.log("failed obj_theme.int_max: " + obj_theme.int_max);
+  }
+  return bln_value;
+} 
+
+
+
+fn_setFillPalette(obj_theme, obj_fill){  
   
-          //*//OPTION                
-          obj_themeItem.borderColor=obj_theme.str_forGround;
-          obj_themeItem.color=obj_theme.str_forGround;
-          obj_themeItem.backgroundColor=obj_theme.str_midGround;        
+  let obj_shade, obj_contrast;
+
+  const obj_gradient=obj_theme.obj_gradient;
+
+  obj_shade=new Object;    
+  obj_shade.str_fill=obj_theme.str_fill;  
+  obj_shade.bln_value=obj_gradient.bln_lighten;  
+
+  let int_percentLight, int_percentContrast;
+  int_percentLight=10;
+  int_percentContrast=5;  
+  if(obj_gradient.bln_contrast){
+    int_percentLight=15;
+    int_percentContrast=10;  
+  }  
+  let int_totalLight=(int_percentLight+(int_percentLight+int_percentContrast));
+  obj_theme.int_percentLight=int_percentLight;
+  obj_theme.int_percentContrast=int_percentContrast;
+  obj_theme.int_totalLight=int_totalLight;
+
+  obj_theme.int_min=0;
+  obj_theme.int_max=100;
+  if(obj_gradient.bln_lighten){//due to getting lighter    
+    obj_theme.int_min=0;
+    obj_theme.int_max=(100-int_totalLight);//due to getting darker
+  }
+  else{    
+    obj_theme.int_min=0+int_totalLight;
+    obj_theme.int_max=100;//due to getting darker
+  }
+  obj_theme.bln_filterPass=this.fn_filterGradientLight(obj_theme);        
+  if(!obj_theme.bln_filterPass){
+    return;
+  }
+
+  obj_contrast={    
+    int_percentHue:0,
+    int_percentSaturation:0,
+    int_percentLight:int_percentLight,
+  }
+  obj_shared.fn_assignProperty(obj_shade, obj_contrast);  
+
+
+  obj_fill.str_fill_1=obj_shared.fn_getShade(obj_shade);              
+  //console.log(obj_fill.str_fill_1);
+
+
+  obj_contrast.int_percentLight=(int_percentLight+int_percentContrast);//10 percent more than fill 1    
+  obj_shade.str_fill=obj_theme.str_fill;//use fill1 as starting point
+  obj_shared.fn_assignProperty(obj_shade, obj_contrast);    
+  obj_fill.str_fill_2=obj_shared.fn_getShade(obj_shade);              
+  obj_fill.obj_shade=obj_shade;
+
+  obj_theme.bln_filterPass=true;  
+}
+
+fn_addColorItem(obj_current){  
+
+  this.arr_color.push(obj_current);    
   
-          obj_themeItem.bln_applyBorder=false;                
-          obj_themeItem.bln_applyDevider=true;
-          obj_project.fn_applyThemeOption(obj_themeItem);        
-          //OPTION
-          //*/                
-          obj_project.obj_themeMenuButton=obj_themeItem;        
-          //MENUBUTTON
-          /////////////////////////////////////////
-          /////////////////////////////////////////
+  let int_hue, int_saturation, int_light;
+  let obj_hsl, str_label;  
+  int_hue=obj_current.int_hue;
+  int_saturation=obj_current.int_saturation;
+
+  int_hue=obj_current.int_hue;
+  int_saturation=obj_current.int_saturation;
+  int_light=60;  
+  str_label=obj_current.str_label + "-light"
+  obj_hsl=obj_shared.fn_getGradientObject(int_hue, int_saturation, int_light, "", str_label);    
+  this.arr_color.push(obj_hsl);
+
+  int_hue=obj_current.int_hue;
+  int_saturation=obj_current.int_saturation;
+  int_light=30;  
+  str_label=obj_current.str_label + "-dark"
+  obj_hsl=obj_shared.fn_getGradientObject(int_hue, int_saturation, int_light, "", str_label);    
+  this.arr_color.push(obj_hsl);
   
-          /////////////////////////////////////////
-          /////////////////////////////////////////
-          //CHILDMENU        
-          obj_themeItem=obj_shared.fn_shallowCopy(obj_project.obj_themeMenuButton);                
-          //*//STRUCTURE           
-          obj_themeItem.fontSize=obj_themeOption.int_size4+"rem";                
-          obj_themeItem.padding="1.0em";                 
-          //STRUCTURE   
-          //*/
+  if(obj_current.int_hue>=10){
+    int_hue=obj_current.int_hue-10;
+    int_saturation=obj_current.int_saturation;
+    int_light=30;      
+    str_label=obj_current.str_label + "-alt"
+    obj_hsl=obj_shared.fn_getGradientObject(int_hue, int_saturation, int_light, "", str_label);    
+    this.arr_color.push(obj_hsl);  
+  }
   
-          //*//OPTION                
-          obj_themeItem.bln_applyBorder=false;
-          obj_themeItem.bln_applyDevider=true;
-          obj_project.fn_applyThemeOption(obj_themeItem);
-          //OPTION
-          //*/                
-          obj_project.obj_themeChildMenu=obj_themeItem;        
-          //CHILDMENU             
-          /////////////////////////////////////////
-          /////////////////////////////////////////
-          
-          /////////////////////////////////////////
-          /////////////////////////////////////////
-          //DYNAMICMENU
-          //obj_themeItem=obj_shared.fn_shallowCopy(this.obj_themeChildMenu);                
-          //obj_themeItem.fontSize=obj_themeOption.int_size3+"rem";                
-          //*//STRUCTURE                   
-          //STRUCTURE   
-          //*/
   
-          //*//OPTION        
-          //this.fn_applyThemeOption(obj_themeItem);        
-          //OPTION
-          //*/                
-          //this.obj_themeDynamicMenu=obj_themeItem;        
-          //DYNAMICMENU
-          /////////////////////////////////////////
-          /////////////////////////////////////////
   
-          /////////////////////////////////////////
-          /////////////////////////////////////////
-          //FORMBUTTON        
-          obj_themeItem=obj_shared.fn_shallowCopy(obj_project.obj_themeProject);                
-          //*//STRUCTURE           
-          obj_themeItem.fontSize=obj_themeOption.int_size2+"rem";                
-          obj_themeItem.fontWeight="bold";  
-          obj_themeItem.cursor="pointer";                              
-          //STRUCTURE   
-          //*/
+}
+
+fn_getColorMap(obj_theme){  
+
+  let obj_hsl;
+  let int_value;
+
+  let int_hue, int_saturation, int_light
+  int_saturation=100;
+  int_light=50;
+
+  this.arr_color = [];  
+  let arr_item = [];  
+  let arr_mod;    
   
-          //*//OPTION
-          obj_themeItem.borderColor=obj_theme.str_midGround;
-          obj_themeItem.color=obj_theme.str_midGround;        
-          obj_themeItem.backgroundColor=obj_theme.str_forGround;        
+  obj_hsl=obj_shared.fn_getGradientObject(0, 100, 50, "", "red");//red
+  this.fn_addColorItem(obj_hsl);
+  obj_hsl=obj_shared.fn_getGradientObject(30, 100, 50, "", "Orange");
+  this.fn_addColorItem(obj_hsl);
+  //obj_hsl=obj_shared.fn_getGradientObject(60, 100, 50, "", "Yellow");
+  //this.fn_addColorItem(obj_hsl);
+  //obj_hsl=obj_shared.fn_getGradientObject(120, 100, 50, "", "Green");
+  //this.fn_addColorItem(obj_hsl);
+  //obj_hsl=obj_shared.fn_getGradientObject(180, 100, 50, "", "Cyan");
+  //this.fn_addColorItem(obj_hsl);
+  obj_hsl=obj_shared.fn_getGradientObject(240, 100, 50, "", "Blue");
+  this.fn_addColorItem(obj_hsl);
+  obj_hsl=obj_shared.fn_getGradientObject(270, 100, 50, "", "Purple");
+  this.fn_addColorItem(obj_hsl);
+  obj_hsl=obj_shared.fn_getGradientObject(300, 100, 50, "", "Magenta");
+  this.fn_addColorItem(obj_hsl);
   
-          obj_themeItem.bln_applyBorder=this.bln_applyBorder;//user session                                
-          obj_project.fn_applyThemeOption(obj_themeItem);
-          //OPTION
-          //*/                
-          obj_project.obj_themeFormButton=obj_themeItem;        
-          //FORMBUTTON
-          /////////////////////////////////////////
-          /////////////////////////////////////////
+  arr_item=this.arr_color;
+  obj_hsl=obj_shared.fn_getGradientObject(0, 0, 100, "", "White");
+  arr_item.push(obj_hsl);  
+  obj_hsl=obj_shared.fn_getGradientObject(0, 0, 0, "", "Black");
+  arr_item.push(obj_hsl);  
+  obj_hsl=obj_shared.fn_getGradientObject(0, 0, 50, "", "Gray");
+  arr_item.push(obj_hsl); 
+  obj_hsl=obj_shared.fn_getGradientObject(0, 0, 60, "", "Gray-light");
+  arr_item.push(obj_hsl);   
+  obj_hsl=obj_shared.fn_getGradientObject(0, 0, 30, "", "Gray-dak");
+  arr_item.push(obj_hsl);     
   
-          /////////////////////////////////////////
-          /////////////////////////////////////////
-          //FORMINPUT        
-          obj_themeItem=obj_shared.fn_shallowCopy(obj_project.obj_themeProject);                
-          //*//STRUCTURE                             
-          obj_themeItem.fontSize=obj_themeOption.int_size1+"rem";                
-          obj_themeItem.padding="1.0em";                        
-          obj_themeItem.fontWeight="normal";                        
-          obj_themeItem.maxHeight="500px";                                          
-          obj_themeItem.overflow="Auto";                                          
-          obj_themeItem.wordBreak="normal";                                          
-          //STRUCTURE   
-          //*/
-          
-          //*//OPTION
-          obj_themeItem.borderColor=obj_theme.str_backGround;
-          obj_themeItem.color=obj_theme.str_color;
-          obj_themeItem.backgroundColor=obj_theme.str_forGround;                          
-          
-          obj_themeItem.bln_applyBorder=this.bln_applyBorder;//user session                                
-          obj_project.fn_applyThemeOption(obj_themeItem);
-          //OPTION
+  console.log(this.arr_color);
+
+  let int_max=this.arr_color.length-1;
+  int_value=obj_shared.fn_getRandomInt(0, int_max); // Generates a random integer between 1 and 8    
+  obj_hsl=this.arr_color[int_value];
   
-          //*/                
-          obj_project.obj_themeFormInput=obj_themeItem;        
-          //FORMINPUT
-          /////////////////////////////////////////
-          /////////////////////////////////////////
-      }
   
-      fn_applyThemeOption(obj_themeItem){
-        
-        //BORDER      
-        let int_borderSize=0.0;                        
-        if(obj_themeItem.bln_applyBorder){
-          switch(this.str_borderSize){                    
-            case "small":
-              int_borderSize=1.0;                    
-              break;
-            case "medium":
-              int_borderSize=1.0;                    
-              break;
-            case "large":
-              int_borderSize=1.5;                    
-              break;
-            default:
-              int_borderSize=0.5;                    
-          }        
-        }
-        const int_borderRadius=(2*int_borderSize);
-        obj_themeItem.borderWidth=int_borderSize + "em";              
-        obj_themeItem.borderRadius=int_borderRadius + "em";                          
-        //BORDER
-        
-        //DEVIDER
-        let int_deviderSize=0.0;                        
-        if(obj_themeItem.bln_applyDevider){        
+  //obj_hsl=obj_shared.fn_getGradientObject(230, 100, 30, "", "blue-mod");  
+  //obj_hsl=obj_shared.fn_getGradientObject(300, 100, 50, "", "magenta");    
+  //obj_hsl=obj_shared.fn_getGradientObject(0, 100, 50, "", "Red");  
+  //obj_hsl=obj_shared.fn_getGradientObject(230, 100, 30, "", "Blue-Alt-Test");    
+  //obj_hsl=obj_shared.fn_getGradientObject(300, 100, 60, "", "magenta-lighter-test");  
+  //obj_hsl=obj_shared.fn_getGradientObject(300, 100, 30, "", "magenta-darker-test");  
+  //obj_hsl=obj_shared.fn_getGradientObject(0, 0, 30, "", "dark-gray-test");  
+  //obj_hsl=obj_shared.fn_getGradientObject(0, 0, 60, "", "light-gray-test");  
+  //obj_hsl=obj_shared.fn_getGradientObject(0, 0, 100, "", "White");  
   
-          switch(this.str_deviderSize){                  
-            case "medium":
-              int_deviderSize=0.5;                        
-              break;
-            case "large":
-              int_deviderSize=1;                        
-              break;
-            default:
-              int_deviderSize=0.1;                        
-          }        
-        }
-        obj_themeItem.marginBottom=int_deviderSize + "em";              
-        //DEVIDER
-      }
-    
+  obj_theme.str_fill=obj_hsl.str_hsl;  
+  obj_theme.obj_gradient=obj_hsl;
+}
+
+  
+
+
+fn_setUserTheme(obj_theme){    
+
+//https://convertingcolors.com/hex-color-A52A2A.html?search=brown
+//https://coolors.co/palettes/trending
+//https://imagecolorpicker.com/
+//coolors affiliate link https://coolors.co/?ref=6754517d5fa59e000b79f378   
+
+//Load Border and Radius Option
+obj_theme.bln_borderDisplay=false;
+obj_theme.bln_borderRadiusDisplay=false;      
+this.fn_setBorderDisplay(obj_theme);      
+this.fn_setBorderRadiusDisplay(obj_theme);
+obj_theme.bln_borderRowz=false;  
+obj_theme.bln_borderRadiusRowz=false;  
+obj_theme.bln_borderButton=true;
+obj_theme.bln_borderRadiusButton=true;
+obj_theme.bln_borderSearch=true;  
+obj_theme.bln_borderRadiusSearch=true;  
+obj_theme.bln_borderFieldset=true;
+obj_theme.bln_borderRadiusFieldset=true;
+obj_theme.bln_borderLegend=true;
+obj_theme.bln_borderRadiusLegend=true;
+obj_theme.bln_borderLabel=true;
+obj_theme.bln_borderRadiusLabel=true;
+obj_theme.bln_borderInput=true;
+obj_theme.bln_borderRadiusInput=true;
+//Load Border and Radius Option
+
+this.fn_getColorMap(obj_theme);//generate array of hsl colors    
+
+const obj_gradient=obj_theme.obj_gradient;
+if(obj_theme.obj_gradient.int_light>=60){
+  obj_gradient.bln_lighten = false;//true by default
+}
+obj_gradient.bln_contrast=true;
+obj_gradient.bln_face=obj_shared.fn_getRandomInt(0, 1);
+
+
+if(obj_gradient.int_light>80){
+  //let obj_hslText=obj_shared.fn_getGradientObject(183, 100, 75, "", "Textcolor");
+  let obj_hslText=obj_shared.fn_getGradientObject(0, 33, 36, "", "Dark Red Brown");
+  obj_theme.str_textColorUI=obj_hslText.str_hsl;        
+}
+
+
+obj_theme.bln_flipBorder=false;
+obj_theme.bln_flipForm=false;
+
+let obj_fill=new Object;
+this.fn_setFillPalette(obj_theme, obj_fill);//we can choose to lighten, or darken based on wether the main color is light or dark
+this.fn_setFillArea(obj_theme, obj_fill);//we can choose which areas are lighter or darker
+obj_theme.str_fillBase=obj_fill.str_fillBase;
+obj_theme.str_fillForm=obj_fill.str_fillForm;       
+obj_theme.str_fillBorder=obj_fill.str_fillBorder;  
+
+if(!obj_theme.bln_filterPass){
+  //obj_theme.str_name=this.fn_getTestThemeName();  
+  //obj_theme.str_name="yellow";
+  //return this.fn_setUserTheme(obj_theme);  
+  console.log("obj_theme.bln_filterPassxxxxx: " + obj_theme.bln_filterPass);
+  obj_theme.str_fillBase="hsl(180, 100%, 50%)";
+  obj_theme.str_fillForm="hsl(180, 100%, 65%)";
+  obj_theme.str_fillBorder="hsl(180, 100%, 85%)";
+  
+}
+
+
+
+
+
+
+//*
+//console.log("obj_theme.str_name: " + obj_theme.str_name);
+console.log("str_label: " + obj_theme.obj_gradient.str_label);
+console.log("obj_theme.str_fill:" + obj_theme.str_fill);
+console.log("obj_theme.bln_filterPass: " + obj_theme.bln_filterPass);
+console.log("obj_gradient.int_hue: " + obj_theme.obj_gradient.int_hue);
+console.log("obj_gradient.int_saturation: " + obj_theme.obj_gradient.int_saturation);
+console.log("obj_gradient.int_light: " + obj_theme.obj_gradient.int_light);
+
+
+console.log("obj_theme.int_min: " + obj_theme.int_min);
+console.log("obj_theme.int_max: " + obj_theme.int_max);
+console.log("obj_theme.int_totalLight: " + obj_theme.int_totalLight);    
+
+
+console.log("obj_gradient.bln_face: " + obj_gradient.bln_face);
+console.log("obj_gradient.bln_lighten: " + obj_gradient.bln_lighten);
+console.log("obj_gradient.bln_contrast: " + obj_gradient.bln_contrast);
+console.log("obj_theme.int_percentLight: " + obj_theme.int_percentLight);
+console.log("obj_theme.int_percentContrast: " + obj_theme.int_percentContrast);
+
+console.log("str_fill:" + obj_theme.str_fill);
+if(obj_gradient.bln_face){    
+  console.log("str_fillForm:" + obj_theme.str_fillForm);  
+  console.log("str_fillBase:" + obj_theme.str_fillBase);
+  console.log("str_fillBorder:" + obj_theme.str_fillBorder);
+}
+else{
+  console.log("str_fillBase:" + obj_theme.str_fillBase);
+  console.log("str_fillForm:" + obj_theme.str_fillForm);    
+  console.log("str_fillBorder:" + obj_theme.str_fillBorder);
+}
+//*/
+}
+
+fn_applyThemeStructure(){        
+  
+
+  //some code requires themeobjects empty or not
+  //const obj_theme=this.obj_theme;          
+  //if(!obj_theme){return;}
+
+  const obj_theme=new Object;          
+  if(!obj_theme){return;}  
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //THEME      
+  //STRUCTURE             
+  obj_theme.display="flex";        
+  obj_theme.padding="1em";        
+  obj_theme.gap="1em";    
+  //STRUCTURE    
+  
+  //OPTION                      
+  obj_theme.str_borderStyle="solid";//user session                        
+  obj_theme.str_borderSize="none";                 
+  obj_theme.str_borderRadiusSize="medium";//set to none for square
+  obj_theme.str_deviderSize="small";      
+  obj_theme.str_fontSize="medium";                            
+  //OPTION                  
+  //THEME
+  /////////////////////////////////////////
+  /////////////////////////////////////////     
+  
+  //default to be adjusted accoridng to light or dark theme                  
+  obj_theme.str_textColorUI="white";                              
+  obj_theme.str_fillInput="white";      
+  obj_theme.str_borderColorInput="gainsboro";            
+  obj_theme.str_textColorInput="black";                  
+  //defaults to be adjusted accoridng to light or dark theme          
+  
+  this.fn_setUserTheme(obj_theme);                                   
+  
+  this.fn_calculateFontSize(obj_theme);                    
+  obj_theme.str_highLightFill="orange"; 
+  
+  //document.body.style.backgroundColor=obj_theme.str_fillBase;        
+
+  let obj_holder=this.obj_holder;
+  let str_fillBorder, str_fillForm, str_fillBase;
+  
+
+  let obj_themeItem;        
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //XAPPACCORDION
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_theme);                
+  //STRUCTURE                             
+  obj_themeItem.padding="0em";
+  obj_themeItem.display="block";
+  //STRUCTURE     
+  //OPTION        
+  obj_themeItem.bln_border=false;         
+  obj_themeItem.backgroundColor=obj_theme.str_fillBase;        
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION            
+  obj_holder.obj_themeXappAccordion=obj_themeItem;                
+  //XAPPACCORDION
+  /////////////////////////////////////////
+  /////////////////////////////////////////        
+  
+  
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //MENUBUTTON
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_theme);                
+  //STRUCTURE                           
+  obj_themeItem.fontWeight="bold";                                
+  obj_themeItem.width="100%";        
+  obj_themeItem.cursor="pointer";                                       
+  obj_themeItem.justifyContent="center";
+  obj_themeItem.alignItems="center";        
+  //STRUCTURE
+  //OPTION       
+  obj_themeItem.str_fontLabel="form_rowz";                    
+  obj_themeItem.bln_border=obj_theme.bln_borderRowz;              
+  obj_themeItem.bln_borderRadius=obj_theme.bln_borderRadiusRowz;                          
+
+  str_fillBorder=obj_theme.str_fillBorder;
+  str_fillForm=obj_theme.str_fillForm;    
+  if(obj_theme.bln_flipBorder){[str_fillBorder, str_fillForm]=obj_shared.fn_flipVariable(str_fillBorder, str_fillForm);}    
+  obj_themeItem.borderColor=str_fillBorder;          
+  obj_themeItem.backgroundColor=str_fillForm;                
+  
+  obj_themeItem.color=obj_theme.str_textColorUI;
+  obj_project.fn_applyThemeOption(obj_themeItem);  
+  //OPTION                    
+  obj_holder.obj_themeRowz=obj_themeItem;        
+  //MENUBUTTON
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //CHILDMENU        
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_holder.obj_themeRowz);                
+  //STRUCTURE                                   
+  //STRUCTURE
+  //OPTION                
+  obj_themeItem.str_fontLabel="form_rowzchild";                        
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION                            
+  obj_holder.obj_themeRowzChild=obj_themeItem;        
+  //CHILDMENU             
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //DYNAMICMENU
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_holder.obj_themeRowzChild);                        
+  //STRUCTURE                                   
+  //STRUCTURE
+  //OPTION                
+  obj_themeItem.str_fontLabel="form_rowzdynamic";                        
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION                    
+  obj_holder.obj_themeRowzDynamic=obj_themeItem;        
+  //DYNAMICMENU
+  /////////////////////////////////////////
+  /////////////////////////////////////////          
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //FORMBUTTON        
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_theme);                
+  //STRUCTURE                           
+  //STRUCTURE           
+  //OPTION                                  
+  obj_themeItem.str_fontLabel="form_button";                                
+  obj_themeItem.bln_border=obj_theme.bln_borderButton;    
+  obj_themeItem.bln_borderRadius=obj_theme.bln_borderRadiusButton;              
+  
+  str_fillBorder=obj_theme.str_fillBorder;
+  str_fillForm=obj_theme.str_fillForm;    
+  if(obj_theme.bln_flipBorder){[str_fillBorder, str_fillForm]=obj_shared.fn_flipVariable(str_fillBorder, str_fillForm);}    
+  obj_themeItem.borderColor=str_fillBorder;          
+  obj_themeItem.backgroundColor=str_fillForm;                
+  obj_themeItem.color=obj_theme.str_textColorUI;        
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION            
+  obj_holder.obj_themeButton=obj_themeItem;        
+  //FORMBUTTON
+  /////////////////////////////////////////
+  ///////////////////////////////////////// 
+  
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //FORMFIELDSET        
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_theme);                
+  //STRUCTURE                             
+  //STRUCTURE   
+  //OPTION                     
+  obj_themeItem.str_fontLabel="form_fieldset";              
+  obj_themeItem.bln_border=obj_theme.bln_borderFieldset;      
+  obj_themeItem.bln_borderRadius=obj_theme.bln_borderRadiusFieldset;        
+  
+  str_fillBorder=obj_theme.str_fillBorder;
+  str_fillForm=obj_theme.str_fillForm;    
+  if(obj_theme.bln_flipBorder){[str_fillBorder, str_fillForm]=obj_shared.fn_flipVariable(str_fillBorder, str_fillForm);}    
+  if(obj_theme.bln_flipForm){[str_fillBorder, str_fillForm]=obj_shared.fn_flipVariable(str_fillBorder, str_fillForm);}      
+  obj_themeItem.borderColor=str_fillBorder;          
+  obj_themeItem.backgroundColor=str_fillForm;                
+obj_themeItem.color=obj_theme.str_textColorUI;
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION
+  obj_holder.obj_themeFormFieldset=obj_themeItem;                
+  //FORMFIELDSET        
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //FORMLEGEND
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_holder.obj_themeFormFieldset);                
+  //STRUCTURE                             
+  //STRUCTURE   
+  //OPTION                          
+  obj_themeItem.str_fontLabel="form_legend";                                
+  obj_themeItem.bln_border=obj_theme.bln_borderLegend;      
+  obj_themeItem.bln_borderRadius=obj_theme.bln_borderRadiusLegend;        
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION
+  obj_holder.obj_themeFormLegend=obj_themeItem;        
+  //FORMLEGEND
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //FORMLABEL
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_holder.obj_themeFormLegend);                
+  //STRUCTURE                             
+  //STRUCTURE   
+  //OPTION                
+  obj_themeItem.str_fontLabel="form_label";                                
+  obj_themeItem.bln_border=obj_theme.bln_borderLabel;      
+  obj_themeItem.bln_borderRadius=obj_theme.bln_borderRadiusLabel;              
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION      
+  obj_holder.obj_themeFormLabel=obj_themeItem;              
+  //FORMLABEL
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //FORMINPUT        
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_holder.obj_themeFormLabel);
+  //STRUCTURE                                           
+  obj_themeItem.fontWeight="normal";                        
+  obj_themeItem.maxHeight="500px";                                          
+  obj_themeItem.overflow="Auto";                                          
+  obj_themeItem.wordBreak="normal";                      
+  //STRUCTURE
+  //OPTION                      
+  obj_themeItem.str_fontLabel="form_input";                                
+  obj_themeItem.bln_border=obj_theme.bln_borderInput;
+  obj_themeItem.bln_borderRadius=obj_theme.bln_borderRadiusInput;        
+  obj_themeItem.borderColor=obj_theme.str_borderColorInput;
+  obj_themeItem.backgroundColor=obj_theme.str_fillInput;                                                                       
+  obj_themeItem.color=obj_theme.str_textColorInput;      
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION            
+  obj_holder.obj_themeFormInput=obj_themeItem;        
+  //FORMINPUT
+  /////////////////////////////////////////
+  /////////////////////////////////////////      
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //FORMINPUT        
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_holder.obj_themeFormInput);
+  //STRUCTURE                                                             
+  obj_themeItem.fontWeight="bold";
+  //STRUCTURE
+  //OPTION                      
+  obj_themeItem.str_fontLabel="rowz_search";                                      
+  obj_themeItem.bln_border=obj_theme.bln_borderSearch;  
+  obj_themeItem.bln_borderRadius=obj_theme.bln_borderRadiusSearch;  
+  obj_themeItem.borderColor=obj_holder.obj_themeButton.borderColor;  
+  obj_themeItem.backgroundColor=obj_theme.str_fillInput;                                                                       
+  
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION            
+  obj_holder.obj_themeRowzSearch=obj_themeItem;              
+  //FORMINPUT
+  /////////////////////////////////////////
+  /////////////////////////////////////////  
+  
+
+  /////////////////////////////////////////
+  /////////////////////////////////////////
+  //FORMHARDRULE
+  obj_themeItem=obj_shared.fn_shallowCopy(obj_theme);                
+  //STRUCTURE                             
+  obj_themeItem.padding="0.5em";                  
+  //STRUCTURE           
+  //OPTION                
+  obj_themeItem.str_fontLabel="form_hardrule";                                      
+  obj_themeItem.bln_border=obj_holder.obj_themeRowz.bln_border;  
+  obj_themeItem.bln_borderRadius=obj_holder.obj_themeRowz.bln_borderRadius;  
+  obj_themeItem.borderColor=obj_holder.obj_themeRowz.borderColor;       
+  obj_themeItem.backgroundColor=obj_holder.obj_themeRowz.backgroundColor;
+  obj_project.fn_applyThemeOption(obj_themeItem);
+  //OPTION        
+  obj_holder.obj_themeFormHardRule=obj_themeItem;        
+  //FORMHARDRULE
+  /////////////////////////////////////////
+  /////////////////////////////////////////        
+  
+}
+
+fn_applyThemeOption(obj_themeItem){
+this.fn_applyThemeFont(obj_themeItem);
+this.fn_applyThemeBorder(obj_themeItem);
+this.fn_applyThemeDevider(obj_themeItem);
+}
+
+fn_applyThemeFont(obj_themeItem){      
+
+//FONTSIZE
+let int_fontSize;  
+switch(obj_themeItem.str_fontLabel){                    
+  case "form_rowz":
+    int_fontSize=obj_themeItem.int_fontSize5;            
+    break;          
+  case "form_rowzchild":
+    int_fontSize=obj_themeItem.int_fontSize4;            
+    break;                                
+  case "form_rowzdynamic":
+    int_fontSize=obj_themeItem.int_fontSize3;
+    break;                  
+  case "form_button":
+    int_fontSize=obj_themeItem.int_fontSize2;
+    break;
+  case "form_input":
+    int_fontSize=obj_themeItem.int_fontSize1;
+    break;
+  case "standard":
+    int_fontSize=obj_themeItem.int_fontSize1;
+    break;
+  default:
+    int_fontSize=obj_themeItem.int_fontSize1;
+}         
+obj_themeItem.fontSize=int_fontSize + "rem";                     
+//FONTSIZE
+}
+
+fn_applyThemeBorder(obj_themeItem){  
+
+//BORDER            
+let str_borderSize="none";      
+if(obj_themeItem.bln_border)      {
+  str_borderSize=obj_themeItem.str_borderSize;        
+  if(str_borderSize==="none"){
+    str_borderSize="medium";
+  }        
+}
+let int_borderSize;                                 
+switch(str_borderSize){                    
+  case "small":
+    int_borderSize=0.3;                    
+    break;
+  case "medium":
+    int_borderSize=0.5;                    
+    break;
+  case "large":
+    int_borderSize=1.0;                    
+    break;
+  default:
+    int_borderSize=0;                    
+}                
+obj_themeItem.borderWidth=int_borderSize + "em";
+//BORDER
+
+//BORDERRADIUS
+let str_borderRadiusSize="none"      
+if(obj_themeItem.bln_borderRadius){
+  str_borderRadiusSize=obj_themeItem.str_borderRadiusSize;
+  if(!int_borderSize){int_borderSize=0.5;}        
+}            
+let int_borderRadiusSize;
+switch(str_borderRadiusSize){                          
+  case "small":
+    int_borderRadiusSize=1;                    
+    break;
+  case "medium":
+    int_borderRadiusSize=1.5;                    
+    break;
+  case "large":
+    int_borderRadiusSize=2;                    
+    break;
+  default:
+    int_borderRadiusSize=0;                    
+}                         
+obj_themeItem.borderRadius=(int_borderRadiusSize*int_borderSize) + "em";                                            
+//BORDERRADIUS       
+}
+
+fn_applyThemeDevider(obj_themeItem){ 
+
+//DEVIDER
+let int_deviderSize;                        
+switch(obj_themeItem.str_deviderSize){                                    
+  case "small":
+    int_deviderSize=0.1;                        
+    break;
+  case "medium":
+    int_deviderSize=0.5;                        
+    break;
+  case "large":
+    int_deviderSize=1;                        
+    break;
+  default:
+    int_deviderSize=0;                        
+}        
+obj_themeItem.marginBottom=int_deviderSize + "em";                  
+//DEVIDER  
+}
+//END THEME HAMDLER
+
 
     fn_setEvent(e, obj_itemEvent){                        
         if(!this.obj_itemEvent){                  
@@ -21955,11 +22614,11 @@ var obj_InstanceJSONMap = new Map([
 [76627, {"obj_design": {"str_tag": "xapp_console_search", "arr_item": [{"obj_design": {"str_type": "form_inputandbutton_input", "int_idRecord": 7585}}, {"obj_design": {"str_type": "form_button_search", "int_idRecord": 77500}}], "str_name": "xapp_console_search", "str_text": "notset", "str_type": "xapp_console_search", "bln_editPin": true, "str_content": "", "int_idRecord": 76627, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_08666691", "str_nameShort": "xapp_console_search", "str_themeType": "form_container", "bln_palettePin": true, "str_classExtend": "form_inputandbutton", "str_createdDate": "2022-11-12 12:20:33", "str_categoryName": "Xapp", "str_modifiedDate": "2022-11-12 12:20:33", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"gap": "1em", "border": "0px solid purple", "display": "flex", "flex-flow": "row wrap"}, "obj_domProperty": {"Id": "myId_08666691"}, "dom_objContentContainer": {"Id": "myId_08666691"}}],
 [76650, {"obj_design": {"str_tag": "xapp_menu_operation", "str_name": "xapp_menu_operation", "str_text": "xapp_menu_operation", "str_type": "xapp_menu_operation", "bln_editPin": true, "str_content": "", "int_idRecord": 76650, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_56611515", "str_nameShort": "xapp_menu_operation", "str_themeType": "xapp_menu_operation", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_button_rich", "str_createdDate": "2022-02-02 20:04:57", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 20:04:57", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"padding-bottom": "2px"}, "obj_domProperty": {"innerHTML": "xapp_menu_operation", "innerText": "xapp_menu_operation", "xDesign_MenuButtonClick": "fn_MenuButtonClick"}, "dom_objContentContainer": {"xDesign_MenuButtonClick": "fn_MenuButtonClick"}}],
 [76655, {"obj_design": {"str_tag": "xapp_console_container", "str_name": "xapp_console_container", "str_text": "notset", "str_type": "xapp_console_container", "bln_editPin": true, "str_content": "", "int_idRecord": 76655, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_51089095", "str_nameShort": "xapp_console_container", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_base", "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "Anchor", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "notset", "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-flow": "row wrap", "justify-content": "end"}}],
-[76677, {"obj_design": {"str_tag": "xapp_accordion", "blnIsTag": true, "str_name": "xapp_accordion", "str_text": "notset", "str_type": "xapp_accordion", "bln_editPin": true, "str_content": "", "int_idRecord": 76677, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_11651443", "str_nameShort": "xapp_accordion", "str_themeType": "xapp_accordion", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-11-01 21:51:10", "str_categoryName": "Xapp", "str_modifiedDate": "2022-11-01 21:51:10", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"width": "100%", "display": "block"}}],
+[76677, {"obj_design": {"str_tag": "xapp_accordion", "blnIsTag": true, "str_name": "xapp_accordion", "str_text": "notset", "str_type": "xapp_accordion", "bln_editPin": true, "str_content": "", "int_idRecord": 76677, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_11651443", "str_nameShort": "xapp_accordion", "str_themeType": "xapp_accordion", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-11-01 21:51:10", "str_categoryName": "Xapp", "str_modifiedDate": "2022-11-01 21:51:10", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"width": "100%", "border": "1em solid orange", "display": "block", "padding": "1em", "background": "rgb(65,65,65)"}}],
 [76680, {"obj_design": {"str_tag": "select", "str_name": "xapp_form_select", "str_text": "notset", "str_type": "xapp_form_select", "bln_editPin": true, "str_content": "", "int_idRecord": 76680, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_00108041", "str_nameShort": "xapp_form_select", "str_themeType": "form_input", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-02-02 19:57:30", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:57:30", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "font-size": "1rem", "background": "rgb(65, 65, 65)"}}],
 [76681, {"obj_design": {"str_tag": "xapp_dataform_context_holder", "arr_item": [{"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": 76259}}, {"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": 76392}}, {"obj_design": {"str_type": "xapp_console_container", "int_idRecord": 76595}}, {"obj_design": {"str_type": "xapp_console_container", "int_idRecord": 77114}}], "str_name": "xapp_dataform_context_holder", "str_text": "notset", "str_type": "xapp_context_holder", "bln_editPin": true, "str_content": "", "int_idRecord": 76681, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_58934923", "str_nameShort": "xapp_dataform_context_holder", "str_themeType": "xapp_context_holder", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "Xapp", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": "false", "bln_isContextHolder": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"gap": "1em", "display": "flex"}, "obj_domProperty": {"Id": "myId_58934923"}, "dom_objContentContainer": {"Id": "myId_58934923"}}],
 [76682, {"obj_design": {"str_tag": "xapp_dataform", "str_name": "xapp_dataform", "str_text": "notset", "str_type": "xapp_dataform", "bln_editPin": true, "str_content": "", "int_idRecord": 76682, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_83282842", "str_nameShort": "xapp_dataform", "str_themeType": "xapp_dataform", "bln_dynamicPin": true, "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_data", "str_createdDate": "2022-02-02 20:10:52", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 20:10:52", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-wrap": "wrap", "flex-direction": "column"}, "str_defaultTypeRow": "xapp_rowform", "str_defaultTypeColumn": "xapp_columnform"}],
-[76683, {"obj_meta": {"str_text": "", "bln_viewPin": 0, "int_joinType": 0, "int_idMetaRowz": 0, "int_idMetaView": 0, "str_metaRowzName": "", "str_metaTypeData": "", "MetaPermissionTag": "100", "str_buttonConsole": "", "bln_togglePeersPin": true, "str_optionChildMenu": "", "int_idParentMetaRowz": 0, "str_metaTypeDashboard": "", "str_metaConstraintName": ""}, "obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "str_icon": "star", "str_name": "xapp_menuform", "str_text": "xapp_menuform", "str_type": "xapp_menuform", "bln_editPin": true, "str_content": "", "int_idRecord": 76683, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_37375355", "str_nameShort": "xapp_menuform", "str_themeType": "menu_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_menu", "str_createdDate": "2022-02-02 20:04:57", "str_categoryName": "Xapp", "str_modifiedDate": "2022-02-02 20:04:57", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "width": "100%", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "font-size": "1rem", "align-text": "center", "background": "rgb(65,65,65)", "margin-bottom": "1em"}, "str_optionData": "Data", "str_optionMenu": "Menu", "obj_domProperty": {"Id": "myId_37375355", "innerHTML": "xapp_menuform", "innerText": "xapp_menuform", "xDesign_MenuButtonClick": "fn_MenuButtonClick"}, "str_optionReport": "Report", "str_optionWidget": "Widget", "int_totalRowCount": 0, "str_listSeparator": "-", "str_optionMenuForm": "MenuForm", "str_defaultTypeData": "xapp_dataform_view", "str_defaultTypeMenu": "xapp_menuform", "str_optionDashboard": "Dashboard", "bln_constraintKeyPin": true, "str_defaultTypeDataChildMenu": "xapp_dataform_childmenu"}],
+[76683, {"obj_meta": {"str_text": "", "bln_viewPin": 0, "int_joinType": 0, "int_idMetaRowz": 0, "int_idMetaView": 0, "str_metaRowzName": "", "str_metaTypeData": "", "MetaPermissionTag": "100", "str_buttonConsole": "", "bln_togglePeersPin": true, "str_optionChildMenu": "", "int_idParentMetaRowz": 0, "str_metaTypeDashboard": "", "str_metaConstraintName": ""}, "obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "str_icon": "star", "str_name": "xapp_menuform", "str_text": "xapp_menuform", "str_type": "xapp_menuform", "bln_editPin": true, "str_content": "", "int_idRecord": 76683, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_37375355", "str_nameShort": "xapp_menuform", "str_themeType": "menu_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_menu", "str_createdDate": "2022-02-02 20:04:57", "str_categoryName": "Xapp", "str_modifiedDate": "2022-02-02 20:04:57", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "width": "100%", "border": "1em solid orange", "display": "flex", "padding": "1em", "font-size": "1rem", "align-text": "center", "background": "rgb(65,65,65)", "margin-bottom": "1em"}, "str_optionData": "Data", "str_optionMenu": "Menu", "obj_domProperty": {"Id": "myId_37375355", "innerHTML": "xapp_menuform", "innerText": "xapp_menuform", "xDesign_MenuButtonClick": "fn_MenuButtonClick"}, "str_optionReport": "Report", "str_optionWidget": "Widget", "int_totalRowCount": 0, "str_listSeparator": "-", "str_optionMenuForm": "MenuForm", "str_defaultTypeData": "xapp_dataform_view", "str_defaultTypeMenu": "xapp_menuform", "str_optionDashboard": "Dashboard", "bln_constraintKeyPin": true, "str_defaultTypeDataChildMenu": "xapp_dataform_childmenu"}],
 [76685, {"obj_design": {"str_tag": "xapp_data", "str_name": "xapp_data", "str_type": "xapp_data", "bln_editPin": true, "int_idRecord": 76685, "str_idXDesign": "myId_62156312", "str_nameShort": "xapp_data", "str_themeType": "xapp_data", "bln_dynamicPin": true, "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_ajax", "str_createdDate": "2022-02-02 20:10:52", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 20:10:52", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-wrap": "wrap", "flex-direction": "column"}, "str_defaultTypeRow": "xapp_row", "str_defaultTypeColumn": "xapp_column"}],
 [76686, {"obj_design": {"str_tag": "xapp_context_data", "arr_item": [{"obj_design": {"str_type": "xapp_row", "int_idRecord": 76689}}, {"obj_design": {"str_type": "xapp_column", "int_idRecord": 76687}}, {"obj_design": {"str_type": "xapp_data_childmenu", "int_idRecord": 76690}}, {"obj_design": {"str_type": "xapp_data_view", "int_idRecord": 76688}}, {"obj_design": {"str_type": "xapp_data", "int_idRecord": 76685}}], "str_name": "xapp_context_data", "str_type": "xapp_context_holder", "bln_editPin": true, "int_idRecord": 76686, "str_idXDesign": "myId_99139996", "str_nameShort": "xapp_context_data", "str_themeType": "xapp_context_holder", "bln_palettePin": true, "bln_isLocalHome": true, "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "Xtra", "str_modifiedDate": "2022-11-01 21:47:45", "bln_lockComponent": true, "bln_classController": "false", "bln_isContextHolder": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-flow": "wrap"}, "obj_domProperty": {"Id": "myId_99139996"}, "dom_objContentContainer": {"Id": "myId_99139996"}}],
 [76687, {"obj_design": {"str_tag": "xapp_column", "str_name": "xapp_column", "str_type": "xapp_column", "bln_editPin": true, "str_context": "crud_context", "int_idRecord": 76687, "str_idXDesign": "myId_17696919", "str_nameShort": "xapp_column", "str_themeType": "xapp_column", "bln_palettePin": true, "str_createdDate": "2022-11-20 18:03:50", "str_categoryName": "Xtra", "str_modifiedDate": "2022-11-20 18:03:50", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"display": "flex", "flex-flow": "column wrap"}}],
@@ -21992,11 +22651,11 @@ var obj_InstanceJSONMap = new Map([
 [77029, {"obj_design": {"str_tag": "button", "str_name": "form_inputandbutton_submit", "str_text": "My Button", "str_type": "form_inputandbutton_submit", "str_value": "My Button", "bln_editPin": true, "str_content": "", "int_idRecord": 77029, "str_classList": "notset", "str_idProject": "myId_36537180", "str_idXDesign": "myId_32160437", "str_nameShort": "form_inputandbutton_submit", "str_themeType": "form_inputandbutton_submit", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_button_rich", "str_createdDate": "2022-02-02 19:57:30", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:57:30", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"border": "0px none", "cursor": "pointer", "height": "40px", "padding": "0px"}, "obj_domProperty": {"type": "submit"}}],
 [77030, {"obj_design": {"str_tag": "inputandbutton", "arr_item": [{"obj_design": {"str_type": "form_input", "int_idRecord": "77028"}}, {"obj_design": {"str_type": "form_inputandbutton_submit", "int_idRecord": 77029}}], "str_name": "form_inputandbutton", "str_text": "notset", "str_type": "form_inputandbutton", "bln_editPin": true, "str_content": "", "int_idRecord": 77030, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_62726192", "str_nameShort": "form_inputandbutton", "str_themeType": "form_panel", "bln_palettePin": true, "str_classExtend": "notset", "str_createdDate": "2022-11-20 10:37:36", "str_categoryName": "Xtra", "str_modifiedDate": "2022-11-20 10:37:36", "str_releaseLabel": "notset", "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domProperty": {"Id": "myId_62726192"}, "dom_objContentContainer": {"Id": "myId_62726192"}}],
 [77032, {"obj_design": {"str_tag": "block", "str_name": "block", "str_text": "notset", "str_type": "block", "bln_editPin": true, "str_content": "", "int_idRecord": 77032, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_72497127", "str_nameShort": "block", "str_themeType": "block", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:10:58", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:10:58", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"display": "block"}}],
-[77033, {"obj_design": {"str_tag": "hr", "str_name": "form_hardrule", "str_text": "notset", "str_type": "form_hardrule", "bln_editPin": true, "str_content": "", "int_idRecord": 77033, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_79277021", "str_nameShort": "form_hardrule", "str_themeType": "form_hardrule", "bln_palettePin": true, "str_classExtend": "notset", "str_createdDate": "2023-09-28 17:30:59", "str_categoryName": "Form", "str_modifiedDate": "2023-09-28 17:30:59", "str_releaseLabel": "notset", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"width": "100%", "border": "0px", "height": "1.0em", "background": "gray"}}],
+[77033, {"obj_design": {"str_tag": "hr", "str_name": "form_hardrule", "str_text": "notset", "str_type": "form_hardrule", "bln_editPin": true, "str_content": "", "int_idRecord": 77033, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_79277021", "str_nameShort": "form_hardrule", "str_themeType": "form_hardrule", "bln_palettePin": true, "str_classExtend": "notset", "str_createdDate": "2023-09-28 17:30:59", "str_categoryName": "Form", "str_modifiedDate": "2023-09-28 17:30:59", "str_releaseLabel": "notset", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"color": "orange", "width": "100%", "border": "0.5em solid orange", "height": "1.0em", "display": "flex", "padding": "1em", "font-size": "1rem", "background": "rgb(65, 65, 65)"}}],
 [77034, {"obj_design": {"str_tag": "a", "str_name": "form_anchor", "str_text": "notset", "str_type": "form_anchor", "bln_editPin": true, "str_content": "", "int_idRecord": 77034, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_79120090", "str_nameShort": "form_anchor", "str_themeType": "form_anchor", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"width": "100%", "border": "1px solid black", "display": "block", "text-decoration": "none"}, "obj_domProperty": {"Id": "myId_79120090", "target": "_blank"}, "dom_objContentContainer": {"Id": "myId_79120090"}}],
 [77037, {"obj_design": {"str_tag": "button", "blnIsTag": true, "str_name": "xapp_button_navigate_mall", "str_text": "Mall", "str_type": "xapp_button_navigate_mall", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77037, "str_idProject": "myId_36985869", "str_idXDesign": "myId_01089000", "str_nameShort": "xapp_button_navigate_mall", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"str_name": "xapp_button_navigate_desktop", "innerHTML": "Mall", "innerText": "Desktop"}, "dom_objContentContainer": {"str_name": "xapp_button_navigate_desktop"}}],
 [77038, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_office", "str_name": "xapp_button_navigate_office", "str_text": "Office", "str_type": "xapp_button_navigate_office", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77038, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_76211896", "str_nameShort": "xapp_button_navigate_office", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_76211896", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_76211896", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
-[77039, {"obj_theme": {"obj_design": {"str_type": "xapp_theme", "int_idRecord": 77570}}, "obj_design": {"str_tag": "office", "arr_item": [{"obj_design": {"str_type": "xapp_theme", "int_idRecord": 77570}}, {"obj_design": {"str_type": "authorise_gate", "int_idRecord": 6009}}, {"obj_design": {"str_type": "xapp_dynamic_content", "int_idRecord": 117}}, {"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": "77040"}}], "str_name": "office", "str_text": "notset", "str_type": "office", "bln_editPin": true, "str_content": "", "int_idRecord": 77039, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_77877717", "str_nameShort": "office", "str_themeType": "office", "bln_palettePin": true, "str_classExtend": "xapp", "str_createdDate": "2023-07-30 15:06:06", "str_categoryName": "Office", "str_modifiedDate": "2023-07-30 15:06:06", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "int_radioDisplayMode": 3, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"xapp_theme": "xapp_theme", "font-family": "Helvetica, Arial, sans-serif"}, "MetaDataViewId": 101426, "MetaLinkViewId": 100475, "MetaUserViewId": 1, "obj_domProperty": {"Id": "myId_77877717"}, "MetaDataViewName": "meta_data", "MetaLinkViewName": "meta_link", "MetaUserViewName": "meta_user", "obj_themeProject": {"gap": "1.0em", "color": "yellow", "cusor": "pointer", "display": "flex", "padding": "1.0em", "fontSize": "1.0rem", "alignItems": "center", "fontWeight": "normal", "borderColor": "orange", "borderStyle": "solid", "borderWidth": "0em", "borderRadius": "0em", "marginBottom": "0em", "justifyContent": "center", "backgroundColor": "rgb(65,65,65)"}, "bln_closePeersPin": true, "bln_togglePeersPin": true, "obj_themeChildMenu": {"gap": "1.0em", "color": "white", "cusor": "pointer", "width": "100%", "cursor": "pointer", "display": "flex", "padding": "1.0em", "fontSize": "1.3rem", "alignItems": "center", "fontWeight": "bold", "borderColor": "white", "borderStyle": "solid", "borderWidth": "0em", "borderRadius": "0em", "marginBottom": "0.1em", "justifyContent": "center", "backgroundColor": "rgb(64, 169, 236)", "bln_applyDevider": true}, "obj_themeForground": {"obj_design": {"str_type": "form_span", "int_idRecord": "77776"}}, "obj_themeFormInput": {"gap": "1.0em", "color": "slate gray", "cusor": "pointer", "display": "flex", "padding": "1.0em", "fontSize": "1rem", "overflow": "Auto", "maxHeight": "500px", "wordBreak": "normal", "alignItems": "center", "fontWeight": "normal", "borderColor": "rgb(37, 150, 190)", "borderStyle": "solid", "borderWidth": "0em", "borderRadius": "0em", "marginBottom": "0em", "justifyContent": "center", "backgroundColor": "white"}, "obj_themeHighlight": {"obj_design": {"str_type": "form_span", "int_idRecord": "77777"}}, "obj_themeMidground": {"obj_design": {"str_type": "form_span", "int_idRecord": "77775"}}, "obj_themeBackground": {"obj_design": {"str_type": "form_span", "int_idRecord": "77774"}}, "obj_themeFormButton": {"gap": "1.0em", "color": "rgb(64, 169, 236)", "cusor": "pointer", "cursor": "pointer", "display": "flex", "padding": "1.0em", "fontSize": "1.1rem", "alignItems": "center", "fontWeight": "bold", "borderColor": "rgb(64, 169, 236)", "borderStyle": "solid", "borderWidth": "0em", "borderRadius": "0em", "marginBottom": "0em", "justifyContent": "center", "backgroundColor": "white"}, "obj_themeMenuButton": {"gap": "1.0em", "color": "white", "cusor": "pointer", "width": "100%", "cursor": "pointer", "display": "flex", "padding": "1.0em", "fontSize": "1.4rem", "alignItems": "center", "fontWeight": "bold", "borderColor": "white", "borderStyle": "solid", "borderWidth": "0em", "borderRadius": "0em", "marginBottom": "0.1em", "justifyContent": "center", "backgroundColor": "rgb(64, 169, 236)", "bln_applyDevider": true}, "dom_objContentContainer": {"Id": "myId_77877717"}}],
+[77039, {"arr_color": [{"int_hue": 0, "str_hsl": "hsl(0, 100%, 50%)", "int_light": 50, "str_label": "red", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 0, "str_hsl": "hsl(0, 100%, 60%)", "int_light": 60, "str_label": "red-light", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 0, "str_hsl": "hsl(0, 100%, 30%)", "int_light": 30, "str_label": "red-dark", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 30, "str_hsl": "hsl(30, 100%, 50%)", "int_light": 50, "str_label": "Orange", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 30, "str_hsl": "hsl(30, 100%, 60%)", "int_light": 60, "str_label": "Orange-light", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 30, "str_hsl": "hsl(30, 100%, 30%)", "int_light": 30, "str_label": "Orange-dark", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 20, "str_hsl": "hsl(20, 100%, 30%)", "int_light": 30, "str_label": "Orange-alt", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 240, "str_hsl": "hsl(240, 100%, 50%)", "int_light": 50, "str_label": "Blue", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 240, "str_hsl": "hsl(240, 100%, 60%)", "int_light": 60, "str_label": "Blue-light", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 240, "str_hsl": "hsl(240, 100%, 30%)", "int_light": 30, "str_label": "Blue-dark", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 230, "str_hsl": "hsl(230, 100%, 30%)", "int_light": 30, "str_label": "Blue-alt", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 270, "str_hsl": "hsl(270, 100%, 50%)", "int_light": 50, "str_label": "Purple", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 270, "str_hsl": "hsl(270, 100%, 60%)", "int_light": 60, "str_label": "Purple-light", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 270, "str_hsl": "hsl(270, 100%, 30%)", "int_light": 30, "str_label": "Purple-dark", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 260, "str_hsl": "hsl(260, 100%, 30%)", "int_light": 30, "str_label": "Purple-alt", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 300, "str_hsl": "hsl(300, 100%, 50%)", "int_light": 50, "str_label": "Magenta", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 300, "str_hsl": "hsl(300, 100%, 60%)", "int_light": 60, "str_label": "Magenta-light", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 300, "str_hsl": "hsl(300, 100%, 30%)", "int_light": 30, "str_label": "Magenta-dark", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 290, "str_hsl": "hsl(290, 100%, 30%)", "int_light": 30, "str_label": "Magenta-alt", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 0, "str_hsl": "hsl(0, 0%, 100%)", "int_light": 100, "str_label": "White", "bln_lighten": true, "int_saturation": 0}, {"int_hue": 0, "str_hsl": "hsl(0, 0%, 0%)", "bln_face": 0, "int_light": 0, "str_label": "Black", "bln_lighten": true, "bln_contrast": true, "int_saturation": 0}, {"int_hue": 0, "str_hsl": "hsl(0, 0%, 50%)", "int_light": 50, "str_label": "Gray", "bln_lighten": true, "int_saturation": 0}, {"int_hue": 0, "str_hsl": "hsl(0, 0%, 60%)", "int_light": 60, "str_label": "Gray-light", "bln_lighten": true, "int_saturation": 0}, {"int_hue": 0, "str_hsl": "hsl(0, 0%, 30%)", "int_light": 30, "str_label": "Gray-dak", "bln_lighten": true, "int_saturation": 0}], "obj_theme": {"obj_design": {"str_type": "xapp_theme", "int_idRecord": 77570}}, "obj_design": {"str_tag": "office", "arr_item": [{"obj_design": {"str_type": "xapp_theme", "int_idRecord": 77570}}, {"obj_design": {"str_type": "authorise_gate", "int_idRecord": 6009}}, {"obj_design": {"str_type": "xapp_dynamic_content", "int_idRecord": 117}}, {"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": "77040"}}], "str_name": "office", "str_text": "notset", "str_type": "office", "bln_editPin": true, "str_content": "", "int_idRecord": 77039, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_77877717", "str_nameShort": "office", "str_themeType": "office", "bln_palettePin": true, "str_classExtend": "xapp", "str_createdDate": "2023-07-30 15:06:06", "str_categoryName": "Office", "str_modifiedDate": "2023-07-30 15:06:06", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "int_radioDisplayMode": 3, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"xapp_theme": "xapp_theme", "font-family": "Helvetica, Arial, sans-serif"}, "MetaDataViewId": 101426, "MetaLinkViewId": 100475, "MetaUserViewId": 1, "obj_domProperty": {"Id": "myId_77877717"}, "MetaDataViewName": "meta_data", "MetaLinkViewName": "meta_link", "MetaUserViewName": "meta_user", "bln_closePeersPin": true, "bln_togglePeersPin": true, "dom_objContentContainer": {"Id": "myId_77877717"}}],
 [77040, {"obj_design": {"str_tag": "xapp_context_holder", "arr_item": [{"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": 76394}}, {"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": 76681}}, {"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": 77327}}, {"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": 76388}}, {"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": "77351"}}, {"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": "77353"}}], "str_name": "xapp_context_holder", "str_text": "notset", "str_type": "xapp_context_holder", "bln_editPin": true, "str_content": "", "int_idRecord": "77040", "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_41831689", "str_nameShort": "xapp_context_holder", "str_themeType": "xapp_context_holder", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-11-01 21:47:45", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "notset", "bln_classController": "false", "bln_isContextHolder": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "none", "flex-flow": "wrap"}, "obj_domProperty": {"Id": "myId_41831689"}, "dom_objContentContainer": {"Id": "myId_41831689"}}],
 [77043, {"obj_meta": {"str_text": "", "bln_viewPin": 0, "int_joinType": 0, "int_idMetaRowz": 0, "int_idMetaView": 0, "str_metaRowzName": "", "str_metaTypeData": "", "MetaPermissionTag": "100", "str_buttonConsole": "", "bln_togglePeersPin": true, "str_optionChildMenu": "", "int_idParentMetaRowz": 0, "str_metaTypeDashboard": "", "str_metaConstraintName": ""}, "obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "str_name": "xapp_menuform_mover", "str_text": "xapp_menuform_mover", "str_type": "xapp_menuform_mover", "bln_editPin": true, "str_content": "", "int_idRecord": 77043, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_08359389", "str_nameShort": "xapp_menuform_mover", "str_themeType": "menu_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_menuform", "str_createdDate": "2022-02-02 20:04:57", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 20:04:57", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "white", "width": "100%", "border": "0px", "cursor": "pointer", "display": "flex", "padding": "15px 15px", "font-size": "100%", "background": "rgb(65, 65, 65)", "align-items": "center", "border-radius": "4px", "corner-radius": "4px", "margin-bottom": "1px", "padding-bottom": "2px", "justify-content": "center"}, "str_optionData": "Data", "str_optionMenu": "Menu", "obj_domProperty": {"Id": "myId_08359389", "type": "submit", "innerHTML": "xapp_menuform_mover", "innerText": "xapp_menu_admin", "xDesign_MenuButtonClick": "fn_MenuButtonClick"}, "str_optionReport": "Report", "str_optionWidget": "Widget", "int_totalRowCount": 0, "str_listSeparator": "-", "str_optionMenuForm": "MenuForm", "str_defaultTypeData": "xapp_dataform_mover", "str_defaultTypeMenu": "xapp_menuform", "str_optionDashboard": "Dashboard", "bln_constraintKeyPin": true, "str_defaultTypeDataChildMenu": "xapp_dataform_childmenu"}],
 [77046, {"obj_design": {"str_tag": "xapp_dataform_mover", "str_name": "xapp_dataform_mover", "str_text": "notset", "str_type": "xapp_dataform_mover", "bln_editPin": true, "str_content": "", "int_idRecord": 77046, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_38368366", "str_nameShort": "xapp_dataform_mover", "str_themeType": "xapp_dataform_mover", "bln_dynamicPin": true, "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_dataform_view", "str_createdDate": "2022-02-02 20:10:52", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 20:10:52", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "width": "100%", "display": "flex", "flex-wrap": "wrap", "flex-direction": "column"}, "str_defaultTypeRow": "xapp_rowform", "str_defaultTypeColumn": "xapp_columnform"}],
@@ -22009,8 +22668,8 @@ var obj_InstanceJSONMap = new Map([
 [77171, {"obj_design": {"str_tag": "button", "str_name": "xapp_button_queryterm", "str_text": "My Button", "str_type": "xapp_button_queryterm", "bln_editPin": true, "int_idRecord": 77171, "str_idXDesign": "myId_05444353", "str_nameShort": "xapp_button_queryterm", "str_themeType": "form_button", "bln_palettePin": true, "str_classExtend": "form_button", "str_createdDate": "2022-11-20 23:26:20", "str_categoryName": "Xtra", "str_modifiedDate": "2022-11-20 23:26:20", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"border": "0px none", "cursor": "pointer", "height": "40px", "padding": "1.0em", "border-radius": "2px"}, "obj_domProperty": {"innerText": "My Button"}}],
 [77173, {"obj_design": {"str_tag": "fieldset", "str_name": "xapp_queryterm_interface", "str_type": "xapp_queryterm_interface", "bln_editPin": true, "int_idRecord": 77173, "str_idXDesign": "myId_41499791", "str_nameShort": "xapp_queryterm_interface", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_fieldset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:05:11", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "padding": "1.0em", "flex-flow": "wrap", "flex-wrap": "wrap", "flex-direction": "column"}}],
 [77177, {"obj_design": {"str_tag": "button", "blnIsTag": true, "str_name": "xapp_button_queryterm", "str_text": "Query Term", "str_type": "xapp_button_queryterm", "bln_editPin": true, "str_content": "My component", "int_idRecord": 77177, "str_idProject": "myId_25365115", "str_idXDesign": "myId_11729888", "str_nameShort": "xapp_button_queryterm", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"innerHTML": "Query Term", "innerText": "Add"}, "dom_objContentContainer": {}}],
-[77184, {"obj_design": {"str_tag": "fieldset", "lockOpen": true, "str_name": "form_fieldset", "str_text": "notset", "str_type": "form_fieldset", "bln_editPin": true, "str_content": "", "int_idRecord": 77184, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_01091007", "str_nameShort": "form_fieldset", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Form", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"gap": "1.0em", "border": "1px outset gray", "display": "flex", "padding": "1.0em", "flex-flow": "wrap", "flex-wrap": "wrap", "align-self": "flex-start", "background": "gray", "border-radius": "4px", "flex-direction": "column"}, "bln_toggleState": true}],
-[77187, {"obj_design": {"str_tag": "legend", "str_name": "form_legend", "str_text": "MyText", "str_type": "form_legend", "bln_editPin": true, "str_content": "", "int_idRecord": 77187, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_82227821", "str_nameShort": "form_legend", "str_themeType": "form_legend", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_button", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Form", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "white", "border": "1px outset gray", "display": "block", "opacity": "1", "padding": "1.0em", "background": "gray", "user-select": "none", "border-radius": "4px", "text-decoration": "none"}, "obj_domProperty": {"href": "https://www.mycode.buzz", "target": "_blank", "tabIndex": "0", "innerHTML": "MyText"}, "dom_objContentContainer": {"href": "https://www.mycode.buzz", "target": "_blank"}}],
+[77184, {"obj_design": {"str_tag": "fieldset", "lockOpen": true, "str_name": "form_fieldset", "str_text": "notset", "str_type": "form_fieldset", "bln_editPin": true, "str_content": "", "int_idRecord": 77184, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_01091007", "str_nameShort": "form_fieldset", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Form", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"gap": "1.0em", "border": "1em solid orange", "margin": "", "display": "flex", "padding": "1.0em", "overflow": "", "flex-flow": "row wrap", "flex-wrap": "wrap", "align-self": "", "background": "rgb(65, 65, 65)", "border-radius": "0.5em", "flex-direction": "column"}, "bln_toggleState": true}],
+[77187, {"obj_design": {"str_tag": "legend", "str_name": "form_legend", "str_text": "MyText", "str_type": "form_legend", "bln_editPin": true, "str_content": "", "int_idRecord": 77187, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_82227821", "str_nameShort": "form_legend", "str_themeType": "form_legend", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_button", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Form", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "opacity": "1", "padding": "1.0em", "font-size": "1rem", "background": "rgb(65, 65, 65)", "user-select": "none", "border-radius": "", "text-decoration": ""}, "obj_domProperty": {"href": "https://www.mycode.buzz", "target": "_blank", "tabIndex": "0", "innerHTML": "MyText"}, "dom_objContentContainer": {"href": "https://www.mycode.buzz", "target": "_blank"}}],
 [77192, {"obj_design": {"str_tag": "tabset", "arr_item": [{"obj_design": {"str_type": "form_panellist", "int_idRecord": 77193}}, {"obj_design": {"str_type": "form_tablist", "int_idRecord": 77194}}], "str_name": "form_tabset", "str_text": "notset", "str_type": "form_tabset", "bln_editPin": true, "str_content": "", "int_idRecord": 77192, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_13355182", "str_nameShort": "form_tabset", "str_themeType": "form_tabset", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_tablist": {"obj_design": {"str_type": "form_tablist", "int_idRecord": 77194}}, "obj_domStyle": {"gap": "1.0em", "display": "none", "flex-wrap": "wrap", "flex-direction": "column"}, "obj_panellist": {"obj_design": {"str_type": "form_panellist", "int_idRecord": 77193}}, "obj_domProperty": {"Id": "myId_13355182", "role": "tablist", "aria-label": "Tab Set"}, "dom_objContentContainer": {"Id": "myId_13355182", "aria-label": "Tab Set"}}],
 [77193, {"obj_design": {"str_tag": "panellist", "str_name": "form_panellist", "str_type": "form_panellist", "bln_editPin": true, "int_idRecord": 77193, "str_idXDesign": "myId_25489299", "str_nameShort": "form_panellist", "str_themeType": "form_panellist", "bln_palettePin": true, "bln_isLocalHome": true, "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:05:11", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"flex-wrap": "wrap", "flex-direction": "column"}, "obj_domProperty": {"role": "tablist", "aria-label": "Tab Set"}, "dom_objContentContainer": {"aria-label": "Tab Set"}}],
 [77194, {"obj_design": {"str_tag": "tablist", "str_name": "form_tablist", "str_type": "form_tablist", "bln_editPin": true, "int_idRecord": 77194, "str_idXDesign": "myId_15515595", "str_nameShort": "form_tablist", "str_themeType": "form_tablist", "bln_palettePin": true, "bln_isLocalHome": true, "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:05:11", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-flow": "row wrap", "flex-wrap": "wrap", "flex-direction": "column"}, "obj_domProperty": {"role": "tablist", "aria-label": "Tab Set"}, "dom_objContentContainer": {"aria-label": "Tab Set"}}],
@@ -22042,7 +22701,7 @@ var obj_InstanceJSONMap = new Map([
 [77396, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_settings", "str_name": "xapp_button_navigate_settings", "str_text": "", "str_type": "xapp_button_navigate_settings", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77396, "str_classList": "notset", "str_idProject": "myId_25365115", "str_idXDesign": "myId_25205280", "str_nameShort": "xapp_button_navigate_settings", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_25205280", "title": "Settings", "innerHTML": "Refresh", "innerText": "Complete", "aria-label": "Settings"}, "dom_objContentContainer": {"Id": "myId_25205280", "aria-label": "Settings"}}],
 [77397, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_desk", "str_name": "xapp_button_navigate_desktop", "str_text": "Home", "str_type": "xapp_button_navigate_desktop", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77397, "str_classList": "notset", "str_idProject": "myId_25365115", "str_idXDesign": "myId_15925355", "str_nameShort": "xapp_button_navigate_desktop", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "cursor": "", "display": "flex", "opacity": "1", "padding": "1em", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_15925355", "title": "Home", "innerHTML": "Refresh", "innerText": "Complete", "aria-label": "Home"}, "dom_objContentContainer": {"Id": "myId_15925355", "aria-label": "Home"}}],
 [77430, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_lock", "str_name": "xapp_button_navigate_login", "str_text": "Exit", "str_type": "xapp_button_navigate_login", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77430, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_23559322", "str_nameShort": "xapp_button_navigate_login", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_23559322", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_23559322", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
-[77451, {"obj_meta": {"str_text": "", "bln_viewPin": 0, "int_idMetaRowz": 0, "int_idMetaView": 0, "str_metaRowzName": "", "str_metaTypeData": "", "MetaPermissionTag": "100", "str_buttonConsole": "", "bln_togglePeersPin": true, "str_optionChildMenu": "", "int_idParentMetaRowz": 0, "str_metaTypeDashboard": "", "str_metaConstraintName": ""}, "obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "star", "str_name": "xapp_menu", "str_text": "xapp_menu", "str_type": "xapp_menu", "bln_editPin": true, "str_content": "", "int_idRecord": 77451, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_77377077", "str_nameShort": "xapp_menu", "str_themeType": "menu_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_menu_operation", "str_createdDate": "2022-02-02 20:04:57", "str_categoryName": "Xapp", "str_modifiedDate": "2022-02-02 20:04:57", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "yellow", "width": "100%", "border": "0.5rem solid yellow", "cursor": "", "display": "flex", "padding": "1em", "font-size": "1rem", "background": "rgb(65, 65, 65)", "align-items": "", "border-radius": "", "margin-bottom": "1em", "padding-bottom": "2px", "justify-content": ""}, "str_optionData": "Data", "str_optionMenu": "Menu", "obj_domProperty": {"Id": "myId_77377077", "innerHTML": "xapp_menu", "innerText": "xapp_menu", "xDesign_MenuButtonClick": "fn_MenuButtonClick"}, "str_optionReport": "Report", "str_optionWidget": "Widget", "str_listSeparator": "-", "str_optionMenuForm": "MenuForm", "str_defaultTypeData": "xapp_data_view", "str_defaultTypeMenu": "xapp_menu", "str_optionDashboard": "Dashboard", "bln_constraintKeyPin": true, "str_defaultTypeDataChildMenu": "xapp_data_childmenu"}],
+[77451, {"obj_meta": {"str_text": "", "bln_viewPin": 0, "int_idMetaRowz": 0, "int_idMetaView": 0, "str_metaRowzName": "", "str_metaTypeData": "", "MetaPermissionTag": "100", "str_buttonConsole": "", "bln_togglePeersPin": true, "str_optionChildMenu": "", "int_idParentMetaRowz": 0, "str_metaTypeDashboard": "", "str_metaConstraintName": ""}, "obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "star", "str_name": "xapp_menu", "str_text": "xapp_menu", "str_type": "xapp_menu", "bln_editPin": true, "str_content": "", "int_idRecord": 77451, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_77377077", "str_nameShort": "xapp_menu", "str_themeType": "menu_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_menu_operation", "str_createdDate": "2022-02-02 20:04:57", "str_categoryName": "Xapp", "str_modifiedDate": "2022-02-02 20:04:57", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "width": "100%", "border": "1em solid orange", "cursor": "", "display": "flex", "padding": "1em", "font-size": "1rem", "background": "rgb(65, 65, 65)", "align-items": "", "border-radius": "", "margin-bottom": "1em", "padding-bottom": "2px", "justify-content": ""}, "str_optionData": "Data", "str_optionMenu": "Menu", "obj_domProperty": {"Id": "myId_77377077", "innerHTML": "xapp_menu", "innerText": "xapp_menu", "xDesign_MenuButtonClick": "fn_MenuButtonClick"}, "str_optionReport": "Report", "str_optionWidget": "Widget", "str_listSeparator": "-", "str_optionMenuForm": "MenuForm", "str_defaultTypeData": "xapp_data_view", "str_defaultTypeMenu": "xapp_menu", "str_optionDashboard": "Dashboard", "bln_constraintKeyPin": true, "str_defaultTypeDataChildMenu": "xapp_data_childmenu"}],
 [77452, {"obj_design": {"str_tag": "block_start", "str_name": "block_start", "str_text": "notset", "str_type": "block_structure", "bln_editPin": true, "str_content": "", "int_idRecord": 77452, "str_position": "start", "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_37013033", "str_nameShort": "block_start", "str_themeType": "form_container", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:10:58", "str_categoryName": "xapp", "str_modifiedDate": "2022-01-31 21:10:58", "str_releaseLabel": "", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "flex": "1 1 auto", "border": "0px solid yellow", "1 1 50%": "1.0em", "display": "flex", "flex-wrap": "wrap", "justify-content": "start"}, "obj_domProperty": {"Id": "myId_37013033"}, "dom_objContentContainer": {"Id": "myId_37013033"}}],
 [77453, {"obj_design": {"str_tag": "block_end", "str_name": "block_end", "str_text": "notset", "str_type": "block_structure", "bln_editPin": true, "str_content": "", "int_idRecord": 77453, "str_position": "end", "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_01401823", "str_nameShort": "block_end", "str_themeType": "form_container", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:10:58", "str_categoryName": "xapp", "str_modifiedDate": "2022-01-31 21:10:58", "str_releaseLabel": "", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "flex": "1 1 auto", "border": "0px solid blue", "display": "flex", "flex-wrap": "wrap", "background": "green", "justify-content": "end"}, "obj_domProperty": {"Id": "myId_01401823"}, "dom_objContentContainer": {"Id": "myId_01401823"}}],
 [77454, {"obj_design": {"str_tag": "xapp_console", "arr_item": [{"obj_design": {"str_type": "block_structure", "int_idRecord": 77452}}, {"obj_design": {"str_type": "block_structure", "int_idRecord": 77453}}], "str_name": "xapp_console", "str_text": "notset", "str_type": "xapp_console", "bln_editPin": true, "str_content": "", "int_idRecord": "77454", "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_22307377", "str_nameShort": "xapp_console", "str_themeType": "form_container", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-02-02 20:10:52", "str_categoryName": "xapp", "str_modifiedDate": "2022-02-02 20:10:52", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_blockEnd": {"obj_design": {"str_type": "block_structure", "int_idRecord": 77453}}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-wrap": "wrap", "flexdirection": "column"}, "obj_blockStart": {"obj_design": {"str_type": "block_structure", "int_idRecord": 77452}}, "obj_domProperty": {"Id": "myId_22307377"}, "dom_objContentContainer": {"Id": "myId_22307377"}}],
@@ -22072,30 +22731,31 @@ var obj_InstanceJSONMap = new Map([
 [77529, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_desk", "str_name": "xapp_button_mover_open", "str_text": "Open System", "str_type": "xapp_button_mover_open", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77529, "str_classList": "notset", "str_idProject": "myId_26127270", "str_idXDesign": "myId_23322328", "str_nameShort": "xapp_button_mover_open", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_23322328", "title": "Home", "innerHTML": "Refresh", "innerText": "Complete", "aria-label": "Home"}, "dom_objContentContainer": {"Id": "myId_23322328", "aria-label": "Home"}}],
 [77530, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_calendar_month", "str_name": "xapp_button_general_use_task_date", "str_text": "Use Task Date", "str_type": "xapp_button_general_use_task_date", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77530, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_92128822", "str_nameShort": "xapp_button_general_use_task_date", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_92128822", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_92128822", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
 [77531, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_calendar_month", "str_name": "xapp_button_general_use_task_datetime", "str_text": "Use Date & Time", "str_type": "xapp_button_general_use_task_datetime", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77531, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_22868883", "str_nameShort": "xapp_button_general_use_task_datetime", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_22868883", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_22868883", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
-[77570, {"obj_design": {"str_tag": "theme_ocean", "arr_item": [{"obj_design": {"str_type": "xapp_accordion", "int_idRecord": "77773"}}, {"obj_design": {"str_type": "form_span", "int_idRecord": "77774"}}, {"obj_design": {"str_type": "form_span", "int_idRecord": "77775"}}, {"obj_design": {"str_type": "form_span", "int_idRecord": "77776"}}, {"obj_design": {"str_type": "form_span", "int_idRecord": "77777"}}], "str_name": "theme_ocean", "str_text": "notset", "str_type": "xapp_theme", "bln_editPin": true, "str_content": "", "int_idRecord": 77570, "str_classList": "notset", "str_idProject": "myId_01221712", "str_idXDesign": "myId_29727565", "str_nameShort": "theme_ocean", "str_themeType": "xapp_theme", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2024-11-30 12:02:09", "str_categoryName": "Anchor", "str_modifiedDate": "2024-11-30 12:02:09", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtProject": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"display": "block", "font-size": "", "font-family": ""}, "obj_domProperty": {"Id": "myId_29727565"}, "dom_objContentContainer": {"Id": "myId_29727565"}}],
-[77771, {"obj_design": {"str_tag": "form_menu_panel", "arr_item": [{"obj_design": {"str_type": "block", "int_idRecord": 77821}}], "str_name": "form_menu_panel", "str_text": "notset", "str_type": "form_menu_panel", "bln_editPin": true, "str_content": "", "int_idRecord": "77771", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_99777780", "str_nameShort": "form_menu_panel", "str_themeType": "form_menu_panel", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-15 08:47:57", "str_categoryName": "", "str_modifiedDate": "2022-11-15 08:47:57", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "border": "0px solid white", "display": "flex", "padding": "1em", "flex flow": "column wrap", "flexdirection": "column", "flex-direction": "column"}, "obj_domProperty": {"Id": "myId_99777780"}, "dom_objContentContainer": {"Id": "myId_99777780"}}],
-[77772, {"obj_design": {"str_tag": "form", "arr_item": [{"obj_design": {"str_type": "form_menu_panel", "int_idRecord": "77771"}}], "str_name": "form_form", "str_text": "notset", "str_type": "form_form", "bln_editPin": true, "str_content": "", "int_idRecord": "77772", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_04703888", "str_nameShort": "form_form", "str_themeType": "form_form", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "component", "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-wrap": "wrap", "flex-direction": "column", " background-color": "coral"}, "obj_domProperty": {"Id": "myId_04703888"}, "dom_objContentContainer": {"0": {"Id": "myId_19412971"}, "1": {"Id": "myId_23118334", "str_name": "xapp_button_navigate_desktop"}, "Id": "myId_04703888"}}],
-[77773, {"obj_design": {"str_tag": "xapp_accordion", "arr_item": [{"obj_design": {"str_type": "form_button_rich", "int_idRecord": 77816}}, {"obj_design": {"str_type": "form_form", "int_idRecord": "77772"}}], "blnIsTag": true, "str_name": "xapp_accordion", "str_text": "notset", "str_type": "xapp_accordion", "bln_editPin": true, "str_content": "", "int_idRecord": "77773", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_38394983", "str_nameShort": "xapp_accordion", "str_themeType": "xapp_accordion", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-01 21:51:10", "str_categoryName": "", "str_modifiedDate": "2022-11-01 21:51:10", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"flex": "wrap", "width": "100%", "display": "block", "justify-content": "", "background-color": "rgb(37, 150, 190)"}, "obj_domProperty": {"Id": "myId_38394983"}, "dom_objContentContainer": {"Id": "myId_38394983"}}],
-[77774, {"obj_design": {"str_tag": "form_blockbackground", "blnIsTag": true, "str_name": "form_blockbackground", "str_text": "notset", "str_type": "form_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77774", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_58870858", "str_nameShort": "form_blockbackground", "str_themeType": "form_blockbackground", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "", "border": "", "padding": "1.0em", "overflow": "", "maxheight": "175", "background": "rgb(37, 150, 190)", "max-height": "", "word-break": "", "font-family": "", "border-radius": "4px"}, "obj_domProperty": {"Id": "myId_58870858"}, "dom_objContentContainer": {"Id": "myId_58870858"}}],
-[77775, {"obj_design": {"str_tag": "form_blockmidground", "blnIsTag": true, "str_name": "form_blockmidground", "str_text": "", "str_type": "form_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77775", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_37817050", "str_nameShort": "form_blockmidground", "str_themeType": "form_blockmidground", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "", "border": "", "padding": "1.0em", "overflow": "", "maxheight": "175", "background": "rgb(64, 169, 236)", "max-height": "", "word-break": "", "font-family": "", "border-radius": "4px"}, "obj_domProperty": {"Id": "myId_37817050", "innerHTML": ""}, "dom_objContentContainer": {"Id": "myId_37817050"}}],
-[77776, {"obj_design": {"str_tag": "form_blockforground", "blnIsTag": true, "str_name": "form_blockforground", "str_text": "notset", "str_type": "form_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77776", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_18017798", "str_nameShort": "form_blockforground", "str_themeType": "form_blockforground", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "", "border": "", "padding": "1.0em", "overflow": "", "maxheight": "175", "background": "white", "max-height": "", "word-break": "", "font-family": "", "border-radius": "4px"}, "obj_domProperty": {"Id": "myId_18017798"}, "dom_objContentContainer": {"Id": "myId_18017798"}}],
-[77777, {"obj_design": {"str_tag": "form_blockhighlight", "blnIsTag": true, "str_name": "form_blockhighlight", "str_text": "notset", "str_type": "form_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77777", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_89738359", "str_nameShort": "form_blockhighlight", "str_themeType": "form_blockhighlight", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "", "border": "", "padding": "1.0em", "overflow": "", "maxheight": "175", "background": "orange", "max-height": "", "word-break": "", "font-family": "", "border-radius": "4px"}, "obj_domProperty": {"Id": "myId_89738359"}, "dom_objContentContainer": {"Id": "myId_89738359"}}],
-[77813, {"obj_design": {"str_tag": "span", "blnIsTag": true, "str_name": "form_button_span", "str_text": "My Button", "str_type": "form_button_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77813", "str_classList": "notset", "str_idProject": "myId_11190110", "str_idXDesign": "myId_67672923", "str_nameShort": "form_button_span", "str_themeType": "form_button_span", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "white", "display": "block", "font-size": "1.2rem", "maxheight": "175", "font-weight": "bold"}, "obj_domProperty": {"Id": "myId_67672923", "innerHTML": "My Button"}, "dom_objContentContainer": {"Id": "myId_67672923"}}],
-[77814, {"obj_design": {"str_tag": "i", "str_name": "form_button_icon", "str_text": "star", "str_type": "form_button_icon", "bln_editPin": true, "str_content": "", "int_idRecord": "77814", "str_classList": "notset", "str_idProject": "myId_79120090", "str_idXDesign": "myId_67661363", "str_nameShort": "form_button_icon", "str_themeType": "form_button_icon", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "white", "display": "block", "font-size": "1.5em", "font-weight": "bold"}, "obj_domProperty": {"Id": "myId_67661363", "innerHTML": "star"}, "dom_objContentContainer": {"Id": "myId_67661363"}}],
-[77815, {"obj_icon": {"obj_design": {"str_type": "form_button_icon", "int_idRecord": "77814"}}, "obj_span": {"obj_design": {"str_type": "form_button_span", "int_idRecord": "77813"}}, "obj_design": {"str_tag": "a", "arr_item": [{"obj_design": {"str_type": "form_button_span", "int_idRecord": "77813"}}, {"obj_design": {"str_type": "form_button_icon", "int_idRecord": "77814"}}], "str_name": "form_button_anchor", "str_text": "notset", "str_type": "form_button_anchor", "bln_editPin": true, "str_content": "", "int_idRecord": 77815, "str_classList": "notset", "str_idProject": "myId_77377077", "str_idXDesign": "myId_37371641", "str_nameShort": "form_button_anchor", "str_themeType": "form_button_anchor", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "0.5em", "text": "de", "color": "white", "border": "0px solid black", "display": "flex", "font-size": "1.2rem", "align-items": "center", "font-weight": "bold", "justify-content": "center", "text-decoration": "none"}, "obj_domProperty": {"Id": "myId_37371641", "target": "_blank"}, "dom_objContentContainer": {"Id": "myId_37371641"}}],
-[77816, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77815}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "menu_button", "str_text": "My Button", "str_type": "form_button_rich", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77816, "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_14263737", "str_nameShort": "menu_button", "str_themeType": "menu_buttonx", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "form_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"gap": "1em", "color": "white", "width": "100%", "border": "1.0em solid orange", "cursor": "pointer", "display": "flex", "padding": "1em", "font-size": "1.2rem", "background": "green", "align-items": "center", "font-weight": "bold", "margin-bottom": "1px", "justify-content": "center"}, "obj_domProperty": {"Id": "myId_14263737", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_14263737", "str_name": "xapp_button_navigate_desktop"}}],
-[77821, {"obj_design": {"str_tag": "form_container", "arr_item": [{"obj_design": {"str_type": "form_panel", "int_idRecord": "77835"}}, {"obj_design": {"str_type": "form_hardrule", "int_idRecord": "77836"}}], "str_name": "form_container", "str_text": "notset", "str_type": "block", "bln_editPin": true, "str_content": "", "int_idRecord": 77821, "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_29752282", "str_nameShort": "form_container", "str_themeType": "form_container", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:10:58", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:10:58", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true}, "obj_domStyle": {"gap": "1em", "display": "flex", "padding": "0em", "flex-flow": "wrap", "background": "transparent", "align-items": ""}, "obj_domProperty": {"Id": "myId_29752282"}, "dom_objContentContainer": {"Id": "myId_29752282"}}],
-[77835, {"obj_design": {"str_tag": "form_panel", "arr_item": [{"obj_design": {"str_type": "form_fieldset", "int_idRecord": 77857}}], "str_name": "form_panel", "str_text": "notset", "str_type": "form_panel", "bln_editPin": true, "str_content": "", "int_idRecord": "77835", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_81978191", "str_nameShort": "form_panel", "str_themeType": "form_panel", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "border": "0px solid red", "display": "flex", "padding": "1em", "flex-flow": "", "flex-wrap": "column wrap", "background": "", "align-items": "end"}, "obj_domProperty": {"Id": "myId_81978191"}, "dom_objContentContainer": {"Id": "myId_81978191"}}],
-[77836, {"obj_design": {"str_tag": "hr", "str_name": "form_hardrule", "str_text": "notset", "str_type": "form_hardrule", "bln_editPin": true, "str_content": "", "int_idRecord": "77836", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_33710013", "str_nameShort": "form_hardrule", "str_themeType": "form_hardrule", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2023-09-28 17:30:59", "str_categoryName": "", "str_modifiedDate": "2023-09-28 17:30:59", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"width": "100%", "border": "0px", "height": "1.0em", "background": "rgb(64, 169, 236)"}, "obj_domProperty": {"Id": "myId_78947874"}, "dom_objContentContainer": {"Id": "myId_78947874"}}],
-[77849, {"obj_design": {"str_tag": "legend", "str_name": "form_legend", "str_text": "MyText", "str_type": "form_legend", "bln_editPin": true, "str_content": "", "int_idRecord": "77849", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_38338887", "str_nameShort": "form_legend", "str_themeType": "form_legend", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "form_button", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"gap": "1em", "color": "white", "border": "3px solid rgb(37, 150, 190)", "display": "block", "opacity": "1", "padding": "1em", "background": "rgb(64, 169, 236)", "user-select": "none", "border-radius": "0.5em", "text-decoration": "none"}, "obj_domProperty": {"Id": "myId_37333474", "href": "https://www.mycode.buzz", "target": "_blank", "tabIndex": "0", "innerHTML": "MyText"}, "dom_objContentContainer": {"Id": "myId_37333474", "href": "https://www.mycode.buzz", "target": "_blank"}}],
-[77850, {"obj_design": {"str_tag": "label", "str_name": "form_label", "str_text": "My Label", "str_type": "form_label", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": 77850, "str_classList": "notset", "str_idProject": "myId_13000276", "str_idXDesign": "myId_37338337", "str_nameShort": "form_label", "str_themeType": "form_label", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-13 21:59:51", "str_categoryName": "", "str_modifiedDate": "2022-11-13 21:59:51", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "color": "white", "border": "1em solid orange", "cursor": "pointer", "margin": "", "padding": "1em", "overflow": "", "font-size": "1.1rem", "max-width": "", "min-width": "", "align-self": "flex-start", "background": "green", "max-height": "", "word-break": "", "border-radius": "1em"}, "obj_domProperty": {"Id": "myId_35320233", "innerText": "My Label"}, "dom_objContentContainer": {"Id": "myId_35320233"}}],
-[77851, {"obj_design": {"str_tag": "text", "blnIsTag": true, "str_name": "form_text", "str_text": "-", "str_type": "form_text", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": 77851, "str_classList": "notset", "str_idProject": "myId_13000276", "str_idXDesign": "myId_23883377", "str_nameShort": "form_text", "str_themeType": "form_inputx", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "color": "white", "border": "0.4em solid orange", "padding": "1em", "overflow": "auto", "font-size": "1rem", "maxheight": "175", "min-width": "", "background": "green", "max-height": "500px", "word-break": "normal", "border-radius": "0.5em"}, "obj_domProperty": {"Id": "myId_07195217", "innerHTML": "-"}, "dom_objContentContainer": {"Id": "myId_07195217"}}],
-[77852, {"obj_design": {"str_tag": "field", "arr_item": [{"obj_design": {"str_type": "form_label", "int_idRecord": 77850}}, {"obj_design": {"str_type": "form_text", "int_idRecord": 77851}}], "str_name": "form_field", "str_text": "notset", "str_type": "form_field", "bln_editPin": true, "str_content": "", "int_idRecord": 77852, "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_83777172", "str_nameShort": "form_field", "str_themeType": "form_field", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "border": "", "display": "flex", "padding": "0em", "flex-flow": "", "flex-wrap": "column wrap", "align-items": "", "justify-content": "", " justify-content": "center"}, "obj_domProperty": {"Id": "myId_83777172"}, "dom_objContentContainer": {"Id": "myId_83777172"}}],
-[77853, {"obj_design": {"str_tag": "span", "blnIsTag": true, "str_name": "form_button_span", "str_text": "My Button", "str_type": "form_button_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77853", "str_classList": "notset", "str_idProject": "myId_11190110", "str_idXDesign": "myId_81813982", "str_nameShort": "form_button_span", "str_themeType": "form_button_span", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "rgb(64, 169, 236)", "display": "block", "font-size": "1.1rem", "maxheight": "175", "font-weight": "bold", "font-wiegth": "bold"}, "obj_domProperty": {"Id": "myId_87111743", "innerHTML": "My Button"}, "dom_objContentContainer": {"Id": "myId_87111743"}}],
-[77854, {"obj_design": {"bln": "expand", "str_tag": "i", "str_name": "form_button_icon", "str_text": "star", "str_type": "form_button_icon", "str_class": "star", "bln_expand": true, "bln_editPin": true, "str_content": "", "int_idRecord": "77854", "str_classList": "notset", "str_idProject": "myId_79120090", "str_idXDesign": "myId_88339798", "str_nameShort": "form_button_icon", "str_themeType": "form_button_icon", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "rgb(64, 169, 236)", "display": "block", "font-size": "1.5em", "font-weight": "bold"}, "obj_domProperty": {"Id": "myId_17078909", "innerHTML": "star"}, "dom_objContentContainer": {"Id": "myId_17078909"}}],
-[77855, {"obj_icon": {"obj_design": {"str_type": "form_button_icon", "int_idRecord": 77854}}, "obj_span": {"obj_design": {"str_type": "form_button_span", "int_idRecord": 77853}}, "obj_design": {"str_tag": "a", "arr_item": [{"obj_design": {"str_type": "form_button_span", "int_idRecord": 77853}}, {"obj_design": {"str_type": "form_button_icon", "int_idRecord": 77854}}], "str_name": "form_button_anchor", "str_text": "notset", "str_type": "form_button_anchor", "bln_editPin": true, "str_content": "", "int_idRecord": "77855", "str_classList": "notset", "str_idProject": "myId_11190110", "str_idXDesign": "myId_83341813", "str_nameShort": "form_button_anchor", "str_themeType": "form_button_anchor", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "0.5em", "text": "de", "color": "rgb(64, 169, 236)", "border": "0px solid black", "display": "flex", "font-size": "1.1rem", "align-items": "center", "font-weight": "bold", "justify-content": "center", "text-decoration": "none"}, "obj_domProperty": {"Id": "myId_83341813", "target": "_blank"}, "dom_objContentContainer": {"Id": "myId_83341813"}}],
-[77856, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77855}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "form_button_rich", "str_text": "My Button", "str_type": "form_button_rich", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77856, "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_23118334", "str_nameShort": "form_button_rich", "str_themeType": "form_buttonx", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "form_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"gap": "1em", "color": "white", "border": "0.5em solid orange", "cursor": "pointer", "display": "flex", "padding": "1em", "font-size": "1.1rem", "background": "green", "align-items": "center", "font-weight": "bold", "border-radius": "0.5em"}, "obj_domProperty": {"Id": "myId_23118334", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_23118334", "str_name": "xapp_button_navigate_desktop"}}],
-[77857, {"obj_design": {"str_tag": "fieldset", "arr_item": [{"obj_design": {"str_type": "form_legend", "int_idRecord": "77849"}}, {"obj_design": {"str_type": "form_field", "int_idRecord": 77852}}, {"obj_design": {"str_type": "form_button_rich", "int_idRecord": 77856}}], "lockOpen": true, "str_name": "form_fieldset", "str_text": "notset", "str_type": "form_fieldset", "bln_editPin": true, "str_content": "", "int_idRecord": 77857, "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_19412971", "str_nameShort": "form_fieldset", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "border": "1px outset rgb(64, 169, 236)", "margin": "0px", "display": "flex", "padding": "1em", "overflow": "hidden", "flex-flow": "row wrap", "flex-wrap": "wrap", "align-self": "flex-start", "background": "rgb(64, 169, 236)", "align-items": "start", "border-radius": "0.5em", "flex-direction": "row"}, "bln_toggleState": true, "obj_domProperty": {"Id": "myId_19412971"}, "dom_objContentContainer": {"Id": "myId_19412971"}}]
+[77570, {"obj_design": {"str_tag": "theme_ocean", "arr_item": [{"obj_design": {"str_type": "xapp_accordion", "int_idRecord": "77880"}}, {"obj_design": {"str_type": "form_span", "int_idRecord": "77881"}}, {"obj_design": {"str_type": "form_span", "int_idRecord": "77882"}}, {"obj_design": {"str_type": "form_span", "int_idRecord": "77883"}}, {"obj_design": {"str_type": "form_span", "int_idRecord": "77884"}}], "str_name": "theme_ocean", "str_text": "notset", "str_type": "xapp_theme", "bln_editPin": true, "str_content": "", "int_idRecord": 77570, "str_classList": "notset", "str_idProject": "myId_01221712", "str_idXDesign": "myId_29727565", "str_nameShort": "theme_ocean", "str_themeType": "xapp_theme", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2024-11-30 12:02:09", "str_categoryName": "Anchor", "str_modifiedDate": "2024-11-30 12:02:09", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtProject": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"display": "block", "font-size": "", "font-family": ""}, "obj_domProperty": {"Id": "myId_29727565"}, "dom_objContentContainer": {"Id": "myId_29727565"}}],
+[77861, {"obj_design": {"str_tag": "span", "blnIsTag": true, "str_name": "form_button_span", "str_text": "My Button", "str_type": "form_button_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77861", "str_classList": "notset", "str_idProject": "myId_11190110", "str_idXDesign": "myId_10076366", "str_nameShort": "form_button_span", "str_themeType": "form_button_span", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "white", "display": "block", "font-size": "1.2rem", "maxheight": "175", "font-weight": "bold"}, "obj_domProperty": {"Id": "myId_10076366", "innerHTML": "My Button"}, "dom_objContentContainer": {"Id": "myId_10076366"}}],
+[77862, {"obj_design": {"str_tag": "i", "str_name": "form_button_icon", "str_text": "star", "str_type": "form_button_icon", "bln_editPin": true, "str_content": "", "int_idRecord": "77862", "str_classList": "notset", "str_idProject": "myId_79120090", "str_idXDesign": "myId_48131142", "str_nameShort": "form_button_icon", "str_themeType": "form_button_icon", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "white", "display": "block", "font-size": "1.5em", "font-weight": "bold"}, "obj_domProperty": {"Id": "myId_48131142", "innerHTML": "star"}, "dom_objContentContainer": {"Id": "myId_48131142"}}],
+[77863, {"obj_icon": {"obj_design": {"str_type": "form_button_icon", "int_idRecord": 77862}}, "obj_span": {"obj_design": {"str_type": "form_button_span", "int_idRecord": 77861}}, "obj_design": {"str_tag": "a", "arr_item": [{"obj_design": {"str_type": "form_button_span", "int_idRecord": 77861}}, {"obj_design": {"str_type": "form_button_icon", "int_idRecord": 77862}}], "str_name": "form_button_anchor", "str_text": "notset", "str_type": "form_button_anchor", "bln_editPin": true, "str_content": "", "int_idRecord": "77863", "str_classList": "notset", "str_idProject": "myId_77377077", "str_idXDesign": "myId_62440730", "str_nameShort": "form_button_anchor", "str_themeType": "form_button_anchor", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "0.5em", "text": "de", "color": "white", "border": "0px solid black", "display": "flex", "font-size": "1.2rem", "align-items": "center", "font-weight": "bold", "justify-content": "center", "text-decoration": "none"}, "obj_domProperty": {"Id": "myId_62440730", "target": "_blank"}, "dom_objContentContainer": {"Id": "myId_62440730"}}],
+[77864, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77863}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "menu_button", "str_text": "My Button", "str_type": "form_button_rich", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": "77864", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_10880106", "str_nameShort": "menu_button", "str_themeType": "menu_button", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "form_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"gap": "1em", "color": "white", "width": "100%", "border": "1em solid orange", "cursor": "pointer", "display": "flex", "padding": "1em", "font-size": "1.2rem", "background": "green", "align-items": "center", "font-weight": "bold", "margin-bottom": "", "justify-content": "center"}, "obj_domProperty": {"Id": "myId_10880106", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_10880106", "str_name": "xapp_button_navigate_desktop"}}],
+[77865, {"obj_design": {"str_tag": "legend", "str_name": "form_legend", "str_text": "MyText", "str_type": "form_legend", "bln_editPin": true, "str_content": "", "int_idRecord": "77865", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_14016036", "str_nameShort": "form_legend", "str_themeType": "form_legend", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "form_button", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"gap": "1em", "color": "white", "border": "0.5em solid orange", "display": "flex", "opacity": "1", "padding": "1em", "background": "green", "user-select": "none", "border-radius": "0.5em", "text-decoration": ""}, "obj_domProperty": {"Id": "myId_14016036", "href": "https://www.mycode.buzz", "target": "_blank", "tabIndex": "0", "innerHTML": "MyText"}, "dom_objContentContainer": {"Id": "myId_14016036", "href": "https://www.mycode.buzz", "target": "_blank"}}],
+[77866, {"obj_design": {"str_tag": "label", "str_name": "form_label", "str_text": "My Label", "str_type": "form_label", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77866", "str_classList": "notset", "str_idProject": "myId_13000276", "str_idXDesign": "myId_40316030", "str_nameShort": "form_label", "str_themeType": "form_label", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-13 21:59:51", "str_categoryName": "", "str_modifiedDate": "2022-11-13 21:59:51", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "color": "white", "border": "0.5em solid orange", "cursor": "pointer", "margin": "", "padding": "1em", "overflow": "", "font-size": "1.1rem", "max-width": "", "min-width": "", "align-self": "flex-start", "background": "green", "max-height": "", "word-break": "", "border-radius": "1em"}, "obj_domProperty": {"Id": "myId_40316030", "innerText": "My Label"}, "dom_objContentContainer": {"Id": "myId_40316030"}}],
+[77867, {"obj_design": {"str_tag": "text", "blnIsTag": true, "str_name": "form_text", "str_text": "-", "str_type": "form_text", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77867", "str_classList": "notset", "str_idProject": "myId_13000276", "str_idXDesign": "myId_30380630", "str_nameShort": "form_text", "str_themeType": "form_input", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "color": "white", "border": "0.5em solid orange", "padding": "1em", "overflow": "auto", "font-size": "1rem", "maxheight": "175", "min-width": "", "background": "green", "max-height": "500px", "word-break": "normal", "border-radius": "0.5em"}, "obj_domProperty": {"Id": "myId_30380630", "innerHTML": "-"}, "dom_objContentContainer": {"Id": "myId_30380630"}}],
+[77868, {"obj_design": {"str_tag": "field", "arr_item": [{"obj_design": {"str_type": "form_label", "int_idRecord": 77866}}, {"obj_design": {"str_type": "form_text", "int_idRecord": 77867}}], "str_name": "form_field", "str_text": "notset", "str_type": "form_field", "bln_editPin": true, "str_content": "", "int_idRecord": "77868", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_04461374", "str_nameShort": "form_field", "str_themeType": "form_field", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "border": "", "display": "flex", "padding": "0em", "flex-flow": "", "flex-wrap": "column wrap", "align-items": "", "justify-content": "", " justify-content": "center"}, "obj_domProperty": {"Id": "myId_04461374"}, "dom_objContentContainer": {"Id": "myId_04461374"}}],
+[77869, {"obj_design": {"str_tag": "span", "blnIsTag": true, "str_name": "form_button_span", "str_text": "My Button", "str_type": "form_button_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77869", "str_classList": "notset", "str_idProject": "myId_11190110", "str_idXDesign": "myId_70130314", "str_nameShort": "form_button_span", "str_themeType": "form_button_span", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "white", "display": "block", "font-size": "1.1rem", "maxheight": "175", "font-weight": "bold", "font-wiegth": "bold"}, "obj_domProperty": {"Id": "myId_70130314", "innerHTML": "My Button"}, "dom_objContentContainer": {"Id": "myId_70130314"}}],
+[77870, {"obj_design": {"bln": "expand", "str_tag": "i", "str_name": "form_button_icon", "str_text": "star", "str_type": "form_button_icon", "str_class": "star", "bln_expand": true, "bln_editPin": true, "str_content": "", "int_idRecord": "77870", "str_classList": "notset", "str_idProject": "myId_79120090", "str_idXDesign": "myId_71730443", "str_nameShort": "form_button_icon", "str_themeType": "form_button_icon", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "white", "display": "block", "font-size": "1.5em", "font-weight": "bold"}, "obj_domProperty": {"Id": "myId_71730443", "innerHTML": "star"}, "dom_objContentContainer": {"Id": "myId_71730443"}}],
+[77871, {"obj_icon": {"obj_design": {"str_type": "form_button_icon", "int_idRecord": 77870}}, "obj_span": {"obj_design": {"str_type": "form_button_span", "int_idRecord": 77869}}, "obj_design": {"str_tag": "a", "arr_item": [{"obj_design": {"str_type": "form_button_span", "int_idRecord": 77869}}, {"obj_design": {"str_type": "form_button_icon", "int_idRecord": 77870}}], "str_name": "form_button_anchor", "str_text": "notset", "str_type": "form_button_anchor", "bln_editPin": true, "str_content": "", "int_idRecord": "77871", "str_classList": "notset", "str_idProject": "myId_11190110", "str_idXDesign": "myId_41070040", "str_nameShort": "form_button_anchor", "str_themeType": "form_button_anchor", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "0.5em", "text": "de", "color": "white", "border": "0px solid black", "display": "flex", "font-size": "1.1rem", "align-items": "center", "font-weight": "bold", "justify-content": "center", "text-decoration": "none"}, "obj_domProperty": {"Id": "myId_41070040", "target": "_blank"}, "dom_objContentContainer": {"Id": "myId_41070040"}}],
+[77872, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77871}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "form_button_rich", "str_text": "My Button", "str_type": "form_button_rich", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": "77872", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_83414743", "str_nameShort": "form_button_rich", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "form_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"gap": "1em", "color": "white", "border": "0.5em solid orange", "cursor": "pointer", "display": "flex", "padding": "1em", "font-size": "1.1rem", "background": "green", "align-items": "center", "font-weight": "bold", "border-radius": "0.5em"}, "obj_domProperty": {"Id": "myId_83414743", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_83414743", "str_name": "xapp_button_navigate_desktop"}}],
+[77873, {"obj_design": {"str_tag": "legend", "str_name": "form_legend", "str_text": "MyText", "str_type": "form_legend", "bln_editPin": true, "str_content": "", "int_idRecord": "77873", "str_classList": "notset", "str_idProject": "myId_63641161", "str_idXDesign": "myId_37487013", "str_nameShort": "form_legend", "str_themeType": "form_legend", "bln_dynamicPin": true, "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_button", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"gap": "1em", "color": "white", "border": "0.5em solid orange", "display": "flex", "opacity": "1", "padding": "1em", "background": "green", "user-select": "none", "border-radius": "0.5em", "text-decoration": ""}, "obj_domProperty": {"Id": "myId_37487013", "href": "https://www.mycode.buzz", "target": "_blank", "tabIndex": "0", "innerHTML": "MyText"}, "dom_objContentContainer": {"Id": "myId_37487013", "href": "https://www.mycode.buzz", "target": "_blank"}}],
+[77874, {"obj_design": {"str_tag": "fieldset", "arr_item": [{"obj_design": {"str_type": "form_legend", "int_idRecord": "77865"}}, {"obj_design": {"str_type": "form_field", "int_idRecord": "77868"}}, {"obj_design": {"str_type": "form_button_rich", "int_idRecord": "77872"}}, {"obj_design": {"str_type": "form_legend", "int_idRecord": "77873"}}], "lockOpen": true, "str_name": "form_fieldset", "str_text": "notset", "str_type": "form_fieldset", "bln_editPin": true, "str_content": "", "int_idRecord": "77874", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_28040276", "str_nameShort": "form_fieldset", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "border": "1em solid orange", "margin": "0px", "display": "flex", "padding": "1em", "overflow": "hidden", "flex-flow": "row wrap", "flex-wrap": "wrap", "align-self": "", "background": "green", "align-items": "start", "border-radius": "0.5em", "flex-direction": "row"}, "bln_toggleState": true, "obj_domProperty": {"Id": "myId_28040276"}, "dom_objContentContainer": {"Id": "myId_28040276"}}],
+[77875, {"obj_design": {"str_tag": "form_panel", "arr_item": [{"obj_design": {"str_type": "form_fieldset", "int_idRecord": "77874"}}], "str_name": "form_panel", "str_text": "notset", "str_type": "form_panel", "bln_editPin": true, "str_content": "", "int_idRecord": "77875", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_33706461", "str_nameShort": "form_panel", "str_themeType": "form_panel", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "border": "0px solid red", "display": "flex", "padding": "1em", "flex-flow": "", "flex-wrap": "column wrap", "background": "", "align-items": "end"}, "obj_domProperty": {"Id": "myId_33706461"}, "dom_objContentContainer": {"Id": "myId_33706461"}}],
+[77876, {"obj_design": {"str_tag": "hr", "str_name": "form_hardrule", "str_text": "notset", "str_type": "form_hardrule", "bln_editPin": true, "str_content": "", "int_idRecord": "77876", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_41368203", "str_nameShort": "form_hardrule", "str_themeType": "form_hardrule", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2023-09-28 17:30:59", "str_categoryName": "", "str_modifiedDate": "2023-09-28 17:30:59", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "white", "width": "100%", "border": "1em solid orange", "height": "1.0em", "padding": "1em", "background": "green", "border-radius": "0em"}, "obj_domProperty": {"Id": "myId_41368203"}, "dom_objContentContainer": {"Id": "myId_41368203"}}],
+[77877, {"obj_design": {"str_tag": "form_container", "arr_item": [{"obj_design": {"str_type": "form_panel", "int_idRecord": "77875"}}, {"obj_design": {"str_type": "form_hardrule", "int_idRecord": "77876"}}], "str_name": "form_container", "str_text": "notset", "str_type": "block", "bln_editPin": true, "str_content": "", "int_idRecord": "77877", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_43031101", "str_nameShort": "form_container", "str_themeType": "form_container", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:10:58", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:10:58", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true}, "obj_domStyle": {"gap": "1em", "display": "flex", "padding": "0em", "flex-flow": "wrap", "background": "transparent", "align-items": ""}, "obj_domProperty": {"Id": "myId_43031101"}, "dom_objContentContainer": {"Id": "myId_43031101"}}],
+[77878, {"obj_design": {"str_tag": "form_menu_panel", "arr_item": [{"obj_design": {"str_type": "block", "int_idRecord": "77877"}}], "str_name": "form_menu_panel", "str_text": "notset", "str_type": "form_menu_panel", "bln_editPin": true, "str_content": "", "int_idRecord": "77878", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_64003014", "str_nameShort": "form_menu_panel", "str_themeType": "form_menu_panel", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-15 08:47:57", "str_categoryName": "", "str_modifiedDate": "2022-11-15 08:47:57", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "border": "0px solid white", "display": "flex", "padding": "1em", "flex flow": "column wrap", "flexdirection": "column", "flex-direction": "column"}, "obj_domProperty": {"Id": "myId_64003014"}, "dom_objContentContainer": {"Id": "myId_64003014"}}],
+[77879, {"obj_design": {"str_tag": "form", "arr_item": [{"obj_design": {"str_type": "form_menu_panel", "int_idRecord": "77878"}}], "str_name": "form_form", "str_text": "notset", "str_type": "form_form", "bln_editPin": true, "str_content": "", "int_idRecord": "77879", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_27017070", "str_nameShort": "form_form", "str_themeType": "form_form", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "component", "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-wrap": "wrap", "flex-direction": "column", " background-color": "coral"}, "obj_domProperty": {"Id": "myId_27017070"}, "dom_objContentContainer": {"0": {"Id": "myId_28040276"}, "1": {"Id": "myId_83414743", "str_name": "xapp_button_navigate_desktop"}, "Id": "myId_27017070"}}],
+[77880, {"obj_design": {"str_tag": "xapp_accordion", "arr_item": [{"obj_design": {"str_type": "form_button_rich", "int_idRecord": "77864"}}, {"obj_design": {"str_type": "form_form", "int_idRecord": "77879"}}], "blnIsTag": true, "str_name": "xapp_accordion", "str_text": "notset", "str_type": "xapp_accordion", "bln_editPin": true, "str_content": "", "int_idRecord": "77880", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_72400131", "str_nameShort": "xapp_accordion", "str_themeType": "xapp_accordion", "bln_palettePin": true, "bln_isLocalHome": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-01 21:51:10", "str_categoryName": "", "str_modifiedDate": "2022-11-01 21:51:10", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"flex": "wrap", "width": "100%", "border": "0em solid orange", "display": "block", "padding": "0em", "justify-content": "", "background-color": "green"}, "obj_domProperty": {"Id": "myId_72400131"}, "dom_objContentContainer": {"Id": "myId_72400131"}}],
+[77881, {"obj_design": {"str_tag": "form_blockbackground", "blnIsTag": true, "str_name": "form_blockbackground", "str_text": "notset", "str_type": "form_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77881", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_10184107", "str_nameShort": "form_blockbackground", "str_themeType": "form_blockbackground", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "", "border": "", "padding": "1.0em", "overflow": "", "maxheight": "175", "background": "rgb(37, 150, 190)", "max-height": "", "word-break": "", "font-family": "", "border-radius": "4px"}, "obj_domProperty": {"Id": "myId_10184107"}, "dom_objContentContainer": {"Id": "myId_10184107"}}],
+[77882, {"obj_design": {"str_tag": "form_blockmidground", "blnIsTag": true, "str_name": "form_blockmidground", "str_text": "", "str_type": "form_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77882", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_04706324", "str_nameShort": "form_blockmidground", "str_themeType": "form_blockmidground", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "", "border": "", "padding": "1.0em", "overflow": "", "maxheight": "175", "background": "rgb(64, 169, 236)", "max-height": "", "word-break": "", "font-family": "", "border-radius": "4px"}, "obj_domProperty": {"Id": "myId_04706324", "innerHTML": ""}, "dom_objContentContainer": {"Id": "myId_04706324"}}],
+[77883, {"obj_design": {"str_tag": "form_blockforground", "blnIsTag": true, "str_name": "form_blockforground", "str_text": "notset", "str_type": "form_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77883", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_38024034", "str_nameShort": "form_blockforground", "str_themeType": "form_blockforground", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "", "border": "", "padding": "1.0em", "overflow": "", "maxheight": "175", "background": "white", "max-height": "", "word-break": "", "font-family": "", "border-radius": "4px"}, "obj_domProperty": {"Id": "myId_38024034"}, "dom_objContentContainer": {"Id": "myId_38024034"}}],
+[77884, {"obj_design": {"str_tag": "form_blockhighlight", "blnIsTag": true, "str_name": "form_blockhighlight", "str_text": "notset", "str_type": "form_span", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77884", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_83720170", "str_nameShort": "form_blockhighlight", "str_themeType": "form_blockhighlight", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "", "border": "", "padding": "1.0em", "overflow": "", "maxheight": "175", "background": "orange", "max-height": "", "word-break": "", "font-family": "", "border-radius": "4px"}, "obj_domProperty": {"Id": "myId_83720170"}, "dom_objContentContainer": {"Id": "myId_83720170"}}]
 ]);
 /*END INSTANCE JSON MAP//*/
 

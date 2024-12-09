@@ -16,13 +16,6 @@ class Project extends {str_nameTargetClass}{
     }    
 
 //START THEME HAMDLER  
-fn_elementExistsAtIndex(array, index) {
-  if (index >= 0 && index < array.length) {
-    return array[index] !== undefined;
-  } else {
-    return false;
-  }
-  }
 fn_calculateFontSizeIncrement(obj_theme, int_fontSize, int_increment=0){
   obj_theme.int_fontSize1=int_fontSize;
   obj_theme.int_fontSize2=obj_theme.int_fontSize1+int_increment;
@@ -31,9 +24,8 @@ fn_calculateFontSizeIncrement(obj_theme, int_fontSize, int_increment=0){
   obj_theme.int_fontSize5=obj_theme.int_fontSize4+int_increment;      
 }
 
-fn_calculateFontSize(obj_theme){
+fn_calculateFontSize(obj_theme){ 
   
-  let int_fontSize, int_fontSize1, int_fontSize2, int_fontSize3, int_fontSize4, int_fontSize5;
 
   switch(obj_theme.str_fontSize){        
       case "small":
@@ -83,107 +75,212 @@ obj_theme.bln_borderRadiusInput=bln_value;
 obj_theme.bln_borderRadiusSearch=bln_value;        
 }
 
-fn_splitUserTheme(obj_theme){
-  let arr_name=obj_theme.str_name.split("-");    
+fn_getTestThemeName(){
 
-  let bln_value;
-  bln_value=this.fn_elementExistsAtIndex(arr_name, 0);
-  if(bln_value){
-    obj_theme.str_title=arr_name[0];
-  }
+  return obj_shared.fn_getRandomValueFromObject(this.obj_color);  
 
-  bln_value=this.fn_elementExistsAtIndex(arr_name, 1);
-  if(bln_value){
-    obj_theme.algorithm=arr_name[1];
-  }
+}
 
+
+
+fn_setFillArea(obj_theme, obj_fill){
+
+  let str_fillBase, str_fillForm, str_fillBorder;
+  const str_fill=obj_theme.str_fill;
   
-  bln_value=this.fn_elementExistsAtIndex(arr_name, 2);
-  if(bln_value){
-    obj_theme.str_location=arr_name[2];    
-  }    
+  const str_fill_1=obj_fill.str_fill_1;
+  const str_fill_2=obj_fill.str_fill_2;
 
-  if(!obj_theme.algorithm){//will fail if not defined
-    obj_theme.algorithm="lighten";
-  }    
-  //if a dark color use base, floor , up
-  //if a light color use base, mid , up
+  const obj_gradient=obj_theme.obj_gradient;
+  
+  str_fillBase=str_fill;
+  str_fillForm=str_fill_1;
+  str_fillBorder=str_fill_2;    
+  
+  
+  if(obj_gradient.bln_face){    
+    str_fillForm=str_fill;
+    str_fillBase=str_fill_1;
+    str_fillBorder=str_fill_2;
+  }
+  
+  
+  obj_fill.str_fill=str_fill;
+  obj_fill.str_fillBase=str_fillBase;
+  obj_fill.str_fillForm=str_fillForm;
+  obj_fill.str_fillBorder=str_fillBorder;  
 }
 
-fn_setColorHSL(obj_theme){
+fn_filterGradientLight(obj_theme){        
+  
+  let int_value=obj_theme.obj_gradient.int_light;  
+  let bln_value=obj_shared.fn_filterValue(int_value, obj_theme.int_min,obj_theme.int_max);         
+  if(!bln_value){
+    console.log("failed int_value: " + int_value);
+    console.log("failed obj_theme.int_min: " + obj_theme.int_min);
+    console.log("failed obj_theme.int_max: " + obj_theme.int_max);
+  }
+  return bln_value;
+} 
 
-let str_title=obj_theme.str_title;
-if(!str_title){
-  str_title="gray";
-}
-//console.log("str_title: " + str_title);
-let str_fillHSL=this.obj_color[str_title];  
-//console.log("str_fillHSL: " + str_fillHSL);
-obj_theme.str_fill=str_fillHSL;                
-
-}
 
 
-fn_setFillPalette(obj_theme, obj_fill){
-let str_fill=obj_theme.str_fill;    
-let int_ratio1, int_ratio2, str_fill_1, str_fill_2;
-switch(obj_theme.algorithm){
-  case "lighten":
-    //1 target, 1 lighter, 1 lighter              
-    int_ratio1=20;
-    int_ratio2=10;      
-    str_fill_1=obj_shared.fn_getLightShade(str_fill, int_ratio1, true);              
-    str_fill_2=obj_shared.fn_getLightShade(str_fill_1, int_ratio2, true);                    
-    
-    break;    
-  break;      
-  case "darken":
-    //1 target, 1 lighter, 1 lighter              
-    int_ratio1=10;
-    int_ratio2=20;
-    str_fill_1=obj_shared.fn_getDarkShade(str_fill, int_ratio1, true);              
-    str_fill_2=obj_shared.fn_getDarkShade(str_fill_1, int_ratio2, true);                    
+fn_setFillPalette(obj_theme, obj_fill){  
+  
+  let obj_shade, obj_contrast;
 
-    
-    break;
-  default://default is mid
-      //1 target, 1 darker, 1 lighter      
-      int_ratio1=10;
-      int_ratio2=20;              
-      str_fill_1=obj_shared.fn_getDarkShade(str_fill, int_ratio1);      
-      str_fill_2=obj_shared.fn_getLightShade(str_fill, int_ratio2);                                
+  const obj_gradient=obj_theme.obj_gradient;
 
-      
-    break;   
-}   
-obj_fill.str_fill_1=str_fill_1;
-obj_fill.str_fill_2=str_fill_2;
-}
+  obj_shade=new Object;    
+  obj_shade.str_fill=obj_theme.str_fill;  
+  obj_shade.bln_value=obj_gradient.bln_lighten;  
 
-fn_setStartLocation(obj_theme, obj_fill){
+  let int_percentLight, int_percentContrast;
+  int_percentLight=10;
+  int_percentContrast=5;  
+  if(obj_gradient.bln_contrast){
+    int_percentLight=15;
+    int_percentContrast=10;  
+  }  
+  let int_totalLight=(int_percentLight+(int_percentLight+int_percentContrast));
+  obj_theme.int_percentLight=int_percentLight;
+  obj_theme.int_percentContrast=int_percentContrast;
+  obj_theme.int_totalLight=int_totalLight;
 
-let str_fillBase, str_fillForm, str_fillBorder;
-const str_fill=obj_theme.str_fill;
+  obj_theme.int_min=0;
+  obj_theme.int_max=100;
+  if(obj_gradient.bln_lighten){//due to getting lighter    
+    obj_theme.int_min=0;
+    obj_theme.int_max=(100-int_totalLight);//due to getting darker
+  }
+  else{    
+    obj_theme.int_min=0+int_totalLight;
+    obj_theme.int_max=100;//due to getting darker
+  }
+  obj_theme.bln_filterPass=this.fn_filterGradientLight(obj_theme);        
+  if(!obj_theme.bln_filterPass){
+    return;
+  }
 
-const str_fill_1=obj_fill.str_fill_1;
-const str_fill_2=obj_fill.str_fill_2;
+  obj_contrast={    
+    int_percentHue:0,
+    int_percentSaturation:0,
+    int_percentLight:int_percentLight,
+  }
+  obj_shared.fn_assignProperty(obj_shade, obj_contrast);  
 
-str_fillBase=str_fill;
-str_fillForm=str_fill_1;
-str_fillBorder=str_fill_2;    
 
-if(obj_theme.bln_backlit){
-  str_fillBase=str_fill_2;
-  str_fillForm=str_fill;
-  str_fillBorder=str_fill_1;
-}
+  obj_fill.str_fill_1=obj_shared.fn_getShade(obj_shade);              
+  //console.log(obj_fill.str_fill_1);
 
-obj_fill.str_fill=str_fill;
-obj_fill.str_fillBase=str_fillBase;
-obj_fill.str_fillForm=str_fillForm;
-obj_fill.str_fillBorder=str_fillBorder;  
+
+  obj_contrast.int_percentLight=(int_percentLight+int_percentContrast);//10 percent more than fill 1    
+  obj_shade.str_fill=obj_theme.str_fill;//use fill1 as starting point
+  obj_shared.fn_assignProperty(obj_shade, obj_contrast);    
+  obj_fill.str_fill_2=obj_shared.fn_getShade(obj_shade);              
+  obj_fill.obj_shade=obj_shade;
+
+  obj_theme.bln_filterPass=true;  
 }
 
+fn_addColorItem(obj_current){  
+
+  this.arr_color.push(obj_current);    
+  
+  let int_hue, int_saturation, int_light;
+  let obj_hsl, str_label;  
+  int_hue=obj_current.int_hue;
+  int_saturation=obj_current.int_saturation;
+
+  int_hue=obj_current.int_hue;
+  int_saturation=obj_current.int_saturation;
+  int_light=60;  
+  str_label=obj_current.str_label + "-light"
+  obj_hsl=obj_shared.fn_getGradientObject(int_hue, int_saturation, int_light, "", str_label);    
+  this.arr_color.push(obj_hsl);
+
+  int_hue=obj_current.int_hue;
+  int_saturation=obj_current.int_saturation;
+  int_light=30;  
+  str_label=obj_current.str_label + "-dark"
+  obj_hsl=obj_shared.fn_getGradientObject(int_hue, int_saturation, int_light, "", str_label);    
+  this.arr_color.push(obj_hsl);
+  
+  if(obj_current.int_hue>=10){
+    int_hue=obj_current.int_hue-10;
+    int_saturation=obj_current.int_saturation;
+    int_light=30;      
+    str_label=obj_current.str_label + "-alt"
+    obj_hsl=obj_shared.fn_getGradientObject(int_hue, int_saturation, int_light, "", str_label);    
+    this.arr_color.push(obj_hsl);  
+  }
+  
+  
+  
+}
+
+fn_getColorMap(obj_theme){  
+
+  let obj_hsl;
+  let int_value;
+
+  let int_hue, int_saturation, int_light
+  int_saturation=100;
+  int_light=50;
+
+  this.arr_color = [];  
+  let arr_item = [];  
+  let arr_mod;    
+  
+  obj_hsl=obj_shared.fn_getGradientObject(0, 100, 50, "", "red");//red
+  this.fn_addColorItem(obj_hsl);
+  obj_hsl=obj_shared.fn_getGradientObject(30, 100, 50, "", "Orange");
+  this.fn_addColorItem(obj_hsl);
+  //obj_hsl=obj_shared.fn_getGradientObject(60, 100, 50, "", "Yellow");
+  //this.fn_addColorItem(obj_hsl);
+  //obj_hsl=obj_shared.fn_getGradientObject(120, 100, 50, "", "Green");
+  //this.fn_addColorItem(obj_hsl);
+  //obj_hsl=obj_shared.fn_getGradientObject(180, 100, 50, "", "Cyan");
+  //this.fn_addColorItem(obj_hsl);
+  obj_hsl=obj_shared.fn_getGradientObject(240, 100, 50, "", "Blue");
+  this.fn_addColorItem(obj_hsl);
+  obj_hsl=obj_shared.fn_getGradientObject(270, 100, 50, "", "Purple");
+  this.fn_addColorItem(obj_hsl);
+  obj_hsl=obj_shared.fn_getGradientObject(300, 100, 50, "", "Magenta");
+  this.fn_addColorItem(obj_hsl);
+  
+  arr_item=this.arr_color;
+  obj_hsl=obj_shared.fn_getGradientObject(0, 0, 100, "", "White");
+  arr_item.push(obj_hsl);  
+  obj_hsl=obj_shared.fn_getGradientObject(0, 0, 0, "", "Black");
+  arr_item.push(obj_hsl);  
+  obj_hsl=obj_shared.fn_getGradientObject(0, 0, 50, "", "Gray");
+  arr_item.push(obj_hsl); 
+  obj_hsl=obj_shared.fn_getGradientObject(0, 0, 60, "", "Gray-light");
+  arr_item.push(obj_hsl);   
+  obj_hsl=obj_shared.fn_getGradientObject(0, 0, 30, "", "Gray-dak");
+  arr_item.push(obj_hsl);     
+  
+  console.log(this.arr_color);
+
+  let int_max=this.arr_color.length-1;
+  int_value=obj_shared.fn_getRandomInt(0, int_max); // Generates a random integer between 1 and 8    
+  obj_hsl=this.arr_color[int_value];
+  
+  
+  //obj_hsl=obj_shared.fn_getGradientObject(230, 100, 30, "", "blue-mod");  
+  //obj_hsl=obj_shared.fn_getGradientObject(300, 100, 50, "", "magenta");    
+  //obj_hsl=obj_shared.fn_getGradientObject(0, 100, 50, "", "Red");  
+  //obj_hsl=obj_shared.fn_getGradientObject(230, 100, 30, "", "Blue-Alt-Test");    
+  //obj_hsl=obj_shared.fn_getGradientObject(300, 100, 60, "", "magenta-lighter-test");  
+  //obj_hsl=obj_shared.fn_getGradientObject(300, 100, 30, "", "magenta-darker-test");  
+  //obj_hsl=obj_shared.fn_getGradientObject(0, 0, 30, "", "dark-gray-test");  
+  //obj_hsl=obj_shared.fn_getGradientObject(0, 0, 60, "", "light-gray-test");  
+  //obj_hsl=obj_shared.fn_getGradientObject(0, 0, 100, "", "White");  
+  
+  obj_theme.str_fill=obj_hsl.str_hsl;  
+  obj_theme.obj_gradient=obj_hsl;
+}
 
   
 
@@ -195,13 +292,6 @@ fn_setUserTheme(obj_theme){
 //https://imagecolorpicker.com/
 //coolors affiliate link https://coolors.co/?ref=6754517d5fa59e000b79f378   
 
-this.fn_getColorMap();    
-obj_theme.str_name=obj_shared.fn_getRandomValueFromObject(this.obj_color);  
-//obj_theme.str_name="olive";
-//obj_theme.str_name="orange";
-this.fn_splitUserTheme(obj_theme);//split name into variables if any
-this.fn_setColorHSL(obj_theme);    
-
 //Load Border and Radius Option
 obj_theme.bln_borderDisplay=false;
 obj_theme.bln_borderRadiusDisplay=false;      
@@ -211,6 +301,8 @@ obj_theme.bln_borderRowz=false;
 obj_theme.bln_borderRadiusRowz=false;  
 obj_theme.bln_borderButton=true;
 obj_theme.bln_borderRadiusButton=true;
+obj_theme.bln_borderSearch=true;  
+obj_theme.bln_borderRadiusSearch=true;  
 obj_theme.bln_borderFieldset=true;
 obj_theme.bln_borderRadiusFieldset=true;
 obj_theme.bln_borderLegend=true;
@@ -221,43 +313,84 @@ obj_theme.bln_borderInput=true;
 obj_theme.bln_borderRadiusInput=true;
 //Load Border and Radius Option
 
-obj_theme.bln_backlit=false;
-obj_theme.bln_backlit=true;
-obj_theme.bln_brightFill=false;//false for dark, true for light
-switch(obj_theme.bln_brightFill){
-  case true:    
-    obj_theme.algorithm="lighten";
-    obj_theme.str_textColorUI="#E26158";      
-  break;
-  case false:
-    obj_theme.algorithm="lighten";
-    
-    
-  break;
+this.fn_getColorMap(obj_theme);//generate array of hsl colors    
+
+const obj_gradient=obj_theme.obj_gradient;
+if(obj_theme.obj_gradient.int_light>=60){
+  obj_gradient.bln_lighten = false;//true by default
 }
+obj_gradient.bln_contrast=true;
+obj_gradient.bln_face=obj_shared.fn_getRandomInt(0, 1);
+
+
+if(obj_gradient.int_light>80){
+  //let obj_hslText=obj_shared.fn_getGradientObject(183, 100, 75, "", "Textcolor");
+  let obj_hslText=obj_shared.fn_getGradientObject(0, 33, 36, "", "Dark Red Brown");
+  obj_theme.str_textColorUI=obj_hslText.str_hsl;        
+}
+
 
 obj_theme.bln_flipBorder=false;
 obj_theme.bln_flipForm=false;
 
 let obj_fill=new Object;
-this.fn_setFillPalette(obj_theme, obj_fill);//we can choose to lighten, split or darken based on the main color and location
-this.fn_setStartLocation(obj_theme, obj_fill);//we know know where we are starting from
-
-
+this.fn_setFillPalette(obj_theme, obj_fill);//we can choose to lighten, or darken based on wether the main color is light or dark
+this.fn_setFillArea(obj_theme, obj_fill);//we can choose which areas are lighter or darker
 obj_theme.str_fillBase=obj_fill.str_fillBase;
 obj_theme.str_fillForm=obj_fill.str_fillForm;       
 obj_theme.str_fillBorder=obj_fill.str_fillBorder;  
 
-/*
-console.log("obj_theme.str_title: " + obj_theme.str_title);
-console.log("obj_theme.algorithm: " + obj_theme.algorithm);
-console.log("obj_theme.str_location: " + obj_theme.str_location);  
-console.log("obj_theme:" + obj_theme.str_fill);
-console.log("obj_theme:" + obj_theme.str_fillBase);
-console.log("obj_theme:" + obj_theme.str_fillForm);
-console.log("obj_theme:" + obj_theme.str_fillBorder);
+if(!obj_theme.bln_filterPass){
+  //obj_theme.str_name=this.fn_getTestThemeName();  
+  //obj_theme.str_name="yellow";
+  //return this.fn_setUserTheme(obj_theme);  
+  console.log("obj_theme.bln_filterPassxxxxx: " + obj_theme.bln_filterPass);
+  obj_theme.str_fillBase="hsl(180, 100%, 50%)";
+  obj_theme.str_fillForm="hsl(180, 100%, 65%)";
+  obj_theme.str_fillBorder="hsl(180, 100%, 85%)";
+  
+}
+
+
+
+
+
+
+//*
+//console.log("obj_theme.str_name: " + obj_theme.str_name);
+console.log("str_label: " + obj_theme.obj_gradient.str_label);
+console.log("obj_theme.str_fill:" + obj_theme.str_fill);
+console.log("obj_theme.bln_filterPass: " + obj_theme.bln_filterPass);
+console.log("obj_gradient.int_hue: " + obj_theme.obj_gradient.int_hue);
+console.log("obj_gradient.int_saturation: " + obj_theme.obj_gradient.int_saturation);
+console.log("obj_gradient.int_light: " + obj_theme.obj_gradient.int_light);
+
+
+console.log("obj_theme.int_min: " + obj_theme.int_min);
+console.log("obj_theme.int_max: " + obj_theme.int_max);
+console.log("obj_theme.int_totalLight: " + obj_theme.int_totalLight);    
+
+
+console.log("obj_gradient.bln_face: " + obj_gradient.bln_face);
+console.log("obj_gradient.bln_lighten: " + obj_gradient.bln_lighten);
+console.log("obj_gradient.bln_contrast: " + obj_gradient.bln_contrast);
+console.log("obj_theme.int_percentLight: " + obj_theme.int_percentLight);
+console.log("obj_theme.int_percentContrast: " + obj_theme.int_percentContrast);
+
+console.log("str_fill:" + obj_theme.str_fill);
+if(obj_gradient.bln_face){    
+  console.log("str_fillForm:" + obj_theme.str_fillForm);  
+  console.log("str_fillBase:" + obj_theme.str_fillBase);
+  console.log("str_fillBorder:" + obj_theme.str_fillBorder);
+}
+else{
+  console.log("str_fillBase:" + obj_theme.str_fillBase);
+  console.log("str_fillForm:" + obj_theme.str_fillForm);    
+  console.log("str_fillBorder:" + obj_theme.str_fillBorder);
+}
 //*/
 }
+
 fn_applyThemeStructure(){        
   
 
@@ -408,7 +541,8 @@ fn_applyThemeStructure(){
   obj_holder.obj_themeButton=obj_themeItem;        
   //FORMBUTTON
   /////////////////////////////////////////
-  /////////////////////////////////////////
+  ///////////////////////////////////////// 
+  
 
   /////////////////////////////////////////
   /////////////////////////////////////////
@@ -427,9 +561,6 @@ fn_applyThemeStructure(){
   if(obj_theme.bln_flipForm){[str_fillBorder, str_fillForm]=obj_shared.fn_flipVariable(str_fillBorder, str_fillForm);}      
   obj_themeItem.borderColor=str_fillBorder;          
   obj_themeItem.backgroundColor=str_fillForm;                
-
-
-  
 obj_themeItem.color=obj_theme.str_textColorUI;
   obj_project.fn_applyThemeOption(obj_themeItem);
   //OPTION
@@ -507,13 +638,15 @@ obj_themeItem.color=obj_theme.str_textColorUI;
   obj_themeItem.str_fontLabel="rowz_search";                                      
   obj_themeItem.bln_border=obj_theme.bln_borderSearch;  
   obj_themeItem.bln_borderRadius=obj_theme.bln_borderRadiusSearch;  
+  obj_themeItem.borderColor=obj_holder.obj_themeButton.borderColor;  
+  obj_themeItem.backgroundColor=obj_theme.str_fillInput;                                                                       
+  
   obj_project.fn_applyThemeOption(obj_themeItem);
   //OPTION            
   obj_holder.obj_themeRowzSearch=obj_themeItem;              
   //FORMINPUT
   /////////////////////////////////////////
-  /////////////////////////////////////////
-
+  /////////////////////////////////////////  
   
 
   /////////////////////////////////////////
@@ -645,155 +778,9 @@ switch(obj_themeItem.str_deviderSize){
 obj_themeItem.marginBottom=int_deviderSize + "em";                  
 //DEVIDER  
 }
-
-
-fn_getColorMap(){
-  
-  this.obj_color = {
-  "alice_blue": "hsl(208, 100%, 97%)",
-  "antique_white": "hsl(34, 78%, 91%)",
-  "aqua": "hsl(180, 100%, 50%)",
-  "aquamarine": "hsl(160, 100%, 75%)",
-  "azure": "hsl(180, 100%, 97%)",
-  "beige": "hsl(60, 56%, 91%)",
-  "bisque": "hsl(33, 100%, 88%)",
-  "black": "hsl(0, 0%, 0%)",
-  "blanched_almond": "hsl(36, 100%, 90%)",
-  "blue": "hsl(240, 100%, 50%)",
-  "blue_violet": "hsl(271, 76%, 53%)",
-  "brown": "hsl(0, 59%, 41%)",
-  "burly_wood": "hsl(34, 57%, 70%)",
-  "cadet_blue": "hsl(182, 25%, 50%)",
-  "chartreuse": "hsl(90, 100%, 50%)",
-  "chocolate": "hsl(25, 75%, 47%)",
-  "coral": "hsl(16, 100%, 66%)",
-  "cornflower_blue": "hsl(219, 79%, 66%)",
-  "cornsilk": "hsl(48, 100%, 93%)",
-  "crimson": "hsl(348, 83%, 47%)",
-  "cyan": "hsl(180, 100%, 50%)",
-  "dark_blue": "hsl(240, 100%, 27%)",
-  "dark_cyan": "hsl(180, 100%, 27%)",
-  "dark_goldenrod": "hsl(43, 89%, 38%)",
-  "dark_gray": "hsl(0, 0%, 66%)",
-  "dark_green": "hsl(120, 100%, 20%)",
-  "dark_khaki": "hsl(56, 38%, 58%)",
-  "dark_magenta": "hsl(300, 100%, 27%)",
-  "dark_olive_green": "hsl(82, 39%, 30%)",
-  "dark_orange": "hsl(33, 100%, 50%)",
-  "dark_orchid": "hsl(280, 61%, 50%)",
-  "dark_red": "hsl(0, 100%, 27%)",
-  "dark_salmon": "hsl(15, 72%, 70%)",
-  "dark_sea_green": "hsl(120, 25%, 65%)",
-  "dark_slate_blue": "hsl(248, 39%, 39%)",
-  "dark_slate_gray": "hsl(180, 25%, 25%)",
-  "dark_turquoise": "hsl(181, 100%, 41%)",
-  "dark_violet": "hsl(282, 100%, 41%)",
-  "deep_pink": "hsl(328, 100%, 54%)",
-  "deep_sky_blue": "hsl(195, 100%, 50%)",
-  "dim_gray": "hsl(0, 0%, 41%)",
-  "dodger_blue": "hsl(210, 100%, 56%)",
-  "firebrick": "hsl(0, 68%, 42%)",
-  "floral_white": "hsl(40, 100%, 97%)",
-  "forest_green": "hsl(120, 61%, 34%)",
-  "fuchsia": "hsl(300, 100%, 50%)",
-  "gainsboro": "hsl(0, 0%, 86%)",
-  "ghost_white": "hsl(240, 100%, 99%)",
-  "gold": "hsl(51, 100%, 50%)",
-  "goldenrod": "hsl(43, 74%, 49%)",
-  "gray": "hsl(0, 0%, 50%)",
-  "green": "hsl(120, 100%, 25%)",
-  "green_yellow": "hsl(84, 100%, 59%)",
-  "honeydew": "hsl(120, 100%, 97%)",
-  "hot_pink": "hsl(330, 100%, 71%)",
-  "indian_red": "hsl(0, 53%, 58%)",
-  "indigo": "hsl(275, 100%, 25%)",
-  "ivory": "hsl(60, 100%, 97%)",
-  "khaki": "hsl(54, 77%, 75%)",
-  "lavender": "hsl(240, 67%, 94%)",
-  "lavender_blush": "hsl(340, 100%, 97%)",
-  "lawn_green": "hsl(90, 100%, 50%)",
-  "lemon_chiffon": "hsl(54, 100%, 90%)",
-  "light_blue": "hsl(195, 53%, 79%)",
-  "light_coral": "hsl(0, 79%, 72%)",
-  "light_cyan": "hsl(180, 100%, 94%)",
-  "light_goldenrod_yellow": "hsl(60, 80%, 90%)",
-  "light_gray": "hsl(0, 0%, 83%)",
-  "light_green": "hsl(120, 73%, 75%)",
-  "light_pink": "hsl(351, 100%, 86%)",
-  "light_salmon": "hsl(17, 100%, 74%)",
-  "light_sea_green": "hsl(177, 70%, 41%)",
-  "light_sky_blue": "hsl(203, 92%, 75%)",
-  "light_slate_gray": "hsl(210, 14%, 53%)",
-  "light_steel_blue": "hsl(214, 41%, 78%)",
-  "light_yellow": "hsl(60, 100%, 94%)",
-  "lime": "hsl(120, 100%, 50%)",
-  "lime_green": "hsl(120, 61%, 50%)",
-  "linen": "hsl(30, 67%, 94%)",
-  "magenta": "hsl(300, 100%, 50%)",
-  "maroon": "hsl(0, 100%, 25%)",
-  "medium_aquamarine": "hsl(160, 51%, 60%)",
-  "medium_blue": "hsl(240, 100%, 40%)",
-  "medium_orchid": "hsl(288, 59%, 58%)",
-  "medium_purple": "hsl(260, 60%, 65%)",
-  "medium_sea_green": "hsl(147, 50%, 47%)",
-  "medium_slate_blue": "hsl(249, 80%, 67%)",
-  "medium_spring_green": "hsl(157, 100%, 49%)",
-  "medium_turquoise": "hsl(178, 60%, 55%)",
-  "medium_violet_red": "hsl(322, 81%, 43%)",
-  "midnight_blue": "hsl(240, 64%, 27%)",
-  "mint_cream": "hsl(150, 100%, 98%)",
-  "misty_rose": "hsl(6, 100%, 94%)",
-  "moccasin": "hsl(38, 100%, 85%)",
-  "navajo_white": "hsl(36, 100%, 84%)",
-  "navy": "hsl(240, 100%, 25%)",
-  "old_lace": "hsl(39, 85%, 95%)",
-  "olive": "hsl(60, 100%, 25%)",
-  "olive_drab": "hsl(80, 60%, 35%)",
-  "orange": "hsl(39, 100%, 50%)",
-  "orange_red": "hsl(16, 100%, 50%)",
-  "orchid": "hsl(302, 59%, 65%)",
-  "pale_goldenrod": "hsl(55, 67%, 80%)",
-  "pale_green": "hsl(120, 93%, 79%)",
-  "pale_turquoise": "hsl(180, 65%, 81%)",
-  "pale_violet_red": "hsl(340, 60%, 65%)",
-  "papaya_whip": "hsl(37, 100%, 92%)",       
-  "peach_puff": "hsl(28, 100%, 86%)",
-  "peru": "hsl(30, 59%, 53%)",
-  "pink": "hsl(350, 100%, 88%)",
-  "plum": "hsl(300, 47%, 75%)",
-  "powder_blue": "hsl(187, 52%, 80%)",
-  "purple": "hsl(300, 100%, 25%)",
-  "rebecca_purple": "hsl(270, 50%, 40%)",
-  "red": "hsl(0, 100%, 50%)",
-  "rosy_brown": "hsl(0, 25%, 65%)",
-  "royal_blue": "hsl(225, 73%, 57%)",
-  "saddle_brown": "hsl(25, 76%, 31%)",
-  "salmon": "hsl(6, 93%, 71%)",
-  "sandy_brown": "hsl(28, 87%, 67%)",
-  "sea_green": "hsl(146, 50%, 36%)",
-  "seashell": "hsl(25, 100%, 97%)",
-  "sienna": "hsl(19, 56%, 40%)",
-  "silver": "hsl(0, 0%, 75%)",
-  "sky_blue": "hsl(197, 71%, 73%)",
-  "slate_blue": "hsl(248, 53%, 58%)",
-  "slate_gray": "hsl(210, 13%, 50%)",
-  "snow": "hsl(0, 100%, 99%)",
-  "spring_green": "hsl(150, 100%, 50%)",
-  "steel_blue": "hsl(207, 44%, 49%)",
-  "tan": "hsl(34, 44%, 69%)",
-  "teal": "hsl(180, 100%, 25%)",
-  "thistle": "hsl(300, 24%, 80%)",
-  "tomato": "hsl(9, 100%, 64%)",
-  "turquoise": "hsl(174, 72%, 56%)",
-  "violet": "hsl(300, 76%, 72%)",
-  "wheat": "hsl(39, 77%, 83%)",
-  "white": "hsl(0, 0%, 100%)",
-  "white_smoke": "hsl(0, 0%, 96%)",
-  "yellow": "hsl(60, 100%, 50%)",
-  "yellow_green": "hsl(80, 61%, 50%)"
-  };
-}
 //END THEME HAMDLER
+
+
     fn_setEvent(e, obj_itemEvent){                        
         if(!this.obj_itemEvent){                  
             this.obj_nativeEvent=e;
