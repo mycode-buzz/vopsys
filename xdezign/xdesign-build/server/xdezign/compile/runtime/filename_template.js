@@ -348,7 +348,8 @@ if(obj_theme.obj_gradient.int_light>=60){
   obj_gradient.bln_lighten = false;//true by default
 }
 obj_gradient.bln_contrast=true;
-obj_gradient.bln_face=obj_shared.fn_getRandomInt(0, 1);
+//obj_gradient.bln_face=obj_shared.fn_getRandomInt(0, 1);
+obj_gradient.bln_face=false;
 
 
 if(obj_gradient.int_light>80){
