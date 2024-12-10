@@ -8192,28 +8192,45 @@ fn_getColorMap(obj_theme){
   let int_value;
 
   let int_hue, int_saturation, int_light
-  int_saturation=100;
+  switch(obj_theme.str_effect){    
+    case "fade":
+    int_saturation=25;
+    break;
+    case "standard":
+    int_saturation=50;
+    break;
+    case "bold":
+    int_saturation=60;
+    break;    
+    case "max":
+      int_saturation=100;
+      break;    
+    default:
+      int_saturation=50;
+  }
+  
+  
   int_light=50;
 
   this.arr_color = [];  
   let arr_item = [];  
   let arr_mod;    
   
-  obj_hsl=obj_shared.fn_getGradientObject(0, 100, 50, "", "red");//red
+  obj_hsl=obj_shared.fn_getGradientObject(0, int_saturation, 50, "", "red");//red
   this.fn_addColorItem(obj_hsl);
-  obj_hsl=obj_shared.fn_getGradientObject(30, 100, 50, "", "Orange");
+  obj_hsl=obj_shared.fn_getGradientObject(30, int_saturation, 50, "", "Orange");
   this.fn_addColorItem(obj_hsl);
-  //obj_hsl=obj_shared.fn_getGradientObject(60, 100, 50, "", "Yellow");
+  //obj_hsl=obj_shared.fn_getGradientObject(60, int_saturation, 50, "", "Yellow");
   //this.fn_addColorItem(obj_hsl);
-  //obj_hsl=obj_shared.fn_getGradientObject(120, 100, 50, "", "Green");
+  //obj_hsl=obj_shared.fn_getGradientObject(120, int_saturation, 50, "", "Green");
   //this.fn_addColorItem(obj_hsl);
-  //obj_hsl=obj_shared.fn_getGradientObject(180, 100, 50, "", "Cyan");
+  //obj_hsl=obj_shared.fn_getGradientObject(180, int_saturation, 50, "", "Cyan");
   //this.fn_addColorItem(obj_hsl);
-  obj_hsl=obj_shared.fn_getGradientObject(240, 100, 50, "", "Blue");
+  obj_hsl=obj_shared.fn_getGradientObject(240, int_saturation, 50, "", "Blue");
   this.fn_addColorItem(obj_hsl);
-  obj_hsl=obj_shared.fn_getGradientObject(270, 100, 50, "", "Purple");
+  obj_hsl=obj_shared.fn_getGradientObject(270, int_saturation, 50, "", "Purple");
   this.fn_addColorItem(obj_hsl);
-  obj_hsl=obj_shared.fn_getGradientObject(300, 100, 50, "", "Magenta");
+  obj_hsl=obj_shared.fn_getGradientObject(300, int_saturation, 50, "", "Magenta");
   this.fn_addColorItem(obj_hsl);
   
   arr_item=this.arr_color;
@@ -8235,15 +8252,18 @@ fn_getColorMap(obj_theme){
   obj_hsl=this.arr_color[int_value];
   
   
-  //obj_hsl=obj_shared.fn_getGradientObject(230, 100, 30, "", "blue-mod");  
-  //obj_hsl=obj_shared.fn_getGradientObject(300, 100, 50, "", "magenta");    
-  //obj_hsl=obj_shared.fn_getGradientObject(0, 100, 50, "", "Red");  
-  //obj_hsl=obj_shared.fn_getGradientObject(230, 100, 30, "", "Blue-Alt-Test");    
-  //obj_hsl=obj_shared.fn_getGradientObject(300, 100, 60, "", "magenta-lighter-test");  
-  //obj_hsl=obj_shared.fn_getGradientObject(300, 100, 30, "", "magenta-darker-test");  
+  //obj_hsl=obj_shared.fn_getGradientObject(230, int_saturation, 30, "", "blue-mod");  
+  //obj_hsl=obj_shared.fn_getGradientObject(300, int_saturation, 50, "", "magenta");    
+  //obj_hsl=obj_shared.fn_getGradientObject(0, int_saturation, 50, "", "Red");  
+  //obj_hsl=obj_shared.fn_getGradientObject(230, int_saturation, 30, "", "Blue-Alt-Test");    
+  //obj_hsl=obj_shared.fn_getGradientObject(300, int_saturation, 60, "", "magenta-lighter-test");  
+  //obj_hsl=obj_shared.fn_getGradientObject(300, int_saturation, 30, "", "magenta-darker-test");  
   //obj_hsl=obj_shared.fn_getGradientObject(0, 0, 30, "", "dark-gray-test");  
   //obj_hsl=obj_shared.fn_getGradientObject(0, 0, 60, "", "light-gray-test");  
   //obj_hsl=obj_shared.fn_getGradientObject(0, 0, 100, "", "White");  
+  obj_hsl=obj_shared.fn_getGradientObject(230, 25, 30, "", "Blue Alt");  
+  
+  
   
   obj_theme.str_fill=obj_hsl.str_hsl;  
   obj_theme.obj_gradient=obj_hsl;
@@ -8279,6 +8299,14 @@ obj_theme.bln_borderRadiusLabel=true;
 obj_theme.bln_borderInput=true;
 obj_theme.bln_borderRadiusInput=true;
 //Load Border and Radius Option
+
+
+//fade
+//standard
+//bold
+//max
+
+obj_theme.str_effect="fade";
 
 this.fn_getColorMap(obj_theme);//generate array of hsl colors    
 
@@ -8325,12 +8353,15 @@ if(!obj_theme.bln_filterPass){
 
 //*
 //console.log("obj_theme.str_name: " + obj_theme.str_name);
-console.log("str_label: " + obj_theme.obj_gradient.str_label);
+console.log("str_label: " + obj_gradient.str_label);
+console.log("str_effect: " + obj_theme.str_effect);
+console.log("obj_gradient.int_saturation: " + obj_gradient.int_saturation);
+
 console.log("obj_theme.str_fill:" + obj_theme.str_fill);
 console.log("obj_theme.bln_filterPass: " + obj_theme.bln_filterPass);
-console.log("obj_gradient.int_hue: " + obj_theme.obj_gradient.int_hue);
-console.log("obj_gradient.int_saturation: " + obj_theme.obj_gradient.int_saturation);
-console.log("obj_gradient.int_light: " + obj_theme.obj_gradient.int_light);
+console.log("obj_gradient.int_hue: " + obj_gradient.int_hue);
+console.log("obj_gradient.int_saturation: " + obj_gradient.int_saturation);
+console.log("obj_gradient.int_light: " + obj_gradient.int_light);
 
 
 console.log("obj_theme.int_min: " + obj_theme.int_min);
