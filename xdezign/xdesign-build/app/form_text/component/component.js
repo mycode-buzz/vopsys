@@ -13,6 +13,7 @@
           this.obj_holder.bln_listenSelectStart=true;                                    
         }
         fn_applyThemeStructure(){                    
+          if(!obj_project.obj_theme){return;}
           super.fn_applyThemeStructure();
         }
         fn_onSelectStart(e){                                    

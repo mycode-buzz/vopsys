@@ -8,6 +8,11 @@ class tableheader extends tablecell {
       //this.fn_setType("tableheader");      
       this.fn_setTag("th", true);                       
     }
+    fn_applyThemeStructure(){                                                        
+      if(!obj_project.obj_theme){return;}
+      this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formButton;                
+      this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+    }
       
     
 }//END CLS

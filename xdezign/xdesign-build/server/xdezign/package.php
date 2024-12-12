@@ -1,7 +1,7 @@
 <?php
 
 /////////////////////////AUTHORISE
-require_once dirname($_SERVER["DOCUMENT_ROOT"], 2)."/upgrade/xdesign-build/authorise.php";
+require_once dirname($_SERVER["DOCUMENT_ROOT"], 2)."/api/xdesign-build/server/api/authorise.php";
 /////////////////////////AUTHORISE
 
 /////////////////////////HEADER
@@ -120,15 +120,15 @@ $str_header2=<<<heredoc
   * {/*NOTE. Box Sizing must be set//*/
     -webkit-box-sizing: border-box;
     box-sizing: border-box;    
-  }                
-  html{        
-    background-color: rgb(43, 44, 52);    
-      font-family: Arial, Helvetica, sans-serif;    
-  }    
+  }                  
    a {
     color: black;
   }  
   body {
+
+    background-color: rgb(43, 44, 52);    
+    font-family: Arial, Helvetica, sans-serif;    
+
     overflow-y: scroll;     
     /*
     margin-left: 10%;

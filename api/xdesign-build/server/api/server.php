@@ -1,7 +1,7 @@
 <?php
 
 /////////////////////////AUTHORISE
-require_once dirname($_SERVER["DOCUMENT_ROOT"], 2)."/api/xdesign-build/api/include.php";
+require_once dirname($_SERVER["DOCUMENT_ROOT"], 2)."/api/xdesign-build/server/api/api/include.php";
 /////////////////////////AUTHORISE
 
 class page {

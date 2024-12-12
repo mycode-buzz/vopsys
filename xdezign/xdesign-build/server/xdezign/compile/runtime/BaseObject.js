@@ -1129,7 +1129,9 @@ class BaseObject extends LevelObject{
         
         
         this.fn_applyTheme();        
-        this.fn_applyThemeStructure();                    
+        if(!obj_project.fn_isTheme()){                        
+            this.fn_applyThemeStructure();                    
+        }        
         this.fn_applyDesign();                                                                         
         this.fn_applyDomProperty();                                                                         
         //this.fn_applyDomAttribute();
@@ -1138,17 +1140,13 @@ class BaseObject extends LevelObject{
         this.fn_onApplyFeatures();
     }
 
-    fn_holdEvent(){}
-    fn_dropEvent(){}
-
-    fn_applyThemeStructure(){                        
-    }
-
-    fn_onApplyFeatures(){//overidden        
-    }
-
-    fn_applyDesign(){//overidden        
-    }
+    fn_holdEvent(){}//overidden
+    fn_dropEvent(){}//overidden    
+    
+    fn_applyThemeStructure(){}//overidden
+    fn_onApplyFeatures(){}//overidden
+    fn_applyDesign(){}//overidden
+    
 
     fn_applyThemeError(str_colorBackground, str_colorBorder="white"){                       
 
@@ -1199,7 +1197,8 @@ class BaseObject extends LevelObject{
             if (bln_debug){console.log("PROJECT THEME IS FALSE" + this.obj_design.str_name);}
             return;
         }
-        if(obj_project.obj_design.str_type.toLowerCase()==="xapp_theme"){return;}//dont theme a theme project        
+        
+        if(obj_project.fn_isTheme()){return;}//dont theme a theme project        
 
         if(this.obj_design.bln_isThemeItem){return;}//dont theme a theme item            
 
@@ -1278,6 +1277,11 @@ class BaseObject extends LevelObject{
         if(obj_themeItem){                        
             let str_display=this.obj_domStyle.display;
             this.obj_domStyle=obj_shared.fn_shallowCopy(obj_themeItem.obj_domStyle);        
+            let obj_parent=this.fn_getParentComponent();
+            if(obj_parent && obj_parent.bln_debg123){
+                obj_themeItem.fn_debug();
+                this.obj_domStyle.background==="transparent";
+            }            
             this.obj_domStyle.display=str_display;    
             //note: this display needs to be block flex etc for background to be applied                
             str_success="THEME APPLIED";        

@@ -35,10 +35,11 @@
                       obj_row=obj_table.fn_addItem();//BootItem
                       obj_ini=new Holder;            
                       obj_ini.obj_design.str_type="tableheader";                                        
-                      obj_ini.obj_design.str_themeType="form_input";                                        
+                      obj_ini.obj_design.str_themeType="form_input";                                                              
                       obj_ini.obj_domProperty.colSpan=2;                                  
-                      obj_item=obj_row.fn_addItem(obj_ini);//BootItem    
+                      obj_item=obj_row.fn_addItem(obj_ini);//BootItem                                                
                       obj_item.fn_setText(str_text);                
+                      obj_item.fn_removeStyleProperty("display");                                                                                                        
                     }                                  
                     
                     if(obj_arg.str_propertySourceChange){

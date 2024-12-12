@@ -29,16 +29,21 @@ class eazygrid extends component {
       
       
     }
-    
-    fn_onLoad(){
-      super.fn_onLoad();
+
+    fn_applyThemeStructure(){
+      if(!obj_project.obj_theme){return;}
+      this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_xappAccordion;                                                          
+      this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy      
+    }
+    fn_applyStyle(obj_style){
+      super.fn_applyStyle(obj_style);
       //START INITIALIZE STYLE                          
       this.obj_domStyle.display="grid";
       if(this.obj_domStyle.height===undefined){this.obj_domStyle.height="100%";}
       if(this.obj_domStyle.width===undefined){this.obj_domStyle.width="100%";}
       if(this.obj_domStyle.padding===undefined){this.obj_domStyle.padding="0px";}      
       if(this.obj_domStyle.overflow==undefined){this.obj_domStyle.overflow="hidden";} 
-      if(this.fn_getStyleProperty("backgroundColor")===undefined){this.obj_domStyle.backgroundColor="#2b2c34";}     
+      //if(this.fn_getStyleProperty("backgroundColor")===undefined){this.obj_domStyle.backgroundColor="#2b2c34";}     
       if(this.fn_getStyleProperty("grid-gap")===undefined){this.fn_setStyleProperty("grid-gap", "1.0em");}
       if(this.fn_getStyleProperty("grid-auto-rows")===undefined){this.fn_setStyleProperty("grid-auto-rows", this.obj_design.str_gridTemplateDefault);}
       if(this.fn_getStyleProperty("grid-auto-columns")===undefined){this.fn_setStyleProperty("grid-auto-columns", this.obj_design.str_gridTemplateDefault);}

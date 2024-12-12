@@ -10,7 +10,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>var ServerQueryString = "<?php echo $_SERVER['QUERY_STRING']; ?>";</script>
-<script type="module" src="/office-version-2024-12-10-00-06-4363.mjs"></script>
+<script type="module" src="/office-version-2024-12-12-18-50-1778.mjs"></script>
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
@@ -18,15 +18,15 @@
   * {/*NOTE. Box Sizing must be set//*/
     -webkit-box-sizing: border-box;
     box-sizing: border-box;    
-  }                
-  html{        
-    background-color: rgb(43, 44, 52);    
-      font-family: Arial, Helvetica, sans-serif;    
-  }    
+  }                  
    a {
     color: black;
   }  
   body {
+
+    background-color: rgb(43, 44, 52);    
+    font-family: Arial, Helvetica, sans-serif;    
+
     overflow-y: scroll;     
     /*
     margin-left: 10%;

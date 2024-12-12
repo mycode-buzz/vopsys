@@ -6,7 +6,7 @@
                 } 
                 fn_initialize(obj_ini){
                   super.fn_initialize(obj_ini);                
-                }
+                }                
                 fn_onPaletteItemDeSelected(){//overiding for safety. can reivew overide.      
                 }    
                 fn_onPaletteItemSelected(){
@@ -44,7 +44,7 @@
                   let bln_disabled=false;                  
                   if(obj_levelLimit.bln_limitTop){bln_disabled=true;}            
                   
-                  let obj_container=this.fn_addContextItem("form_section");
+                  let obj_container=this.fn_addContextItem("form_container");                  
                   obj_container.fn_setStyleProperty("width","100%");                  
                   obj_container.fn_setStyleProperty("border","0px");                
                   //ADD BUTTON TO VALUE CELL                  
@@ -67,7 +67,7 @@
 
                   let obj_levelLimit=obj_selected.obj_holder.obj_levelLimit;
                   
-                  let obj_container=this.fn_addContextItem("form_section");                                    
+                  let obj_container=this.fn_addContextItem("form_container");                                    
                   obj_container.fn_setStyleProperty("width","100%");                
                   obj_container.fn_setStyleProperty("border","0px");                
             
@@ -97,7 +97,7 @@
                   if(obj_levelLimit.bln_limitBottom){bln_disabled=true;}                                    
                   
                   
-                  let obj_container=this.fn_addContextItem("form_section");
+                  let obj_container=this.fn_addContextItem("form_container");
                   obj_container.fn_setStyleProperty("width","100%");
                   obj_container.fn_setStyleProperty("border","0px");                
                   

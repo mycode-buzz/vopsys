@@ -243,7 +243,7 @@
                     bln_isProject=true;
                   }                                                   
                   
-                  let str_listIn="bln_debugDesign,bln_editPinRelease,bln_editPin,bln_expand,bln_isContainer,bln_lockComponent,bln_palettePinRelease,bln_palettePin,bln_registerAtContainer,bln_registerAtProject,bln_showToolbar,bln_startPosition,bln_typeable,str_nameRegistrator,dataSVG,filterSVG,gridTemplate,int_idMetaRowz,str_categoryName,str_icon,str_releaseLabel,str_createdDate,str_idProject,str_modifiedDate,str_name,str_nameFileServer,str_subType,str_tag,str_text,str_themeType,str_value";              
+                  let str_listIn="bln_debugDesign,bln_editPinRelease,bln_editPin,bln_expand,bln_isContainer,bln_isThemeItem,bln_lockComponent,bln_palettePinRelease,bln_palettePin,bln_registerAtContainer,bln_registerAtProject,bln_showToolbar,bln_startPosition,bln_typeable,str_nameRegistrator,dataSVG,filterSVG,gridTemplate,int_idMetaRowz,str_categoryName,str_icon,str_releaseLabel,str_createdDate,str_idProject,str_modifiedDate,str_name,str_nameFileServer,str_subType,str_tag,str_text,str_themeType,str_value";              
                   let str_listInProjectOnly="bln_classController,bln_dynamicPin,bln_isContextHolder,bln_palettePin,bln_serverIndex,bln_stageRelease,str_classList,str_classExtend,str_nameFileServer,str_type";              
                   let str_listReadOnly="int_idRecord";                            
                   let str_listAllAccess="gridTemplate";

@@ -9,7 +9,7 @@
                 }
                 fn_onPaletteItemSelected(){
                   //console.log("xdezign_widget_tag_type fn_onPaletteItemSelected");
-                }
+                }                
                 fn_loadWidget(obj_row){                
                   //let obj_item=super.fn_loadWidget();
                   

@@ -1,7 +1,7 @@
 <?php
 
 /////////////////////////AUTHORISE
-require_once dirname($_SERVER["DOCUMENT_ROOT"], 2)."/upgrade/xdesign-build/authorise.php";
+require_once dirname($_SERVER["DOCUMENT_ROOT"], 2)."/api/xdesign-build/server/api/authorise.php";
 /////////////////////////AUTHORISE
 
 class xdezign extends interface_datamanager{

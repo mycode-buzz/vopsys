@@ -293,17 +293,16 @@
               }
         } 
             
-              fn_onOpen(){
-                  this.fn_setStyleProperty("marginBottom", "0em");              
-              }
-              fn_onClose(){                      
-                
-                const str_value=this.obj_holder.obj_themeStructure.marginBottom;                
-                this.fn_setStyleProperty("marginBottom", str_value);                              
-                  
-                if(this.bln_rebound){this.fn_open();}
-                //this.fn_debugText("fn_onClose");
-              } 
+        fn_onOpen(){                                  
+          this.fn_setStyleProperty("marginBottom", "0em");                                                      
+        }
+        fn_onClose(){                      
+          
+          const str_value=this.obj_holder.obj_themeStructure.marginBottom;                                                
+          this.fn_setStyleProperty("marginBottom", str_value);                                              
+            
+          if(this.bln_rebound){this.fn_open();}              
+        } 
               fn_clearContent(){
                 let obj_accordion=this.fn_getAccordionChildMenu();
                 if(obj_accordion){obj_accordion.fn_removeChildren();}
@@ -606,6 +605,22 @@
                   fn_resetArrayDynamicMenu(){                    
                     this.obj_holder.arr_dynamicMenu=[];                                  
                   }
+                  fn_hasChildStandardMenu(){
+                    let arr_childMenu=this.fn_getArrayStandardMenu();                    
+                    return arr_childMenu.length;
+                  }
+                  fn_hasChildDynamicMenu(){
+                    let arr_childMenu=this.fn_getArrayDynamicMenu();
+                    return arr_childMenu.length;
+                  }
+                  fn_hasChildMenu(){
+                    let bln_childStandard=this.fn_hasChildStandardMenu();
+                    let bln_childDynamic=this.fn_hasChildDynamicMenu();                    
+                    if(!bln_childStandard && !bln_childDynamic){
+                      return false;
+                    }
+                    return true;
+                  }                  
                   
                   fn_addToArrayStandardMenu(obj_item){                    
                     this.obj_holder.arr_standardMenu.push(obj_item);                    
@@ -614,8 +629,7 @@
                   }
                   fn_getArrayStandardMenu(){
                     return this.obj_holder.arr_standardMenu;
-                  }                          
-                  
+                  }  
                   fn_getOnlyStandardMenu(){
                     let arr_item=this.fn_getArrayStandardMenu();                                        
                     //this.fn_debugArrayStandardMenu();                    

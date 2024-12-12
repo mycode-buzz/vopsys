@@ -107,16 +107,33 @@ class Shared{
     }
     return true;
   }
+  fn_getRandomArrayElement(array) {
+    const randomIndex = Math.floor(Math.random() * array.length);
+    return array[randomIndex];
+  }
 
-  fn_getRandomValueFromObject(obj_my) {
+  fn_getNameValueFromObject(obj_my, str_name) {  
+    
+    const obj_new={
+      str_name:str_name,
+      str_value:obj_my[str_name],
+    };
+    return obj_new;
+  }
+  
+
+  fn_getRandomNameValueFromObject(obj_my) {
   
     const keys = Object.keys(obj_my);
     const randomKey = keys[Math.floor(Math.random() * keys.length)];
-    return randomKey;
+    return this.fn_getNameValueFromObject(obj_my, randomKey);    
   }
   fn_flipVariable(str_value1, str_value2){    
     return [str_value1, str_value2] = [str_value2, str_value1];  
   }  
+  fn_getRandomBool() {
+    return Math.random() < 0.5;
+  }
   fn_getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
@@ -292,6 +309,17 @@ fn_maintainList(obj_list){
 
  fn_sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+fn_isANumber(int_val) {    
+  if (typeof int_val === "number") {
+    if (isNaN(int_val)) {
+      return false;      
+    } 
+    return true;
+  } else {
+    return false;
+  }  
 }
 
 
@@ -1666,129 +1694,345 @@ fn_maintainList(obj_list){
     return JSON.parse(str_json);
   }
 
-  //START SHARED THEME HANLDER
-  fn_getShade(obj_shade){        
-    let str_hsl;
-    str_hsl=obj_shade.str_fill;            
-    let obj_gradient=this.fn_getGradienObjectFromHSL(str_hsl);
-    str_hsl=this.fn_setHueHSL(obj_gradient, obj_shade.int_percentHue, obj_shade.bln_value);        
-    str_hsl=this.fn_setSaturateHSL(obj_gradient, obj_shade.int_percentSaturation, obj_shade.bln_value);    
-    str_hsl=this.fn_setLightHSL(obj_gradient, obj_shade.int_percentLight, obj_shade.bln_value); 
-    str_hsl=this.fn_formatHSL(str_hsl);
-    return str_hsl;
-  }       
-  fn_getGradientObject(int_hue, int_saturation, int_light, str_hsl, str_label="MyColor"){
-    
-    let obj_gradient={          
-      int_hue:int_hue,
-      int_saturation:int_saturation,
-      int_light:int_light,
-    }
-    if(!str_hsl){
-      str_hsl=this.fn_getHSLString(obj_gradient);
-    }
-    obj_gradient.str_hsl=str_hsl;
-    obj_gradient.str_label=str_label;
-    obj_gradient.bln_face=false;
-    obj_gradient.bln_lighten=true;    
-    return obj_gradient;
-  }   
-  fn_getGradienObjectFromHSL(str_hsl){      
+//START SHARED THEME HANDLER
+fn_getShade(obj_shade){        
+  let str_hsla;
+  str_hsla=obj_shade.str_hsla;            
+  let obj_gradient=this.fn_getGradientObjectFromHSLA(str_hsla);    
+  str_hsla=this.fn_setHueHSLA(obj_gradient, obj_shade.int_percentHue, obj_shade.bln_value);        
+  str_hsla=this.fn_setSaturateHSLA(obj_gradient, obj_shade.int_percentSaturation, obj_shade.bln_value);    
+  str_hsla=this.fn_setLightHSLA(obj_gradient, obj_shade.int_percentLight, obj_shade.bln_value); 
+  str_hsla=this.fn_formatHSLA(str_hsla);
+  return str_hsla;
+}       
+fn_getGradientObject(int_hue, int_saturation, int_light, int_alpha, str_hsla, str_label="MyColor"){
   
-    let int_hue=this.fn_getGradientValue(str_hsl, 0);//hue  
-    let int_saturation=this.fn_getGradientValue(str_hsl, 1);//saturation
-    let int_light=this.fn_getGradientValue(str_hsl, 2);//light
-    let obj_gradient=this.fn_getGradientObject(int_hue, int_saturation, int_light, str_hsl);    
-    return obj_gradient;
+  const obj_gradient={          
+    int_hue:int_hue,
+    int_saturation:int_saturation,
+    int_light:int_light,
+    int_alpha:int_alpha,
+  }
+  if(!str_hsla){
+    str_hsla=this.fn_getHSLAString(obj_gradient);                
   }
   
-  fn_setHueHSL(obj_gradient, int_amount, bln_value){
-    let int_position=0;    
-    let int_value=obj_gradient.int_hue;
-    int_value=this.fn_changeValue(int_value, int_amount, bln_value);    
-    int_value=this.fn_boundDegree(int_value);    
-    return this.fn_setHSL(obj_gradient.str_hsl, int_position, int_value);
-  }  
-  fn_setSaturateHSL(obj_gradient, int_amount, bln_value){
+  obj_gradient.str_hsla=str_hsla;  
+  obj_gradient.str_label=str_label;        
+  if(obj_gradient.int_alpha===1){
+    obj_gradient.bln_transparent=true;
+  }
+  return obj_gradient;
+}   
+fn_getGradientObjectFromHSLA(str_hsla, str_label="MyColor"){      
 
-    let int_position=1;    
-    let int_value=obj_gradient.int_saturation;
-    int_value=this.fn_changeValue(int_value, int_amount, bln_value);    
-    int_value=this.fn_boundPercentage(int_value);    
-    return this.fn_setHSL(obj_gradient.str_hsl, int_position, int_value);
-  }    
-  fn_setLightHSL(obj_gradient, int_amount, bln_value){
+  const arr_value=this.fn_splitGradient(str_hsla);              
+  const obj_gradient=this.fn_getGradientObjectFromArray(arr_value, str_label);  
+  return obj_gradient;
+  
+}
+fn_getGradientObjectFromArray(arr_value, str_label){
 
-    let int_position=2;    
-    let int_value=obj_gradient.int_light;
-    int_value=this.fn_changeValue(int_value, int_amount, bln_value);    
-    int_value=this.fn_boundPercentage(int_value);    
-    return this.fn_setHSL(obj_gradient.str_hsl, int_position, int_value);
+  let int_hue=this.fn_getGradientValue(arr_value, 0);//hue      
+  let int_saturation=this.fn_getGradientValue(arr_value, 1);//saturation
+  let int_light=this.fn_getGradientValue(arr_value, 2);//light      
+  let int_alpha=this.fn_getGradientValue(arr_value, 3);//alpha
+  let obj_gradient;
+  if(!this.fn_isANumber(int_alpha)){//HSL string passed
+    int_alpha=1;                
+    obj_gradient=this.fn_getGradientObject(int_hue, int_saturation, int_light, int_alpha, false, str_label);//empty string will force str hlsa to be got.        
+  } 
+  if(!obj_gradient){
+    obj_gradient=this.fn_getGradientObject(int_hue, int_saturation, int_light, int_alpha, false, str_label);          
   }    
-  fn_setHSL(str_hsl, int_position, int_value) {                     
-    let str_value=this.fn_setGradientValue(str_hsl, int_position, int_value);            
-    str_value="HSL"+str_value;
-    return str_value;
-  }
-  fn_getGradientValue(str_value, int_position){
-    const arr_value=this.fn_splitGradient(str_value);          
-    return Number(arr_value[int_position]);    
-  }
-  fn_setGradientValue(str_value, int_position, int_value){
-    const arr_value=this.fn_splitGradient(str_value);          
-    arr_value[int_position]=int_value;     
-    return this.fn_getGradientString(arr_value);          
-  }  
-  fn_getGradientString(arr_value){    
-    let str_value="("+arr_value.join(',')+")";          
-    return str_value;
-  }
-  fn_splitGradient(str_value){          
-    str_value=this.fn_replace(str_value, "%", "");        
-    str_value=str_value.replace("°", "");
-    str_value=str_value.replace("(", "");
-    str_value=str_value.replace(")", "");
-    str_value=str_value.replace("hsl", "");
-    str_value=str_value.replace("HSL", "");    
-    let arr_value=str_value.split(",");  
-    return arr_value;  
-  }  
-  fn_formatHSL(str_value){      
-    const arr_value=this.fn_splitGradient(str_value);          
-    arr_value[1]+="%";
-    arr_value[2]+="%";
-    str_value="HSL("+arr_value.join(',')+")";      
-    return str_value;  
-  }
-  fn_changeValue(int_value, int_amount, bln_value){    
-    if(bln_value){int_value+=int_amount;}
-    else{int_value-=int_amount;}
-    return int_value;
+  return obj_gradient;
+  
+}
+
+fn_getGradientObjectFromGradient(obj_hsla, str_label="MyColor"){      
+  const obj_gradient=this.fn_getGradientObject(obj_hsla.int_hue, obj_hsla.int_saturation, obj_hsla.int_light, obj_hsla.int_alpha, false, str_label);            
+  return obj_gradient;
+}
+
+fn_setHueHSLA(obj_gradient, int_amount, bln_value){
+  const int_position=0;    
+  let int_value=obj_gradient.int_hue;
+  int_value=this.fn_changeValue(int_value, int_amount, bln_value);    
+  int_value=this.fn_boundDegree(int_value);    
+  return this.fn_setHSLA(obj_gradient.str_hsla, int_position, int_value);
+}  
+fn_setSaturateHSLA(obj_gradient, int_amount, bln_value){
+
+  const int_position=1;    
+  let int_value=obj_gradient.int_saturation;
+  int_value=this.fn_changeValue(int_value, int_amount, bln_value);    
+  int_value=this.fn_boundPercentage(int_value);    
+  return this.fn_setHSLA(obj_gradient.str_hsla, int_position, int_value);
+}    
+fn_setLightHSLA(obj_gradient, int_amount, bln_value){
+
+  const int_position=2;    
+  let int_value=obj_gradient.int_light;
+  int_value=this.fn_changeValue(int_value, int_amount, bln_value);    
+  int_value=this.fn_boundPercentage(int_value);    
+  return this.fn_setHSLA(obj_gradient.str_hsla, int_position, int_value);
+}    
+fn_setHSLA(str_hsla, int_position, int_value) {                     
+  let str_value=this.fn_setGradientValue(str_hsla, int_position, int_value);            
+  str_value="HSLA"+str_value;
+  return str_value;
+}
+fn_getGradientValue(arr_value, int_position){      
+  return Number(arr_value[int_position]);    
+}
+fn_setGradientValue(str_value, int_position, int_value){
+  const arr_value=this.fn_splitGradient(str_value);          
+  arr_value[int_position]=int_value;     
+  return this.fn_getGradientString(arr_value);          
+}  
+fn_getGradientString(arr_value){    
+  const str_value="("+arr_value.join(',')+")";          
+  return str_value;
+}
+fn_splitGradient(str_value){          
+  str_value=this.fn_replace(str_value, "%", "");        
+  str_value=str_value.replace("°", "");
+  str_value=str_value.replace("(", "");
+  str_value=str_value.replace(")", "");
+  str_value=str_value.replace("hsla", "");    
+  str_value=str_value.replace("HSLA", "");    
+  str_value=str_value.replace("hsl", "");
+  str_value=str_value.replace("HSL", "");        
+  let arr_value=str_value.split(",");  
+  return arr_value;  
+}    
+fn_formatHSLA(str_value){      
+  const arr_value=this.fn_splitGradient(str_value);          
+  arr_value[1]+="%";
+  arr_value[2]+="%";
+  str_value="HSLA("+arr_value.join(',')+")";      
+  return str_value;  
+}
+fn_changeValue(int_value, int_amount, bln_value){    
+  if(bln_value){int_value+=int_amount;}
+  else{int_value-=int_amount;}
+  return int_value;
+}
+
+fn_boundPercentage(int_value){
+  return this.fn_boundValue(int_value, 0,100);   
+}
+fn_boundDegree(int_value){
+  return this.fn_boundValue(int_value, 0, 359);   
+}  
+fn_boundValue(int_value, int_min, int_max){    
+  if(int_value<int_min){int_value=int_min;}
+  if(int_value>int_max){int_value=int_max;}        
+  return int_value;
+}
+fn_filterValue(int_value, int_min, int_max){    
+  if(int_value<int_min){return false;}
+  if(int_value>int_max){return false;}        
+  return true;
+}
+fn_getHSLString(obj_gradient){  
+  const int_hue=obj_gradient.int_hue;
+  const int_saturation=obj_gradient.int_saturation;
+  const int_light=obj_gradient.int_light;      
+  return `hsl(${int_hue}, ${int_saturation}%, ${int_light}%)`;
+}  
+fn_getHSLAString(obj_gradient){  
+  const int_hue=obj_gradient.int_hue;
+  const int_saturation=obj_gradient.int_saturation;
+  const int_light=obj_gradient.int_light;
+  const int_alpha=obj_gradient.int_alpha;
+  return `hsla(${int_hue}, ${int_saturation}%, ${int_light}%, ${int_alpha})`;
+} 
+fn_groupColorList(){  
+  this.fn_sortColorList();
+  const entries = Object.entries(this.obj_colorList);
+  //console.log(obj_shared.entries);
+  for (const [str_name, arr_value] of Object.entries(this.obj_colorList)) {    
+    let int_hue=arr_value[0];
+    let int_saturation=arr_value[1];
+    let int_light=arr_value[2];    
+    let str_value=`HSLA(${int_hue}, ${int_saturation}, ${int_light})`;
+    let obj_color={str_name:str_name,str_value:str_value};     
+    //console.log("str_name: " + str_name);
+    //console.log("str_value: " + str_value);
+    //console.log(obj_color);    
   }
   
-  fn_boundPercentage(int_value){
-    return this.fn_boundValue(int_value, 0,100);   
   }
-  fn_boundDegree(int_value){
-    return this.fn_boundValue(int_value, 0, 359);   
-  }  
-  fn_boundValue(int_value, int_min, int_max){    
-    if(int_value<int_min){int_value=int_min;}
-    if(int_value>int_max){int_value=int_max;}        
-    return int_value;
+fn_sortColorList(){  
+  //*
+  // Sort by the first value of each array
+  this.obj_colorList = Object.entries(this.obj_colorList)
+    .sort((a, b) => a[1][0] - b[1][0])
+    .reduce((acc, [color, value]) => ({ ...acc, [color]: value }), {});
+//*/
+
+/*
+    // Sort by the middle value of each array
+this.obj_colorList = Object.entries(this.obj_colorList)
+.sort((a, b) => a[1][1] - b[1][1])
+.reduce((acc, [color, value]) => ({ ...acc, [color]: value }), {});
+//*/
+}
+fn_getRandomColorName(){    
+  const obj_my=this.fn_getRandomNameValueFromObject(this.obj_colorList);    
+  return obj_my.str_name;
+}
+fn_getColorNameValue(str_name){          
+  const obj_color=this.fn_getNameValueFromObject(this.obj_colorList, str_name);          
+  return obj_color;
+}
+fn_setColorList(){
+  this.obj_colorList = {    
+    "aliceblue": [208, 100, 97],
+      "antiquewhite": [34, 78, 91],
+      "aqua": [180, 100, 50],
+      "aquamarine": [160, 100, 75],
+      "azure": [180, 100, 97],
+      "beige": [60, 56, 91],
+      "bisque": [33, 100, 88],
+      "black": [0, 0, 0],
+      "blanchedalmond": [36, 100, 90],
+      "blue": [240, 100, 50],
+      "blueviolet": [271, 76, 53],
+      "brown": [0, 59, 41],
+      "burlywood": [34, 57, 70],
+      "cadetblue": [182, 25, 50],
+      "chartreuse": [90, 100, 50],
+      "chocolate": [25, 75, 47],
+      "coral": [16, 100, 66],
+      "cornflowerblue": [219, 79, 66],
+      "cornsilk": [48, 100, 93],
+      "crimson": [348, 83, 47],
+      "cyan": [180, 100, 50],
+      "darkblue": [240, 100, 27],
+      "darkcyan": [180, 100, 27],
+      "darkgoldenrod": [43, 89, 38],
+      "darkgray": [0, 0, 66],
+      "darkgreen": [120, 100, 20],
+      "darkkhaki": [56, 38, 58],
+      "darkmagenta": [300, 100, 27],
+      "darkolivegreen": [82, 39, 30],
+      "darkorange": [33, 100, 50],
+      "darkorchid": [280, 61, 50],
+      "darkred": [0, 100, 27],
+      "darksalmon": [15, 72, 70],
+      "darkseagreen": [120, 25, 65],
+      "darkslateblue": [248, 39, 39],
+      "darkslategray": [180, 25, 25],
+      "darkturquoise": [181, 100, 41],
+      "darkviolet": [282, 100, 41],
+      "deeppink": [328, 100, 54],
+      "deepskyblue": [195, 100, 50],
+      "dimgray": [0, 0, 41],
+      "dodgerblue": [210, 100, 56],
+      "firebrick": [0, 68, 42],
+      "floralwhite": [40, 100, 97],
+      "forestgreen": [120, 61, 34],
+      "fuchsia": [300, 100, 50],
+      "gainsboro": [0, 0, 86],
+      "ghostwhite": [240, 100, 99],
+      "gold": [51, 100, 50],
+      "goldenrod": [43, 74, 49],
+      "gray": [0, 0, 50],
+      "green": [120, 100, 25],
+      "greenyellow": [84, 100, 59],
+      "honeydew": [120, 100, 97],
+      "hotpink": [330, 100, 71],
+      "indianred": [0, 53, 58],
+      "indigo": [275, 100, 25],
+      "ivory": [60, 100, 97],
+      "khaki": [54, 77, 75],
+      "lavender": [240, 67, 94],
+      "lavenderblush": [340, 100, 97],
+      "lawngreen": [90, 100, 50],
+      "lemonchiffon": [54, 100, 90],
+      "lightblue": [195, 53, 79],
+      "lightcoral": [0, 79, 72],
+      "lightcyan": [180, 100, 94],
+      "lightgoldenrodyellow": [60, 80, 90],
+      "lightgray": [0, 0, 83],
+      "lightgreen": [120, 73, 75],
+      "lightpink": [351, 100, 86],
+      "lightsalmon": [17, 100, 74],
+      "lightseagreen": [177, 70, 41],
+      "lightskyblue": [203, 92, 75],
+      "lightslategray": [210, 14, 53],
+      "lightsteelblue": [214, 41, 78],
+      "lightyellow": [60, 100, 94],
+      "lime": [120, 100, 50],
+      "limegreen": [120, 61, 50],
+      "linen": [30, 67, 94],
+      "magenta": [300, 100, 50],
+      "maroon": [0, 100, 25],
+      "mediumaquamarine": [160, 51, 60],
+      "mediumblue": [240, 100, 40],
+      "mediumorchid": [288, 59, 58],
+      "mediumpurple": [260, 60, 65],
+      "mediumseagreen": [147, 50, 47],
+      "mediumslateblue": [249, 80, 67],
+      "mediumspringgreen": [157, 100, 49],
+      "mediumturquoise": [178, 60, 55],
+      "mediumvioletred": [322, 81, 43],
+      "midnightblue": [240, 64, 27],
+      "mintcream": [150, 100, 98],            
+      "mistyrose": [6, 100, 94],
+      "moccasin": [38, 100, 85],
+      "navajowhite": [36, 100, 84],
+      "navy": [240, 100, 25],
+      "oldlace": [39, 85, 95],
+      "olive": [60, 100, 25],
+      "olivedrab": [80, 60, 35],
+      "orange": [39, 100, 50],
+      "orangered": [16, 100, 50],
+      "orchid": [302, 59, 65],
+      "palegoldenrod": [55, 67, 80],
+      "palegreen": [120, 93, 79],
+      "paleturquoise": [180, 65, 81],
+      "palevioletred": [340, 60, 65],
+      "papayawhip": [37, 100, 92],
+      "peachpuff": [28, 100, 86],
+      "peru": [30, 59, 53],
+      "pink": [350, 100, 88],
+      "plum": [300, 47, 75],
+      "powderblue": [187, 52, 80],
+      "purple": [300, 100, 25],
+      "rebeccapurple": [270, 50, 40],
+      "red": [0, 100, 50],
+      "rosybrown": [0, 25, 65],
+      "royalblue": [225, 73, 57],
+      "saddlebrown": [25, 276, 31],
+      "salmon": [6, 93, 71],
+      "sandybrown": [28, 87, 67],
+      "seagreen": [146, 50, 36],
+      "seashell": [25, 100, 97],
+      "sienna": [19, 56, 40],
+      "silver": [0, 0, 75],
+      "skyblue": [197, 71, 73],
+      "slateblue": [248, 53, 58],
+      "slategray": [210, 13, 50],
+      "snow": [0, 100, 99],
+      "springgreen": [150, 100, 50],
+      "steelblue": [207, 44, 49],
+      "tan": [34, 44, 69],
+      "teal": [180, 100, 25],
+      "thistle": [300, 24, 80],
+      "tomato": [9, 100, 64],
+      "turquoise": [174, 72, 56],
+      "violet": [300, 76, 72],
+      "wheat": [39, 77, 83],
+      "white": [0, 30, 100],
+      "whitesmoke": [0, 0, 96],
+      "yellow": [60, 100, 50],
+      "yellowgreen": [80, 61, 50]      
   }
-  fn_filterValue(int_value, int_min, int_max){    
-    if(int_value<int_min){return false;}
-    if(int_value>int_max){return false;}        
-    return true;
-  }
-  fn_getHSLString(obj_gradient){  
-    let int_hue=obj_gradient.int_hue;
-    let int_saturation=obj_gradient.int_saturation;
-    let int_light=obj_gradient.int_light;
-    return `hsl(${int_hue}, ${int_saturation}%, ${int_light}%)`;
-  }  
-  //END SHARED THEME HANLDER
+}
+//END SHARED THEME HANDLER
     
 }//END CLS
 

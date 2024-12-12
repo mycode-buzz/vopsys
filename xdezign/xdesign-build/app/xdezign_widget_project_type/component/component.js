@@ -1,12 +1,12 @@
 
             //XSTART component/xdezign_widget_project_type
-            class xdezign_widget_project_type extends xdezign_propertysheet{
+            class xdezign_widget_project_type extends xapp_widgetboard{
               constructor(obj_ini) {      
                 super(obj_ini);        
               } 
               fn_initialize(obj_ini){
                 super.fn_initialize(obj_ini);                
-              }
+              }              
               fn_loadWidget(obj_row){                
                 
                 let obj_item=this.fn_addContextItem("xdezign_button_open_project");

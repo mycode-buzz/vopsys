@@ -8,7 +8,7 @@
                   super.fn_initialize(obj_ini);                
                   
                   this.obj_holder.bln_debugServer=false;                                    
-                }
+                }                
                 fn_loadDashboard(){
                   if(!super.fn_loadDashboard()){return;}                                                                            
                   
@@ -17,11 +17,10 @@
                   this.obj_button_new_project=obj_container.fn_addConsoleContextItem("xdezign_button_new_project");                                        
                   
                   let obj_containerLeft=this.obj_consoleContainerDashboardLeft=obj_menuPanel.fn_addConsoleContainer("xapp_console_container_dashboard", false);
-                  this.obj_button_maintain_project=obj_containerLeft.fn_addConsoleContextItem("xdezign_button_maintain_project");
-                  
-                  //this.obj_hardrule=this.fn_addContextItem("form_hardrule");                                    
+                  this.obj_button_maintain_project=obj_containerLeft.fn_addConsoleContextItem("xdezign_button_maintain_project");                  
+                
                   this.fn_onProjectNeutral();                  
-                }                                
+                }                     
                 fn_showHardRule(bln_value){                  
                   this.fn_notify(this.obj_hardrule, "fn_setDisplay", bln_value);
                 }                

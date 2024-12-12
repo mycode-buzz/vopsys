@@ -49,7 +49,7 @@
                   }
                   else{
 
-                    obj_item=this.fn_addContextItem("form_section");                      
+                    obj_item=this.fn_addContextItem("form_fieldset");                      
                     obj_item.fn_setText("No More Apps Available");                  
 
                   }

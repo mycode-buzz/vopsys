@@ -9,16 +9,21 @@
                 }
                 fn_onStateChange(){      
                   if(!super.fn_onStateChange()){return;}      
-                }                
+                }
+                fn_applyThemeStructure(){                                                            
+                  if(!obj_project.obj_theme){return;}                  
+                  this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formFieldset;                
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                                            
+                }                                
                 fn_loadDashboard(){
                   if(!super.fn_loadDashboard()){return;}//should be overidden                                    
                   
                   let obj_item;
-                  //obj_item=this.fn_addContextItem("form_hardrule");                  
+                  
                   obj_item=this.fn_addContextItemOnce("xdezign_map");                  
                   obj_item=this.fn_addContextItem("form_hardrule");                  
                   obj_item=this.fn_addContextItemOnce("xdezign_action");                  
-                  //obj_item=this.fn_addContextItem("form_hardrule");                                   
+                  
                   obj_item=this.fn_addContextItemOnce("xdezign_propertysheet_designui");                  
                   obj_item=this.fn_addContextItemOnce("xdezign_propertysheet_design");
                   obj_item.fn_setDisplay(false);

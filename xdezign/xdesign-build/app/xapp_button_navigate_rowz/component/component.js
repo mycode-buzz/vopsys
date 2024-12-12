@@ -10,7 +10,7 @@
                                         
           obj_path.fn_navigateSubdomain("desk");
           obj_project.fn_forgetEvent(e);    
-        }
+        }                
       }//END CLS
       //END TAG
       //END component/xapp_button_navigate_rowz        

@@ -76,7 +76,7 @@
           let str_text;
           let obj_control;
           let obj_container=this;          
-          obj_control=obj_container.fn_addContextItem("form_hardrule");                              
+          //obj_control=obj_container.fn_addContextItem("form_hardrule");                              
           
           //---------------------
           obj_param={
@@ -85,9 +85,9 @@
             int_priceTokenz:undefined,
             int_packageTokenz:undefined,            
             str_nameProduct:"Subscription",                        
-            obj_themeItem:obj_project.obj_themeMidground,
+            obj_themeItem:obj_project.obj_theme.obj_blockMidground,
             str_textSubmit:"&nbsp;",
-            str_color:obj_project.obj_themeMidground.fn_getStyleProperty("backgroundColor"),            
+            str_color:obj_project.obj_theme.obj_blockMidground.fn_getStyleProperty("backgroundColor"),            
             bln_boldText:true,            
           };
           this.fn_setDefaultPackageOption(obj_param);
@@ -101,7 +101,7 @@
           this.fn_checkForUpgradeOptions(false);    
           
           
-          obj_control=obj_container.fn_addContextItem("form_hardrule");                    
+          //obj_control=obj_container.fn_addContextItem("form_hardrule");                    
           
 
           obj_container=this.fn_addContextItem("form_form");                                                      
@@ -174,6 +174,7 @@
           obj_showHide.obj_controlTarget=obj_control;
         } 
 
+        
         fn_loadPriceList(){
 
           this.obj_priceList={};
@@ -181,10 +182,10 @@
           let obj_param;
           let obj_themeItem, str_textPay, str_iconPay, str_color, bln_boldText; 
           
-          obj_themeItem=obj_project.obj_themeMidground;
+          obj_themeItem=obj_project.obj_theme.obj_blockMidground;
           str_textPay=this.str_textPay;
           str_iconPay=this.str_icon;
-          str_color=obj_project.obj_themeMidground.fn_getStyleProperty("backgroundColor");
+          str_color=obj_project.obj_theme.obj_blockMidground.fn_getStyleProperty("backgroundColor");          
           bln_boldText=true;
           
           //---------------------
@@ -613,13 +614,13 @@
           let arr_item=obj_param.arr_item;
 
           obj_param.bln_hasForm=true;
-          
+
           obj_topupPanel=this.fn_addContextItem("topup_panel");                                                          
           obj_param.obj_topupPanel=obj_topupPanel;//refernce used by button
 
           obj_form=obj_topupPanel.fn_addContextItem("form_form");                                            
           obj_param.obj_form=obj_form;
-          obj_topupPanel.fn_setStyleProperty("boxShadow", "1px 1px 3px rgba(0, 0, 0, 0.5)");                              
+          //obj_topupPanel.fn_setStyleProperty("boxShadow", "1px 1px 3px rgba(0, 0, 0, 0.5)");                              
 
           for (const str_item of arr_item) {
             obj_control=obj_form.fn_addContextItem("form_span");                              

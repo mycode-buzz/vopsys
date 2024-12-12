@@ -1,10 +1,10 @@
 <?php
 /////////////////////////AUTHORISE
-require_once dirname($_SERVER["DOCUMENT_ROOT"], 2)."/upgrade/xdesign-build/authorise.php";
+require_once dirname($_SERVER["DOCUMENT_ROOT"], 2)."/api/xdesign-build/server/api/authorise.php";
 /////////////////////////AUTHORISE
 
 /////////////////////////HEADER
-require_once dirname($_SERVER["DOCUMENT_ROOT"], 2)."/upgrade/xdesign-build/header.php";
+require_once dirname($_SERVER["DOCUMENT_ROOT"], 2)."/api/xdesign-build/server/api/header.php";
 /////////////////////////HEADER
 
 /////////////////////////AUTOLOAD
@@ -441,6 +441,6 @@ function fn_mover_sendgridmail($obj_param){
 }//END OF CLASS
 
 /////////////////////////FOOTER
-require_once dirname($_SERVER["DOCUMENT_ROOT"], 2)."/upgrade/xdesign-build/footer.php";
+require_once dirname($_SERVER["DOCUMENT_ROOT"], 2)."/api/xdesign-build/server/api/footer.php";
 /////////////////////////FOOTER
 ?>

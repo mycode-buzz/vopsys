@@ -15,16 +15,7 @@
                   }
                   obj_item=super.fn_addItem(obj_ini);//CallSuper          
                   return obj_item;
-                }
-                fn_setCellStyle(str_name, str_value){
-            
-                  let arr, obj_item;
-                  arr=this.obj_design.arr_item;
-                  for(let i=0;i<arr.length;i++){
-                      obj_item=arr[i];              
-                      obj_item.fn_setStyleProperty(str_name, str_value);            
-                  }
-                }
+                }                
                 fn_locateItem(str_idXDesign, str_type){
                   let arr, obj_item, obj_locate;
                   arr=this.obj_design.arr_item;

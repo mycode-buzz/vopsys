@@ -1,7 +1,7 @@
 <?php
 
 /////////////////////////HEADER
-require_once dirname($_SERVER["DOCUMENT_ROOT"], 2)."/upgrade/xdesign-build/header.php";
+require_once dirname($_SERVER["DOCUMENT_ROOT"], 2)."/api/xdesign-build/server/api/header.php";
 /////////////////////////HEADER
 
 /////////////////////////AUTOLOAD
@@ -768,5 +768,5 @@ function fn_createInstanceUserIfNotExist($MetaUserName, $MetaUserPassword){
   }    
 }
 /////////////////////////FOOTER
-require_once dirname($_SERVER["DOCUMENT_ROOT"], 2)."/upgrade/xdesign-build/footer.php";
+require_once dirname($_SERVER["DOCUMENT_ROOT"], 2)."/api/xdesign-build/server/api/footer.php";
 /////////////////////////FOOTER

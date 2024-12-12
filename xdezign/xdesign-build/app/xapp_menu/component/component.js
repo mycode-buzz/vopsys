@@ -119,10 +119,10 @@
           }   
 
           fn_applyThemeStructure(){                    
-          
-            this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeRowz;                
+            if(!obj_project.obj_theme){return;}
+            this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_rowz;                
             if(this.fn_getIsDynamicMenu()){
-              this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeRowzDynamic;                
+              this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_rowzDynamic;                
             }            
             this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                        
           }
@@ -2476,8 +2476,7 @@
             //for example CRUD top level object            
             this.fn_runClient();
           }        
-          //let obj_container=this.fn_getAccordionChildMenu();            
-          //let obj_hardrule=obj_container  .fn_addContextItem("form_hardrule");                        
+          //let obj_container=this.fn_getAccordionChildMenu();                      
           
           if(this.bln_isAppRoot){
             let obj_item=this.fn_getOnlyStandardMenu();                            
@@ -2577,9 +2576,8 @@
               //this.fn_debugText("Only Standard Menu, Open");                
               obj_item.fn_open();
             } 
-          }   
+          }             
           
-          //let obj_hardrule=this.fn_addContextItem("form_hardrule");                              
         }
 
         
@@ -2792,7 +2790,7 @@
 
         
         fn_getDataSummaryContainer(obj_parent){
-          let obj_container=obj_parent.fn_addContextItem("block");        
+          let obj_container=obj_parent.fn_addContextItem("form_container");        
           obj_container.fn_setDisplayFlex(true);                        
           obj_container.fn_setStyleProperty("padding", "1.0em");              
           /*

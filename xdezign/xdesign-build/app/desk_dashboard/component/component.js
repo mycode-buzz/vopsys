@@ -17,7 +17,7 @@
     }
     fn_applyThemeStructure(){                        
       if(!obj_project.obj_theme){return;}
-      this.obj_holder.obj_themeStructure=obj_project.obj_holder.obj_themeFormFieldset;                
+      this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formFieldset;                
       this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                          
     }
     getSubscribedList(obj_post){
@@ -42,7 +42,7 @@
 
       }
       else{        
-        obj_item=this.fn_addContextItem("form_section");                      
+        obj_item=this.fn_addContextItem("form_fieldset");                      
         obj_item.fn_setText("No Apps Enabled");                  
       }
     }

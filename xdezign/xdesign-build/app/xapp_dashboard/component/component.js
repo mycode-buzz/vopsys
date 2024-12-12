@@ -10,7 +10,7 @@
                 fn_onLoad(){    
                   super.fn_onLoad();                  
                   if(this.fn_getDebugPin()){this.fn_highlightBorder("pink");}                  
-                }
+                }                
                 fn_loadDashboard(){//should be overidden
                   //console.log("default load xapp_dashboard");                                           
 

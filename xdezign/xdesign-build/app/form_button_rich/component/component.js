@@ -35,7 +35,7 @@
           this.fn_showIcon(this.obj_design.str_icon);                    
         }                        
 
-        fn_applyThemeStructure(){                                        
+        fn_applyThemeStructure(){      
           if(!obj_project.obj_theme){return;}
           super.fn_applyThemeStructure();          
         }
