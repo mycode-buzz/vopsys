@@ -10,7 +10,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>var ServerQueryString = "<?php echo $_SERVER['QUERY_STRING']; ?>";</script>
-<script type="module" src="/desk-version-2024-12-12-19-03-5273.mjs"></script>
+<script type="module" src="/desk-version-2024-12-13-01-59-2359.mjs"></script>
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
@@ -19,9 +19,13 @@
     -webkit-box-sizing: border-box;
     box-sizing: border-box;    
   }                  
-   a {
-    color: black;
-  }  
+  a {  
+    color: inherit; /* Inherit color from parent element */
+  }
+
+  a:visited, a:hover, a:active {
+    color: inherit;
+  }
   body {
 
     background-color: rgb(43, 44, 52);    

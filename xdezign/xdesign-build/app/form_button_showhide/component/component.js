@@ -16,7 +16,7 @@
           if(obj_control){
             this.fn_toggleControl();
           }
-        }
+        }        
         fn_toggleControl(){
 
           //console.log("fn_toggleOptions");

@@ -124,7 +124,7 @@
             if(this.fn_getIsDynamicMenu()){
               this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_rowzDynamic;                
             }            
-            this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                        
+            this.fn_applyStyle(this.obj_holder.obj_themeStructure);                        
           }
           
           fn_runSearch(){//overridden by Menuform

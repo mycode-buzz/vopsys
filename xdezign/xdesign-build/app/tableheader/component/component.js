@@ -11,7 +11,7 @@ class tableheader extends tablecell {
     fn_applyThemeStructure(){                                                        
       if(!obj_project.obj_theme){return;}
       this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formButton;                
-      this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+      this.fn_applyStyle(this.obj_holder.obj_themeStructure);            
     }
       
     

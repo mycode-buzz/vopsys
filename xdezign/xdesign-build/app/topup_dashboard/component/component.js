@@ -12,12 +12,10 @@
           if(obj_path.bln_isLocal){
             this.bln_usePaymentProviderSandbox=true;                              
             this.bln_debug=false;                    
-          }          
-          this.bln_emphasis=true;
-          this.int_emphasis=4;
-          this.int_boldWeight=500;          
+          }                              
+          
           this.str_textPay="Payment";
-          //this.str_iconPay="fa-solid fa-star";
+          this.str_iconPay="rowz_credit_card";
           //IMPORTANT: SAFE TO USE FOR PRODUCTION RELEASE, CHECKS FOR LOCAL HOST
         }  
 
@@ -84,11 +82,10 @@
             str_labelProduct:"Subscription",
             int_priceTokenz:undefined,
             int_packageTokenz:undefined,            
-            str_nameProduct:"Subscription",                        
-            obj_themeItem:obj_project.obj_theme.obj_blockMidground,
-            str_textSubmit:"&nbsp;",
-            str_color:obj_project.obj_theme.obj_blockMidground.fn_getStyleProperty("backgroundColor"),            
+            str_nameProduct:"Subscription",                                    
+            str_textSubmit:"&nbsp;",            
             bln_boldText:true,            
+            str_icon:"xapp_star",
           };
           this.fn_setDefaultPackageOption(obj_param);
           obj_param.bln_expiredSubscription=false;          
@@ -111,7 +108,7 @@
           
           let obj_showHide=obj_container.fn_addContextItem("form_button_showhide");                    
           obj_showHide.fn_setText(str_text);                      
-          obj_showHide.fn_showIcon("info");
+          obj_showHide.fn_showIcon("xapp_star");
 
           let str_paymentLink;
           //let str_paymentLink =window.location.href;
@@ -158,16 +155,7 @@
           </ul>`;
           //*/
           
-          obj_control=obj_container.fn_addContextItem("form_span");          
-          if(this.bln_emphasis){
-            if(obj_param.bln_boldText){              
-              obj_control.fn_setStyleProperty("fontWeight", "bold");                    
-            }                                 
-          }
-          if(obj_param.str_color){
-            obj_control.fn_setStyleProperty("color", obj_param.str_color);                                
-          }         
-          
+          obj_control=obj_container.fn_addContextItem("form_span");                              
           obj_control.fn_setText(str_text);
           obj_control.fn_setDisplay(false);
 
@@ -180,25 +168,20 @@
           this.obj_priceList={};
 
           let obj_param;
-          let obj_themeItem, str_textPay, str_iconPay, str_color, bln_boldText; 
+          let str_textPay, str_iconPay; 
           
-          obj_themeItem=obj_project.obj_theme.obj_blockMidground;
+          
           str_textPay=this.str_textPay;
-          str_iconPay=this.str_icon;
-          str_color=obj_project.obj_theme.obj_blockMidground.fn_getStyleProperty("backgroundColor");          
-          bln_boldText=true;
+          str_iconPay=this.str_iconPay;                    
           
           //---------------------
           obj_param={            
             str_labelProduct:"CALENDAR DAY",
             int_priceTokenz:2.50,
             int_packageTokenz:500,            
-            str_nameProduct:"CALENDARDAY",                                    
-            obj_themeItem:obj_themeItem,
+            str_nameProduct:"CALENDARDAY",                                                
             str_textSubmit:str_textPay,
-            str_icon:str_iconPay,
-            str_color:str_color,            
-            bln_boldText:bln_boldText,            
+            str_icon:str_iconPay,                        
           };
           this.obj_priceList[obj_param.str_nameProduct]=obj_param;                    
 
@@ -207,12 +190,9 @@
             str_labelProduct:"CALENDAR MONTH",
             int_priceTokenz:15,
             int_packageTokenz:5000,            
-            str_nameProduct:"CALENDARMONTH",      
-            obj_themeItem:obj_themeItem,
+            str_nameProduct:"CALENDARMONTH",                  
             str_textSubmit:str_textPay,
-            str_icon:str_iconPay,
-            str_color:str_color,            
-            bln_boldText:bln_boldText,            
+            str_icon:str_iconPay,                        
           };
           this.obj_priceList[obj_param.str_nameProduct]=obj_param;                    
           
@@ -221,12 +201,9 @@
             str_labelProduct:"FISCAL QUARTER",
             int_priceTokenz:100,
             int_packageTokenz:60000,            
-            str_nameProduct:"FISCALQUARTER",                  
-            obj_themeItem:obj_themeItem,
+            str_nameProduct:"FISCALQUARTER",                              
             str_textSubmit:str_textPay,
-            str_icon:str_iconPay,
-            str_color:str_color,            
-            bln_boldText:bln_boldText,            
+            str_icon:str_iconPay,                        
           };
           this.obj_priceList[obj_param.str_nameProduct]=obj_param;                              
           
@@ -236,12 +213,9 @@
               str_labelProduct:"FISCAL YEAR",
               int_priceTokenz:1000,
               int_packageTokenz:1000000,            
-              str_nameProduct:"FISCALYEAR",
-              obj_themeItem:obj_themeItem,
+              str_nameProduct:"FISCALYEAR",              
               str_textSubmit:str_textPay,
-              str_icon:str_iconPay,
-              str_color:str_color,            
-              bln_boldText:bln_boldText,            
+              str_icon:str_iconPay,                          
             };
             this.obj_priceList[obj_param.str_nameProduct]=obj_param;          
           }
@@ -419,36 +393,6 @@
           obj_param.arr_item=arr_item;
           
           this.fn_writeTopUpForm(obj_param);          
-          
-          this.fn_themePanelBackgroundColor(obj_param);          
-        }
-
-        fn_themePanelBackgroundColor(obj_param){
-          let obj_control=obj_param.obj_topupPanel;                    
-          this.fn_themeBackgroundColor(obj_control, obj_param);
-        }
-
-        fn_themeBackgroundColor(obj_control, obj_param){
-          let obj_themeItem=obj_param.obj_themeItem;
-          let str_backgroundColor="grey";          
-
-          if(obj_themeItem){
-            str_backgroundColor=obj_themeItem.fn_getStyleProperty("backgroundColor");            
-          }
-          
-          if((this.bln_disableOnLimitTokenz)){          
-            str_backgroundColor="grey";                                  
-          }
-          if(obj_param.bln_expiredSubscription){          
-            str_backgroundColor="grey";                      
-            if(this.bln_debug){
-              console.log(obj_param.str_labelProduct + ": bln_expiredSubscription caused str_backgroundColor = grey ")    
-            }
-          }
-          if(str_backgroundColor){
-            obj_control.fn_setStyleProperty("backgroundColor", str_backgroundColor);          
-            obj_control.fn_setStyleProperty("borderColor", str_backgroundColor);                      
-          }
         }
         
         fn_getDisplayExpireSubcription(obj_param){
@@ -466,13 +410,7 @@
           str_expireSubscription=str_expireLabel + " " + str_expireSubscription;                        
           if(bln_value){
             str_expireSubscription=str_expireLabel + " Tomorrow";
-          }   
-          /*    
-          if(obj_param.bln_limitToMaxTokenz){
-            //str_expireSubscription="<span style=\"color:grey\">"+str_expireSubscription+"</span>";
-
-          }
-          //*/
+          }             
 
           return str_expireSubscription;
 
@@ -586,10 +524,6 @@
             obj_param.obj_controlSubmit            
           }          
           //obj_param.obj_controlSubmit.fn_debug();
-
-          this.fn_themePanelBackgroundColor(obj_param);          
-
-          
           
         }
 
@@ -618,21 +552,21 @@
           obj_topupPanel=this.fn_addContextItem("topup_panel");                                                          
           obj_param.obj_topupPanel=obj_topupPanel;//refernce used by button
 
-          obj_form=obj_topupPanel.fn_addContextItem("form_form");                                            
+          //THEME STRUCTURE
+          let obj_themeStructure=obj_project.obj_theme.obj_formFieldset;                
+          obj_topupPanel.fn_applyStyle(obj_themeStructure);                      
+          //THEME STRUCTURE
+
+          obj_form=obj_topupPanel.fn_addContextItem("form_form");                                                      
           obj_param.obj_form=obj_form;
-          //obj_topupPanel.fn_setStyleProperty("boxShadow", "1px 1px 3px rgba(0, 0, 0, 0.5)");                              
 
           for (const str_item of arr_item) {
             obj_control=obj_form.fn_addContextItem("form_span");                              
             obj_control.fn_setText(str_item);            
-            if(this.bln_emphasis){
-              if(obj_param.bln_boldText){              
-                obj_control.fn_setStyleProperty("fontWeight", "bold");                    
-              }                     
-            }   
-            if(obj_param.str_color){
-              obj_control.fn_setStyleProperty("color", obj_param.str_color);                                
-            }         
+            //THEME STRUCTURE
+            obj_themeStructure=obj_project.obj_theme.obj_formLabel;                
+            obj_control.fn_applyStyle(obj_themeStructure);            
+            //THEME STRUCTURE
           }
 
           obj_control=this.fn_addTopUpSubmit(obj_form, obj_param);                    
@@ -651,12 +585,12 @@
           }          
           
           let obj_control=obj_container.fn_addContextItem("topup_form_button");                       
+
           obj_control.obj_holder.obj_dashboard=this;
           obj_control.obj_holder.obj_product=obj_param;
           obj_control.fn_setDomProperty("name", str_name);                    
           obj_control.fn_setText(obj_param.str_textSubmit);          
-          obj_control.fn_showIcon(obj_param.str_icon);          
-          obj_control.fn_setStyleProperty("cursor", "pointer");                     
+          obj_control.fn_showIcon(obj_param.str_icon);                                        
           if(obj_param.bln_customerSummary){            
             this.obj_submitSummary=obj_control;
             this.obj_submitSummary.bln_open=false;
@@ -665,27 +599,28 @@
             }
             this.fn_setTextSubscription();            
           }
-          else{
-            //obj_control.fn_setStyleProperty("backgroundColor", "green");                              
+          else{            
           }
           return obj_control;
         }        
 
-        fn_setTextSubscription(){
+        fn_setTextSubscription(){          
           
           let str_text;
+          let str_icon="xapp_chevron_right";
           if(this.obj_submitSummary.bln_open){            
             str_text="Close Options";                        
+            str_icon="xapp_chevron_right";
           }
           else{            
-            str_text="Show Options";            
+            str_text="Show Options";                        
           }
           if(this.bln_paymentSuccess && this.bln_disableOnPay){
             str_text="Let's Go!";            
           }           
          
           this.obj_submitSummary.fn_setText(str_text);                                        
-          this.obj_submitSummary.fn_showIcon("replace-summary");
+          this.obj_submitSummary.fn_showIcon(str_icon);
         }        
 
         fn_checkForUpgradeOptions(bln_action=false){
@@ -726,9 +661,7 @@
           this.fn_setTextSubscription();          
         }
 
-        fn_topUpSubmitOnClick(obj_submit){                    
-          
-          //console.log("HEY HEY 123");
+        fn_topUpSubmitOnClick(obj_submit){                                       
 
           let obj_product=obj_submit.obj_holder.obj_product;
 
@@ -758,13 +691,10 @@
 
           let str_nameProduct=obj_submit.obj_holder.obj_product.str_nameProduct;
           let str_expireSubscription=obj_submit.obj_holder.obj_product.str_expireSubscriptionSystem;
-          let int_purchaseTokenz=obj_submit.obj_holder.obj_product.int_purchaseTokenz;          
-          
+          let int_purchaseTokenz=obj_submit.obj_holder.obj_product.int_purchaseTokenz;                    
 
           let obj_paymentProvider=new paymentProviderStripe();          
-          obj_paymentProvider.fn_getPaymentURL(str_nameProduct, str_expireSubscription, int_purchaseTokenz);
-
-          
+          obj_paymentProvider.fn_getPaymentURL(str_nameProduct, str_expireSubscription, int_purchaseTokenz);          
           
           let str_paymentURL=obj_paymentProvider.str_paymentURL;
           if(this.bln_usePaymentProviderSandbox){
@@ -832,57 +762,6 @@
                 break;
           }
         }
-
-        
-
-      }
-
-      class tempControl{        
-        
-
-        fn_addSelectField(obj_container, str_label){
-          let obj_field=obj_container.fn_addContextItem("form_field");                              
-          let obj_label=obj_field.fn_getComponent("form_label");
-          obj_label.fn_setText(str_label);         
-          let obj_span=obj_field.fn_getComponent("form_span");   
-          obj_span.fn_setDisplay("none");
-          return obj_field;
-        }
-
-        fn_addSelect(obj_container){
-
-          let obj_select=obj_container.fn_addContextItem("form_select");                    
-          obj_select.fn_setStyleProperty("fontWeight", "bold");          
-          return obj_select;
-        }
-
-        fn_addSelectOption(obj_select, str_text, str_value){
-          let dom_option=obj_select.fn_addOption(str_text, str_value);
-          dom_option.style.fontWeight="bold";
-          return dom_option;
-        }
-
-        fn_addTopUpRadio(obj_container, str_name, str_value){
-
-          let obj_control=obj_container.fn_addContextItem("form_input");                    
-          obj_control.fn_setDomProperty("type", "radio");
-          obj_control.fn_setDomProperty("name", str_name);          
-          obj_control.fn_setValue(str_value);          
-          return obj_control;
-
-        }
-
-
-        fn_addSpanField(obj_container, str_label="", str_span=""){
-          let obj_field=obj_container.fn_addContextItem("form_field");                    
-          //obj_field.fn_setStyleProperty("flex-flow", "row wrap");          
-          let obj_label=obj_field.fn_getComponent("form_label");
-          obj_label.fn_setText(str_label);            
-          let obj_span=obj_field.fn_getComponent("form_span");
-          obj_span.fn_setText(str_span);            
-          obj_span.fn_setStyleProperty("fontWeight", "bold");                    
-          return obj_field;
-        }
-      }
+      }      
       //END TAG
       //END component/topup_dashboard        

@@ -582,7 +582,7 @@ class xapp_theme extends component{
     obj_themeItem.color=obj_gradient.str_fillTextUI;        
     this.fn_applyThemeOption(obj_themeItem);
     //OPTION                
-    this.obj_rowzSearch=obj_themeItem;        
+    this.obj_uiInput=obj_themeItem;        
     //FORMINPUT
     /////////////////////////////////////////
     /////////////////////////////////////////  
@@ -613,26 +613,26 @@ class xapp_theme extends component{
     //*
     //THEMEBACKGROUND      
     obj_themeItem=this.fn_getComponent("form_blockbackground");                          
-    obj_themeItem.fn_applyStyle(this.obj_xappAccordion)
+    obj_themeItem.fn_applyStyle(this.obj_xappAccordion);
     obj_themeItem.fn_setDisplay(false);    
     this.obj_blockBackground=obj_themeItem;      
     //THEMEBACKGROUND
     //THEMEMIDGROUND
     obj_themeItem=this.fn_getComponent("form_blockmidground");                      
-    obj_themeItem.fn_applyStyle(this.obj_formFieldset)  
+    obj_themeItem.fn_applyStyle(this.obj_formFieldset);  
     obj_themeItem.fn_setDisplay(false);    
     this.obj_blockMidground=obj_themeItem;                
     //THEMEMIDGROUND
     //THEMEFORGROUND
     obj_themeItem=this.fn_getComponent("form_blockforground");                      
-    obj_themeItem.fn_applyStyle(this.obj_formFieldset)
+    obj_themeItem.fn_applyStyle(this.obj_formFieldset);
     obj_themeItem.backgroundColor=obj_themeItem.borderColor;  
     obj_themeItem.fn_setDisplay(false);    
     this.obj_blockForground=obj_themeItem;                
     //THEMEFORGROUND
     //THEMEFORGROUND
     obj_themeItem=this.fn_getComponent("form_blockhighlight");                      
-    obj_themeItem.fn_applyStyle(this.obj_formFieldset)
+    obj_themeItem.fn_applyStyle(this.obj_formFieldset);
     obj_themeItem.backgroundColor="orange";  
     obj_themeItem.fn_setDisplay(false);    
     this.obj_blockHighlight=obj_themeItem;    
@@ -987,7 +987,7 @@ class xapp_theme extends component{
     console.log("str_fillForm:" + obj_gradient.str_fillForm);    
     console.log("str_fillBorder:" + obj_gradient.str_fillBorder);
 
-    console.log(this);
+    //console.log(this);
   }
 
 

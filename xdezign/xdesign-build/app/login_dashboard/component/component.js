@@ -14,12 +14,22 @@ class login_dashboard extends xapp_dashboard{
   fn_onLoad(){
     super.fn_onLoad();
     
+    //SHOW EMAIL
     let obj_item;
     obj_item=obj_project.fn_getComponent("form_button_login_email");                
     obj_item.fn_setDisplay(true);                 
 
+    obj_item=obj_project.fn_getComponent("form_button_login_email");                
+    obj_item.fn_setDisplay(true);            
+    //SHOW EMAIL
+    
+    //HIDE PASS
+    obj_item=obj_project.fn_getComponent("form_input_login_pass");                                
+    obj_item.fn_setDisplay(false);             
+
     obj_item=obj_project.fn_getComponent("form_button_login_pass");                
     obj_item.fn_setDisplay(false);             
+    //HIDE PASS    
   }
 
   fn_onSubmit(e){      
@@ -188,18 +198,21 @@ class login_dashboard extends xapp_dashboard{
       if(!bln_value){return false;}
     }              
 
+    //HIDE EMAIL
     obj_item=obj_project.fn_getComponent("form_input_login_email");                    
+    obj_item.fn_setDisplay(false);                
+    
+    obj_item=obj_project.fn_getComponent("form_button_login_email");                
     obj_item.fn_setDisplay(false);            
-
+    //HIDE EMAIL
+    
+    //SHOW PASS
     obj_item=obj_project.fn_getComponent("form_input_login_pass");                                
     obj_item.fn_setDisplay(true);             
 
-    
-    obj_item=obj_project.fn_getComponent("form_button_login_email");                
-    obj_item.fn_setDisplay(false);                 
-
     obj_item=obj_project.fn_getComponent("form_button_login_pass");                
     obj_item.fn_setDisplay(true);             
+    //SHOW PASS    
     
     
     if(!obj_auth.AuthorizeUserPass){

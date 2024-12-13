@@ -1,10 +1,11 @@
 <?php
+class maintainBase{    
+    function fn_varDump($str_foo, $str_message=false, $bln_output=false) {
+        echo($str_foo."<BR>");
+    }
+    //can be copied from the live backup file to a testing locaiton to more easily debug etc
+}
 
-
-
-/////////////////////////AUTHORISE
-require_once dirname($_SERVER["DOCUMENT_ROOT"], 2)."/api/xdesign-build/server/api/authorise.php";
-/////////////////////////AUTHORISE
 
 class maintainBackup extends maintainBase{    
 
@@ -179,3 +180,7 @@ class maintainBackup extends maintainBase{
     }
    
 }
+
+$obj_my=new maintainBackup;
+$obj_my->fn_backup();
+  
