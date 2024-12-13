@@ -601,6 +601,7 @@ class xapp_theme extends component{
     obj_themeItem.bln_borderRadius=this.obj_rowz.bln_borderRadius;  
     obj_themeItem.borderColor=this.obj_rowz.borderColor;       
     obj_themeItem.backgroundColor=this.obj_rowz.backgroundColor;
+    obj_themeItem.margin="0em";
     this.fn_applyThemeOption(obj_themeItem);
     //OPTION            
     this.obj_formHardRule=obj_themeItem;        

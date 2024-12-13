@@ -42,7 +42,7 @@
 
       }
       else{        
-        obj_item=this.fn_addContextItem("form_fieldset");                      
+        obj_item=this.fn_addContextItem("obj_formLabel");                      
         obj_item.fn_setText("No Apps Enabled");                  
       }
     }

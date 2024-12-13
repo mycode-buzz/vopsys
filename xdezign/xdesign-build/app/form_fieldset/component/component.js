@@ -18,8 +18,9 @@ class form_fieldset extends component{
     this.fn_setStyleProperty("margin", "0px");                      
   }
   fn_applyThemeStructure(){                        
+    
     if(!obj_project.obj_theme){return;}
-    this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formFieldset;                
+    this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formFieldset;                    
     this.fn_applyStyle(this.obj_holder.obj_themeStructure);                          
   }
   fn_onRowMember(obj_row){

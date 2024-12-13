@@ -30,9 +30,11 @@
             this.obj_consoleContainer=obj_menuButton.obj_menuPanel.fn_addConsoleContainer("console_container_system", true);            
             let obj_button=this.obj_consoleContainer.fn_getConsoleComponent("xapp_button_system_home", true);
             this.obj_consoleContainer.fn_showItem(obj_button);            
-
             return;
           }              
+
+          this.fn_setStyleProperty("alignItems", "center");                      
+          this.fn_setStyleProperty("flex-flow", "column wrap");                      
           
 
           this.str_goPayLabel=obj_path.fn_getQueryStringValue("goPayLabel");            
@@ -42,6 +44,9 @@
           else if(this.str_goPayLabel==="topup"){
             this.bln_forceTopup=true;
           }          
+
+          
+          
           
 
           this.str_debug=obj_path.fn_getQueryStringValue("mode");            
@@ -93,35 +98,47 @@
             obj_param.bln_expiredSubscription=true;                        
           }                
 
+          this.obj_formHardruleTop=this.fn_addContextItem("form_hardrule");                              
           this.fn_addSubscriptionSummary(obj_param);           
           this.fn_displayPriceList();   
-          this.fn_checkForUpgradeOptions(false);    
-          
-          
-          //obj_control=obj_container.fn_addContextItem("form_hardrule");                    
+          this.fn_checkForUpgradeOptions(false);              
+          this.obj_formHardruleBot=this.fn_addContextItem("form_hardrule");                              
+          this.obj_formHardruleBot.fn_setDisplay(false);
+          this.fn_getPanelMoreInformation();                    
+        }         
+        fn_getPanelMoreInformation(){
+
+          const obj_container=this;
+          const str_text=this.fn_getTextMoreInformation();          
+          const obj_control=obj_container.fn_addContextItem("form_span");                              
+          obj_control.fn_setText(str_text);          
+          //THEME STRUCTURE
+          const obj_themeStructure=obj_project.obj_theme.obj_formFieldset;                
+          obj_control.fn_applyStyle(obj_themeStructure);                      
+          //THEME STRUCTURE
+          obj_control.fn_setDisplay(false);
+          this.obj_panelMoreInformation=obj_control;
+        }        
+        fn_getButtonMoreInformation(){
+          const obj_showHide=obj_container.fn_addContextItem("form_button_showhide");                    
+          obj_showHide.fn_setText(`More Information`);                      
+          obj_showHide.fn_showIcon("chevron_right");
+          obj_showHide.fn_setStyleProperty("flexGrow", 0);
+          obj_showHide.fn_setStyleProperty("alignSelf", "flex-start");          
+          return obj_showHide;
+        }
+        fn_getTextMoreInformation(){
+
+          let str_paymentLink;          
+          str_paymentLink=obj_path.fn_setQueryStringValue("goPayLabel", "topup");                               
+          return `<ul class="faq-list">
+          <li>1 token is deducted when a Customer Record is fetched from the database.</li>                    
+          <li>Existing tokens rollover on purchase.</li>                    
+          <li>If tokens expire, data remains securely online until next purchase.</li>
+          <li>For more options, <a href="` + str_paymentLink + `">click here</a>.</li>          
+          </ul>`;                    
           
 
-          obj_container=this.fn_addContextItem("form_form");                                                      
-          obj_container.fn_setStyleProperty("flexFlow", "column wrap");
-
-          str_text=`More Information`;          
-          
-          let obj_showHide=obj_container.fn_addContextItem("form_button_showhide");                    
-          obj_showHide.fn_setText(str_text);                      
-          obj_showHide.fn_showIcon("xapp_star");
-
-          let str_paymentLink;
-          //let str_paymentLink =window.location.href;
-          //str_paymentLink+="?goPayLabel=topup";
-
-          /*
-          str_paymentLink=window.location.pathname;
-          if(!this.bln_forceTopup){
-            str_paymentLink=obj_path.fn_setQueryStringValue("goPayLabel", "topup");                      
-          }
-          //*/
-          str_paymentLink=obj_path.fn_setQueryStringValue("goPayLabel", "topup");                      
-          
           /*
           <li><div style="text-decoration:underline" class="question">Is there a maximum number of tokens ?</div>          
           <div class="answer">Double the package amount. 
@@ -145,22 +162,9 @@
           </ul>`;
           //*/
 
-          //*
-          str_text=
-          `<ul class="faq-list">
-          <li>1 token is deducted when a Customer Record is fetched from the database.</li>                    
-          <li>Existing tokens rollover on purchase.</li>                    
-          <li>If tokens expire, data remains securely online until next purchase.</li>
-          <li>For more options, <a href="` + str_paymentLink + `">click here</a>.</li>          
-          </ul>`;
-          //*/
-          
-          obj_control=obj_container.fn_addContextItem("form_span");                              
-          obj_control.fn_setText(str_text);
-          obj_control.fn_setDisplay(false);
+        }
 
-          obj_showHide.obj_controlTarget=obj_control;
-        } 
+        
 
         
         fn_loadPriceList(){
@@ -554,7 +558,7 @@
 
           //THEME STRUCTURE
           let obj_themeStructure=obj_project.obj_theme.obj_formFieldset;                
-          obj_topupPanel.fn_applyStyle(obj_themeStructure);                      
+          obj_topupPanel.fn_applyStyle(obj_themeStructure);                                
           //THEME STRUCTURE
 
           obj_form=obj_topupPanel.fn_addContextItem("form_form");                                                      
@@ -607,7 +611,7 @@
         fn_setTextSubscription(){          
           
           let str_text;
-          let str_icon="xapp_chevron_right";
+          let str_icon="xapp_chevron_left";
           if(this.obj_submitSummary.bln_open){            
             str_text="Close Options";                        
             str_icon="xapp_chevron_right";
@@ -652,9 +656,19 @@
           let  obj_submitSummary=this.obj_submitSummary;
           if(obj_submitSummary.bln_open){
             obj_submitSummary.bln_open=false;            
+            this.fn_setStyleProperty("alignItems", "center");                      
+            this.fn_setStyleProperty("justifyContent", "center");                      
+            this.fn_setStyleProperty("flex-flow", "column wrap");                      
+            this.obj_panelMoreInformation.fn_setDisplay(false);
+            this.obj_formHardruleBot.fn_setDisplay(false);
           }
           else{
             obj_submitSummary.bln_open=true;                        
+            this.fn_setStyleProperty("alignItems", "center");                      
+            this.fn_setStyleProperty("justifyContent", "center");                      
+            this.fn_setStyleProperty("flex-flow", "row wrap");
+            this.obj_panelMoreInformation.fn_setDisplay(true);                         
+            this.obj_formHardruleBot.fn_setDisplay(true);
           }
           
           this.fn_checkForUpgradeOptions(true);          
