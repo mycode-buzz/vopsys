@@ -201,6 +201,9 @@
                   if(str_sectionTitle){                                                                                
                     obj_fieldset.fn_setText(str_sectionTitle);                                                       
                   }
+                  else{
+                    //obj_fieldset.fn_setText("");                                                       
+                  }
 
                   let bln_lockOpen=true;                                      
                   let bln_sectionClose=obj_metaColumn.SectionClose;

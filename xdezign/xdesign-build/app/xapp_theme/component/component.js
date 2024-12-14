@@ -22,7 +22,7 @@ class xapp_theme extends component{
       return;
     }
     
-    this.bln_debug=true;  
+    this.bln_debug=false;  
     
     this.fn_setUserTheme();
     this.fn_setThemeItem();
@@ -107,7 +107,7 @@ class xapp_theme extends component{
     if(!this.bln_saved){              
       /////////////////////MOVE TO EDIT SCREEN    
       const obj_gradientUser={
-        str_name:"green",      
+        str_name:"red",      
         bln_transparent:obj_shared.fn_getRandomBool(),             
         bln_lighten:obj_shared.fn_getRandomBool(),      
         bln_contrast:obj_shared.fn_getRandomBool(),      
@@ -469,7 +469,7 @@ class xapp_theme extends component{
     //STRUCTURE                             
     //STRUCTURE   
     //OPTION                     
-    obj_themeItem.str_label="form_fieldset";              
+    obj_themeItem.str_label="form_fieldset";                      
     obj_themeItem.bln_border=obj_base.bln_borderFieldset;      
     obj_themeItem.bln_borderRadius=obj_base.bln_borderRadiusFieldset;          
     obj_themeItem.bln_borderExpand=true;
@@ -695,8 +695,10 @@ class xapp_theme extends component{
   //FONTSIZE
   }
   
-  fn_applyThemeBorder(obj_themeItem){  
+  fn_applyThemeBorder(obj_themeItem){      
   
+  obj_themeItem.borderStyle=obj_themeItem.str_borderStyle;
+
   //BORDER            
   let str_borderSize="none";      
   if(obj_themeItem.bln_border)      {

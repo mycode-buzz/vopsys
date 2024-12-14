@@ -34,9 +34,10 @@ class maintain extends maintainBackup{
         //MAINTAIN ORPHAN
         
         
-        $this->fn_doAutoView();
-        $this->fn_maintainXDezign();
-        $this->fn_maintainSetup();                
+        $this->fn_doAutoView();        
+        $this->fn_maintainXDezign();        
+        $this->fn_maintainSetup();  
+        return;              
         
         return;
         //*

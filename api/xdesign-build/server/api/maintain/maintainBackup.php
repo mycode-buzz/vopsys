@@ -7,32 +7,53 @@ require_once dirname($_SERVER["DOCUMENT_ROOT"], 2)."/api/xdesign-build/server/ap
 /////////////////////////AUTHORISE
 
 class maintainBackup extends maintainBase{    
+    
+    function fn_transferdb(){
+        $this->fn_doTransferdb();
+        $this->fn_setMessage("TransferDB to Live Server is COMPLETE");        
+    }
+    function fn_doTransferdb(){
 
-    function fn_backup(){
+        global $REMOTE_ADMINISTRATOR_USERNAME, $REMOTE_ADMINISTRATOR_PASSWORD, $REMOTE_SERVER_HOST;
 
-        $this->fn_varDump("fn_backup", "backup", true);        
-        
-    
-        global $SYSTEM_ADMINISTRATOR_USERNAME, $SYSTEM_ADMINISTRATOR_PASSWORD;
-    
-        $host = 'localhost';
-        $user = $SYSTEM_ADMINISTRATOR_USERNAME;
-        $password = $SYSTEM_ADMINISTRATOR_PASSWORD;
-    
-        $user = "remote@mycode.buzz";
-        $password = "MyCode.Buzz.!00";        
-        
         $str_nameFolderDrive="D:/";
         $str_nameFolderBase="backup/";
         $str_pathFolderBase=$str_nameFolderDrive.$str_nameFolderBase;        
-        $str_pathVopsys=$str_nameFolderDrive."var/www/html/vm-xdesign/vopsys/";
-        
+        $str_pathVopsys=$str_nameFolderDrive."var/www/html/vm-xdesign/vopsys/";        
         $str_nameDump="all-databases";
         $str_nameDumpFile=$str_nameDump.".sql";
         $str_nameDumpZip=$str_nameDump.".zip";
         $str_pathDumpFile=$str_nameFolderDrive.$str_nameDumpFile;        
-        $str_pathDumpZip=$str_nameFolderDrive.$str_nameDumpZip;        
+        $str_pathDumpZip=$str_nameFolderDrive.$str_nameDumpZip;                
+        $str_pathVopsysZip=$str_pathVopsys.$str_nameDumpZip;        
         
+        $command="mysql -u $REMOTE_ADMINISTRATOR_USERNAME --password=$REMOTE_ADMINISTRATOR_PASSWORD --host $REMOTE_SERVER_HOST < \"$str_pathDumpFile\"";
+        $this->fn_varDump($command, "command", true);        
+        system($command, $output);        
+    }
+
+    function fn_backup(){
+        $this->fn_doBackup();
+        $this->fn_setMessage("Backup is COMPLETE");        
+    }
+    function fn_doBackup(){
+
+        $this->fn_varDump("fn_doBackup", "backup", true);               
+    
+    
+        global $REMOTE_ADMINISTRATOR_USERNAME, $REMOTE_ADMINISTRATOR_PASSWORD;
+    
+        $host = 'localhost';
+        
+        $str_nameFolderDrive="D:/";
+        $str_nameFolderBase="backup/";
+        $str_pathFolderBase=$str_nameFolderDrive.$str_nameFolderBase;        
+        $str_pathVopsys=$str_nameFolderDrive."var/www/html/vm-xdesign/vopsys/";        
+        $str_nameDump="all-databases";
+        $str_nameDumpFile=$str_nameDump.".sql";
+        $str_nameDumpZip=$str_nameDump.".zip";
+        $str_pathDumpFile=$str_nameFolderDrive.$str_nameDumpFile;        
+        $str_pathDumpZip=$str_nameFolderDrive.$str_nameDumpZip;                
         $str_pathVopsysZip=$str_pathVopsys.$str_nameDumpZip;        
     
         
@@ -85,7 +106,7 @@ class maintainBackup extends maintainBase{
         
         //CREATE DUMP FILE
         //$command = "mysqldump --host=$host --user=$user --password=$password --all-databases  > $str_pathDumpFile";
-        $command="mysqldump --host=$host --user=$user --password=$password --set-gtid-purged=OFF --column-statistics=OFF --all-databases  > ".$str_pathDumpFile;
+        $command="mysqldump --host=$host --user=$REMOTE_ADMINISTRATOR_USERNAME --password=$REMOTE_ADMINISTRATOR_PASSWORD --set-gtid-purged=OFF --column-statistics=OFF --all-databases  > ".$str_pathDumpFile;        
         $this->fn_varDump($command, "command", true);        
         system($command, $output);        
         //CREATE DUMP FILE

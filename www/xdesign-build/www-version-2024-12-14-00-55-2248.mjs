@@ -6579,7 +6579,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
                 fn_applyThemeStructure(){
                   if(!obj_project.obj_theme){return;}
                   this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formButton;                                                    
-                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);            
                 }
 
                 fn_expand(){//called by base onload                  
@@ -6849,7 +6849,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
                 fn_applyThemeStructure(){                  
                   if(!obj_project.obj_theme){return;}
                   this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formInput;                
-                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);            
                 }
                 fn_onSelectStart(e){
                   //console.log("hit input");
@@ -7033,7 +7033,7 @@ class eazygrid extends component {
     fn_applyThemeStructure(){
       if(!obj_project.obj_theme){return;}
       this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_xappAccordion;                                                          
-      this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy      
+      this.fn_applyStyle(this.obj_holder.obj_themeStructure);      
     }
     fn_applyStyle(obj_style){
       super.fn_applyStyle(obj_style);
@@ -7212,54 +7212,59 @@ class eazygrid extends component {
         
         fn_showIcon(str_value){
 
-          let bln_debug=false;          
+          let bln_debug=false;                    
           
           switch(str_value){                        
-              case "":                         
-              case "rowz_icon_blank":                         
-              //str_value="blank";
+              case "":                                       
+              case "rowz_icon_blank":                                       
               str_value='<svg width="0px" height="24px"></svg>';
-              break;              
+              break;                    
               case "xapp_xdezign":
               //brush
               str_value="brush";
               break;
-              case "xdezign_project":
-              //str_value="flowchart";
-              str_value='<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#5f6368"><path d="M600-160v-80H440v-200h-80v80H80v-240h280v80h80v-200h160v-80h280v240H600v-80h-80v320h80v-80h280v240H600Z"/></svg>';                            
+              case "xdezign_project":              
+              str_value="project";
               break;              
               case "xdezign_tag":
               str_value="sell";
               break;         
               case "xdezign_map":
               str_value="map";
-              break;         
-              case "xapp_desk":            
-              str_value="chair";
-              break;
+              break;                                     
               case "xapp_lock":
               str_value="lock";
               break;                     
               case "xapp_rowz":
               str_value="tag";
-              break;        
-              case "xapp_office":
-              //str_value="trophy";
-              str_value='<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#5f6368"><path d="M280-120v-80h160v-124q-49-11-87.5-41.5T296-442q-75-9-125.5-65.5T120-640v-40q0-33 23.5-56.5T200-760h80v-80h400v80h80q33 0 56.5 23.5T840-680v40q0 76-50.5 132.5T664-442q-18 46-56.5 76.5T520-324v124h160v80H280Zm0-408v-152h-80v40q0 38 22 68.5t58 43.5Zm200 128q50 0 85-35t35-85v-240H360v240q0 50 35 85t85 35Zm200-128q36-13 58-43.5t22-68.5v-40h-80v152Zm-200-52Z"/></svg>';
+              break;              
+              case "thumb_up":              
+              break;              
+              case "xapp_desk":                 
+              case "xapp_chair":              
+              str_value='<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><g><path d="M0,0h24v24H0V0z" fill="none"/></g><g><g><path d="M7,11v2h10v-2c0-1.86,1.28-3.41,3-3.86V6c0-1.65-1.35-3-3-3H7C5.35,3,4,4.35,4,6v1.14C5.72,7.59,7,9.14,7,11z"/><path d="M21,9c-1.1,0-2,0.9-2,2v4H5v-4c0-1.1-0.9-2-2-2s-2,0.9-2,2v5c0,1.65,1.35,3,3,3v1c0,0.55,0.45,1,1,1c0.55,0,1-0.45,1-1v-1 h12v1c0,0.55,0.45,1,1,1c0.55,0,1-0.45,1-1v-1c1.65,0,3-1.35,3-3v-5C23,9.9,22.1,9,21,9z"/></g></g></svg>';              
+              break;
+              case "xapp_office":              
+              str_value="phone_iphone";
               break;
               case "rowz_activity":
               str_value="alternate_email";
               break;
-              case "rowz_contact":
-              //str_value="contacts_product" //not correctly hosted
-              str_value='<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#5f6368"><path d="M185-80q-17 0-29.5-12.5T143-122v-105q0-90 56-159t144-88q-40 28-62 70.5T259-312v190q0 11 3 22t10 20h-87Zm147 0q-17 0-29.5-12.5T290-122v-190q0-70 49.5-119T459-480h189q70 0 119 49t49 119v64q0 70-49 119T648-80H332Zm148-484q-66 0-112-46t-46-112q0-66 46-112t112-46q66 0 112 46t46 112q0 66-46 112t-112 46Z"/></svg>';
+              case "rowz_contact":              
+              str_value="spa";
               break;
+              case "rowz_touch_app":      
+              str_value="touch_app";                      
+              break; 
+              case "rowz_credit_card":                    
+              str_value="credit_card";                              
+              break;               
               case "rowz_hashtag":
               str_value="tag";
               break;
               case "rowz_tag":
               str_value="sell";
-              break;
+              break;              
               case "rowz_upload_file":
               str_value="upload_file";
               break;              
@@ -7326,16 +7331,18 @@ class eazygrid extends component {
               case "xapp_add":  
               str_value="add";   
               break;            
-              
-              
+              case "xapp_dangerous":  
+              str_value="dangerous";   
+              break;            
             default:
               str_value=str_value;
           }
           
           if(str_value){                                                    
             
+            this.obj_icon.dom_obj.innerHTML="";
             this.obj_icon.fn_setText(str_value);                                                
-            this.obj_icon.fn_setClassName("material-icons");                                                                      
+            this.obj_icon.fn_setClassName("material-icons");            
             this.obj_icon.fn_setDisplay(true); 
             if(bln_debug){
               this.obj_icon.fn_debug();
@@ -7351,10 +7358,10 @@ class eazygrid extends component {
           else{
             this.fn_showIcon("rowz_icon_blank");                                    
           }
+        
           if(bln_debug){
             this.fn_debug();
           }
-
         }  
         fn_setText(str_value){ 
           
@@ -7593,14 +7600,15 @@ class form_fieldset extends component{
     this.obj_formLegend=this.fn_addContextItem("form_legend");
     this.bln_toggleState=true;
     
-    this.obj_themeItemSection=this.fn_getThemeObject("form_section");    
+    
     this.fn_setStyleProperty("overflow", "hidden");                      
     this.fn_setStyleProperty("margin", "0px");                      
   }
   fn_applyThemeStructure(){                        
+    
     if(!obj_project.obj_theme){return;}
-    this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formFieldset;                
-    this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                          
+    this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formFieldset;                    
+    this.fn_applyStyle(this.obj_holder.obj_themeStructure);                                 
   }
   fn_onRowMember(obj_row){
 
@@ -7608,8 +7616,10 @@ class form_fieldset extends component{
     this.obj_paramRow=this.obj_row.obj_paramRow;                                    
     this.obj_paramRS=this.obj_paramRow.obj_paramRS;                                                       
     
+    
     this.fn_setStyleProperty("display", "flex");
     this.fn_setStyleProperty("flex-wrap", "wrap");
+    this.fn_setStyleProperty("alignSelf", "flex-start");    
     this.fn_setAxis(this.obj_paramRS.bln_axisFieldset);
     
 
@@ -7619,6 +7629,7 @@ class form_fieldset extends component{
     if(this.fn_hasContextHolderParent()){return;}    
     if(!this.obj_formLegend){return;}    
     this.obj_formLegend.fn_setText(str_value);                           
+    
   }  
   fn_legendOnClick(){    
     
@@ -7639,26 +7650,17 @@ class form_fieldset extends component{
     }
   }
 
-  fn_open(){    
+  fn_open(){   
 
-    let obj_themeItem=this.obj_themeItemSection;
-    if(obj_themeItem){      
-      this.fn_setStyleProperty("border", obj_themeItem.fn_getStyleProperty("border"));    
-      this.fn_setStyleProperty("boxShadow", obj_themeItem.fn_getStyleProperty("boxShadow"));    
-      this.fn_setStyleProperty("padding", obj_themeItem.fn_getStyleProperty("padding"));
-      this.fn_setStyleProperty("backgroundColor", obj_themeItem.fn_getStyleProperty("backgroundColor"));
-    }        
-    
-    
+    this.fn_applyThemeStructure();            
 
     this.bln_toggleState=true;    
     this.fn_setDisplayChildren(true);
   }  
   
-  fn_close(e){        
-    
-    this.fn_setStyleProperty("border", "none");          
-    this.fn_setStyleProperty("boxShadow", "none");    
+  fn_close(e){ 
+
+    this.fn_setStyleProperty("border", "none");              
     this.fn_setStyleProperty("paddingTop", "0px");            
     this.fn_setStyleProperty("paddingBottom", "0px");               
     this.fn_setStyleProperty("backgroundColor", "transparent");
@@ -7740,7 +7742,7 @@ class form_fieldset extends component{
         fn_applyThemeStructure(){                              
           if(!obj_project.obj_theme){return;}
           this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formHardRule;                
-          this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                                
+          this.fn_applyStyle(this.obj_holder.obj_themeStructure);                                
         }
       }//END CLS
       //END TAG
@@ -7781,7 +7783,7 @@ class form_fieldset extends component{
                 fn_applyThemeStructure(){                                                        
                   if(!obj_project.obj_theme){return;}
                   this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formLabel;                
-                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);            
                 }
 
                 fn_setUnLocked(){
@@ -7853,7 +7855,7 @@ class form_fieldset extends component{
         fn_applyThemeStructure(){                              
           if(!obj_project.obj_theme){return;}
           this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formLegend;                
-          this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                      
+          this.fn_applyStyle(this.obj_holder.obj_themeStructure);                      
         }
 
         
@@ -8051,7 +8053,7 @@ class panel extends component {
                 fn_applyThemeStructure(){                        
                   if(!obj_project.obj_theme){return;}
                   this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_xappAccordion;                  
-                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                                            
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);                                            
                 }
 
                 fn_addItem(obj_ini=false){
@@ -8202,7 +8204,7 @@ class xapp_theme extends component{
       return;
     }
     
-    this.bln_debug=true;  
+    this.bln_debug=false;  
     
     this.fn_setUserTheme();
     this.fn_setThemeItem();
@@ -8287,7 +8289,7 @@ class xapp_theme extends component{
     if(!this.bln_saved){              
       /////////////////////MOVE TO EDIT SCREEN    
       const obj_gradientUser={
-        str_name:"green",      
+        str_name:"red",      
         bln_transparent:obj_shared.fn_getRandomBool(),             
         bln_lighten:obj_shared.fn_getRandomBool(),      
         bln_contrast:obj_shared.fn_getRandomBool(),      
@@ -8649,7 +8651,7 @@ class xapp_theme extends component{
     //STRUCTURE                             
     //STRUCTURE   
     //OPTION                     
-    obj_themeItem.str_label="form_fieldset";              
+    obj_themeItem.str_label="form_fieldset";                      
     obj_themeItem.bln_border=obj_base.bln_borderFieldset;      
     obj_themeItem.bln_borderRadius=obj_base.bln_borderRadiusFieldset;          
     obj_themeItem.bln_borderExpand=true;
@@ -8661,6 +8663,28 @@ class xapp_theme extends component{
     //OPTION    
     this.obj_formFieldset=obj_themeItem;        
     //FORMFIELDSET        
+    /////////////////////////////////////////
+    /////////////////////////////////////////
+
+    /////////////////////////////////////////
+    /////////////////////////////////////////
+    //FORMLEGEND
+    obj_themeItem=obj_shared.fn_shallowCopy(this.obj_formFieldset);                
+    //STRUCTURE                             
+    //STRUCTURE   
+    //OPTION                          
+    obj_themeItem.str_label="form_container";                                
+    //obj_themeItem.fontWeight="bold";
+    obj_themeItem.bln_border=false;      
+    obj_themeItem.bln_borderRadius=false;           
+    obj_themeItem.bln_border=false;      
+    obj_themeItem.backgroundColor="transparent";                
+    obj_themeItem.padding="0em";                
+    this.fn_applyThemeOption(obj_themeItem);
+    
+    //OPTION    
+    this.obj_formContainer=obj_themeItem;        
+    //FORMLEGEND
     /////////////////////////////////////////
     /////////////////////////////////////////
     
@@ -8740,7 +8764,7 @@ class xapp_theme extends component{
     obj_themeItem.color=obj_gradient.str_fillTextUI;        
     this.fn_applyThemeOption(obj_themeItem);
     //OPTION                
-    this.obj_rowzSearch=obj_themeItem;        
+    this.obj_uiInput=obj_themeItem;        
     //FORMINPUT
     /////////////////////////////////////////
     /////////////////////////////////////////  
@@ -8759,6 +8783,7 @@ class xapp_theme extends component{
     obj_themeItem.bln_borderRadius=this.obj_rowz.bln_borderRadius;  
     obj_themeItem.borderColor=this.obj_rowz.borderColor;       
     obj_themeItem.backgroundColor=this.obj_rowz.backgroundColor;
+    obj_themeItem.margin="0em";
     this.fn_applyThemeOption(obj_themeItem);
     //OPTION            
     this.obj_formHardRule=obj_themeItem;        
@@ -8771,26 +8796,26 @@ class xapp_theme extends component{
     //*
     //THEMEBACKGROUND      
     obj_themeItem=this.fn_getComponent("form_blockbackground");                          
-    obj_themeItem.fn_applyStyle(this.obj_xappAccordion)
+    obj_themeItem.fn_applyStyle(this.obj_xappAccordion);
     obj_themeItem.fn_setDisplay(false);    
     this.obj_blockBackground=obj_themeItem;      
     //THEMEBACKGROUND
     //THEMEMIDGROUND
     obj_themeItem=this.fn_getComponent("form_blockmidground");                      
-    obj_themeItem.fn_applyStyle(this.obj_formFieldset)  
+    obj_themeItem.fn_applyStyle(this.obj_formFieldset);  
     obj_themeItem.fn_setDisplay(false);    
     this.obj_blockMidground=obj_themeItem;                
     //THEMEMIDGROUND
     //THEMEFORGROUND
     obj_themeItem=this.fn_getComponent("form_blockforground");                      
-    obj_themeItem.fn_applyStyle(this.obj_formFieldset)
+    obj_themeItem.fn_applyStyle(this.obj_formFieldset);
     obj_themeItem.backgroundColor=obj_themeItem.borderColor;  
     obj_themeItem.fn_setDisplay(false);    
     this.obj_blockForground=obj_themeItem;                
     //THEMEFORGROUND
     //THEMEFORGROUND
     obj_themeItem=this.fn_getComponent("form_blockhighlight");                      
-    obj_themeItem.fn_applyStyle(this.obj_formFieldset)
+    obj_themeItem.fn_applyStyle(this.obj_formFieldset);
     obj_themeItem.backgroundColor="orange";  
     obj_themeItem.fn_setDisplay(false);    
     this.obj_blockHighlight=obj_themeItem;    
@@ -8852,8 +8877,10 @@ class xapp_theme extends component{
   //FONTSIZE
   }
   
-  fn_applyThemeBorder(obj_themeItem){  
+  fn_applyThemeBorder(obj_themeItem){      
   
+  obj_themeItem.borderStyle=obj_themeItem.str_borderStyle;
+
   //BORDER            
   let str_borderSize="none";      
   if(obj_themeItem.bln_border)      {
@@ -9145,7 +9172,7 @@ class xapp_theme extends component{
     console.log("str_fillForm:" + obj_gradient.str_fillForm);    
     console.log("str_fillBorder:" + obj_gradient.str_fillBorder);
 
-    console.log(this);
+    //console.log(this);
   }
 
 

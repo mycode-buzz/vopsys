@@ -167,8 +167,9 @@
                     
                     let str_html=obj_shared.fn_getHTMLTable(arr_nameSummary, arr_valueSummary );                    
                     if(str_html){
-                      let obj_control=obj_parent.fn_addContextItem("form_span");   
+                      let obj_control=obj_parent.fn_addContextItem("form_container");   
                       obj_control.fn_setText(str_html);
+                      obj_parent.fn_setStyleProperty("alignSelf", "flex-start");
                       //obj_control.fn_setDisabled(true);
                     }
                   } 

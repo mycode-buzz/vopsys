@@ -16,12 +16,14 @@
             this.obj_consoleContainerMaintain=obj_consoleContainerMaintain=this.obj_menuPanel.fn_addConsoleContainer("console_container_maintain", true);                        
             this.obj_button_maintain=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_maintain");            
             this.obj_button_provision=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision");
-            this.obj_button_backup=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_backup");                                    
+            this.obj_button_backup=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_backup");
+            this.obj_button_transferdb=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_transferdb");
             this.obj_button_maintain_debug_release=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_maintain_debug_release");                                                                       
             
             obj_consoleContainerMaintain.fn_showItem(this.obj_button_maintain);
             obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision);    
             obj_consoleContainerMaintain.fn_showItem(this.obj_button_backup);                        
+            obj_consoleContainerMaintain.fn_showItem(this.obj_button_transferdb);                                    
             obj_consoleContainerMaintain.fn_showItem(this.obj_button_maintain_debug_release);                      
             
 
@@ -73,6 +75,12 @@
           
           let obj_ini=new Object;            
           obj_ini.str_action="backup";                                     
+          this.fn_runServerAction(obj_ini);                                                                  
+        } 
+        fn_transferdb(){
+          
+          let obj_ini=new Object;            
+          obj_ini.str_action="transferdb";                                     
           this.fn_runServerAction(obj_ini);                                                                  
         } 
         

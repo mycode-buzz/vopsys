@@ -6818,8 +6818,9 @@ document.addEventListener('DOMContentLoaded', (e) => {
                     
                     let str_html=obj_shared.fn_getHTMLTable(arr_nameSummary, arr_valueSummary );                    
                     if(str_html){
-                      let obj_control=obj_parent.fn_addContextItem("form_span");   
+                      let obj_control=obj_parent.fn_addContextItem("form_container");   
                       obj_control.fn_setText(str_html);
+                      obj_parent.fn_setStyleProperty("alignSelf", "flex-start");
                       //obj_control.fn_setDisabled(true);
                     }
                   } 
@@ -8309,7 +8310,7 @@ class form_fieldset extends component{
     this.obj_formLegend=this.fn_addContextItem("form_legend");
     this.bln_toggleState=true;
     
-    this.obj_themeItemSection=this.fn_getThemeObject("form_section");    
+    
     this.fn_setStyleProperty("overflow", "hidden");                      
     this.fn_setStyleProperty("margin", "0px");                      
   }
@@ -8317,7 +8318,7 @@ class form_fieldset extends component{
     
     if(!obj_project.obj_theme){return;}
     this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formFieldset;                    
-    this.fn_applyStyle(this.obj_holder.obj_themeStructure);                          
+    this.fn_applyStyle(this.obj_holder.obj_themeStructure);                                 
   }
   fn_onRowMember(obj_row){
 
@@ -8325,8 +8326,10 @@ class form_fieldset extends component{
     this.obj_paramRow=this.obj_row.obj_paramRow;                                    
     this.obj_paramRS=this.obj_paramRow.obj_paramRS;                                                       
     
+    
     this.fn_setStyleProperty("display", "flex");
     this.fn_setStyleProperty("flex-wrap", "wrap");
+    this.fn_setStyleProperty("alignSelf", "flex-start");    
     this.fn_setAxis(this.obj_paramRS.bln_axisFieldset);
     
 
@@ -8336,6 +8339,7 @@ class form_fieldset extends component{
     if(this.fn_hasContextHolderParent()){return;}    
     if(!this.obj_formLegend){return;}    
     this.obj_formLegend.fn_setText(str_value);                           
+    
   }  
   fn_legendOnClick(){    
     
@@ -8356,26 +8360,17 @@ class form_fieldset extends component{
     }
   }
 
-  fn_open(){    
+  fn_open(){   
 
-    let obj_themeItem=this.obj_themeItemSection;
-    if(obj_themeItem){      
-      this.fn_setStyleProperty("border", obj_themeItem.fn_getStyleProperty("border"));    
-      this.fn_setStyleProperty("boxShadow", obj_themeItem.fn_getStyleProperty("boxShadow"));    
-      this.fn_setStyleProperty("padding", obj_themeItem.fn_getStyleProperty("padding"));
-      this.fn_setStyleProperty("backgroundColor", obj_themeItem.fn_getStyleProperty("backgroundColor"));
-    }        
-    
-    
+    this.fn_applyThemeStructure();            
 
     this.bln_toggleState=true;    
     this.fn_setDisplayChildren(true);
   }  
   
-  fn_close(e){        
-    
-    this.fn_setStyleProperty("border", "none");          
-    this.fn_setStyleProperty("boxShadow", "none");    
+  fn_close(e){ 
+
+    this.fn_setStyleProperty("border", "none");              
     this.fn_setStyleProperty("paddingTop", "0px");            
     this.fn_setStyleProperty("paddingBottom", "0px");               
     this.fn_setStyleProperty("backgroundColor", "transparent");
@@ -15678,8 +15673,9 @@ class table extends component {
               case "xapp_add":  
               str_value="add";   
               break;            
-              
-              
+              case "xapp_dangerous":  
+              str_value="dangerous";   
+              break;            
             default:
               str_value=str_value;
           }
@@ -21088,6 +21084,9 @@ class report_column extends xapp_columnform{
                   if(str_sectionTitle){                                                                                
                     obj_fieldset.fn_setText(str_sectionTitle);                                                       
                   }
+                  else{
+                    //obj_fieldset.fn_setText("");                                                       
+                  }
 
                   let bln_lockOpen=true;                                      
                   let bln_sectionClose=obj_metaColumn.SectionClose;
@@ -21195,7 +21194,7 @@ class xapp_theme extends component{
       return;
     }
     
-    this.bln_debug=true;  
+    this.bln_debug=false;  
     
     this.fn_setUserTheme();
     this.fn_setThemeItem();
@@ -21280,7 +21279,7 @@ class xapp_theme extends component{
     if(!this.bln_saved){              
       /////////////////////MOVE TO EDIT SCREEN    
       const obj_gradientUser={
-        str_name:"green",      
+        str_name:"red",      
         bln_transparent:obj_shared.fn_getRandomBool(),             
         bln_lighten:obj_shared.fn_getRandomBool(),      
         bln_contrast:obj_shared.fn_getRandomBool(),      
@@ -21642,7 +21641,7 @@ class xapp_theme extends component{
     //STRUCTURE                             
     //STRUCTURE   
     //OPTION                     
-    obj_themeItem.str_label="form_fieldset";              
+    obj_themeItem.str_label="form_fieldset";                      
     obj_themeItem.bln_border=obj_base.bln_borderFieldset;      
     obj_themeItem.bln_borderRadius=obj_base.bln_borderRadiusFieldset;          
     obj_themeItem.bln_borderExpand=true;
@@ -21868,8 +21867,10 @@ class xapp_theme extends component{
   //FONTSIZE
   }
   
-  fn_applyThemeBorder(obj_themeItem){  
+  fn_applyThemeBorder(obj_themeItem){      
   
+  obj_themeItem.borderStyle=obj_themeItem.str_borderStyle;
+
   //BORDER            
   let str_borderSize="none";      
   if(obj_themeItem.bln_border)      {

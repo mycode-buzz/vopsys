@@ -147,8 +147,9 @@
               case "xapp_add":  
               str_value="add";   
               break;            
-              
-              
+              case "xapp_dangerous":  
+              str_value="dangerous";   
+              break;            
             default:
               str_value=str_value;
           }

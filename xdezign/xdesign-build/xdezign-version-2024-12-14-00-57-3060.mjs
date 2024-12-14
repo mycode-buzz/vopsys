@@ -6665,7 +6665,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
                 fn_applyThemeStructure(){                                                            
                   if(!obj_project.obj_theme){return;}                  
                   this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formFieldset;                
-                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                                            
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);                                            
                 }
                 fn_loadWidget(obj_row){                
 
@@ -6742,7 +6742,7 @@ class tableheader extends tablecell {
     fn_applyThemeStructure(){                                                        
       if(!obj_project.obj_theme){return;}
       this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formButton;                
-      this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+      this.fn_applyStyle(this.obj_holder.obj_themeStructure);            
     }
       
     
@@ -7138,7 +7138,7 @@ class table extends component {
                 fn_applyThemeStructure(){                  
                   if(!obj_project.obj_theme){return;}
                   this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formInput;                
-                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);            
                 }
                 fn_onSelectStart(e){
                   //console.log("hit input");
@@ -7611,7 +7611,7 @@ class table extends component {
                 fn_applyThemeStructure(){
                   if(!obj_project.obj_theme){return;}
                   this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formButton;                                                    
-                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);            
                 }
 
                 fn_expand(){//called by base onload                  
@@ -8615,7 +8615,7 @@ class table extends component {
             if(this.fn_getIsDynamicMenu()){
               this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_rowzDynamic;                
             }            
-            this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                        
+            this.fn_applyStyle(this.obj_holder.obj_themeStructure);                        
           }
           
           fn_runSearch(){//overridden by Menuform
@@ -12472,8 +12472,9 @@ class table extends component {
                     
                     let str_html=obj_shared.fn_getHTMLTable(arr_nameSummary, arr_valueSummary );                    
                     if(str_html){
-                      let obj_control=obj_parent.fn_addContextItem("form_span");   
+                      let obj_control=obj_parent.fn_addContextItem("form_container");   
                       obj_control.fn_setText(str_html);
+                      obj_parent.fn_setStyleProperty("alignSelf", "flex-start");
                       //obj_control.fn_setDisabled(true);
                     }
                   } 
@@ -13963,14 +13964,15 @@ class form_fieldset extends component{
     this.obj_formLegend=this.fn_addContextItem("form_legend");
     this.bln_toggleState=true;
     
-    this.obj_themeItemSection=this.fn_getThemeObject("form_section");    
+    
     this.fn_setStyleProperty("overflow", "hidden");                      
     this.fn_setStyleProperty("margin", "0px");                      
   }
   fn_applyThemeStructure(){                        
+    
     if(!obj_project.obj_theme){return;}
-    this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formFieldset;                
-    this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                          
+    this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formFieldset;                    
+    this.fn_applyStyle(this.obj_holder.obj_themeStructure);                                 
   }
   fn_onRowMember(obj_row){
 
@@ -13978,8 +13980,10 @@ class form_fieldset extends component{
     this.obj_paramRow=this.obj_row.obj_paramRow;                                    
     this.obj_paramRS=this.obj_paramRow.obj_paramRS;                                                       
     
+    
     this.fn_setStyleProperty("display", "flex");
     this.fn_setStyleProperty("flex-wrap", "wrap");
+    this.fn_setStyleProperty("alignSelf", "flex-start");    
     this.fn_setAxis(this.obj_paramRS.bln_axisFieldset);
     
 
@@ -13989,6 +13993,7 @@ class form_fieldset extends component{
     if(this.fn_hasContextHolderParent()){return;}    
     if(!this.obj_formLegend){return;}    
     this.obj_formLegend.fn_setText(str_value);                           
+    
   }  
   fn_legendOnClick(){    
     
@@ -14009,26 +14014,17 @@ class form_fieldset extends component{
     }
   }
 
-  fn_open(){    
+  fn_open(){   
 
-    let obj_themeItem=this.obj_themeItemSection;
-    if(obj_themeItem){      
-      this.fn_setStyleProperty("border", obj_themeItem.fn_getStyleProperty("border"));    
-      this.fn_setStyleProperty("boxShadow", obj_themeItem.fn_getStyleProperty("boxShadow"));    
-      this.fn_setStyleProperty("padding", obj_themeItem.fn_getStyleProperty("padding"));
-      this.fn_setStyleProperty("backgroundColor", obj_themeItem.fn_getStyleProperty("backgroundColor"));
-    }        
-    
-    
+    this.fn_applyThemeStructure();            
 
     this.bln_toggleState=true;    
     this.fn_setDisplayChildren(true);
   }  
   
-  fn_close(e){        
-    
-    this.fn_setStyleProperty("border", "none");          
-    this.fn_setStyleProperty("boxShadow", "none");    
+  fn_close(e){ 
+
+    this.fn_setStyleProperty("border", "none");              
     this.fn_setStyleProperty("paddingTop", "0px");            
     this.fn_setStyleProperty("paddingBottom", "0px");               
     this.fn_setStyleProperty("backgroundColor", "transparent");
@@ -14103,7 +14099,7 @@ class form_fieldset extends component{
               fn_applyThemeStructure(){                    
                 if(!obj_project.obj_theme){return;}
                 this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_rowzChild;                
-                this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+                this.fn_applyStyle(this.obj_holder.obj_themeStructure);            
               }
               
               fn_setMenuPanel(){     
@@ -14949,6 +14945,13 @@ class form_fieldset extends component{
                     this.fn_hideItem(obj_a);                                                                  
                   }                          
               }
+
+              fn_applyThemeStructure(){                                                            
+                if(!obj_project.obj_theme){return;}                  
+                this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formContainer;                
+                this.fn_applyStyle(this.obj_holder.obj_themeStructure);                                            
+                
+              }                                  
 
                 fn_onSubmit(e){                                                                                         
 
@@ -16057,15 +16060,15 @@ class form_fieldset extends component{
                 } 
                 
                 fn_showLabelBorder(){    
-                    //this.obj_label.fn_setStyleProperty("borderColor", obj_project.obj_theme.obj_forground.fn_getStyleProperty("backgroundColor"));                                    
+                    //this.obj_label.fn_setStyleProperty("borderColor", obj_project.obj_theme.obj_blockForground.fn_getStyleProperty("backgroundColor"));                                    
                 }        
                 fn_highlightLabelBorder(){    
-                  //this.obj_label.fn_setStyleProperty("borderColor", obj_project.obj_theme.obj_forground.fn_getStyleProperty("backgroundColor"));                                    
+                  //this.obj_label.fn_setStyleProperty("borderColor", obj_project.obj_theme.obj_blockForground.fn_getStyleProperty("backgroundColor"));                                    
                 }        
               
                 fn_hideLabelBorder(){                                      
                   //this.obj_label.fn_setStyleProperty("borderColor", "transparent");                                                                      
-                  //this.obj_label.fn_setStyleProperty("borderColor", obj_project.obj_theme.obj_background.fn_getStyleProperty("backgroundColor"));                                  
+                  //this.obj_label.fn_setStyleProperty("borderColor", obj_project.obj_theme.obj_blockBackground.fn_getStyleProperty("backgroundColor"));                                  
                 }
 
                 fn_onChildMouseUp(e){                         
@@ -17533,7 +17536,7 @@ class clipboard extends component{
     fn_applyThemeStructure(){                        
       if(!obj_project.obj_theme){return;}
       this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formFieldset;                
-      this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                          
+      this.fn_applyStyle(this.obj_holder.obj_themeStructure);                          
     }
     getSubscribedList(obj_post){
       
@@ -17557,7 +17560,7 @@ class clipboard extends component{
 
       }
       else{        
-        obj_item=this.fn_addContextItem("form_fieldset");                      
+        obj_item=this.fn_addContextItem("obj_formLabel");                      
         obj_item.fn_setText("No Apps Enabled");                  
       }
     }
@@ -17709,7 +17712,7 @@ class eazygrid extends component {
     fn_applyThemeStructure(){
       if(!obj_project.obj_theme){return;}
       this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_xappAccordion;                                                          
-      this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy      
+      this.fn_applyStyle(this.obj_holder.obj_themeStructure);      
     }
     fn_applyStyle(obj_style){
       super.fn_applyStyle(obj_style);
@@ -17943,54 +17946,59 @@ class eazygrid extends component {
         
         fn_showIcon(str_value){
 
-          let bln_debug=false;          
+          let bln_debug=false;                    
           
           switch(str_value){                        
-              case "":                         
-              case "rowz_icon_blank":                         
-              //str_value="blank";
+              case "":                                       
+              case "rowz_icon_blank":                                       
               str_value='<svg width="0px" height="24px"></svg>';
-              break;              
+              break;                    
               case "xapp_xdezign":
               //brush
               str_value="brush";
               break;
-              case "xdezign_project":
-              //str_value="flowchart";
-              str_value='<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#5f6368"><path d="M600-160v-80H440v-200h-80v80H80v-240h280v80h80v-200h160v-80h280v240H600v-80h-80v320h80v-80h280v240H600Z"/></svg>';                            
+              case "xdezign_project":              
+              str_value="project";
               break;              
               case "xdezign_tag":
               str_value="sell";
               break;         
               case "xdezign_map":
               str_value="map";
-              break;         
-              case "xapp_desk":            
-              str_value="chair";
-              break;
+              break;                                     
               case "xapp_lock":
               str_value="lock";
               break;                     
               case "xapp_rowz":
               str_value="tag";
-              break;        
-              case "xapp_office":
-              //str_value="trophy";
-              str_value='<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#5f6368"><path d="M280-120v-80h160v-124q-49-11-87.5-41.5T296-442q-75-9-125.5-65.5T120-640v-40q0-33 23.5-56.5T200-760h80v-80h400v80h80q33 0 56.5 23.5T840-680v40q0 76-50.5 132.5T664-442q-18 46-56.5 76.5T520-324v124h160v80H280Zm0-408v-152h-80v40q0 38 22 68.5t58 43.5Zm200 128q50 0 85-35t35-85v-240H360v240q0 50 35 85t85 35Zm200-128q36-13 58-43.5t22-68.5v-40h-80v152Zm-200-52Z"/></svg>';
+              break;              
+              case "thumb_up":              
+              break;              
+              case "xapp_desk":                 
+              case "xapp_chair":              
+              str_value='<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><g><path d="M0,0h24v24H0V0z" fill="none"/></g><g><g><path d="M7,11v2h10v-2c0-1.86,1.28-3.41,3-3.86V6c0-1.65-1.35-3-3-3H7C5.35,3,4,4.35,4,6v1.14C5.72,7.59,7,9.14,7,11z"/><path d="M21,9c-1.1,0-2,0.9-2,2v4H5v-4c0-1.1-0.9-2-2-2s-2,0.9-2,2v5c0,1.65,1.35,3,3,3v1c0,0.55,0.45,1,1,1c0.55,0,1-0.45,1-1v-1 h12v1c0,0.55,0.45,1,1,1c0.55,0,1-0.45,1-1v-1c1.65,0,3-1.35,3-3v-5C23,9.9,22.1,9,21,9z"/></g></g></svg>';              
+              break;
+              case "xapp_office":              
+              str_value="phone_iphone";
               break;
               case "rowz_activity":
               str_value="alternate_email";
               break;
-              case "rowz_contact":
-              //str_value="contacts_product" //not correctly hosted
-              str_value='<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#5f6368"><path d="M185-80q-17 0-29.5-12.5T143-122v-105q0-90 56-159t144-88q-40 28-62 70.5T259-312v190q0 11 3 22t10 20h-87Zm147 0q-17 0-29.5-12.5T290-122v-190q0-70 49.5-119T459-480h189q70 0 119 49t49 119v64q0 70-49 119T648-80H332Zm148-484q-66 0-112-46t-46-112q0-66 46-112t112-46q66 0 112 46t46 112q0 66-46 112t-112 46Z"/></svg>';
+              case "rowz_contact":              
+              str_value="spa";
               break;
+              case "rowz_touch_app":      
+              str_value="touch_app";                      
+              break; 
+              case "rowz_credit_card":                    
+              str_value="credit_card";                              
+              break;               
               case "rowz_hashtag":
               str_value="tag";
               break;
               case "rowz_tag":
               str_value="sell";
-              break;
+              break;              
               case "rowz_upload_file":
               str_value="upload_file";
               break;              
@@ -18057,16 +18065,18 @@ class eazygrid extends component {
               case "xapp_add":  
               str_value="add";   
               break;            
-              
-              
+              case "xapp_dangerous":  
+              str_value="dangerous";   
+              break;            
             default:
               str_value=str_value;
           }
           
           if(str_value){                                                    
             
+            this.obj_icon.dom_obj.innerHTML="";
             this.obj_icon.fn_setText(str_value);                                                
-            this.obj_icon.fn_setClassName("material-icons");                                                                      
+            this.obj_icon.fn_setClassName("material-icons");            
             this.obj_icon.fn_setDisplay(true); 
             if(bln_debug){
               this.obj_icon.fn_debug();
@@ -18082,10 +18092,10 @@ class eazygrid extends component {
           else{
             this.fn_showIcon("rowz_icon_blank");                                    
           }
+        
           if(bln_debug){
             this.fn_debug();
           }
-
         }  
         fn_setText(str_value){ 
           
@@ -18238,7 +18248,7 @@ class eazygrid extends component {
           if(obj_control){
             this.fn_toggleControl();
           }
-        }
+        }        
         fn_toggleControl(){
 
           //console.log("fn_toggleOptions");
@@ -18469,7 +18479,7 @@ class eazygrid extends component {
         fn_applyThemeStructure(){                              
           if(!obj_project.obj_theme){return;}
           this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formHardRule;                
-          this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                                
+          this.fn_applyStyle(this.obj_holder.obj_themeStructure);                                
         }
       }//END CLS
       //END TAG
@@ -18543,8 +18553,8 @@ class eazygrid extends component {
         }
         fn_applyThemeStructure(){                                                          
           if(!obj_project.obj_theme){return;}
-          this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_rowzSearch;                                    
-          this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                                              
+          this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_uiInput;                                    
+          this.fn_applyStyle(this.obj_holder.obj_themeStructure);                                              
         }
       }//END CLS
       //END TAG
@@ -18585,7 +18595,7 @@ class eazygrid extends component {
                 fn_applyThemeStructure(){                                                        
                   if(!obj_project.obj_theme){return;}
                   this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formLabel;                
-                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);            
                 }
 
                 fn_setUnLocked(){
@@ -18657,7 +18667,7 @@ class eazygrid extends component {
         fn_applyThemeStructure(){                              
           if(!obj_project.obj_theme){return;}
           this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formLegend;                
-          this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                      
+          this.fn_applyStyle(this.obj_holder.obj_themeStructure);                      
         }
 
         
@@ -18822,7 +18832,7 @@ class eazygrid extends component {
                 fn_applyThemeStructure(){                                                            
                   if(!obj_project.obj_theme){return;}                  
                   this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formFieldset;                
-                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                                            
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);                                            
                 }                                  
               }//END CLS
               //END TAG
@@ -19313,12 +19323,22 @@ class login_dashboard extends xapp_dashboard{
   fn_onLoad(){
     super.fn_onLoad();
     
+    //SHOW EMAIL
     let obj_item;
     obj_item=obj_project.fn_getComponent("form_button_login_email");                
     obj_item.fn_setDisplay(true);                 
 
+    obj_item=obj_project.fn_getComponent("form_button_login_email");                
+    obj_item.fn_setDisplay(true);            
+    //SHOW EMAIL
+    
+    //HIDE PASS
+    obj_item=obj_project.fn_getComponent("form_input_login_pass");                                
+    obj_item.fn_setDisplay(false);             
+
     obj_item=obj_project.fn_getComponent("form_button_login_pass");                
     obj_item.fn_setDisplay(false);             
+    //HIDE PASS    
   }
 
   fn_onSubmit(e){      
@@ -19487,18 +19507,21 @@ class login_dashboard extends xapp_dashboard{
       if(!bln_value){return false;}
     }              
 
+    //HIDE EMAIL
     obj_item=obj_project.fn_getComponent("form_input_login_email");                    
+    obj_item.fn_setDisplay(false);                
+    
+    obj_item=obj_project.fn_getComponent("form_button_login_email");                
     obj_item.fn_setDisplay(false);            
-
+    //HIDE EMAIL
+    
+    //SHOW PASS
     obj_item=obj_project.fn_getComponent("form_input_login_pass");                                
     obj_item.fn_setDisplay(true);             
 
-    
-    obj_item=obj_project.fn_getComponent("form_button_login_email");                
-    obj_item.fn_setDisplay(false);                 
-
     obj_item=obj_project.fn_getComponent("form_button_login_pass");                
     obj_item.fn_setDisplay(true);             
+    //SHOW PASS    
     
     
     if(!obj_auth.AuthorizeUserPass){
@@ -19975,12 +19998,10 @@ class textnode extends tag {
           if(obj_path.bln_isLocal){
             this.bln_usePaymentProviderSandbox=true;                              
             this.bln_debug=false;                    
-          }          
-          this.bln_emphasis=true;
-          this.int_emphasis=4;
-          this.int_boldWeight=500;          
+          }                              
+          
           this.str_textPay="Payment";
-          //this.str_iconPay="fa-solid fa-star";
+          this.str_iconPay="rowz_credit_card";
           //IMPORTANT: SAFE TO USE FOR PRODUCTION RELEASE, CHECKS FOR LOCAL HOST
         }  
 
@@ -19995,9 +20016,11 @@ class textnode extends tag {
             this.obj_consoleContainer=obj_menuButton.obj_menuPanel.fn_addConsoleContainer("console_container_system", true);            
             let obj_button=this.obj_consoleContainer.fn_getConsoleComponent("xapp_button_system_home", true);
             this.obj_consoleContainer.fn_showItem(obj_button);            
-
             return;
           }              
+
+          this.fn_setStyleProperty("alignItems", "center");                      
+          this.fn_setStyleProperty("flex-flow", "column wrap");                      
           
 
           this.str_goPayLabel=obj_path.fn_getQueryStringValue("goPayLabel");            
@@ -20007,6 +20030,9 @@ class textnode extends tag {
           else if(this.str_goPayLabel==="topup"){
             this.bln_forceTopup=true;
           }          
+
+          
+          
           
 
           this.str_debug=obj_path.fn_getQueryStringValue("mode");            
@@ -20047,11 +20073,10 @@ class textnode extends tag {
             str_labelProduct:"Subscription",
             int_priceTokenz:undefined,
             int_packageTokenz:undefined,            
-            str_nameProduct:"Subscription",                        
-            obj_themeItem:obj_project.obj_theme.obj_blockMidground,
-            str_textSubmit:"&nbsp;",
-            str_color:obj_project.obj_theme.obj_blockMidground.fn_getStyleProperty("backgroundColor"),            
+            str_nameProduct:"Subscription",                                    
+            str_textSubmit:"&nbsp;",            
             bln_boldText:true,            
+            str_icon:"xapp_star",
           };
           this.fn_setDefaultPackageOption(obj_param);
           obj_param.bln_expiredSubscription=false;          
@@ -20059,35 +20084,47 @@ class textnode extends tag {
             obj_param.bln_expiredSubscription=true;                        
           }                
 
+          this.obj_formHardruleTop=this.fn_addContextItem("form_hardrule");                              
           this.fn_addSubscriptionSummary(obj_param);           
           this.fn_displayPriceList();   
-          this.fn_checkForUpgradeOptions(false);    
-          
-          
-          //obj_control=obj_container.fn_addContextItem("form_hardrule");                    
+          this.fn_checkForUpgradeOptions(false);              
+          this.obj_formHardruleBot=this.fn_addContextItem("form_hardrule");                              
+          this.obj_formHardruleBot.fn_setDisplay(false);
+          this.fn_getPanelMoreInformation();                    
+        }         
+        fn_getPanelMoreInformation(){
+
+          const obj_container=this;
+          const str_text=this.fn_getTextMoreInformation();          
+          const obj_control=obj_container.fn_addContextItem("form_span");                              
+          obj_control.fn_setText(str_text);          
+          //THEME STRUCTURE
+          const obj_themeStructure=obj_project.obj_theme.obj_formFieldset;                
+          obj_control.fn_applyStyle(obj_themeStructure);                      
+          //THEME STRUCTURE
+          obj_control.fn_setDisplay(false);
+          this.obj_panelMoreInformation=obj_control;
+        }        
+        fn_getButtonMoreInformation(){
+          const obj_showHide=obj_container.fn_addContextItem("form_button_showhide");                    
+          obj_showHide.fn_setText(`More Information`);                      
+          obj_showHide.fn_showIcon("chevron_right");
+          obj_showHide.fn_setStyleProperty("flexGrow", 0);
+          obj_showHide.fn_setStyleProperty("alignSelf", "flex-start");          
+          return obj_showHide;
+        }
+        fn_getTextMoreInformation(){
+
+          let str_paymentLink;          
+          str_paymentLink=obj_path.fn_setQueryStringValue("goPayLabel", "topup");                               
+          return `<ul class="faq-list">
+          <li>1 token is deducted when a Customer Record is fetched from the database.</li>                    
+          <li>Existing tokens rollover on purchase.</li>                    
+          <li>If tokens expire, data remains securely online until next purchase.</li>
+          <li>For more options, <a href="` + str_paymentLink + `">click here</a>.</li>          
+          </ul>`;                    
           
 
-          obj_container=this.fn_addContextItem("form_form");                                                      
-          obj_container.fn_setStyleProperty("flexFlow", "column wrap");
-
-          str_text=`More Information`;          
-          
-          let obj_showHide=obj_container.fn_addContextItem("form_button_showhide");                    
-          obj_showHide.fn_setText(str_text);                      
-          obj_showHide.fn_showIcon("info");
-
-          let str_paymentLink;
-          //let str_paymentLink =window.location.href;
-          //str_paymentLink+="?goPayLabel=topup";
-
-          /*
-          str_paymentLink=window.location.pathname;
-          if(!this.bln_forceTopup){
-            str_paymentLink=obj_path.fn_setQueryStringValue("goPayLabel", "topup");                      
-          }
-          //*/
-          str_paymentLink=obj_path.fn_setQueryStringValue("goPayLabel", "topup");                      
-          
           /*
           <li><div style="text-decoration:underline" class="question">Is there a maximum number of tokens ?</div>          
           <div class="answer">Double the package amount. 
@@ -20111,31 +20148,9 @@ class textnode extends tag {
           </ul>`;
           //*/
 
-          //*
-          str_text=
-          `<ul class="faq-list">
-          <li>1 token is deducted when a Customer Record is fetched from the database.</li>                    
-          <li>Existing tokens rollover on purchase.</li>                    
-          <li>If tokens expire, data remains securely online until next purchase.</li>
-          <li>For more options, <a href="` + str_paymentLink + `">click here</a>.</li>          
-          </ul>`;
-          //*/
-          
-          obj_control=obj_container.fn_addContextItem("form_span");          
-          if(this.bln_emphasis){
-            if(obj_param.bln_boldText){              
-              obj_control.fn_setStyleProperty("fontWeight", "bold");                    
-            }                                 
-          }
-          if(obj_param.str_color){
-            obj_control.fn_setStyleProperty("color", obj_param.str_color);                                
-          }         
-          
-          obj_control.fn_setText(str_text);
-          obj_control.fn_setDisplay(false);
+        }
 
-          obj_showHide.obj_controlTarget=obj_control;
-        } 
+        
 
         
         fn_loadPriceList(){
@@ -20143,25 +20158,20 @@ class textnode extends tag {
           this.obj_priceList={};
 
           let obj_param;
-          let obj_themeItem, str_textPay, str_iconPay, str_color, bln_boldText; 
+          let str_textPay, str_iconPay; 
           
-          obj_themeItem=obj_project.obj_theme.obj_midground;
+          
           str_textPay=this.str_textPay;
-          str_iconPay=this.str_icon;
-          str_color=obj_project.obj_theme.obj_midground.fn_getStyleProperty("backgroundColor");          
-          bln_boldText=true;
+          str_iconPay=this.str_iconPay;                    
           
           //---------------------
           obj_param={            
             str_labelProduct:"CALENDAR DAY",
             int_priceTokenz:2.50,
             int_packageTokenz:500,            
-            str_nameProduct:"CALENDARDAY",                                    
-            obj_themeItem:obj_themeItem,
+            str_nameProduct:"CALENDARDAY",                                                
             str_textSubmit:str_textPay,
-            str_icon:str_iconPay,
-            str_color:str_color,            
-            bln_boldText:bln_boldText,            
+            str_icon:str_iconPay,                        
           };
           this.obj_priceList[obj_param.str_nameProduct]=obj_param;                    
 
@@ -20170,12 +20180,9 @@ class textnode extends tag {
             str_labelProduct:"CALENDAR MONTH",
             int_priceTokenz:15,
             int_packageTokenz:5000,            
-            str_nameProduct:"CALENDARMONTH",      
-            obj_themeItem:obj_themeItem,
+            str_nameProduct:"CALENDARMONTH",                  
             str_textSubmit:str_textPay,
-            str_icon:str_iconPay,
-            str_color:str_color,            
-            bln_boldText:bln_boldText,            
+            str_icon:str_iconPay,                        
           };
           this.obj_priceList[obj_param.str_nameProduct]=obj_param;                    
           
@@ -20184,12 +20191,9 @@ class textnode extends tag {
             str_labelProduct:"FISCAL QUARTER",
             int_priceTokenz:100,
             int_packageTokenz:60000,            
-            str_nameProduct:"FISCALQUARTER",                  
-            obj_themeItem:obj_themeItem,
+            str_nameProduct:"FISCALQUARTER",                              
             str_textSubmit:str_textPay,
-            str_icon:str_iconPay,
-            str_color:str_color,            
-            bln_boldText:bln_boldText,            
+            str_icon:str_iconPay,                        
           };
           this.obj_priceList[obj_param.str_nameProduct]=obj_param;                              
           
@@ -20199,12 +20203,9 @@ class textnode extends tag {
               str_labelProduct:"FISCAL YEAR",
               int_priceTokenz:1000,
               int_packageTokenz:1000000,            
-              str_nameProduct:"FISCALYEAR",
-              obj_themeItem:obj_themeItem,
+              str_nameProduct:"FISCALYEAR",              
               str_textSubmit:str_textPay,
-              str_icon:str_iconPay,
-              str_color:str_color,            
-              bln_boldText:bln_boldText,            
+              str_icon:str_iconPay,                          
             };
             this.obj_priceList[obj_param.str_nameProduct]=obj_param;          
           }
@@ -20382,36 +20383,6 @@ class textnode extends tag {
           obj_param.arr_item=arr_item;
           
           this.fn_writeTopUpForm(obj_param);          
-          
-          this.fn_themePanelBackgroundColor(obj_param);          
-        }
-
-        fn_themePanelBackgroundColor(obj_param){
-          let obj_control=obj_param.obj_topupPanel;                    
-          this.fn_themeBackgroundColor(obj_control, obj_param);
-        }
-
-        fn_themeBackgroundColor(obj_control, obj_param){
-          let obj_themeItem=obj_param.obj_themeItem;
-          let str_backgroundColor="grey";          
-
-          if(obj_themeItem){
-            str_backgroundColor=obj_themeItem.fn_getStyleProperty("backgroundColor");            
-          }
-          
-          if((this.bln_disableOnLimitTokenz)){          
-            str_backgroundColor="grey";                                  
-          }
-          if(obj_param.bln_expiredSubscription){          
-            str_backgroundColor="grey";                      
-            if(this.bln_debug){
-              console.log(obj_param.str_labelProduct + ": bln_expiredSubscription caused str_backgroundColor = grey ")    
-            }
-          }
-          if(str_backgroundColor){
-            obj_control.fn_setStyleProperty("backgroundColor", str_backgroundColor);          
-            obj_control.fn_setStyleProperty("borderColor", str_backgroundColor);                      
-          }
         }
         
         fn_getDisplayExpireSubcription(obj_param){
@@ -20429,13 +20400,7 @@ class textnode extends tag {
           str_expireSubscription=str_expireLabel + " " + str_expireSubscription;                        
           if(bln_value){
             str_expireSubscription=str_expireLabel + " Tomorrow";
-          }   
-          /*    
-          if(obj_param.bln_limitToMaxTokenz){
-            //str_expireSubscription="<span style=\"color:grey\">"+str_expireSubscription+"</span>";
-
-          }
-          //*/
+          }             
 
           return str_expireSubscription;
 
@@ -20549,10 +20514,6 @@ class textnode extends tag {
             obj_param.obj_controlSubmit            
           }          
           //obj_param.obj_controlSubmit.fn_debug();
-
-          this.fn_themePanelBackgroundColor(obj_param);          
-
-          
           
         }
 
@@ -20581,21 +20542,21 @@ class textnode extends tag {
           obj_topupPanel=this.fn_addContextItem("topup_panel");                                                          
           obj_param.obj_topupPanel=obj_topupPanel;//refernce used by button
 
-          obj_form=obj_topupPanel.fn_addContextItem("form_form");                                            
+          //THEME STRUCTURE
+          let obj_themeStructure=obj_project.obj_theme.obj_formFieldset;                
+          obj_topupPanel.fn_applyStyle(obj_themeStructure);                                
+          //THEME STRUCTURE
+
+          obj_form=obj_topupPanel.fn_addContextItem("form_form");                                                      
           obj_param.obj_form=obj_form;
-          //obj_topupPanel.fn_setStyleProperty("boxShadow", "1px 1px 3px rgba(0, 0, 0, 0.5)");                              
 
           for (const str_item of arr_item) {
             obj_control=obj_form.fn_addContextItem("form_span");                              
             obj_control.fn_setText(str_item);            
-            if(this.bln_emphasis){
-              if(obj_param.bln_boldText){              
-                obj_control.fn_setStyleProperty("fontWeight", "bold");                    
-              }                     
-            }   
-            if(obj_param.str_color){
-              obj_control.fn_setStyleProperty("color", obj_param.str_color);                                
-            }         
+            //THEME STRUCTURE
+            obj_themeStructure=obj_project.obj_theme.obj_formLabel;                
+            obj_control.fn_applyStyle(obj_themeStructure);            
+            //THEME STRUCTURE
           }
 
           obj_control=this.fn_addTopUpSubmit(obj_form, obj_param);                    
@@ -20614,12 +20575,12 @@ class textnode extends tag {
           }          
           
           let obj_control=obj_container.fn_addContextItem("topup_form_button");                       
+
           obj_control.obj_holder.obj_dashboard=this;
           obj_control.obj_holder.obj_product=obj_param;
           obj_control.fn_setDomProperty("name", str_name);                    
           obj_control.fn_setText(obj_param.str_textSubmit);          
-          obj_control.fn_showIcon(obj_param.str_icon);          
-          obj_control.fn_setStyleProperty("cursor", "pointer");                     
+          obj_control.fn_showIcon(obj_param.str_icon);                                        
           if(obj_param.bln_customerSummary){            
             this.obj_submitSummary=obj_control;
             this.obj_submitSummary.bln_open=false;
@@ -20628,27 +20589,28 @@ class textnode extends tag {
             }
             this.fn_setTextSubscription();            
           }
-          else{
-            //obj_control.fn_setStyleProperty("backgroundColor", "green");                              
+          else{            
           }
           return obj_control;
         }        
 
-        fn_setTextSubscription(){
+        fn_setTextSubscription(){          
           
           let str_text;
+          let str_icon="xapp_chevron_left";
           if(this.obj_submitSummary.bln_open){            
             str_text="Close Options";                        
+            str_icon="xapp_chevron_right";
           }
           else{            
-            str_text="Show Options";            
+            str_text="Show Options";                        
           }
           if(this.bln_paymentSuccess && this.bln_disableOnPay){
             str_text="Let's Go!";            
           }           
          
           this.obj_submitSummary.fn_setText(str_text);                                        
-          this.obj_submitSummary.fn_showIcon("replace-summary");
+          this.obj_submitSummary.fn_showIcon(str_icon);
         }        
 
         fn_checkForUpgradeOptions(bln_action=false){
@@ -20680,18 +20642,26 @@ class textnode extends tag {
           let  obj_submitSummary=this.obj_submitSummary;
           if(obj_submitSummary.bln_open){
             obj_submitSummary.bln_open=false;            
+            this.fn_setStyleProperty("alignItems", "center");                      
+            this.fn_setStyleProperty("justifyContent", "center");                      
+            this.fn_setStyleProperty("flex-flow", "column wrap");                      
+            this.obj_panelMoreInformation.fn_setDisplay(false);
+            this.obj_formHardruleBot.fn_setDisplay(false);
           }
           else{
             obj_submitSummary.bln_open=true;                        
+            this.fn_setStyleProperty("alignItems", "center");                      
+            this.fn_setStyleProperty("justifyContent", "center");                      
+            this.fn_setStyleProperty("flex-flow", "row wrap");
+            this.obj_panelMoreInformation.fn_setDisplay(true);                         
+            this.obj_formHardruleBot.fn_setDisplay(true);
           }
           
           this.fn_checkForUpgradeOptions(true);          
           this.fn_setTextSubscription();          
         }
 
-        fn_topUpSubmitOnClick(obj_submit){                    
-          
-          //console.log("HEY HEY 123");
+        fn_topUpSubmitOnClick(obj_submit){                                       
 
           let obj_product=obj_submit.obj_holder.obj_product;
 
@@ -20721,13 +20691,10 @@ class textnode extends tag {
 
           let str_nameProduct=obj_submit.obj_holder.obj_product.str_nameProduct;
           let str_expireSubscription=obj_submit.obj_holder.obj_product.str_expireSubscriptionSystem;
-          let int_purchaseTokenz=obj_submit.obj_holder.obj_product.int_purchaseTokenz;          
-          
+          let int_purchaseTokenz=obj_submit.obj_holder.obj_product.int_purchaseTokenz;                    
 
           let obj_paymentProvider=new paymentProviderStripe();          
-          obj_paymentProvider.fn_getPaymentURL(str_nameProduct, str_expireSubscription, int_purchaseTokenz);
-
-          
+          obj_paymentProvider.fn_getPaymentURL(str_nameProduct, str_expireSubscription, int_purchaseTokenz);          
           
           let str_paymentURL=obj_paymentProvider.str_paymentURL;
           if(this.bln_usePaymentProviderSandbox){
@@ -20795,58 +20762,7 @@ class textnode extends tag {
                 break;
           }
         }
-
-        
-
-      }
-
-      class tempControl{        
-        
-
-        fn_addSelectField(obj_container, str_label){
-          let obj_field=obj_container.fn_addContextItem("form_field");                              
-          let obj_label=obj_field.fn_getComponent("form_label");
-          obj_label.fn_setText(str_label);         
-          let obj_span=obj_field.fn_getComponent("form_span");   
-          obj_span.fn_setDisplay("none");
-          return obj_field;
-        }
-
-        fn_addSelect(obj_container){
-
-          let obj_select=obj_container.fn_addContextItem("form_select");                    
-          obj_select.fn_setStyleProperty("fontWeight", "bold");          
-          return obj_select;
-        }
-
-        fn_addSelectOption(obj_select, str_text, str_value){
-          let dom_option=obj_select.fn_addOption(str_text, str_value);
-          dom_option.style.fontWeight="bold";
-          return dom_option;
-        }
-
-        fn_addTopUpRadio(obj_container, str_name, str_value){
-
-          let obj_control=obj_container.fn_addContextItem("form_input");                    
-          obj_control.fn_setDomProperty("type", "radio");
-          obj_control.fn_setDomProperty("name", str_name);          
-          obj_control.fn_setValue(str_value);          
-          return obj_control;
-
-        }
-
-
-        fn_addSpanField(obj_container, str_label="", str_span=""){
-          let obj_field=obj_container.fn_addContextItem("form_field");                    
-          //obj_field.fn_setStyleProperty("flex-flow", "row wrap");          
-          let obj_label=obj_field.fn_getComponent("form_label");
-          obj_label.fn_setText(str_label);            
-          let obj_span=obj_field.fn_getComponent("form_span");
-          obj_span.fn_setText(str_span);            
-          obj_span.fn_setStyleProperty("fontWeight", "bold");                    
-          return obj_field;
-        }
-      }
+      }      
       //END TAG
       //END component/topup_dashboard        
 /*type: topup_dashboard//*/
@@ -20933,7 +20849,7 @@ class textnode extends tag {
         fn_applyThemeStructure(){                                                        
           if(!obj_project.obj_theme){return;}
           this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formFieldset;                
-          this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy            
+          this.fn_applyStyle(this.obj_holder.obj_themeStructure);            
         }
         fn_loadDashboard(){
           if(!super.fn_loadDashboard()){return;}          
@@ -20981,7 +20897,7 @@ class textnode extends tag {
                 fn_applyThemeStructure(){                        
                   if(!obj_project.obj_theme){return;}
                   this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_xappAccordion;                  
-                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                                            
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);                                            
                 }
 
                 fn_addItem(obj_ini=false){
@@ -21124,12 +21040,16 @@ class textnode extends tag {
         }
         fn_onClick(e){                                    
           
-          obj_project.fn_forgetEvent(e);                  
-          let obj_menuButton=this.fn_getMenuButton();          
-          let obj_dashboard=obj_menuButton.fn_locateItem("xapp_dashboard_setting");          
-          if(obj_dashboard){                    
-            obj_dashboard.fn_backup();
-          }                  
+          obj_project.fn_forgetEvent(e);                            
+          let bln_value=obj_shared.fn_messageConfirm("Really Backu?");
+          if(bln_value){          
+            let obj_menuButton=this.fn_getMenuButton();          
+            let obj_dashboard=obj_menuButton.fn_locateItem("xapp_dashboard_setting");          
+            if(obj_dashboard){                    
+              obj_dashboard.fn_backup();
+            }                    
+          } 
+          
         }     
       }//END CLS
       //END TAG
@@ -22133,32 +22053,6 @@ class textnode extends tag {
 
 
 /*START COMPONENT//*/
-/*type: xapp_button_provision//*/
-      //XSTART component/xapp_button_provision
-      class xapp_button_provision extends xapp_console_button{
-        constructor(obj_ini) {      
-          super(obj_ini);        
-        } 
-        fn_initialize(obj_ini){
-          super.fn_initialize(obj_ini);                
-        }
-        fn_onClick(e){                                    
-          
-          obj_project.fn_forgetEvent(e);                  
-          let obj_menuButton=this.fn_getMenuButton();          
-          let obj_dashboard=obj_menuButton.fn_locateItem("xapp_dashboard_setting");          
-          if(obj_dashboard){                    
-            obj_dashboard.fn_provision();
-          }       
-        }           
-      }//END CLS
-      //END TAG
-      //END component/xapp_button_provision        
-/*type: xapp_button_provision//*/
-/*END COMPONENT//*/
-
-
-/*START COMPONENT//*/
 /*type: xapp_button_provision_b2b//*/
       //XSTART component/xapp_button_provision_b2b
       class xapp_button_provision_b2b extends xapp_console_button{
@@ -22414,6 +22308,35 @@ class textnode extends tag {
       //END TAG
       //END component/xapp_button_system_home        
 /*type: xapp_button_system_home//*/
+/*END COMPONENT//*/
+
+
+/*START COMPONENT//*/
+/*type: xapp_button_transferdb//*/
+      //XSTART component/xapp_button_transferdb
+      class xapp_button_transferdb extends xapp_console_button{
+        constructor(obj_ini) {      
+          super(obj_ini);        
+        } 
+        fn_initialize(obj_ini){
+          super.fn_initialize(obj_ini);                
+        }
+        fn_onClick(e){                                    
+          
+          obj_project.fn_forgetEvent(e);     
+          let bln_value=obj_shared.fn_messageConfirm("Really Transfer Default DB to LIVE Server? CANCEL if this is Production Server.");
+          if(bln_value){                       
+            let obj_menuButton=this.fn_getMenuButton();          
+            let obj_dashboard=obj_menuButton.fn_locateItem("xapp_dashboard_setting");          
+            if(obj_dashboard){                    
+              obj_dashboard.fn_transferdb();          
+            }                  
+          }
+        }     
+      }//END CLS
+      //END TAG
+      //END component/xapp_button_transferdb        
+/*type: xapp_button_transferdb//*/
 /*END COMPONENT//*/
 
 
@@ -23053,12 +22976,14 @@ class textnode extends tag {
             this.obj_consoleContainerMaintain=obj_consoleContainerMaintain=this.obj_menuPanel.fn_addConsoleContainer("console_container_maintain", true);                        
             this.obj_button_maintain=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_maintain");            
             this.obj_button_provision=obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_provision");
-            this.obj_button_backup=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_backup");                                    
+            this.obj_button_backup=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_backup");
+            this.obj_button_transferdb=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_transferdb");
             this.obj_button_maintain_debug_release=this.obj_consoleContainerMaintain.fn_getConsoleComponent("xapp_button_maintain_debug_release");                                                                       
             
             obj_consoleContainerMaintain.fn_showItem(this.obj_button_maintain);
             obj_consoleContainerMaintain.fn_showItem(this.obj_button_provision);    
             obj_consoleContainerMaintain.fn_showItem(this.obj_button_backup);                        
+            obj_consoleContainerMaintain.fn_showItem(this.obj_button_transferdb);                                    
             obj_consoleContainerMaintain.fn_showItem(this.obj_button_maintain_debug_release);                      
             
 
@@ -23110,6 +23035,12 @@ class textnode extends tag {
           
           let obj_ini=new Object;            
           obj_ini.str_action="backup";                                     
+          this.fn_runServerAction(obj_ini);                                                                  
+        } 
+        fn_transferdb(){
+          
+          let obj_ini=new Object;            
+          obj_ini.str_action="transferdb";                                     
           this.fn_runServerAction(obj_ini);                                                                  
         } 
         
@@ -24414,6 +24345,9 @@ class textnode extends tag {
                   if(str_sectionTitle){                                                                                
                     obj_fieldset.fn_setText(str_sectionTitle);                                                       
                   }
+                  else{
+                    //obj_fieldset.fn_setText("");                                                       
+                  }
 
                   let bln_lockOpen=true;                                      
                   let bln_sectionClose=obj_metaColumn.SectionClose;
@@ -24521,7 +24455,7 @@ class xapp_theme extends component{
       return;
     }
     
-    this.bln_debug=true;  
+    this.bln_debug=false;  
     
     this.fn_setUserTheme();
     this.fn_setThemeItem();
@@ -24606,7 +24540,7 @@ class xapp_theme extends component{
     if(!this.bln_saved){              
       /////////////////////MOVE TO EDIT SCREEN    
       const obj_gradientUser={
-        str_name:"green",      
+        str_name:"red",      
         bln_transparent:obj_shared.fn_getRandomBool(),             
         bln_lighten:obj_shared.fn_getRandomBool(),      
         bln_contrast:obj_shared.fn_getRandomBool(),      
@@ -24968,7 +24902,7 @@ class xapp_theme extends component{
     //STRUCTURE                             
     //STRUCTURE   
     //OPTION                     
-    obj_themeItem.str_label="form_fieldset";              
+    obj_themeItem.str_label="form_fieldset";                      
     obj_themeItem.bln_border=obj_base.bln_borderFieldset;      
     obj_themeItem.bln_borderRadius=obj_base.bln_borderRadiusFieldset;          
     obj_themeItem.bln_borderExpand=true;
@@ -24980,6 +24914,28 @@ class xapp_theme extends component{
     //OPTION    
     this.obj_formFieldset=obj_themeItem;        
     //FORMFIELDSET        
+    /////////////////////////////////////////
+    /////////////////////////////////////////
+
+    /////////////////////////////////////////
+    /////////////////////////////////////////
+    //FORMLEGEND
+    obj_themeItem=obj_shared.fn_shallowCopy(this.obj_formFieldset);                
+    //STRUCTURE                             
+    //STRUCTURE   
+    //OPTION                          
+    obj_themeItem.str_label="form_container";                                
+    //obj_themeItem.fontWeight="bold";
+    obj_themeItem.bln_border=false;      
+    obj_themeItem.bln_borderRadius=false;           
+    obj_themeItem.bln_border=false;      
+    obj_themeItem.backgroundColor="transparent";                
+    obj_themeItem.padding="0em";                
+    this.fn_applyThemeOption(obj_themeItem);
+    
+    //OPTION    
+    this.obj_formContainer=obj_themeItem;        
+    //FORMLEGEND
     /////////////////////////////////////////
     /////////////////////////////////////////
     
@@ -25059,7 +25015,7 @@ class xapp_theme extends component{
     obj_themeItem.color=obj_gradient.str_fillTextUI;        
     this.fn_applyThemeOption(obj_themeItem);
     //OPTION                
-    this.obj_rowzSearch=obj_themeItem;        
+    this.obj_uiInput=obj_themeItem;        
     //FORMINPUT
     /////////////////////////////////////////
     /////////////////////////////////////////  
@@ -25078,6 +25034,7 @@ class xapp_theme extends component{
     obj_themeItem.bln_borderRadius=this.obj_rowz.bln_borderRadius;  
     obj_themeItem.borderColor=this.obj_rowz.borderColor;       
     obj_themeItem.backgroundColor=this.obj_rowz.backgroundColor;
+    obj_themeItem.margin="0em";
     this.fn_applyThemeOption(obj_themeItem);
     //OPTION            
     this.obj_formHardRule=obj_themeItem;        
@@ -25090,26 +25047,26 @@ class xapp_theme extends component{
     //*
     //THEMEBACKGROUND      
     obj_themeItem=this.fn_getComponent("form_blockbackground");                          
-    obj_themeItem.fn_applyStyle(this.obj_xappAccordion)
+    obj_themeItem.fn_applyStyle(this.obj_xappAccordion);
     obj_themeItem.fn_setDisplay(false);    
     this.obj_blockBackground=obj_themeItem;      
     //THEMEBACKGROUND
     //THEMEMIDGROUND
     obj_themeItem=this.fn_getComponent("form_blockmidground");                      
-    obj_themeItem.fn_applyStyle(this.obj_formFieldset)  
+    obj_themeItem.fn_applyStyle(this.obj_formFieldset);  
     obj_themeItem.fn_setDisplay(false);    
     this.obj_blockMidground=obj_themeItem;                
     //THEMEMIDGROUND
     //THEMEFORGROUND
     obj_themeItem=this.fn_getComponent("form_blockforground");                      
-    obj_themeItem.fn_applyStyle(this.obj_formFieldset)
+    obj_themeItem.fn_applyStyle(this.obj_formFieldset);
     obj_themeItem.backgroundColor=obj_themeItem.borderColor;  
     obj_themeItem.fn_setDisplay(false);    
     this.obj_blockForground=obj_themeItem;                
     //THEMEFORGROUND
     //THEMEFORGROUND
     obj_themeItem=this.fn_getComponent("form_blockhighlight");                      
-    obj_themeItem.fn_applyStyle(this.obj_formFieldset)
+    obj_themeItem.fn_applyStyle(this.obj_formFieldset);
     obj_themeItem.backgroundColor="orange";  
     obj_themeItem.fn_setDisplay(false);    
     this.obj_blockHighlight=obj_themeItem;    
@@ -25171,8 +25128,10 @@ class xapp_theme extends component{
   //FONTSIZE
   }
   
-  fn_applyThemeBorder(obj_themeItem){  
+  fn_applyThemeBorder(obj_themeItem){      
   
+  obj_themeItem.borderStyle=obj_themeItem.str_borderStyle;
+
   //BORDER            
   let str_borderSize="none";      
   if(obj_themeItem.bln_border)      {
@@ -25464,7 +25423,7 @@ class xapp_theme extends component{
     console.log("str_fillForm:" + obj_gradient.str_fillForm);    
     console.log("str_fillBorder:" + obj_gradient.str_fillBorder);
 
-    console.log(this);
+    //console.log(this);
   }
 
 
@@ -26760,7 +26719,7 @@ class xdezign_button_map_item extends form_button{
                 fn_applyThemeStructure(){                                                            
                   if(!obj_project.obj_theme){return;}                  
                   this.obj_holder.obj_themeStructure=obj_project.obj_theme.obj_formFieldset;                
-                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);//should be called here . not on base object - due to class hierachy                                            
+                  this.fn_applyStyle(this.obj_holder.obj_themeStructure);                                            
                 }                                
                 fn_loadDashboard(){
                   if(!super.fn_loadDashboard()){return;}//should be overidden                                    
@@ -29033,7 +28992,7 @@ class xdezign_button_map_item extends form_button{
 //START COMPONENTMAP
 
 //START AUTO GENERATED COMPONENT MAP
-const obj_ComponentMap = new Map([['component', component],['xapp_ajax', xapp_ajax],['xapp_component', xapp_component],['xapp_widgetboard', xapp_widgetboard],['tablecell', tablecell],['tableheader', tableheader],['tablerow', tablerow],['table', table],['xapp_propertysheet', xapp_propertysheet],['xdezign_propertysheet', xdezign_propertysheet],['form_input', form_input],['xapp_propertysheet_input', xapp_propertysheet_input],['xdezign_propertysheet_design', xdezign_propertysheet_design],['form_button', form_button],['form_button_rich', form_button_rich],['xapp_menu_operation', xapp_menu_operation],['xapp_menu', xapp_menu],['xdezign_menu', xdezign_menu],['form_iframe', form_iframe],['xapp_dashboard', xapp_dashboard],['xapp_button', xapp_button],['xapp', xapp],['xapp_row', xapp_row],['xapp_data', xapp_data],['xapp_dataform', xapp_dataform],['xapp_dataform_view', xapp_dataform_view],['form_fieldset', form_fieldset],['xapp_menuform', xapp_menuform],['form_menu_panel', form_menu_panel],['xapp_base', xapp_base],['xapp_console_container', xapp_console_container],['form_inputandbutton', form_inputandbutton],['xapp_column', xapp_column],['xapp_columnform', xapp_columnform],['xapp_console_button', xapp_console_button],['panel', panel],['form_form', form_form],['form_tablecell', form_tablecell],['form_inputandbutton_submit', form_inputandbutton_submit],['eazygriditem', eazygriditem],['svgblock', svgblock],['api', api],['authorise_end', authorise_end],['authorise_gate', authorise_gate],['block', block],['block_structure', block_structure],['clipboard', clipboard],['desk_dashboard', desk_dashboard],['desk_form_button', desk_form_button],['desktopnavigationbutton', desktopnavigationbutton],['div', div],['eazygrid', eazygrid],['form_anchor', form_anchor],['form_button_anchor', form_button_anchor],['form_button_icon', form_button_icon],['form_button_search', form_button_search],['form_button_showhide', form_button_showhide],['form_button_span', form_button_span],['form_button_submit', form_button_submit],['form_checkbox', form_checkbox],['form_container', form_container],['form_field', form_field],['form_hardrule', form_hardrule],['form_icon', form_icon],['form_input_login_email', form_input_login_email],['form_input_login_pass', form_input_login_pass],['form_inputandbutton_input', form_inputandbutton_input],['form_label', form_label],['form_legend', form_legend],['form_nonbreakingspace', form_nonbreakingspace],['form_panel', form_panel],['form_panellist', form_panellist],['form_radio', form_radio],['form_section', form_section],['form_select', form_select],['form_span', form_span],['form_tab', form_tab],['form_table', form_table],['form_tableheader', form_tableheader],['form_tablerow', form_tablerow],['form_tablist', form_tablist],['form_tabset', form_tabset],['form_text', form_text],['form_textarea', form_textarea],['grid', grid],['img', img],['login_dashboard', login_dashboard],['loginpanelform', loginpanelform],['mall_dashboard', mall_dashboard],['mall_form_button', mall_form_button],['navblock', navblock],['office', office],['recordset', recordset],['report_column', report_column],['textarea', textarea],['textnode', textnode],['topup_dashboard', topup_dashboard],['topup_form_button', topup_form_button],['upgrade', upgrade],['upgrade_button', upgrade_button],['upgrade_dashboard', upgrade_dashboard],['xapp_accordion', xapp_accordion],['xapp_button_archive_record', xapp_button_archive_record],['xapp_button_backup', xapp_button_backup],['xapp_button_complete_record', xapp_button_complete_record],['xapp_button_data_nav_back', xapp_button_data_nav_back],['xapp_button_data_nav_forward', xapp_button_data_nav_forward],['xapp_button_data_nav_toggle', xapp_button_data_nav_toggle],['xapp_button_file_import', xapp_button_file_import],['xapp_button_file_select', xapp_button_file_select],['xapp_button_filteroff_record', xapp_button_filteroff_record],['xapp_button_filteron_record', xapp_button_filteron_record],['xapp_button_general_archive_hide', xapp_button_general_archive_hide],['xapp_button_general_archive_show', xapp_button_general_archive_show],['xapp_button_general_form_down', xapp_button_general_form_down],['xapp_button_general_form_gap', xapp_button_general_form_gap],['xapp_button_general_form_group', xapp_button_general_form_group],['xapp_button_general_form_up', xapp_button_general_form_up],['xapp_button_general_row_hide', xapp_button_general_row_hide],['xapp_button_general_row_show', xapp_button_general_row_show],['xapp_button_general_use_task_date', xapp_button_general_use_task_date],['xapp_button_general_use_task_datetime', xapp_button_general_use_task_datetime],['xapp_button_linkoff_record', xapp_button_linkoff_record],['xapp_button_linkon_record', xapp_button_linkon_record],['xapp_button_maintain', xapp_button_maintain],['xapp_button_maintain_debug_release', xapp_button_maintain_debug_release],['xapp_button_mover_disable', xapp_button_mover_disable],['xapp_button_mover_enable', xapp_button_mover_enable],['xapp_button_mover_home', xapp_button_mover_home],['xapp_button_mover_invite', xapp_button_mover_invite],['xapp_button_mover_open', xapp_button_mover_open],['xapp_button_navigate_desktop', xapp_button_navigate_desktop],['xapp_button_navigate_lobby', xapp_button_navigate_lobby],['xapp_button_navigate_login', xapp_button_navigate_login],['xapp_button_navigate_mall', xapp_button_navigate_mall],['xapp_button_navigate_newcolumn', xapp_button_navigate_newcolumn],['xapp_button_navigate_newrow', xapp_button_navigate_newrow],['xapp_button_navigate_office', xapp_button_navigate_office],['xapp_button_navigate_record', xapp_button_navigate_record],['xapp_button_navigate_rowz', xapp_button_navigate_rowz],['xapp_button_navigate_settings', xapp_button_navigate_settings],['xapp_button_new_record', xapp_button_new_record],['xapp_button_next_record', xapp_button_next_record],['xapp_button_provision', xapp_button_provision],['xapp_button_provision_b2b', xapp_button_provision_b2b],['xapp_button_provision_b2c', xapp_button_provision_b2c],['xapp_button_provision_linked_contact_hide', xapp_button_provision_linked_contact_hide],['xapp_button_provision_linked_contact_show', xapp_button_provision_linked_contact_show],['xapp_button_provision_linked_opportunity_hide', xapp_button_provision_linked_opportunity_hide],['xapp_button_provision_linked_opportunity_show', xapp_button_provision_linked_opportunity_show],['xapp_button_provision_linked_task_hide', xapp_button_provision_linked_task_hide],['xapp_button_provision_linked_task_show', xapp_button_provision_linked_task_show],['xapp_button_push_reset', xapp_button_push_reset],['xapp_button_push_schedule', xapp_button_push_schedule],['xapp_button_queryterm', xapp_button_queryterm],['xapp_button_system_home', xapp_button_system_home],['xapp_columnform_metajointype', xapp_columnform_metajointype],['xapp_console', xapp_console],['xapp_console_search', xapp_console_search],['xapp_context_holder', xapp_context_holder],['xapp_dashboard_push', xapp_dashboard_push],['xapp_dashboard_push_row', xapp_dashboard_push_row],['xapp_dashboard_setting', xapp_dashboard_setting],['xapp_dashboard_view', xapp_dashboard_view],['xapp_data_childmenu', xapp_data_childmenu],['xapp_data_view', xapp_data_view],['xapp_dataform_childmenu', xapp_dataform_childmenu],['xapp_dataform_mover', xapp_dataform_mover],['xapp_dataform_system', xapp_dataform_system],['xapp_dynamic_content', xapp_dynamic_content],['xapp_form_container_search', xapp_form_container_search],['xapp_form_select', xapp_form_select],['xapp_input_file_select', xapp_input_file_select],['xapp_menu_autoform', xapp_menu_autoform],['xapp_menu_panel', xapp_menu_panel],['xapp_menuform_mover', xapp_menuform_mover],['xapp_menuform_system', xapp_menuform_system],['xapp_queryterm_interface', xapp_queryterm_interface],['xapp_report_interface_fieldcriteria', xapp_report_interface_fieldcriteria],['xapp_report_interface_fieldlist', xapp_report_interface_fieldlist],['xapp_report_view', xapp_report_view],['xapp_rowform', xapp_rowform],['xapp_theme', xapp_theme],['xdezign', xdezign],['xdezign_action', xdezign_action],['xdezign_button_action_item', xdezign_button_action_item],['xdezign_button_close_project', xdezign_button_close_project],['xdezign_button_duplicate_project', xdezign_button_duplicate_project],['xdezign_button_locate_project', xdezign_button_locate_project],['xdezign_button_maintain_project', xdezign_button_maintain_project],['xdezign_button_map_item', xdezign_button_map_item],['xdezign_button_map_nav', xdezign_button_map_nav],['xdezign_button_new_project', xdezign_button_new_project],['xdezign_button_open_project', xdezign_button_open_project],['xdezign_button_release_project', xdezign_button_release_project],['xdezign_button_save_project', xdezign_button_save_project],['xdezign_button_tag_item', xdezign_button_tag_item],['xdezign_button_view_project', xdezign_button_view_project],['xdezign_clipboard', xdezign_clipboard],['xdezign_dashboard', xdezign_dashboard],['xdezign_dashboard_component', xdezign_dashboard_component],['xdezign_dashboard_map', xdezign_dashboard_map],['xdezign_dashboard_project', xdezign_dashboard_project],['xdezign_dashboard_save', xdezign_dashboard_save],['xdezign_iframe', xdezign_iframe],['xdezign_map', xdezign_map],['xdezign_menu_component', xdezign_menu_component],['xdezign_menu_map', xdezign_menu_map],['xdezign_menu_project', xdezign_menu_project],['xdezign_menu_project_type', xdezign_menu_project_type],['xdezign_menu_tag', xdezign_menu_tag],['xdezign_menu_tag_type', xdezign_menu_tag_type],['xdezign_propertysheet_attribute', xdezign_propertysheet_attribute],['xdezign_propertysheet_designui', xdezign_propertysheet_designui],['xdezign_propertysheet_input', xdezign_propertysheet_input],['xdezign_propertysheet_property', xdezign_propertysheet_property],['xdezign_propertysheet_style', xdezign_propertysheet_style],['xdezign_widget_project_type', xdezign_widget_project_type],['xdezign_widget_tag_type', xdezign_widget_tag_type]]);
+const obj_ComponentMap = new Map([['component', component],['xapp_ajax', xapp_ajax],['xapp_component', xapp_component],['xapp_widgetboard', xapp_widgetboard],['tablecell', tablecell],['tableheader', tableheader],['tablerow', tablerow],['table', table],['xapp_propertysheet', xapp_propertysheet],['xdezign_propertysheet', xdezign_propertysheet],['form_input', form_input],['xapp_propertysheet_input', xapp_propertysheet_input],['xdezign_propertysheet_design', xdezign_propertysheet_design],['form_button', form_button],['form_button_rich', form_button_rich],['xapp_menu_operation', xapp_menu_operation],['xapp_menu', xapp_menu],['xdezign_menu', xdezign_menu],['form_iframe', form_iframe],['xapp_dashboard', xapp_dashboard],['xapp_button', xapp_button],['xapp', xapp],['xapp_row', xapp_row],['xapp_data', xapp_data],['xapp_dataform', xapp_dataform],['xapp_dataform_view', xapp_dataform_view],['form_fieldset', form_fieldset],['xapp_menuform', xapp_menuform],['form_menu_panel', form_menu_panel],['xapp_base', xapp_base],['xapp_console_container', xapp_console_container],['form_inputandbutton', form_inputandbutton],['xapp_column', xapp_column],['xapp_columnform', xapp_columnform],['xapp_console_button', xapp_console_button],['panel', panel],['form_form', form_form],['form_tablecell', form_tablecell],['form_inputandbutton_submit', form_inputandbutton_submit],['eazygriditem', eazygriditem],['svgblock', svgblock],['api', api],['authorise_end', authorise_end],['authorise_gate', authorise_gate],['block', block],['block_structure', block_structure],['clipboard', clipboard],['desk_dashboard', desk_dashboard],['desk_form_button', desk_form_button],['desktopnavigationbutton', desktopnavigationbutton],['div', div],['eazygrid', eazygrid],['form_anchor', form_anchor],['form_button_anchor', form_button_anchor],['form_button_icon', form_button_icon],['form_button_search', form_button_search],['form_button_showhide', form_button_showhide],['form_button_span', form_button_span],['form_button_submit', form_button_submit],['form_checkbox', form_checkbox],['form_container', form_container],['form_field', form_field],['form_hardrule', form_hardrule],['form_icon', form_icon],['form_input_login_email', form_input_login_email],['form_input_login_pass', form_input_login_pass],['form_inputandbutton_input', form_inputandbutton_input],['form_label', form_label],['form_legend', form_legend],['form_nonbreakingspace', form_nonbreakingspace],['form_panel', form_panel],['form_panellist', form_panellist],['form_radio', form_radio],['form_section', form_section],['form_select', form_select],['form_span', form_span],['form_tab', form_tab],['form_table', form_table],['form_tableheader', form_tableheader],['form_tablerow', form_tablerow],['form_tablist', form_tablist],['form_tabset', form_tabset],['form_text', form_text],['form_textarea', form_textarea],['grid', grid],['img', img],['login_dashboard', login_dashboard],['loginpanelform', loginpanelform],['mall_dashboard', mall_dashboard],['mall_form_button', mall_form_button],['navblock', navblock],['office', office],['recordset', recordset],['report_column', report_column],['textarea', textarea],['textnode', textnode],['topup_dashboard', topup_dashboard],['topup_form_button', topup_form_button],['upgrade', upgrade],['upgrade_button', upgrade_button],['upgrade_dashboard', upgrade_dashboard],['xapp_accordion', xapp_accordion],['xapp_button_archive_record', xapp_button_archive_record],['xapp_button_backup', xapp_button_backup],['xapp_button_complete_record', xapp_button_complete_record],['xapp_button_data_nav_back', xapp_button_data_nav_back],['xapp_button_data_nav_forward', xapp_button_data_nav_forward],['xapp_button_data_nav_toggle', xapp_button_data_nav_toggle],['xapp_button_file_import', xapp_button_file_import],['xapp_button_file_select', xapp_button_file_select],['xapp_button_filteroff_record', xapp_button_filteroff_record],['xapp_button_filteron_record', xapp_button_filteron_record],['xapp_button_general_archive_hide', xapp_button_general_archive_hide],['xapp_button_general_archive_show', xapp_button_general_archive_show],['xapp_button_general_form_down', xapp_button_general_form_down],['xapp_button_general_form_gap', xapp_button_general_form_gap],['xapp_button_general_form_group', xapp_button_general_form_group],['xapp_button_general_form_up', xapp_button_general_form_up],['xapp_button_general_row_hide', xapp_button_general_row_hide],['xapp_button_general_row_show', xapp_button_general_row_show],['xapp_button_general_use_task_date', xapp_button_general_use_task_date],['xapp_button_general_use_task_datetime', xapp_button_general_use_task_datetime],['xapp_button_linkoff_record', xapp_button_linkoff_record],['xapp_button_linkon_record', xapp_button_linkon_record],['xapp_button_maintain', xapp_button_maintain],['xapp_button_maintain_debug_release', xapp_button_maintain_debug_release],['xapp_button_mover_disable', xapp_button_mover_disable],['xapp_button_mover_enable', xapp_button_mover_enable],['xapp_button_mover_home', xapp_button_mover_home],['xapp_button_mover_invite', xapp_button_mover_invite],['xapp_button_mover_open', xapp_button_mover_open],['xapp_button_navigate_desktop', xapp_button_navigate_desktop],['xapp_button_navigate_lobby', xapp_button_navigate_lobby],['xapp_button_navigate_login', xapp_button_navigate_login],['xapp_button_navigate_mall', xapp_button_navigate_mall],['xapp_button_navigate_newcolumn', xapp_button_navigate_newcolumn],['xapp_button_navigate_newrow', xapp_button_navigate_newrow],['xapp_button_navigate_office', xapp_button_navigate_office],['xapp_button_navigate_record', xapp_button_navigate_record],['xapp_button_navigate_rowz', xapp_button_navigate_rowz],['xapp_button_navigate_settings', xapp_button_navigate_settings],['xapp_button_new_record', xapp_button_new_record],['xapp_button_next_record', xapp_button_next_record],['xapp_button_provision_b2b', xapp_button_provision_b2b],['xapp_button_provision_b2c', xapp_button_provision_b2c],['xapp_button_provision_linked_contact_hide', xapp_button_provision_linked_contact_hide],['xapp_button_provision_linked_contact_show', xapp_button_provision_linked_contact_show],['xapp_button_provision_linked_opportunity_hide', xapp_button_provision_linked_opportunity_hide],['xapp_button_provision_linked_opportunity_show', xapp_button_provision_linked_opportunity_show],['xapp_button_provision_linked_task_hide', xapp_button_provision_linked_task_hide],['xapp_button_provision_linked_task_show', xapp_button_provision_linked_task_show],['xapp_button_push_reset', xapp_button_push_reset],['xapp_button_push_schedule', xapp_button_push_schedule],['xapp_button_queryterm', xapp_button_queryterm],['xapp_button_system_home', xapp_button_system_home],['xapp_button_transferdb', xapp_button_transferdb],['xapp_columnform_metajointype', xapp_columnform_metajointype],['xapp_console', xapp_console],['xapp_console_search', xapp_console_search],['xapp_context_holder', xapp_context_holder],['xapp_dashboard_push', xapp_dashboard_push],['xapp_dashboard_push_row', xapp_dashboard_push_row],['xapp_dashboard_setting', xapp_dashboard_setting],['xapp_dashboard_view', xapp_dashboard_view],['xapp_data_childmenu', xapp_data_childmenu],['xapp_data_view', xapp_data_view],['xapp_dataform_childmenu', xapp_dataform_childmenu],['xapp_dataform_mover', xapp_dataform_mover],['xapp_dataform_system', xapp_dataform_system],['xapp_dynamic_content', xapp_dynamic_content],['xapp_form_container_search', xapp_form_container_search],['xapp_form_select', xapp_form_select],['xapp_input_file_select', xapp_input_file_select],['xapp_menu_autoform', xapp_menu_autoform],['xapp_menu_panel', xapp_menu_panel],['xapp_menuform_mover', xapp_menuform_mover],['xapp_menuform_system', xapp_menuform_system],['xapp_queryterm_interface', xapp_queryterm_interface],['xapp_report_interface_fieldcriteria', xapp_report_interface_fieldcriteria],['xapp_report_interface_fieldlist', xapp_report_interface_fieldlist],['xapp_report_view', xapp_report_view],['xapp_rowform', xapp_rowform],['xapp_theme', xapp_theme],['xdezign', xdezign],['xdezign_action', xdezign_action],['xdezign_button_action_item', xdezign_button_action_item],['xdezign_button_close_project', xdezign_button_close_project],['xdezign_button_duplicate_project', xdezign_button_duplicate_project],['xdezign_button_locate_project', xdezign_button_locate_project],['xdezign_button_maintain_project', xdezign_button_maintain_project],['xdezign_button_map_item', xdezign_button_map_item],['xdezign_button_map_nav', xdezign_button_map_nav],['xdezign_button_new_project', xdezign_button_new_project],['xdezign_button_open_project', xdezign_button_open_project],['xdezign_button_release_project', xdezign_button_release_project],['xdezign_button_save_project', xdezign_button_save_project],['xdezign_button_tag_item', xdezign_button_tag_item],['xdezign_button_view_project', xdezign_button_view_project],['xdezign_clipboard', xdezign_clipboard],['xdezign_dashboard', xdezign_dashboard],['xdezign_dashboard_component', xdezign_dashboard_component],['xdezign_dashboard_map', xdezign_dashboard_map],['xdezign_dashboard_project', xdezign_dashboard_project],['xdezign_dashboard_save', xdezign_dashboard_save],['xdezign_iframe', xdezign_iframe],['xdezign_map', xdezign_map],['xdezign_menu_component', xdezign_menu_component],['xdezign_menu_map', xdezign_menu_map],['xdezign_menu_project', xdezign_menu_project],['xdezign_menu_project_type', xdezign_menu_project_type],['xdezign_menu_tag', xdezign_menu_tag],['xdezign_menu_tag_type', xdezign_menu_tag_type],['xdezign_propertysheet_attribute', xdezign_propertysheet_attribute],['xdezign_propertysheet_designui', xdezign_propertysheet_designui],['xdezign_propertysheet_input', xdezign_propertysheet_input],['xdezign_propertysheet_property', xdezign_propertysheet_property],['xdezign_propertysheet_style', xdezign_propertysheet_style],['xdezign_widget_project_type', xdezign_widget_project_type],['xdezign_widget_tag_type', xdezign_widget_tag_type]]);
 //END AUTO GENERATED MAP
 
 
@@ -29293,7 +29252,7 @@ var obj_InstanceJSONMap = new Map([
 [76627, {"obj_design": {"str_tag": "xapp_console_search", "arr_item": [{"obj_design": {"str_type": "form_inputandbutton_input", "int_idRecord": 7585}}, {"obj_design": {"str_type": "form_button_search", "int_idRecord": 77500}}], "str_name": "xapp_console_search", "str_text": "notset", "str_type": "xapp_console_search", "bln_editPin": true, "str_content": "", "int_idRecord": 76627, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_08666691", "str_nameShort": "xapp_console_search", "str_themeType": "form_container", "bln_palettePin": true, "str_classExtend": "form_inputandbutton", "str_createdDate": "2022-11-12 12:20:33", "str_categoryName": "Xapp", "str_modifiedDate": "2022-11-12 12:20:33", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1em", "border": "0px solid purple", "display": "flex", "flex-flow": "row wrap"}, "obj_domProperty": {"Id": "myId_08666691"}, "dom_objContentContainer": {"Id": "myId_08666691"}}],
 [76650, {"obj_design": {"str_tag": "xapp_menu_operation", "str_name": "xapp_menu_operation", "str_text": "xapp_menu_operation", "str_type": "xapp_menu_operation", "bln_editPin": true, "str_content": "", "int_idRecord": 76650, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_56611515", "str_nameShort": "xapp_menu_operation", "str_themeType": "xapp_menu_operation", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_button_rich", "str_createdDate": "2022-02-02 20:04:57", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 20:04:57", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"padding-bottom": "2px"}, "obj_domProperty": {"innerHTML": "xapp_menu_operation", "innerText": "xapp_menu_operation", "xDesign_MenuButtonClick": "fn_MenuButtonClick"}, "dom_objContentContainer": {"xDesign_MenuButtonClick": "fn_MenuButtonClick"}}],
 [76655, {"obj_design": {"str_tag": "xapp_console_container", "str_name": "xapp_console_container", "str_text": "notset", "str_type": "xapp_console_container", "bln_editPin": true, "str_content": "", "int_idRecord": 76655, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_51089095", "str_nameShort": "xapp_console_container", "str_themeType": "form_container", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_base", "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "Anchor", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-flow": "row wrap", "justify-content": "end"}}],
-[76664, {"arr_color": [{"int_hue": 0, "str_hsl": "hsl(0, 100%, 50%)", "int_light": 50, "str_label": "red", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 0, "str_hsl": "hsl(0, 100%, 60%)", "int_light": 60, "str_label": "red-light", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 0, "str_hsl": "hsl(0, 100%, 30%)", "int_light": 30, "str_label": "red-dark", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 30, "str_hsl": "hsl(30, 100%, 50%)", "int_light": 50, "str_label": "Orange", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 30, "str_hsl": "hsl(30, 100%, 60%)", "int_light": 60, "str_label": "Orange-light", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 30, "str_hsl": "hsl(30, 100%, 30%)", "int_light": 30, "str_label": "Orange-dark", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 20, "str_hsl": "hsl(20, 100%, 30%)", "int_light": 30, "str_label": "Orange-alt", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 240, "str_hsl": "hsl(240, 100%, 50%)", "int_light": 50, "str_label": "Blue", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 240, "str_hsl": "hsl(240, 100%, 60%)", "int_light": 60, "str_label": "Blue-light", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 240, "str_hsl": "hsl(240, 100%, 30%)", "int_light": 30, "str_label": "Blue-dark", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 230, "str_hsl": "hsl(230, 100%, 30%)", "int_light": 30, "str_label": "Blue-alt", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 270, "str_hsl": "hsl(270, 100%, 50%)", "int_light": 50, "str_label": "Purple", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 270, "str_hsl": "hsl(270, 100%, 60%)", "int_light": 60, "str_label": "Purple-light", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 270, "str_hsl": "hsl(270, 100%, 30%)", "int_light": 30, "str_label": "Purple-dark", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 260, "str_hsl": "hsl(260, 100%, 30%)", "int_light": 30, "str_label": "Purple-alt", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 300, "str_hsl": "hsl(300, 100%, 50%)", "int_light": 50, "str_label": "Magenta", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 300, "str_hsl": "hsl(300, 100%, 60%)", "int_light": 60, "str_label": "Magenta-light", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 300, "str_hsl": "hsl(300, 100%, 30%)", "int_light": 30, "str_label": "Magenta-dark", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 290, "str_hsl": "hsl(290, 100%, 30%)", "int_light": 30, "str_label": "Magenta-alt", "bln_lighten": true, "int_saturation": 100}, {"int_hue": 0, "str_hsl": "hsl(0, 0%, 100%)", "int_light": 100, "str_label": "White", "bln_lighten": true, "int_saturation": 0}, {"int_hue": 0, "str_hsl": "hsl(0, 0%, 0%)", "int_light": 0, "str_label": "Black", "bln_lighten": true, "int_saturation": 0}, {"int_hue": 0, "str_hsl": "hsl(0, 0%, 50%)", "bln_face": 1, "int_light": 50, "str_label": "Gray", "bln_lighten": true, "bln_contrast": true, "int_saturation": 0}, {"int_hue": 0, "str_hsl": "hsl(0, 0%, 60%)", "int_light": 60, "str_label": "Gray-light", "bln_lighten": true, "int_saturation": 0}, {"int_hue": 0, "str_hsl": "hsl(0, 0%, 30%)", "int_light": 30, "str_label": "Gray-dak", "bln_lighten": true, "int_saturation": 0}], "obj_theme": {"obj_design": {"str_type": "xapp_theme", "int_idRecord": 77570}}, "obj_design": {"str_tag": "xapp", "arr_item": [{"obj_design": {"str_type": "xapp_theme", "int_idRecord": 77570}}, {"obj_design": {"str_type": "authorise_gate", "int_idRecord": 6009}}, {"obj_design": {"str_type": "xapp_dynamic_content", "int_idRecord": "77109"}}, {"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": 76674}}], "str_name": "xapp", "str_text": "notset", "str_type": "xapp", "bln_editPin": true, "str_content": "", "int_idRecord": 76664, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_17590179", "str_nameShort": "xapp", "str_themeType": "xapp_theme", "bln_palettePin": true, "str_classExtend": "xapp_ajax", "str_createdDate": "2023-07-30 15:06:06", "str_categoryName": "XApp", "str_modifiedDate": "2023-07-30 15:06:06", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "int_radioDisplayMode": 3, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"font-size": "", "font-family": ""}, "MetaDataViewId": 101426, "MetaLinkViewId": 100475, "MetaUserViewId": 1, "obj_domProperty": {"Id": "myId_17590179"}, "MetaDataViewName": "meta_data", "MetaLinkViewName": "meta_link", "MetaUserViewName": "meta_user", "bln_closePeersPin": true, "bln_togglePeersPin": true, "dom_objContentContainer": {"Id": "myId_17590179"}}],
+[76664, {"obj_theme": {"obj_design": {"str_type": "xapp_theme", "int_idRecord": 77570}}, "obj_design": {"str_tag": "xapp", "arr_item": [{"obj_design": {"str_type": "xapp_theme", "int_idRecord": 77570}}, {"obj_design": {"str_type": "authorise_gate", "int_idRecord": 6009}}, {"obj_design": {"str_type": "xapp_dynamic_content", "int_idRecord": "77109"}}, {"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": 76674}}], "str_name": "xapp", "str_text": "notset", "str_type": "xapp", "bln_editPin": true, "str_content": "", "int_idRecord": 76664, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_17590179", "str_nameShort": "xapp", "str_themeType": "xapp_theme", "bln_palettePin": true, "str_classExtend": "xapp_ajax", "str_createdDate": "2023-07-30 15:06:06", "str_categoryName": "XApp", "str_modifiedDate": "2023-07-30 15:06:06", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "int_radioDisplayMode": 3, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"font-size": "", "font-family": ""}, "MetaDataViewId": 101426, "MetaLinkViewId": 100475, "MetaUserViewId": 1, "obj_domProperty": {"Id": "myId_17590179"}, "MetaDataViewName": "meta_data", "MetaLinkViewName": "meta_link", "MetaUserViewName": "meta_user", "bln_closePeersPin": true, "bln_togglePeersPin": true, "dom_objContentContainer": {"Id": "myId_17590179"}}],
 [76674, {"obj_design": {"str_tag": "xapp_context_holder", "arr_item": [{"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": 76394}}, {"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": 76681}}, {"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": 77111}}], "str_name": "xapp_context_holder", "str_type": "xapp_context_holder", "bln_editPin": true, "int_idRecord": 76674, "str_idXDesign": "myId_23664694", "str_nameShort": "xapp_context_holder", "str_themeType": "xapp_context_holder", "bln_palettePin": true, "bln_isLocalHome": true, "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "Xapp", "str_modifiedDate": "2022-11-01 21:47:45", "bln_lockComponent": true, "bln_classController": "false", "bln_isContextHolder": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-flow": "wrap"}, "obj_domProperty": {"Id": "myId_23664694"}, "dom_objContentContainer": {"Id": "myId_23664694"}}],
 [76677, {"obj_design": {"str_tag": "xapp_accordion", "blnIsTag": true, "str_name": "xapp_accordion", "str_text": "notset", "str_type": "xapp_accordion", "bln_editPin": true, "str_content": "", "int_idRecord": 76677, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_11651443", "str_nameShort": "xapp_accordion", "str_themeType": "xapp_accordion", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-11-01 21:51:10", "str_categoryName": "Xapp", "str_modifiedDate": "2022-11-01 21:51:10", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"width": "100%", "border": "1em solid orange", "display": "block", "padding": "1em", "background": "rgb(65,65,65)"}}],
 [76680, {"obj_design": {"str_tag": "select", "str_name": "xapp_form_select", "str_text": "notset", "str_type": "xapp_form_select", "bln_editPin": true, "str_content": "", "int_idRecord": 76680, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_00108041", "str_nameShort": "xapp_form_select", "str_themeType": "form_input", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-02-02 19:57:30", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:57:30", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "font-size": "1rem", "background": "rgb(65, 65, 65)"}}],
@@ -29393,7 +29352,7 @@ var obj_InstanceJSONMap = new Map([
 [77082, {"obj_design": {"str_tag": "xapp_base", "blnIsTag": true, "str_name": "xapp_base", "str_text": "notset", "str_type": "xapp_base", "bln_editPin": true, "str_content": "", "int_idRecord": 77082, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_76307086", "str_nameShort": "xapp_base", "str_themeType": "component", "bln_palettePin": true, "str_classExtend": "notset", "str_createdDate": "2023-11-19 12:58:13", "str_categoryName": "Xtra", "str_modifiedDate": "2023-11-19 12:58:13", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true}}],
 [77084, {"obj_design": {"str_tag": "input", "str_name": "form_checkbox", "str_text": "on", "str_type": "form_checkbox", "bln_editPin": true, "str_content": "", "int_idRecord": 77084, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_61351551", "str_nameShort": "form_checkbox", "str_themeType": "form_input", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-02-02 19:57:30", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:57:30", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"width": "40px", "border": "0px none", "cursor": "pointer", "height": "40px", "margin": "0px", "content": "\\2713", "vertical-align": "middle"}, "obj_domProperty": {"type": "checkbox", "checked": true}}],
 [77109, {"obj_design": {"str_tag": "xapp_dynamic_content", "str_name": "xapp_dynamic_content", "str_type": "xapp_dynamic_content", "bln_editPin": true, "int_idRecord": "77109", "str_idProject": "myId_17590179", "str_idXDesign": "myId_33963675", "str_nameShort": "xapp_dynamic_content", "str_themeType": "xapp_dynamic_content", "bln_dynamicPin": true, "bln_palettePin": true, "bln_isLocalHome": true, "str_createdDate": "2022-02-02 20:12:17", "str_modifiedDate": "2022-02-02 20:12:17", "bln_createRelease": "false", "bln_classController": "false", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"width": "100%", "cursor": "default", "height": "100%", "display": "flex", "overflow": "auto", "flex-wrap": "wrap"}}],
-[77110, {"obj_design": {"str_tag": "console_container_maintain", "arr_item": [{"obj_design": {"str_type": "xapp_button_provision", "int_idRecord": 77505}}, {"obj_design": {"str_type": "xapp_button_maintain", "int_idRecord": 77510}}, {"obj_design": {"str_type": "xapp_button_provision_b2b", "int_idRecord": 77508}}, {"obj_design": {"str_type": "xapp_button_provision_b2c", "int_idRecord": 77513}}, {"obj_design": {"str_type": "xapp_button_provision_linked_opportunity_hide", "int_idRecord": 77514}}, {"obj_design": {"str_type": "xapp_button_provision_linked_opportunity_show", "int_idRecord": 77506}}, {"obj_design": {"str_type": "xapp_button_provision_linked_contact_hide", "int_idRecord": 77515}}, {"obj_design": {"str_type": "xapp_button_provision_linked_contact_show", "int_idRecord": 77507}}, {"obj_design": {"str_type": "xapp_button_provision_linked_task_hide", "int_idRecord": 77516}}, {"obj_design": {"str_type": "xapp_button_provision_linked_task_show", "int_idRecord": 77509}}, {"obj_design": {"str_type": "xapp_button_maintain_debug_release", "int_idRecord": 77511}}, {"obj_design": {"str_type": "xapp_button_push_reset", "int_idRecord": 77165}}, {"obj_design": {"str_type": "xapp_button_push_schedule", "int_idRecord": 77168}}, {"obj_design": {"str_type": "xapp_button_backup", "int_idRecord": 77512}}], "str_name": "console_container_maintain", "str_text": "notset", "str_type": "xapp_console_container", "bln_editPin": true, "str_content": "", "int_idRecord": 77110, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_20107211", "str_nameShort": "console_container_maintain", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xapp", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"gap": "1.0em", "border": "0px solid purple", "display": "flex", "str_name": "crud_console_record_control", "flex-flow": "row wrap", "backkground": "red", "justify-content": "end"}, "obj_domProperty": {"Id": "myId_20107211"}, "dom_objContentContainer": {"Id": "myId_20107211"}}],
+[77110, {"obj_design": {"str_tag": "console_container_maintain", "arr_item": [{"obj_design": {"str_type": "xapp_button_maintain", "int_idRecord": 77510}}, {"obj_design": {"str_type": "xapp_button_provision_b2b", "int_idRecord": 77508}}, {"obj_design": {"str_type": "xapp_button_provision_b2c", "int_idRecord": 77513}}, {"obj_design": {"str_type": "xapp_button_provision_linked_opportunity_hide", "int_idRecord": 77514}}, {"obj_design": {"str_type": "xapp_button_provision_linked_opportunity_show", "int_idRecord": 77506}}, {"obj_design": {"str_type": "xapp_button_provision_linked_contact_hide", "int_idRecord": 77515}}, {"obj_design": {"str_type": "xapp_button_provision_linked_contact_show", "int_idRecord": 77507}}, {"obj_design": {"str_type": "xapp_button_provision_linked_task_hide", "int_idRecord": 77516}}, {"obj_design": {"str_type": "xapp_button_provision_linked_task_show", "int_idRecord": 77509}}, {"obj_design": {"str_type": "xapp_button_maintain_debug_release", "int_idRecord": 77511}}, {"obj_design": {"str_type": "xapp_button_push_reset", "int_idRecord": 77165}}, {"obj_design": {"str_type": "xapp_button_push_schedule", "int_idRecord": 77168}}, {"obj_design": {"str_type": "xapp_button_backup", "int_idRecord": 77512}}, {"obj_design": {"str_type": "xapp_button_transferdb", "int_idRecord": 77929}}], "str_name": "console_container_maintain", "str_text": "notset", "str_type": "xapp_console_container", "bln_editPin": true, "str_content": "", "int_idRecord": 77110, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_20107211", "str_nameShort": "console_container_maintain", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xapp", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"gap": "1.0em", "border": "0px solid purple", "display": "flex", "str_name": "crud_console_record_control", "flex-flow": "row wrap", "backkground": "red", "justify-content": "end"}, "obj_domProperty": {"Id": "myId_20107211"}, "dom_objContentContainer": {"Id": "myId_20107211"}}],
 [77111, {"obj_design": {"str_tag": "xapp_admin_context", "arr_item": [{"obj_design": {"str_type": "xapp_console_container", "int_idRecord": 77110}}, {"obj_design": {"str_type": "xapp_dashboard_setting", "int_idRecord": 77133}}, {"obj_design": {"str_type": "xapp_dashboard_push", "int_idRecord": 77164}}, {"obj_design": {"str_type": "xapp_dashboard_push_row", "int_idRecord": 77167}}, {"obj_design": {"str_type": "xapp_dashboard_view", "int_idRecord": "77215"}}], "str_name": "xapp_admin_context", "str_text": "notset", "str_type": "xapp_context_holder", "bln_editPin": true, "str_content": "", "int_idRecord": 77111, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_00383002", "str_nameShort": "xapp_admin_context", "str_themeType": "xapp_context_holder", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "Xapp", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": "false", "bln_isContextHolder": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"display": "flex"}, "obj_domProperty": {"Id": "myId_00383002"}, "dom_objContentContainer": {"Id": "myId_00383002"}}],
 [77114, {"obj_design": {"str_tag": "xapp_console_container_datasummary", "arr_item": [{"obj_design": {"str_type": "xapp_button_data_nav_back", "int_idRecord": 76987}}, {"obj_design": {"str_type": "xapp_button_data_nav_forward", "int_idRecord": 76988}}, {"obj_design": {"str_type": "xapp_button_data_nav_toggle", "int_idRecord": 76997}}], "str_name": "xapp_console_container_datasummary", "str_text": "notset", "str_type": "xapp_console_container", "bln_editPin": true, "str_content": "", "int_idRecord": 77114, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_09060272", "str_nameShort": "xapp_console_container_datasummary", "str_themeType": "form_container", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "border": "0px solid purple", "display": "flex", "str_name": "crud_console_record_control", "flex-flow": "row wrap", "backkground": "red"}, "obj_domProperty": {"Id": "myId_09060272"}, "dom_objContentContainer": {"Id": "myId_09060272"}}],
 [77115, {"obj_design": {"str_tag": "xdezign_dashboard", "str_name": "xdezign_dashboard", "str_type": "xdezign_dashboard", "bln_editPin": true, "int_idRecord": "77115", "str_classList": "programiconbutton", "str_idProject": "myId_07717158", "str_idXDesign": "myId_30547404", "str_nameShort": "xdezign_dashboard", "str_themeType": "xdezign_dashboard", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_dashboard", "str_createdDate": "2022-01-31 21:05:11", "str_modifiedDate": "2022-01-31 21:05:11", "bln_createRelease": "false", "bln_classController": "false", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "width": "100%", "border": "0px solid black", "display": "none", "padding": "1.0em", "flex-flow": "row wrap", "flex-wrap": "wrap", "flex-direction": "column"}}],
@@ -29430,9 +29389,9 @@ var obj_InstanceJSONMap = new Map([
 [77222, {"obj_theme": {"obj_design": {"str_type": "xapp_theme", "int_idRecord": 77570}}, "obj_design": {"str_tag": "upgrade", "arr_item": [{"obj_design": {"str_type": "xapp_theme", "int_idRecord": 77570}}, {"obj_design": {"str_type": "authorise_gate", "int_idRecord": 6009}}, {"obj_design": {"str_type": "xapp_dynamic_content", "int_idRecord": "76960"}}, {"obj_design": {"str_type": "xapp_context_holder", "int_idRecord": "76961"}}], "str_name": "upgrade", "str_text": "notset", "str_type": "upgrade", "bln_editPin": true, "str_content": "", "int_idRecord": 77222, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_40446418", "str_nameShort": "upgrade", "str_themeType": "upgrade", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp", "str_createdDate": "2022-10-13 21:31:43", "str_categoryName": "Upgrade", "str_modifiedDate": "2022-10-13 21:31:43", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "int_radioDisplayMode": 3, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "MetaDataViewId": 101426, "MetaLinkViewId": 100475, "MetaUserViewId": 1, "obj_domProperty": {"Id": "myId_40446418"}, "MetaDataViewName": "meta_data", "MetaLinkViewName": "meta_link", "MetaUserViewName": "meta_user", "bln_closePeersPin": true, "bln_togglePeersPin": true, "dom_objContentContainer": {"Id": "myId_40446418"}}],
 [77254, {"obj_design": {"str_tag": "button", "blnIsTag": true, "str_name": "xapp_button_navigate_system", "str_text": "Desk", "str_type": "xapp_button_navigate_desktop", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77254, "str_idProject": "myId_71777718", "str_idXDesign": "myId_49453702", "str_nameShort": "xapp_button_navigate_system", "str_themeType": "form_buttonx", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "www", "str_modifiedDate": "2022-02-02 19:54:40", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"border": "0px none white", "cursor": "pointer", "height": "100%", "opacity": "1", "padding": "1.0em", "pointer": "black", "flex flow": "column wrap", "border-radius": "2px", "rgb(18, 47, 66)": "rgb(18, 47, 66)", "background-color": "white"}, "obj_domProperty": {"str_name": "xapp_button_navigate_desktop", "innerHTML": "Desk", "innerText": "Logout"}, "dom_objContentContainer": {"str_name": "xapp_button_navigate_desktop"}}],
 [77292, {"obj_design": {"str_tag": "xapp_logo2", "str_name": "xapp_logo2", "str_text": "#rowz.app", "str_type": "panel", "bln_editPin": true, "int_idRecord": 77292, "str_idProject": "myId_40971357", "str_idXDesign": "myId_29227893", "str_nameShort": "xapp_logo2", "str_themeType": "panel", "bln_palettePin": true, "bln_isLocalHome": true, "str_createdDate": "2022-02-02 20:10:52", "str_categoryName": "www", "str_modifiedDate": "2022-02-02 20:10:52", "bln_createRelease": "false", "bln_classController": "false", "bln_palettePinRelease": true}, "obj_domStyle": {"color": "white", "padding": "20px", "font-size": "20pt", "font-color": "white", "font-style": "italic", "font-family": "arial", "font-weight": "bold", "padding-top": "50px", "border-radius": "20px", "background-color": "rgb(37, 150, 190)"}, "obj_domProperty": {"innerHTML": "#rowz.app"}}],
-[77327, {"obj_design": {"str_tag": "topup_context_holder", "arr_item": [{"obj_design": {"str_type": "topup_dashboard", "int_idRecord": 77328}}, {"obj_design": {"str_type": "component", "int_idRecord": 77329}}, {"obj_design": {"str_type": "topup_form_button", "int_idRecord": 77488}}], "str_name": "topup_context_holder", "str_text": "notset", "str_type": "xapp_context_holder", "bln_editPin": true, "str_content": "", "int_idRecord": 77327, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_88198848", "str_nameShort": "topup_context_holder", "str_themeType": "topup_context_holder", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "Topup", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": "false", "bln_isContextHolder": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-flow": "wrap"}, "obj_domProperty": {"Id": "myId_88198848"}, "dom_objContentContainer": {"Id": "myId_88198848"}}],
+[77327, {"obj_design": {"str_tag": "topup_context_holder", "arr_item": [{"obj_design": {"str_type": "topup_dashboard", "int_idRecord": 77328}}, {"obj_design": {"str_type": "component", "int_idRecord": 77329}}, {"obj_design": {"str_type": "topup_form_button", "int_idRecord": 77488}}], "str_name": "topup_context_holder", "str_text": "notset", "str_type": "xapp_context_holder", "bln_editPin": true, "str_content": "", "int_idRecord": 77327, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_88198848", "str_nameShort": "topup_context_holder", "str_themeType": "topup_context_holder", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-11-01 21:47:45", "str_categoryName": "Topup", "str_modifiedDate": "2022-11-01 21:47:45", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": "false", "bln_isContextHolder": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"gap": "1.0em", "display": "none", "flex-flow": "wrap"}, "obj_domProperty": {"Id": "myId_88198848"}, "dom_objContentContainer": {"Id": "myId_88198848"}}],
 [77328, {"obj_design": {"str_tag": "topup_dashboard", "str_name": "topup_dashboard", "str_text": "notset", "str_type": "topup_dashboard", "bln_editPin": true, "str_content": "", "int_idRecord": 77328, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_06046648", "str_nameShort": "topup_dashboard", "str_themeType": "form_container", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_dashboard", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Topup", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "str_textPay": "Payment", "bln_emphasis": true, "int_emphasis": 4, "obj_domStyle": {"gap": "1.0em", "border": "0px solid white", "display": "flex", "flex-flow": "row wrap", "flex-wrap": "wrap", "align-items": "center", "flex-direction": "column", "justify-content": "center"}, "int_boldWeight": 500, "obj_domProperty": {"Id": "myId_06046648"}, "dom_objContentContainer": {"Id": "myId_06046648"}, "bln_usePaymentProviderSandbox": true}],
-[77329, {"obj_design": {"str_tag": "topup_panel", "str_name": "topup_panel", "str_text": "notset", "str_type": "component", "bln_editPin": true, "str_content": "", "int_idRecord": 77329, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_14488377", "str_nameShort": "topup_panel", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Xtra", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"border": "0.5em solid orange", "display": "flex", "padding": "1.0em", "align-items": "center", "border-radius": "4px", "justify-content": "center", "background-color": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_14488377"}, "dom_objContentContainer": {"Id": "myId_14488377"}}],
+[77329, {"obj_design": {"str_tag": "topup_panel", "str_name": "topup_panel", "str_text": "notset", "str_type": "component", "bln_editPin": true, "str_content": "", "int_idRecord": 77329, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_14488377", "str_nameShort": "topup_panel", "str_themeType": "form_section", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:05:11", "str_categoryName": "Topup", "str_modifiedDate": "2022-01-31 21:05:11", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"border": "0.5em solid orange", "display": "flex", "padding": "1.0em", "align-items": "center", "border-radius": "4px", "justify-content": "center", "background-color": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_14488377"}, "dom_objContentContainer": {"Id": "myId_14488377"}}],
 [77335, {"obj_design": {"str_tag": "input", "str_name": "form_radio", "str_text": "notset", "str_type": "form_radio", "bln_editPin": true, "str_content": "", "int_idRecord": "77335", "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_74996919", "str_nameShort": "form_radio", "str_themeType": "form_input", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-02-02 19:57:30", "str_modifiedDate": "2022-02-02 19:57:30", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"width": "40px", "border": "0px none", "cursor": "pointer", "height": "40px", "margin": "0px", "content": "\\2713", "vertical-align": "middle"}, "obj_domProperty": {"Id": "myId_74996919", "type": "radio", "checked": true, "innerHTML": "&nbsp;"}, "dom_objContentContainer": {"Id": "myId_74996919"}}],
 [77337, {"obj_design": {"str_tag": "br", "str_name": "form_nonbreakingspace", "str_text": "notset", "str_type": "form_nonbreakingspace", "bln_editPin": true, "str_content": "", "int_idRecord": "77337", "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_88201141", "str_nameShort": "form_nonbreakingspace", "str_themeType": "form_nonbreakingspace", "bln_palettePin": true, "str_classExtend": "notset", "str_createdDate": "2023-09-28 17:30:59", "str_modifiedDate": "2023-09-28 17:30:59", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"width": "100%", "border": "0px", "height": "1.0em", "background": "yellow"}, "obj_domProperty": {"Id": "myId_88201141"}, "dom_objContentContainer": {"Id": "myId_88201141"}}],
 [77339, {"obj_design": {"str_tag": "label", "str_name": "form_label", "str_text": "My Label", "str_type": "form_label", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": 77339, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_11122295", "str_nameShort": "form_label", "str_themeType": "form_label", "bln_palettePin": true, "str_classExtend": "notset", "str_createdDate": "2022-11-13 21:59:51", "str_categoryName": "Form", "str_modifiedDate": "2022-11-13 21:59:51", "str_releaseLabel": "notset", "bln_lockComponent": true, "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "cursor": "pointer", "margin": "3px", "padding": "1.0em", "overflow": "auto", "max-width": "", "min-width": "", "align-self": "flex-start", "background": "rgb(65,65,65)", "max-height": "", "word-break": "", "border-radius": "0px"}, "obj_domProperty": {"Id": "myId_11122295", "innerText": "My Label"}, "dom_objContentContainer": {"Id": "myId_11122295"}}],
@@ -29471,7 +29430,7 @@ var obj_InstanceJSONMap = new Map([
 [77454, {"obj_design": {"str_tag": "xapp_console", "arr_item": [{"obj_design": {"str_type": "block_structure", "int_idRecord": 77452}}, {"obj_design": {"str_type": "block_structure", "int_idRecord": 77453}}], "str_name": "xapp_console", "str_text": "notset", "str_type": "xapp_console", "bln_editPin": true, "str_content": "", "int_idRecord": "77454", "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_22307377", "str_nameShort": "xapp_console", "str_themeType": "form_container", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-02-02 20:10:52", "str_categoryName": "xapp", "str_modifiedDate": "2022-02-02 20:10:52", "str_releaseLabel": "", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_blockEnd": {"obj_design": {"str_type": "block_structure", "int_idRecord": 77453}}, "obj_domStyle": {"gap": "1.0em", "display": "flex", "flex-wrap": "wrap", "flexdirection": "column"}, "obj_blockStart": {"obj_design": {"str_type": "block_structure", "int_idRecord": 77452}}, "obj_domProperty": {"Id": "myId_22307377"}, "dom_objContentContainer": {"Id": "myId_22307377"}}],
 [77485, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "xapp_button_navigate_lobby", "str_text": "Lobby", "str_type": "xapp_button_navigate_lobby", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77485, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_31653329", "str_nameShort": "xapp_button_navigate_lobby", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "font-size": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_31653329", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_31653329", "str_name": "xapp_button_navigate_desktop"}}],
 [77486, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "rowz_hashtag", "str_name": "xapp_button_navigate_rowz", "str_text": "Rowz", "str_type": "xapp_button_navigate_rowz", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77486, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_36003113", "str_nameShort": "xapp_button_navigate_rowz", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "www", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "font-size": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_36003113", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_36003113", "str_name": "xapp_button_navigate_desktop"}}],
-[77488, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "topup_form_button", "str_text": "Topup", "str_type": "topup_form_button", "bln_expand": true, "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77488, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_19177339", "str_nameShort": "topup_form_button", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Topup", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "15px", "font-size": "1.2rem", "background": "rgb(65, 65, 65)", "font-weight": "bold"}, "obj_domProperty": {"Id": "myId_19177339", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_19177339", "str_name": "xapp_button_navigate_desktop"}}],
+[77488, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "topup_form_button", "str_text": "Topup", "str_type": "topup_form_button", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77488, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_19177339", "str_nameShort": "topup_form_button", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Topup", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "font-size": "1.0rem", "background": "rgb(65, 65, 65)", "font-weight": ""}, "obj_domProperty": {"Id": "myId_19177339", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_19177339", "str_name": "xapp_button_navigate_desktop"}}],
 [77489, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "star", "str_name": "form_button_rich", "str_text": "My Button", "str_type": "form_button_rich", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77489, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_11150032", "str_nameShort": "form_button_rich", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Form", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "cursor": "pointer", "display": "flex", "padding": "1em", "background": "rgb(65, 65, 65)", "align-items": "", "justify-content": ""}, "obj_domProperty": {"Id": "myId_11150032", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_11150032", "str_name": "xapp_button_navigate_desktop"}}],
 [77490, {"obj_design": {"str_tag": "button", "blnIsTag": true, "str_icon": "xapp_star", "str_name": "form_button", "str_text": "My Button", "str_type": "form_button", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77490, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_12330123", "str_nameShort": "form_button", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "font-size": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_12330123", "str_name": "xapp_button_navigate_desktop", "innerHTML": "My Button", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_12330123", "data": "", "str_name": "xapp_button_navigate_desktop"}}],
 [77491, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "form_button_showhide", "str_text": "My Button", "str_type": "form_button_showhide", "bln_expand": true, "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77491, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_78802071", "str_nameShort": "form_button_showhide", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_button_rich", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "15px", "font-size": "1.2rem", "background": "rgb(65, 65, 65)", "font-weight": "bold"}, "obj_domProperty": {"Id": "myId_78802071", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_78802071", "str_name": "xapp_button_navigate_desktop"}}],
@@ -29481,14 +29440,13 @@ var obj_InstanceJSONMap = new Map([
 [77499, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "", "str_name": "xapp_button_archive_record", "str_text": "Archive Record", "str_type": "xapp_button_archive_record", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77499, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_22102372", "str_nameShort": "xapp_button_archive_record", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "font-size": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_22102372", "innerHTML": "Refresh", "innerText": "Complete", "aria-label": "New Record"}, "dom_objContentContainer": {"Id": "myId_22102372", "aria-label": "New Record"}}],
 [77500, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_search", "str_name": "form_button_search", "str_text": "Search", "str_type": "form_button_search", "str_value": "Search", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77500, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_50437881", "str_nameShort": "form_button_search", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "form_inputandbutton_submit", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "font-size": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_50437881", "innerHTML": "Refresh", "innerText": "Complete", "aria-label": "New Record"}, "dom_objContentContainer": {"Id": "myId_50437881", "aria-label": "New Record"}}],
 [77501, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}, {"obj_design": {"str_type": "xapp_input_file_select", "int_idRecord": 77218}}], "blnIsTag": true, "str_icon": "rowz_upload_file", "str_name": "xapp_button_file_select", "str_text": "Step 1: Choose File", "str_type": "xapp_button_file_select", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77501, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_28207122", "str_nameShort": "xapp_button_file_select", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "font-size": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_28207122", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_28207122", "str_name": "xapp_button_navigate_desktop"}}],
-[77505, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_wrench", "str_name": "xapp_button_provision", "str_text": "Provision", "str_type": "xapp_button_provision", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77505, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_14322737", "str_nameShort": "xapp_button_provision", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_14322737", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_14322737", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
 [77506, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "xapp_button_provision_linked_opportunity_show", "str_text": "Show Linked Opportunities", "str_type": "xapp_button_provision_linked_opportunity_show", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77506, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_35323172", "str_nameShort": "xapp_button_provision_linked_opportunity_show", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_35323172", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_35323172", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
 [77507, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "xapp_button_provision_linked_contact_show", "str_text": "Show Linked Contacts", "str_type": "xapp_button_provision_linked_contact_show", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77507, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_13373239", "str_nameShort": "xapp_button_provision_linked_contact_show", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_13373239", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_13373239", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
 [77508, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "xapp_button_provision_b2b", "str_text": "B2B Model", "str_type": "xapp_button_provision_b2b", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77508, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_27734227", "str_nameShort": "xapp_button_provision_b2b", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_27734227", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_27734227", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
 [77509, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "xapp_button_provision_linked_task_show", "str_text": "Show Linked Tasks", "str_type": "xapp_button_provision_linked_task_show", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77509, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_25422221", "str_nameShort": "xapp_button_provision_linked_task_show", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_25422221", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_25422221", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
 [77510, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_wrench", "str_name": "xapp_button_maintain", "str_text": "Maintain", "str_type": "xapp_button_maintain", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77510, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_37233216", "str_nameShort": "xapp_button_maintain", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_37233216", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_37233216", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
 [77511, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_wrench", "str_name": "xapp_button_maintain_debug_release", "str_text": "Debug Release", "str_type": "xapp_button_maintain_debug_release", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77511, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_35617732", "str_nameShort": "xapp_button_maintain_debug_release", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_35617732", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_35617732", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
-[77512, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_wrench", "str_name": "xapp_button_backup", "str_text": "Backup", "str_type": "xapp_button_backup", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77512, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_28218884", "str_nameShort": "xapp_button_backup", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_28218884", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_28218884", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
+[77512, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_wrench", "str_name": "xapp_button_backup", "str_text": "Backup", "str_type": "xapp_button_backup", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77512, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_28218884", "str_nameShort": "xapp_button_backup", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "font-size": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_28218884", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_28218884", "str_name": "xapp_button_navigate_desktop"}}],
 [77513, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "xapp_button_provision_b2c", "str_text": "B2C Model", "str_type": "xapp_button_provision_b2c", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77513, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_73811662", "str_nameShort": "xapp_button_provision_b2c", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xtra", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_73811662", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_73811662", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
 [77514, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "xapp_button_provision_linked_opportunity_hide", "str_text": "Hide Linked Opportunities", "str_type": "xapp_button_provision_linked_opportunity_hide", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77514, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_42235730", "str_nameShort": "xapp_button_provision_linked_opportunity_hide", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_42235730", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_42235730", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
 [77515, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_star", "str_name": "xapp_button_provision_linked_contact_hide", "str_text": "Hide Linked Contacts", "str_type": "xapp_button_provision_linked_contact_hide", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77515, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_22206726", "str_nameShort": "xapp_button_provision_linked_contact_hide", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Other", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "fontSize": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_22206726", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_22206726", "str_name": "xapp_button_navigate_desktop", "arial-label": "Goto Office"}}],
@@ -29539,7 +29497,8 @@ var obj_InstanceJSONMap = new Map([
 [77919, {"obj_design": {"str_tag": "form_container", "str_name": "form_container", "str_text": "notset", "str_type": "form_container", "bln_editPin": true, "str_content": "", "int_idRecord": 77919, "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_83529294", "str_nameShort": "form_container", "str_themeType": "form_container", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:10:58", "str_categoryName": "Form", "str_modifiedDate": "2022-01-31 21:10:58", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "obj_domStyle": {"gap": "1em", "display": "flex", "padding": "0em", "flex-flow": "wrap", "background": "rgb(65,65,65)", "align-items": ""}, "obj_domProperty": {"Id": "myId_83529294"}, "dom_objContentContainer": {"Id": "myId_83529294"}}],
 [77920, {"obj_design": {"str_tag": "text", "blnIsTag": true, "str_name": "form_text", "str_text": "-", "str_type": "form_text", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77920", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_93792335", "str_nameShort": "form_text", "str_themeType": "form_input", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "form_input", "str_createdDate": "2022-11-18 16:02:10", "str_categoryName": "", "str_modifiedDate": "2022-11-18 16:02:10", "str_releaseLabel": "", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "black", "border": "0.5em solid orange", "padding": "1.0em", "overflow": "auto", "maxheight": "175", "min-width": "", "background": "white", "max-height": "500px", "word-break": "normal", "border-radius": "0em"}, "obj_domProperty": {"Id": "myId_09599995", "innerHTML": "-"}, "dom_objContentContainer": {"Id": "myId_09599995"}}],
 [77921, {"obj_design": {"str_tag": "label", "str_name": "form_label", "str_text": "My Label", "str_type": "form_label", "bln_editPin": true, "str_content": "", "bln_typeable": true, "int_idRecord": "77921", "str_classList": "notset", "str_idProject": "myId_29727565", "str_idXDesign": "myId_53155553", "str_nameShort": "form_label", "str_themeType": "form_label", "bln_palettePin": true, "bln_isThemeItem": true, "str_classExtend": "notset", "str_createdDate": "2022-11-13 21:59:51", "str_categoryName": "", "str_modifiedDate": "2022-11-13 21:59:51", "str_releaseLabel": "", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "cursor": "pointer", "margin": "3px", "padding": "1.0em", "overflow": "auto", "max-width": "", "min-width": "", "align-self": "flex-start", "background": "green", "max-height": "", "word-break": "", "border-radius": "0px"}, "obj_domProperty": {"Id": "myId_53155553", "innerText": "My Label"}, "dom_objContentContainer": {"Id": "myId_53155553"}}],
-[77924, {"obj_design": {"str_tag": "form_block", "str_name": "form_block", "str_text": "notset", "str_type": "block", "bln_editPin": true, "str_content": "", "int_idRecord": "77924", "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_90830292", "str_nameShort": "form_block", "str_themeType": "form_block", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:10:58", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:10:58", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"border": "0.5em solid orange", "display": "block", "background": "rgb(65,65,65)"}, "obj_domProperty": {"Id": "myId_03369673"}, "dom_objContentContainer": {"Id": "myId_03369673"}}]
+[77924, {"obj_design": {"str_tag": "form_block", "str_name": "form_block", "str_text": "notset", "str_type": "block", "bln_editPin": true, "str_content": "", "int_idRecord": "77924", "str_classList": "notset", "str_idProject": "notset", "str_idXDesign": "myId_90830292", "str_nameShort": "form_block", "str_themeType": "form_block", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "notset", "str_createdDate": "2022-01-31 21:10:58", "str_categoryName": "", "str_modifiedDate": "2022-01-31 21:10:58", "str_releaseLabel": "", "bln_createRelease": "false", "bln_classController": "false", "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "obj_domStyle": {"border": "0.5em solid orange", "display": "block", "background": "rgb(65,65,65)"}, "obj_domProperty": {"Id": "myId_03369673"}, "dom_objContentContainer": {"Id": "myId_03369673"}}],
+[77929, {"obj_design": {"str_tag": "button", "arr_item": [{"obj_design": {"str_type": "form_button_anchor", "int_idRecord": 77393}}], "blnIsTag": true, "str_icon": "xapp_dangerous", "str_name": "xapp_button_transferdb", "str_text": "TransferDB", "str_type": "xapp_button_transferdb", "bln_editPin": true, "str_content": "My component", "bln_typeable": true, "int_idRecord": 77929, "str_classList": "notset", "str_idProject": "myId_36985869", "str_idXDesign": "myId_39710903", "str_nameShort": "xapp_button_transferdb", "str_themeType": "form_button", "bln_palettePin": true, "bln_isLocalHome": true, "str_classExtend": "xapp_console_button", "str_createdDate": "2022-02-02 19:54:40", "str_categoryName": "Xapp", "str_modifiedDate": "2022-02-02 19:54:40", "str_releaseLabel": "notset", "bln_createRelease": "false", "bln_lockComponent": true, "bln_classController": true, "str_lastVersionDate": "notset", "str_nameRegistrator": "notset", "bln_palettePinRelease": true, "bln_registerAtContainer": true}, "user_agent": "Firefox", "bln_enabled": true, "obj_domStyle": {"color": "orange", "border": "0.5em solid orange", "display": "flex", "padding": "1em", "font-size": "1rem", "background": "rgb(65, 65, 65)"}, "obj_domProperty": {"Id": "myId_39710903", "str_name": "xapp_button_navigate_desktop", "innerHTML": "Office", "innerText": "Desktop"}, "dom_objContentContainer": {"Id": "myId_39710903", "str_name": "xapp_button_navigate_desktop"}}]
 ]);
 /*END INSTANCE JSON MAP//*/
 

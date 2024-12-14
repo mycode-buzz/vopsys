@@ -37,6 +37,9 @@ class page extends maintain{
         case "backup":                 
           $this->fn_backup();
         break;         
+        case "transferdb":                 
+          $this->fn_transferdb();
+        break;         
         case "form_add_group":       
           $this->fn_form_add_group($int_idMetaRowz);
         break;                        

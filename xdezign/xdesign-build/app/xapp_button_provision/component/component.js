@@ -7,13 +7,15 @@
           super.fn_initialize(obj_ini);                
         }
         fn_onClick(e){                                    
-          
-          obj_project.fn_forgetEvent(e);                  
-          let obj_menuButton=this.fn_getMenuButton();          
-          let obj_dashboard=obj_menuButton.fn_locateItem("xapp_dashboard_setting");          
-          if(obj_dashboard){                    
-            obj_dashboard.fn_provision();
-          }       
+          obj_project.fn_forgetEvent(e);                            
+          let bln_value=obj_shared.fn_messageConfirm("Really Provision?");
+          if(bln_value){          
+            let obj_menuButton=this.fn_getMenuButton();          
+            let obj_dashboard=obj_menuButton.fn_locateItem("xapp_dashboard_setting");          
+            if(obj_dashboard){                    
+              obj_dashboard.fn_provision();
+            }                    
+          } 
         }           
       }//END CLS
       //END TAG
